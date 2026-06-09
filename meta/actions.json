@@ -1,0 +1,12 @@
+[
+  { "actionKey": "SEARCH", "actionName": "조회", "functionName": "btnSearch", "auditYn": "N" },
+  { "actionKey": "CREATE", "actionName": "신규", "functionName": "btnCreate", "auditYn": "Y" },
+  { "actionKey": "SAVE", "actionName": "저장", "functionName": "btnSave", "auditYn": "Y" },
+  { "actionKey": "UPDATE", "actionName": "수정", "functionName": "btnUpdate", "auditYn": "Y" },
+  { "actionKey": "DELETE", "actionName": "삭제", "functionName": "btnDelete", "auditYn": "Y" },
+  { "actionKey": "EXCEL_DOWN", "actionName": "엑셀다운로드", "functionName": "btnExcelDown", "auditYn": "Y" },
+  { "actionKey": "EXCEL_UPLOAD", "actionName": "엑셀업로드", "functionName": "btnExcelUpload", "auditYn": "Y" },
+  { "actionKey": "PRINT", "actionName": "인쇄", "functionName": "btnPrint", "auditYn": "Y" },
+  { "actionKey": "APPROVE", "actionName": "승인", "functionName": "btnApprove", "auditYn": "Y" },
+  { "actionKey": "REJECT", "actionName": "반려", "functionName": "btnReject", "auditYn": "Y" }
+]

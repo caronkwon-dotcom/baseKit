@@ -1,0 +1,52 @@
+[
+  {
+    "menuKey": "HOME",
+    "parentMenuKey": null,
+    "menuName": "Home",
+    "menuLevel": 1,
+    "menuType": "SCREEN",
+    "programKey": "HOME",
+    "sortOrder": 0,
+    "useYn": "Y"
+  },
+  {
+    "menuKey": "SYS",
+    "parentMenuKey": null,
+    "menuName": "시스템관리",
+    "menuLevel": 1,
+    "menuType": "GROUP",
+    "programKey": null,
+    "sortOrder": 1,
+    "useYn": "Y"
+  },
+  {
+    "menuKey": "SYS.USER",
+    "parentMenuKey": "SYS",
+    "menuName": "사용자관리",
+    "menuLevel": 2,
+    "menuType": "SCREEN",
+    "programKey": "USER_MGMT",
+    "sortOrder": 1,
+    "useYn": "Y"
+  },
+  {
+    "menuKey": "SYS.CODE",
+    "parentMenuKey": "SYS",
+    "menuName": "공통코드관리",
+    "menuLevel": 2,
+    "menuType": "SCREEN",
+    "programKey": "CODE_MGMT",
+    "sortOrder": 2,
+    "useYn": "Y"
+  },
+  {
+    "menuKey": "SYS.MENU",
+    "parentMenuKey": "SYS",
+    "menuName": "메뉴관리",
+    "menuLevel": 2,
+    "menuType": "SCREEN",
+    "programKey": "MENU_MGMT",
+    "sortOrder": 3,
+    "useYn": "Y"
+  }
+]

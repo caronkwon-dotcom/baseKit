@@ -1,0 +1,31 @@
+[
+  { "logicalName": "회사코드", "physicalName": "COMPANY_CODE", "domain": "CODE" },
+  { "logicalName": "회사명", "physicalName": "COMPANY_NAME", "domain": "NAME" },
+  { "logicalName": "조직코드", "physicalName": "ORG_CODE", "domain": "CODE" },
+  { "logicalName": "조직명", "physicalName": "ORG_NAME", "domain": "NAME" },
+
+  { "logicalName": "사용자ID", "physicalName": "USER_ID", "domain": "ID" },
+  { "logicalName": "로그인ID", "physicalName": "LOGIN_ID", "domain": "ID" },
+  { "logicalName": "사용자명", "physicalName": "USER_NAME", "domain": "NAME" },
+  { "logicalName": "사용자구분", "physicalName": "USER_TYPE", "domain": "CODE" },
+  { "logicalName": "이메일", "physicalName": "EMAIL", "domain": "TEXT" },
+  { "logicalName": "사용여부", "physicalName": "USE_YN", "domain": "YN" },
+
+  { "logicalName": "메뉴키", "physicalName": "MENU_KEY", "domain": "KEY" },
+  { "logicalName": "상위메뉴키", "physicalName": "PARENT_MENU_KEY", "domain": "KEY" },
+  { "logicalName": "메뉴명", "physicalName": "MENU_NAME", "domain": "NAME" },
+  { "logicalName": "메뉴레벨", "physicalName": "MENU_LEVEL", "domain": "CODE" },
+  { "logicalName": "메뉴유형", "physicalName": "MENU_TYPE", "domain": "CODE" },
+
+  { "logicalName": "프로그램키", "physicalName": "PROGRAM_KEY", "domain": "KEY" },
+  { "logicalName": "프로그램명", "physicalName": "PROGRAM_NAME", "domain": "NAME" },
+  { "logicalName": "화면유형", "physicalName": "SCREEN_TYPE", "domain": "CODE" },
+
+  { "logicalName": "액션키", "physicalName": "ACTION_KEY", "domain": "KEY" },
+  { "logicalName": "액션명", "physicalName": "ACTION_NAME", "domain": "NAME" },
+
+  { "logicalName": "등록자", "physicalName": "CREATED_BY", "domain": "BY" },
+  { "logicalName": "등록일시", "physicalName": "CREATED_AT", "domain": "AT" },
+  { "logicalName": "수정자", "physicalName": "UPDATED_BY", "domain": "BY" },
+  { "logicalName": "수정일시", "physicalName": "UPDATED_AT", "domain": "AT" }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "programKey": "HOME",
+    "programName": "Home",
+    "componentName": "HomePage",
+    "screenType": "HOME",
+    "routePath": "/home",
+    "dataScope": "USER",
+    "modifyScope": "NONE",
+    "useYn": "Y"
+  },
+  {
+    "programKey": "USER_MGMT",
+    "programName": "사용자관리",
+    "componentName": "UserManagePage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/users",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "useYn": "Y"
+  },
+  {
+    "programKey": "CODE_MGMT",
+    "programName": "공통코드관리",
+    "componentName": "CodeManagePage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/codes",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "useYn": "Y"
+  },
+  {
+    "programKey": "MENU_MGMT",
+    "programName": "메뉴관리",
+    "componentName": "MenuManagePage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/menus",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "useYn": "Y"
+  }
+]

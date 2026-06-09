@@ -1,0 +1,36 @@
+[
+  {
+    "codeGroup": "USER_TYPE",
+    "codeGroupName": "사용자구분",
+    "codes": [
+      { "code": "INTERNAL", "name": "내부사용자" },
+      { "code": "EXTERNAL", "name": "외부사용자" }
+    ]
+  },
+  {
+    "codeGroup": "MENU_TYPE",
+    "codeGroupName": "메뉴유형",
+    "codes": [
+      { "code": "GROUP", "name": "그룹" },
+      { "code": "SCREEN", "name": "화면" },
+      { "code": "LINK", "name": "링크" }
+    ]
+  },
+  {
+    "codeGroup": "SCREEN_TYPE",
+    "codeGroupName": "화면유형",
+    "codes": [
+      { "code": "HOME", "name": "홈" },
+      { "code": "GRID_DETAIL", "name": "그리드하단상세" },
+      { "code": "DETAIL_PAGE", "name": "상세전환형" }
+    ]
+  },
+  {
+    "codeGroup": "USE_YN",
+    "codeGroupName": "사용여부",
+    "codes": [
+      { "code": "Y", "name": "사용" },
+      { "code": "N", "name": "미사용" }
+    ]
+  }
+]

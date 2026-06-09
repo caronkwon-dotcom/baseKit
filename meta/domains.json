@@ -1,0 +1,18 @@
+[
+  { "domain": "ID", "dataType": "VARCHAR", "description": "내부 식별자 또는 계정 식별자" },
+  { "domain": "KEY", "dataType": "VARCHAR", "description": "변경되면 안 되는 시스템 고유키" },
+  { "domain": "CODE", "dataType": "VARCHAR", "description": "업무 마스터 또는 공통코드 식별값" },
+  { "domain": "NAME", "dataType": "VARCHAR", "description": "명칭" },
+  { "domain": "YN", "dataType": "CHAR", "description": "여부값 Y/N" },
+  { "domain": "NO", "dataType": "VARCHAR", "description": "번호" },
+  { "domain": "DATE", "dataType": "DATE", "description": "일자" },
+  { "domain": "AT", "dataType": "DATETIME", "description": "일시" },
+  { "domain": "BY", "dataType": "VARCHAR", "description": "처리자" },
+  { "domain": "ORDER", "dataType": "INTEGER", "description": "정렬순서" },
+  { "domain": "AMOUNT", "dataType": "DECIMAL", "description": "금액" },
+  { "domain": "RATE", "dataType": "DECIMAL", "description": "비율" },
+  { "domain": "TEXT", "dataType": "TEXT", "description": "긴 설명 또는 내용" },
+  { "domain": "PATH", "dataType": "VARCHAR", "description": "경로" },
+  { "domain": "URL", "dataType": "VARCHAR", "description": "URL" },
+  { "domain": "JSON", "dataType": "JSON", "description": "JSON 데이터" }
+]
