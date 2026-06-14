@@ -4,6 +4,7 @@ export type { Company } from './company';
 export type { LoginLog } from './login';
 export type { Menu } from './menu';
 export type { Role } from './role';
+export type { SystemConfig } from './system';
 export type { User } from './user';
 
 export type SystemMenuPath =
