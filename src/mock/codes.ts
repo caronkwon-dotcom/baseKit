@@ -4,6 +4,7 @@ export const codes: Code[] = [
   {
     CODE_GROUP_ID: 'USER_STATUS',
     CODE_ID: 'ACTIVE',
+    CODE: 'ACTIVE',
     CODE_NAME: '활성',
     SORT_ORDER: 1,
     USE_YN: 'Y',
@@ -15,6 +16,7 @@ export const codes: Code[] = [
   {
     CODE_GROUP_ID: 'USER_STATUS',
     CODE_ID: 'LOCKED',
+    CODE: 'LOCKED',
     CODE_NAME: '잠김',
     SORT_ORDER: 2,
     USE_YN: 'Y',
@@ -26,6 +28,7 @@ export const codes: Code[] = [
   {
     CODE_GROUP_ID: 'ROLE_TYPE',
     CODE_ID: 'ADMIN',
+    CODE: 'ADMIN',
     CODE_NAME: '관리자',
     SORT_ORDER: 1,
     USE_YN: 'Y',
@@ -37,6 +40,7 @@ export const codes: Code[] = [
   {
     CODE_GROUP_ID: 'ROLE_TYPE',
     CODE_ID: 'USER',
+    CODE: 'USER',
     CODE_NAME: '일반사용자',
     SORT_ORDER: 2,
     USE_YN: 'Y',
@@ -48,6 +52,7 @@ export const codes: Code[] = [
   {
     CODE_GROUP_ID: 'MENU_TYPE',
     CODE_ID: 'FOLDER',
+    CODE: 'FOLDER',
     CODE_NAME: '폴더',
     SORT_ORDER: 1,
     USE_YN: 'Y',
@@ -59,6 +64,7 @@ export const codes: Code[] = [
   {
     CODE_GROUP_ID: 'MENU_TYPE',
     CODE_ID: 'PAGE',
+    CODE: 'PAGE',
     CODE_NAME: '페이지',
     SORT_ORDER: 2,
     USE_YN: 'Y',
@@ -70,6 +76,7 @@ export const codes: Code[] = [
   {
     CODE_GROUP_ID: 'USE_YN',
     CODE_ID: 'Y',
+    CODE: 'Y',
     CODE_NAME: '사용',
     SORT_ORDER: 1,
     USE_YN: 'Y',
@@ -81,6 +88,7 @@ export const codes: Code[] = [
   {
     CODE_GROUP_ID: 'USE_YN',
     CODE_ID: 'N',
+    CODE: 'N',
     CODE_NAME: '미사용',
     SORT_ORDER: 2,
     USE_YN: 'Y',
@@ -92,6 +100,7 @@ export const codes: Code[] = [
   {
     CODE_GROUP_ID: 'APPROVAL_STATUS',
     CODE_ID: 'REQUESTED',
+    CODE: 'REQUESTED',
     CODE_NAME: '요청',
     SORT_ORDER: 1,
     USE_YN: 'Y',
@@ -103,6 +112,7 @@ export const codes: Code[] = [
   {
     CODE_GROUP_ID: 'APPROVAL_STATUS',
     CODE_ID: 'APPROVED',
+    CODE: 'APPROVED',
     CODE_NAME: '승인',
     SORT_ORDER: 2,
     USE_YN: 'Y',

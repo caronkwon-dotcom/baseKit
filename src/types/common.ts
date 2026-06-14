@@ -4,3 +4,5 @@ export interface BaseEntity {
   UPDATED_AT: string;
   UPDATED_BY: string;
 }
+
+export type UseYn = 'Y' | 'N';
