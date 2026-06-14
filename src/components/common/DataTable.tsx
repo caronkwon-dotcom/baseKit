@@ -1,0 +1,47 @@
+import type { ReactNode } from 'react';
+
+export interface DataTableColumn<T> {
+  key: string;
+  header: string;
+  render: (row: T) => ReactNode;
+}
+
+interface DataTableProps<T> {
+  title: string;
+  columns: DataTableColumn<T>[];
+  rows: T[];
+  getRowKey: (row: T) => string;
+}
+
+export default function DataTable<T>({
+  title,
+  columns,
+  rows,
+  getRowKey,
+}: DataTableProps<T>) {
+  return (
+    <div className="data-section">
+      <h2>{title}</h2>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              {columns.map((column) => (
+                <th key={column.key}>{column.header}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={getRowKey(row)}>
+                {columns.map((column) => (
+                  <td key={column.key}>{column.render(row)}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
