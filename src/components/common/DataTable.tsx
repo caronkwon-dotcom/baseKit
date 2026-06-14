@@ -11,6 +11,8 @@ interface DataTableProps<T> {
   columns: DataTableColumn<T>[];
   rows: T[];
   getRowKey: (row: T) => string;
+  onRowClick?: (row: T) => void;
+  getRowClassName?: (row: T) => string;
 }
 
 export default function DataTable<T>({
@@ -18,6 +20,8 @@ export default function DataTable<T>({
   columns,
   rows,
   getRowKey,
+  onRowClick,
+  getRowClassName,
 }: DataTableProps<T>) {
   return (
     <div className="data-section">
@@ -32,13 +36,26 @@ export default function DataTable<T>({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
-              <tr key={getRowKey(row)}>
-                {columns.map((column) => (
-                  <td key={column.key}>{column.render(row)}</td>
-                ))}
-              </tr>
-            ))}
+            {rows.map((row) => {
+              const rowClassNames = [
+                onRowClick ? 'clickable-row' : '',
+                getRowClassName?.(row) ?? '',
+              ]
+                .filter(Boolean)
+                .join(' ');
+
+              return (
+                <tr
+                  key={getRowKey(row)}
+                  className={rowClassNames}
+                  onClick={() => onRowClick?.(row)}
+                >
+                  {columns.map((column) => (
+                    <td key={column.key}>{column.render(row)}</td>
+                  ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
