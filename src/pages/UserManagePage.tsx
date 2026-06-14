@@ -34,6 +34,16 @@ const userColumns: DataTableColumn<User>[] = [
     render: (user) => user.USER_TYPE_CODE,
   },
   {
+    key: 'LANGUAGE_CODE',
+    header: 'LANGUAGE_CODE',
+    render: (user) => user.LANGUAGE_CODE,
+  },
+  {
+    key: 'TIMEZONE_ID',
+    header: 'TIMEZONE_ID',
+    render: (user) => user.TIMEZONE_ID,
+  },
+  {
     key: 'LAST_LOGIN_AT',
     header: 'LAST_LOGIN_AT',
     render: (user) => user.LAST_LOGIN_AT,
@@ -113,6 +123,14 @@ export default function UserManagePage() {
           <div>
             <dt>USER_TYPE_CODE</dt>
             <dd>{selectedUser.USER_TYPE_CODE}</dd>
+          </div>
+          <div>
+            <dt>LANGUAGE_CODE</dt>
+            <dd>{selectedUser.LANGUAGE_CODE}</dd>
+          </div>
+          <div>
+            <dt>TIMEZONE_ID</dt>
+            <dd>{selectedUser.TIMEZONE_ID}</dd>
           </div>
           <div>
             <dt>STATUS_CODE</dt>

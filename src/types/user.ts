@@ -6,6 +6,8 @@ export interface User extends BaseEntity {
   USER_NAME: string;
   EMAIL: string;
   USER_TYPE_CODE: string;
+  LANGUAGE_CODE: string;
+  TIMEZONE_ID: string;
   STATUS_CODE: string;
   LAST_LOGIN_AT: string;
   ACCOUNT_EXPIRED_AT: string;
