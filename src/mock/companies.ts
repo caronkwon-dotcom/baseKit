@@ -1,0 +1,40 @@
+import type { Company } from '../types';
+
+export const companies: Company[] = [
+  {
+    COMPANY_ID: 'COMP-001',
+    COMPANY_NAME: 'BaseKit 본사',
+    COMPANY_TYPE_CODE: 'HEADQUARTER',
+    LANGUAGE_CODE: 'ko',
+    TIMEZONE_ID: 'Asia/Seoul',
+    USE_YN: 'Y',
+    CREATED_AT: '2026-06-01T09:00:00',
+    CREATED_BY: 'system',
+    UPDATED_AT: '2026-06-01T09:00:00',
+    UPDATED_BY: 'system',
+  },
+  {
+    COMPANY_ID: 'COMP-002',
+    COMPANY_NAME: '서부 고객사',
+    COMPANY_TYPE_CODE: 'CUSTOMER',
+    LANGUAGE_CODE: 'en',
+    TIMEZONE_ID: 'America/Los_Angeles',
+    USE_YN: 'Y',
+    CREATED_AT: '2026-06-01T09:10:00',
+    CREATED_BY: 'system',
+    UPDATED_AT: '2026-06-01T09:10:00',
+    UPDATED_BY: 'system',
+  },
+  {
+    COMPANY_ID: 'COMP-003',
+    COMPANY_NAME: '글로벌 협력사',
+    COMPANY_TYPE_CODE: 'PARTNER',
+    LANGUAGE_CODE: 'en',
+    TIMEZONE_ID: 'UTC',
+    USE_YN: 'Y',
+    CREATED_AT: '2026-06-01T09:20:00',
+    CREATED_BY: 'system',
+    UPDATED_AT: '2026-06-01T09:20:00',
+    UPDATED_BY: 'system',
+  },
+];
