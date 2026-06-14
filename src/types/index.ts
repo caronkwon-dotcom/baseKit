@@ -8,6 +8,7 @@ export type { SystemConfig } from './system';
 export type { User } from './user';
 
 export type SystemMenuPath =
+  | '/system/companies'
   | '/system/users'
   | '/system/roles'
   | '/system/menus'

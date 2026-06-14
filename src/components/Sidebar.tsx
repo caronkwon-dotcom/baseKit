@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 
 const systemMenus = [
+  { label: '회사관리', path: '/system/companies' },
   { label: '사용자관리', path: '/system/users' },
   { label: '권한관리', path: '/system/roles' },
   { label: '메뉴관리', path: '/system/menus' },

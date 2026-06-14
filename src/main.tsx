@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import AppLayout from './layouts/AppLayout';
 import CodeManagePage from './pages/CodeManagePage';
+import CompanyManagePage from './pages/CompanyManagePage';
 import HomePage from './pages/HomePage';
 import MenuManagePage from './pages/MenuManagePage';
 import RoleManagePage from './pages/RoleManagePage';
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: 'system/codes', element: <CodeManagePage /> },
+      { path: 'system/companies', element: <CompanyManagePage /> },
       { path: 'system/users', element: <UserManagePage /> },
       { path: 'system/menus', element: <MenuManagePage /> },
       { path: 'system/roles', element: <RoleManagePage /> },
