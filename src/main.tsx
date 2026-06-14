@@ -6,6 +6,7 @@ import CodeManagePage from './pages/CodeManagePage';
 import HomePage from './pages/HomePage';
 import MenuManagePage from './pages/MenuManagePage';
 import RoleManagePage from './pages/RoleManagePage';
+import SystemConfigPage from './pages/SystemConfigPage';
 import UserManagePage from './pages/UserManagePage';
 import './styles.css';
 
@@ -19,6 +20,7 @@ const router = createBrowserRouter([
       { path: 'system/users', element: <UserManagePage /> },
       { path: 'system/menus', element: <MenuManagePage /> },
       { path: 'system/roles', element: <RoleManagePage /> },
+      { path: 'system/config', element: <SystemConfigPage /> },
     ],
   },
 ]);

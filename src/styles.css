@@ -228,6 +228,15 @@ tbody tr.selected-row td {
   word-break: break-word;
 }
 
+.readonly-field {
+  background: #f7f9fd;
+}
+
+.readonly-field dd {
+  color: #657084;
+  font-weight: 700;
+}
+
 @media (max-width: 720px) {
   .app-shell {
     flex-direction: column;

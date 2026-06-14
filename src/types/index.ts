@@ -11,4 +11,5 @@ export type SystemMenuPath =
   | '/system/users'
   | '/system/roles'
   | '/system/menus'
-  | '/system/codes';
+  | '/system/codes'
+  | '/system/config';

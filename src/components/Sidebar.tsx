@@ -5,6 +5,7 @@ const systemMenus = [
   { label: '권한관리', path: '/system/roles' },
   { label: '메뉴관리', path: '/system/menus' },
   { label: '공통코드관리', path: '/system/codes' },
+  { label: '시스템설정', path: '/system/config' },
 ];
 
 export default function Sidebar() {
