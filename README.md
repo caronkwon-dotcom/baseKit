@@ -56,21 +56,8 @@ meta/
 - 타입 파일은 `src/types`에 도메인별로 분리합니다.
 - 공통 감사 필드는 `BaseEntity`를 상속해서 사용합니다.
 - 사용 여부 값은 `UseYn` 타입을 사용합니다.
-- 필드명은 백엔드 및 메타데이터와 맞추기 위해 대문자 스네이크 케이스를 사용합니다.
-- mock 데이터는 반드시 정의된 타입을 import해서 작성합니다.
-
-예시:
-
-```ts
-export interface BaseEntity {
-  CREATED_AT: string;
-  CREATED_BY: string;
-  UPDATED_AT: string;
-  UPDATED_BY: string;
-}
-
-export type UseYn = 'Y' | 'N';
-```
+- 필드명은 메타데이터, API, DB 컬럼과의 일관성을 위해 대문자 스네이크 케이스를 사용합니다.
+- 자세한 결정 배경은 [타입 명명 규칙 결정 문서](docs/decisions/001-type-naming-convention.md)를 참고합니다.
 
 ## 실행 방법
 
