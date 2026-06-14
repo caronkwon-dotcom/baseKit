@@ -86,10 +86,10 @@ export const codes: Code[] = [
     UPDATED_BY: 'system',
   },
   {
-    CODE_ID: 'USER_STATUS_DORMANT',
+    CODE_ID: 'USER_STATUS_EXPIRED',
     CODE_GROUP_ID: 'USER_STATUS_CODE',
-    CODE: 'DORMANT',
-    CODE_NAME: '휴면',
+    CODE: 'EXPIRED',
+    CODE_NAME: '만료',
     SORT_ORDER: 4,
     USE_YN: 'Y',
     CREATED_AT: '2026-06-01T10:35:00',

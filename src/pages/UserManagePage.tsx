@@ -39,6 +39,16 @@ const userColumns: DataTableColumn<User>[] = [
     render: (user) => user.STATUS_CODE,
   },
   {
+    key: 'LAST_LOGIN_AT',
+    header: 'LAST_LOGIN_AT',
+    render: (user) => user.LAST_LOGIN_AT,
+  },
+  {
+    key: 'ACCOUNT_EXPIRED_AT',
+    header: 'ACCOUNT_EXPIRED_AT',
+    render: (user) => user.ACCOUNT_EXPIRED_AT,
+  },
+  {
     key: 'USE_YN',
     header: 'USE_YN',
     render: (user) => user.USE_YN,
@@ -97,6 +107,14 @@ export default function UserManagePage() {
           <div>
             <dt>STATUS_CODE</dt>
             <dd>{selectedUser.STATUS_CODE}</dd>
+          </div>
+          <div>
+            <dt>LAST_LOGIN_AT</dt>
+            <dd>{selectedUser.LAST_LOGIN_AT}</dd>
+          </div>
+          <div>
+            <dt>ACCOUNT_EXPIRED_AT</dt>
+            <dd>{selectedUser.ACCOUNT_EXPIRED_AT}</dd>
           </div>
           <div>
             <dt>USE_YN</dt>
