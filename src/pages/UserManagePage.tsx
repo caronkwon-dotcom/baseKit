@@ -34,11 +34,6 @@ const userColumns: DataTableColumn<User>[] = [
     render: (user) => user.USER_TYPE_CODE,
   },
   {
-    key: 'STATUS_CODE',
-    header: 'STATUS_CODE',
-    render: (user) => user.STATUS_CODE,
-  },
-  {
     key: 'LAST_LOGIN_AT',
     header: 'LAST_LOGIN_AT',
     render: (user) => user.LAST_LOGIN_AT,
@@ -47,6 +42,21 @@ const userColumns: DataTableColumn<User>[] = [
     key: 'ACCOUNT_EXPIRED_AT',
     header: 'ACCOUNT_EXPIRED_AT',
     render: (user) => user.ACCOUNT_EXPIRED_AT,
+  },
+  {
+    key: 'LOGIN_FAIL_COUNT',
+    header: 'LOGIN_FAIL_COUNT',
+    render: (user) => user.LOGIN_FAIL_COUNT,
+  },
+  {
+    key: 'LOCKED_YN',
+    header: 'LOCKED_YN',
+    render: (user) => user.LOCKED_YN,
+  },
+  {
+    key: 'STATUS_CODE',
+    header: 'STATUS_CODE',
+    render: (user) => user.STATUS_CODE,
   },
   {
     key: 'USE_YN',
@@ -115,6 +125,18 @@ export default function UserManagePage() {
           <div>
             <dt>ACCOUNT_EXPIRED_AT</dt>
             <dd>{selectedUser.ACCOUNT_EXPIRED_AT}</dd>
+          </div>
+          <div>
+            <dt>PASSWORD_CHANGED_AT</dt>
+            <dd>{selectedUser.PASSWORD_CHANGED_AT}</dd>
+          </div>
+          <div>
+            <dt>LOGIN_FAIL_COUNT</dt>
+            <dd>{selectedUser.LOGIN_FAIL_COUNT}</dd>
+          </div>
+          <div>
+            <dt>LOCKED_YN</dt>
+            <dd>{selectedUser.LOCKED_YN}</dd>
           </div>
           <div>
             <dt>USE_YN</dt>

@@ -9,5 +9,8 @@ export interface User extends BaseEntity {
   STATUS_CODE: string;
   LAST_LOGIN_AT: string;
   ACCOUNT_EXPIRED_AT: string;
+  PASSWORD_CHANGED_AT: string;
+  LOGIN_FAIL_COUNT: number;
+  LOCKED_YN: UseYn;
   USE_YN: UseYn;
 }
