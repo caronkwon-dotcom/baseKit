@@ -6,3 +6,4 @@ export interface BaseEntity {
 }
 
 export type UseYn = 'Y' | 'N';
+export type Yn = UseYn;
