@@ -7,6 +7,6 @@
 ## Directory Roles
 
 - `src/types`: 메뉴, 역할, 권한, 공통코드 같은 도메인 데이터 구조를 정의한다.
-- `src/mocks`: API 연결 전 화면과 유틸 검증에 사용할 정적 샘플 데이터를 둔다.
+- `src/mock`: API 연결 전 화면과 유틸 검증에 사용할 정적 샘플 데이터를 둔다.
 - `src/constants`: 역할 코드처럼 여러 파일에서 공유하는 고정 값을 정의한다.
 - `src/utils`: React, router, store에 의존하지 않는 순수 함수를 둔다.
