@@ -25,16 +25,21 @@ const readonlyPagePermission = (
   customYn: 'N',
 });
 
+const fullPagePermission = (
+  roleCode: string,
+  menuId: string,
+): MenuPermission => ({
+  roleCode,
+  menuId,
+  readYn: 'Y',
+  createYn: 'Y',
+  updateYn: 'Y',
+  deleteYn: 'Y',
+  customYn: 'Y',
+});
+
 export const menuPermissionMock: MenuPermission[] = [
-  ...pageMenuIds.map((menuId) => ({
-    roleCode: ROLE.ADMIN,
-    menuId,
-    readYn: 'Y',
-    createYn: 'Y',
-    updateYn: 'Y',
-    deleteYn: 'Y',
-    customYn: 'Y',
-  })),
+  ...pageMenuIds.map((menuId) => fullPagePermission(ROLE.ADMIN, menuId)),
   ...pageMenuIds.map((menuId) => readonlyPagePermission(ROLE.PURCHASER, menuId)),
   ...pageMenuIds.map((menuId) => readonlyPagePermission(ROLE.MANAGER, menuId)),
   readonlyPagePermission(ROLE.VENDOR, 'BOARD_NOTICE'),
