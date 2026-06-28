@@ -13,6 +13,7 @@ interface DataTableProps<T> {
   getRowKey: (row: T) => string;
   onRowClick?: (row: T) => void;
   getRowClassName?: (row: T) => string;
+  emptyMessage?: string;
 }
 
 export default function DataTable<T>({
@@ -22,6 +23,7 @@ export default function DataTable<T>({
   getRowKey,
   onRowClick,
   getRowClassName,
+  emptyMessage = '조회 결과가 없습니다.',
 }: DataTableProps<T>) {
   return (
     <div className="data-section">
@@ -36,26 +38,34 @@ export default function DataTable<T>({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => {
-              const rowClassNames = [
-                onRowClick ? 'clickable-row' : '',
-                getRowClassName?.(row) ?? '',
-              ]
-                .filter(Boolean)
-                .join(' ');
+            {rows.length === 0 ? (
+              <tr>
+                <td className="empty-cell" colSpan={columns.length}>
+                  {emptyMessage}
+                </td>
+              </tr>
+            ) : (
+              rows.map((row) => {
+                const rowClassNames = [
+                  onRowClick ? 'clickable-row' : '',
+                  getRowClassName?.(row) ?? '',
+                ]
+                  .filter(Boolean)
+                  .join(' ');
 
-              return (
-                <tr
-                  key={getRowKey(row)}
-                  className={rowClassNames}
-                  onClick={() => onRowClick?.(row)}
-                >
-                  {columns.map((column) => (
-                    <td key={column.key}>{column.render(row)}</td>
-                  ))}
-                </tr>
-              );
-            })}
+                return (
+                  <tr
+                    key={getRowKey(row)}
+                    className={rowClassNames}
+                    onClick={() => onRowClick?.(row)}
+                  >
+                    {columns.map((column) => (
+                      <td key={column.key}>{column.render(row)}</td>
+                    ))}
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
