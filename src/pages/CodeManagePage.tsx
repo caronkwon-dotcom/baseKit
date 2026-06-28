@@ -62,10 +62,42 @@ export default function CodeManagePage() {
   return (
     <section className="page">
       <PageHeader
-        eyebrow="System"
+        breadcrumbs={['시스템관리', '공통코드관리']}
         title="공통코드관리"
         description="시스템 공통 코드와 코드 그룹을 관리합니다."
       />
+
+      <section className="search-panel" aria-label="조회 조건">
+        <div className="section-title-row">
+          <h2>조회 조건</h2>
+          <div className="button-area">
+            <button type="button" className="secondary-button">
+              초기화
+            </button>
+            <button type="button" className="primary-button">
+              조회
+            </button>
+          </div>
+        </div>
+        <div className="search-grid">
+          <label>
+            코드그룹
+            <input placeholder="코드그룹" />
+          </label>
+          <label>
+            코드명
+            <input placeholder="코드명" />
+          </label>
+          <label>
+            사용 여부
+            <select defaultValue="">
+              <option value="">전체</option>
+              <option value="Y">사용</option>
+              <option value="N">미사용</option>
+            </select>
+          </label>
+        </div>
+      </section>
 
       <div className="summary-grid">
         <SummaryCard label="코드그룹" value={codeGroups.length} />
