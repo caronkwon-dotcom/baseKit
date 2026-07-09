@@ -3,7 +3,13 @@ import type { ProgramMeta } from '../types/adminShell';
 interface HeaderProps {
   activeProgram: ProgramMeta;
 }
-
+/**
+ * 상단 헤더 영역
+ *
+ * 시스템 브랜드, 사용자 정보, 현재 활성 프로그램명을 표시한다.
+ * activeProgram은 AppLayout에서 현재 선택된 programKey 기준으로 전달된다.
+ * 추후 로그인 사용자 정보와 프로그램별 공통 액션 버튼으로 확장한다.
+ */
 export default function Header({ activeProgram }: HeaderProps) {
   return (
     <header className="app-header">
