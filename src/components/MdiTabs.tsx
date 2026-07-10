@@ -1,5 +1,11 @@
 import type { MdiTab, ProgramKey } from '../types/adminShell';
-
+/**
+ * MDI 탭 영역
+ *
+ * 현재 열린 프로그램 탭 목록을 표시한다.
+ * 탭 선택과 닫기 이벤트는 AppLayout으로 전달하여
+ * 활성 프로그램 변경 및 탭 목록 갱신을 처리한다.
+ */
 interface MdiTabsProps {
   tabs: MdiTab[];
   activeProgramKey: ProgramKey;

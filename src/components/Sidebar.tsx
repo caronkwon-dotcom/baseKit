@@ -1,5 +1,12 @@
 import type { MenuNode, ProgramKey } from '../types/adminShell';
 
+/**
+ * 좌측 메뉴 영역
+ *
+ * AppLayout에서 생성한 메뉴 트리를 받아 Sidebar에 표시한다.
+ * SCREEN 메뉴 클릭 시 programKey를 AppLayout으로 전달하여
+ * MDI 탭 열기와 Workspace 화면 전환이 일어나도록 한다.
+ */
 interface SidebarProps {
   menus: MenuNode[];
   activeProgramKey: ProgramKey;
