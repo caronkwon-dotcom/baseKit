@@ -8,6 +8,8 @@ import CodeManagePage from '../pages/CodeManagePage';
 import HomePage from '../pages/HomePage';
 import MenuManagePage from '../pages/MenuManagePage';
 import UserManagePage from '../pages/UserManagePage';
+import { SearchSampleType1Page } from '../features/devGuide/searchSampleType1';
+
 import type {
   MdiTab,
   ProgramComponentMap,
@@ -31,6 +33,7 @@ const programComponents: ProgramComponentMap = {
   USER_MGMT: () => <UserManagePage />,
   COMMON_CODE_MGMT: () => <CodeManagePage />,
   MENU_MGMT: () => <MenuManagePage />,
+  DEV_SEARCH_SAMPLE_TYPE_1: () => <SearchSampleType1Page />,
 };
 
 /**

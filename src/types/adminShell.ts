@@ -1,6 +1,11 @@
 import type { ReactNode } from 'react';
 
-export type ProgramKey = 'HOME' | 'USER_MGMT' | 'COMMON_CODE_MGMT' | 'MENU_MGMT';
+export type ProgramKey =
+    | 'HOME'
+    | 'USER_MGMT'
+    | 'COMMON_CODE_MGMT'
+    | 'MENU_MGMT'
+    | 'DEV_SEARCH_SAMPLE_TYPE_1';
 
 /**
  * programKey     : 화면 ID
