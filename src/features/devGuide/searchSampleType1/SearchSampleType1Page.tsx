@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { DataTable, PageHeader, SearchPanel } from '../../../components/common';
+import type { SearchPanelRows } from '../../../components/common';
 import { COMMON_ACTIONS } from '../../../constants/actionCodes';
 import {
     initialSearchSampleType1Condition,
@@ -10,6 +11,9 @@ import { searchSampleType1Repository } from './searchSampleType1.repository';
 import type { SearchSampleType1Condition } from './searchSampleType1.types';
 
 export default function SearchSampleType1Page() {
+    const [previewRows, setPreviewRows] = useState<SearchPanelRows>(
+        SEARCH_SAMPLE_TYPE_1_PAGE.searchRows,
+    );
     const [condition, setCondition] = useState<SearchSampleType1Condition>(
         initialSearchSampleType1Condition,
     );
@@ -43,8 +47,23 @@ export default function SearchSampleType1Page() {
                 description={SEARCH_SAMPLE_TYPE_1_PAGE.description}
             />
 
+            <div className="search-layout-preview" aria-label="검색영역 단수 미리보기">
+                <span>검색영역 미리보기</span>
+                {([1, 2, 3] as const).map((rows) => (
+                    <button
+                        key={rows}
+                        type="button"
+                        className={previewRows === rows ? 'active' : ''}
+                        aria-pressed={previewRows === rows}
+                        onClick={() => setPreviewRows(rows)}
+                    >
+                        {rows}단
+                    </button>
+                ))}
+            </div>
+
             <SearchPanel
-                rows={SEARCH_SAMPLE_TYPE_1_PAGE.searchRows}
+                rows={previewRows}
                 actions={
                     <>
                         <button
@@ -99,6 +118,17 @@ export default function SearchSampleType1Page() {
                         <option value="N">미사용</option>
                     </select>
                 </label>
+                {Array.from({ length: previewRows * 4 - 3 }, (_, index) => (
+                    <label key={`preview-condition-${index + 1}`}>
+                        추가조건 {index + 1}
+                        <input
+                            type="text"
+                            readOnly
+                            placeholder="배치 예시"
+                            aria-label={`추가조건 ${index + 1} 배치 예시`}
+                        />
+                    </label>
+                ))}
             </SearchPanel>
 
             <DataTable

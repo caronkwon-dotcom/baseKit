@@ -316,7 +316,7 @@ button {
   min-width: 0;
   flex: 1;
   overflow: auto;
-  padding: 12px 14px;
+  padding: 8px 12px 12px;
 }
 
 .page {
@@ -324,7 +324,7 @@ button {
 }
 
 .page-header {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .page-context-row,
@@ -334,21 +334,21 @@ button {
 }
 
 .page-context-row {
-  min-height: 30px;
+  min-height: 24px;
   justify-content: space-between;
   gap: 16px;
   border-bottom: 1px solid #dbe3ee;
-  padding: 0 2px 6px;
+  padding: 0 0 2px;
 }
 
 .page-navigation-area {
   flex: 0 0 auto;
-  gap: 5px;
+  gap: 3px;
 }
 
 .breadcrumb {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   color: #64748b;
   font-size: 12px;
   font-weight: 700;
@@ -356,8 +356,8 @@ button {
 
 .manual-icon-button {
   display: grid;
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   place-items: center;
   border: 0;
   border-radius: 5px;
@@ -371,7 +371,7 @@ button {
 }
 
 .manual-icon-button svg {
-  width: 17px;
+  width: 15px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
@@ -494,9 +494,39 @@ button {
 
 .search-grid label {
   display: grid;
-  gap: 4px;
+  grid-template-columns: 68px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
   color: #475569;
   font-size: 12px;
+  font-weight: 700;
+}
+
+.search-layout-preview {
+  display: flex;
+  min-height: 28px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-bottom: 4px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.search-layout-preview button {
+  min-height: 24px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: #ffffff;
+  padding: 0 8px;
+  color: #475569;
+  font-size: 12px;
+}
+
+.search-layout-preview button.active {
+  border-color: #1f6feb;
+  background: #e1effe;
+  color: #1456b8;
   font-weight: 700;
 }
 
@@ -695,6 +725,10 @@ tbody tr.selected-row td {
 
   .search-panel-layout {
     grid-template-columns: 1fr;
+  }
+
+  .search-grid label {
+    grid-template-columns: 88px minmax(0, 1fr);
   }
 
   .search-panel-actions {
