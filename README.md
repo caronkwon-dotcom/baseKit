@@ -1,6 +1,6 @@
 # BaseKit
 
-BaseKit은 업무시스템 개발을 위한 React 기반 참조 아키텍처 프로젝트입니다. 공통 메타데이터, 타입 정의, mock 데이터, 화면 구조를 일관된 방식으로 관리하여 이후 API, DB, UI 구현의 기준점을 제공합니다.
+BaseKit은 여러 SI 업무시스템에서 반복 사용할 표준 아키텍처, 공통 Business Foundation, 개발 생산성 기반을 만드는 프로젝트입니다. 기술 데모보다 실제 적용 가능성, 유지보수성, 확장성과 개발자 이해도를 우선합니다.
 
 ## 프로젝트 목적
 
@@ -8,6 +8,7 @@ BaseKit은 업무시스템 개발을 위한 React 기반 참조 아키텍처 프
 - 화면, 타입, mock 데이터를 먼저 정의하여 기능 개발 전 데이터 계약을 명확히 합니다.
 - 프론트엔드 화면 구현과 백엔드 API 설계가 같은 용어와 구조를 사용하도록 합니다.
 - 개발자의 자유도보다 프로젝트 전체의 일관성과 유지보수성을 우선합니다.
+- 초기부터 거대한 범용 Framework, BPM, Rule Engine을 만들지 않고 실제 사용 가능한 범위부터 확장합니다.
 
 ## 기술스택
 
@@ -17,6 +18,16 @@ BaseKit은 업무시스템 개발을 위한 React 기반 참조 아키텍처 프
 - React Router
 - ESLint
 
+기본 실행 환경은 Node.js 20.19 이상과 npm 10 이상입니다. 현재 도구 호환 범위에서 Node.js 22.12 이상도 지원합니다.
+
+## 처음 확인할 문서
+
+1. [AGENTS.md](AGENTS.md): GPT/Codex 작업 안전 규칙
+2. [현재 상태](docs/basekit-current-status.md): 구현·설계·불일치·미결정 및 다음 작업
+3. [새 PC 복구 가이드](docs/recovery-guide.md): 설치·검증·작업 재개
+4. `docs/01~04`: Architecture, Menu, Permission, Domain 기준
+5. `docs/decisions`: 확정된 Architecture Decision
+
 ## 브랜치 운영 방식
 
 - `main`: 승인된 안정 버전입니다. 직접 수정하지 않습니다.
@@ -25,6 +36,7 @@ BaseKit은 업무시스템 개발을 위한 React 기반 참조 아키텍처 프
 - 작업 브랜치는 최신 `dev-pm`을 기준으로 생성하고 PR 대상도 `dev-pm`으로 합니다.
 - `dev-pm` 검수와 사용자 승인 후 `dev-pm → main` 승격 PR을 병합합니다.
 - Commit, Push, Merge 전에 변경 범위와 검증 결과를 확인합니다.
+- 자세한 배경은 [Git 통합 Workflow ADR](docs/decisions/008-git-integration-workflow.md)을 참고합니다.
 
 ## 폴더 구조
 
@@ -76,7 +88,7 @@ meta/
 의존성 설치:
 
 ```bash
-npm install
+npm ci
 ```
 
 개발 서버 실행:
@@ -91,8 +103,22 @@ npm run dev
 npm run build
 ```
 
+린트:
+
+```bash
+npm run lint
+```
+
 빌드 결과 미리보기:
 
 ```bash
 npm run preview
 ```
+
+현재 실행에 필수인 `.env`나 외부 서비스 인증정보는 없습니다. 비밀키와 Token은 Repository에 저장하지 않습니다.
+
+## 배포
+
+- `dev-pm` 대상 PR: 자동 build 검증
+- `main` push: GitHub Pages 배포
+- URL: https://caronkwon-dotcom.github.io/baseKit/

@@ -227,6 +227,10 @@ BaseKit은 최소한 다음 레벨의 구분을 염두에 둔다.
 * `hasAction(roleCode, programKey, actionCode)` 계약
 * 향후 Backend 권한 정책 연결 전제 확보
 
+현재 `hasAction(roleCode, programKey, actionCode)` 계약은 로그인 Context 연결 전의 Foundation이다. 로그인 Context가 도입되면 UI는 역할을 직접 전달하지 않는 `hasAction(programKey, actionCode)` 형태의 래퍼를 사용한다.
+
+Frontend의 버튼 숨김·비활성화는 사용자 경험을 위한 처리다. 실제 보안은 Backend에서 동일한 Program/Action 권한을 반드시 다시 검증한다.
+
 로그인 사용자 역할 연결, 버튼 자동 제어, Backend 검증, 데이터 범위 권한은 아직 구현 범위가 아니다.
 
 ---
