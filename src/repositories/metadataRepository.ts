@@ -126,6 +126,10 @@ export const metadataRepository = {
   getMenus: () => menus.filter((menu) => menu.useYn === 'Y'),
   getMenuTree: () => buildMenuTree(menus),
   getActions: () => actions,
+  getMenuNameByProgram: (programKey: ProgramKey) =>
+    menus.find(
+      (menu) => menu.useYn === 'Y' && menu.menuType === 'SCREEN' && menu.programKey === programKey,
+    )?.menuName,
   getRoleProgramActions: () => roleProgramActions,
   hasAction: (
     roleCode: string,

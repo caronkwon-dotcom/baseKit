@@ -1,6 +1,8 @@
 export { default as DataTable } from './DataTable';
 export type { DataTableColumn } from './DataTable';
 export { default as PageHeader } from './PageHeader';
+export { default as ProgramDataGrid } from './ProgramDataGrid';
+export type { GridActionContext, GridActionHandlers, GridMetric } from './ProgramDataGrid';
 export { default as SearchPanel } from './SearchPanel';
 export type {
   SearchFieldConfig,
