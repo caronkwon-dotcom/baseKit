@@ -11,3 +11,9 @@ export interface SearchSampleType1Row {
     USE_YN      : 'Y' | 'N';
     CREATED_AT  : string;
 }
+
+export interface SearchSampleType1Condition {
+    sampleName: string;
+    sampleType: string;
+    useYn: '' | 'Y' | 'N';
+}

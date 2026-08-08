@@ -5,7 +5,7 @@
  * 실제 업무 데이터가 아니라 Search Page 개발 패턴 확인용 데이터
  */
 
-import type { SearchSampleType1Row } from "./searchSampleType1.types.ts";
+import type { SearchSampleType1Row } from './searchSampleType1.types';
 
 export const searchSampleTypeRows : SearchSampleType1Row[] = [
     {

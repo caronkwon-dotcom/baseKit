@@ -2,6 +2,7 @@ import DataTable, {
   type DataTableColumn,
 } from '../components/common/DataTable';
 import PageHeader from '../components/common/PageHeader';
+import SearchPanel from '../components/common/SearchPanel';
 import SummaryCard from '../components/common/SummaryCard';
 import { codeGroups } from '../mock/codeGroups';
 import { codes } from '../mock/codes';
@@ -66,16 +67,19 @@ export default function CodeManagePage() {
         description="시스템 공통 코드와 코드 그룹을 관리합니다."
       />
 
-      <section className="search-panel" aria-label="조회 조건">
-        <div className="search-actions button-area">
+      <SearchPanel
+        rows={1}
+        actions={
+          <>
             <button type="button" className="secondary-button">
               초기화
             </button>
             <button type="button" className="primary-button">
               조회
             </button>
-        </div>
-        <div className="search-grid">
+          </>
+        }
+      >
           <label>
             코드그룹
             <input placeholder="코드그룹" />
@@ -92,8 +96,7 @@ export default function CodeManagePage() {
               <option value="N">미사용</option>
             </select>
           </label>
-        </div>
-      </section>
+      </SearchPanel>
 
       <div className="summary-grid">
         <SummaryCard label="코드그룹" value={codeGroups.length} />

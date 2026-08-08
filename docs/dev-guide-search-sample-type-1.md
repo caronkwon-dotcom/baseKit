@@ -31,7 +31,9 @@
 src/features/devGuide/searchSampleType1/
  ├─ SearchSampleType1Page.tsx
  ├─ index.ts
+ ├─ searchSampleType1.config.ts
  ├─ searchSampleType1.mock.ts
+ ├─ searchSampleType1.repository.ts
  └─ searchSampleType1.types.ts
 ```
 
@@ -39,24 +41,28 @@ src/features/devGuide/searchSampleType1/
 
 | 파일 | 역할 |
 | --- | --- |
-| `SearchSampleType1Page.tsx` | 화면 본체. 검색조건, 이벤트, SearchPanel, DataTable 구성 |
-| `searchSampleType1.types.ts` | 화면에서 사용하는 row 타입 정의 |
+| `SearchSampleType1Page.tsx` | 화면 조립과 사용자 이벤트, 상태 연결 |
+| `searchSampleType1.config.ts` | 화면 Context, 검색 단수, 초기조건, Grid 컬럼 |
+| `searchSampleType1.types.ts` | 검색조건과 API/목록 row 타입 |
 | `searchSampleType1.mock.ts` | API 연동 전 화면 확인용 mock 데이터 |
-| `index.ts` | feature 외부 공개용 export 진입점 |
+| `searchSampleType1.repository.ts` | Mock 조회 경계. 향후 REST Adapter 교체 지점 |
+| `index.ts` | feature 외부 공개 API. 내부 mock/repository는 노출하지 않음 |
 
 ---
 
 ## 4. 주요 설계 기준
 
-### 4.1 화면 설정은 `PAGE_CONFIG`로 관리
+### 4.1 화면 설정은 `config.ts`로 관리
 
 프로그램 설명과 programKey는 페이지 상단의 `PAGE_CONFIG`에서 관리한다. 화면명은 메뉴 경로에 이미 표시되므로 PageHeader에서 반복하지 않는다.
 
 ```ts
-const PAGE_CONFIG = {
+const SEARCH_SAMPLE_TYPE_1_PAGE = {
   programKey: 'DEV_SEARCH_SAMPLE_TYPE_1',
+  breadcrumbs: ['개발자가이드', '화면 샘플', '기본 검색 페이지 샘플'],
   description:
     '검색조건 1단 + 데이터 목록으로 구성된 가장 기본적인 Search Page 샘플입니다.',
+  searchRows: 1,
 } as const;
 ```
 
@@ -116,15 +122,10 @@ CREATED_AT
 
 ### 4.4 서버 검색조건과 그리드 필터는 분리
 
-현재 `searchMockRows`는 DB/API 연동 전 mock 데이터를 조회하기 위한 임시 함수이다.
+현재 `searchSampleType1Repository.search()`는 DB/API 연동 전 mock 데이터를 조회한다.
 
 ```ts
-function searchMockRows(
-  rows: SearchSampleType1Row[],
-  condition: SearchCondition,
-): SearchSampleType1Row[] {
-  // mock 조회 처리
-}
+const rows = searchSampleType1Repository.search(condition);
 ```
 
 이 함수는 그리드 필터 기능이 아니다.
@@ -136,37 +137,48 @@ function searchMockRows(
 | 검색조건 | 서버 조회 조건. 업무적으로 의미 있는 조건만 배치 |
 | 그리드 필터 | 조회된 결과 안에서 사용자가 임시로 필터링하는 기능 |
 
-실제 API 연동 후에는 `searchMockRows`를 service 호출로 대체한다.
+실제 API 연동 후에는 Page를 변경하지 않고 Repository 구현을 REST Adapter로 교체한다.
 
 ```ts
-const result = await searchSampleType1(condition);
+const result = await searchSampleType1Repository.search(condition);
 ```
+
+---
+
+### 4.5 검색영역 1단·2단·3단 표준
+
+Desktop 검색영역은 `검색조건 4열 + 버튼 영역`으로 구성한다. 초기화·조회 버튼은 검색조건과 같은 Layout 안에 있으며 마지막 단의 오른쪽에 정렬한다.
+
+| `rows` | 검색조건 최대 개수 | 버튼 위치 |
+| --- | ---: | --- |
+| `1` | 4개 | 첫 번째 단 오른쪽 |
+| `2` | 8개 | 두 번째 단 오른쪽 |
+| `3` | 12개 | 세 번째 단 오른쪽 |
+
+```tsx
+<SearchPanel rows={2} actions={actions}>
+  {/* 검색조건 5~8개 */}
+</SearchPanel>
+```
+
+`rows`보다 많은 조건을 전달하면 공통 컴포넌트가 즉시 오류를 발생시켜 화면별 임의 배치를 막는다. 작은 화면에서는 검색조건과 버튼이 한 열로 전환된다.
 
 ---
 
 ## 5. 화면 구성 순서
 
-`SearchSampleType1Page.tsx`는 다음 순서로 작성한다.
+파일별 책임은 다음 순서로 수정한다.
 
 ```text
-1. import
-2. PAGE_CONFIG
-3. SearchCondition 타입
-4. initialCondition
-5. columns
-6. searchMockRows
-7. SearchSampleType1Page 컴포넌트
-8. condition / searchedCondition 상태
-9. searchedRows 계산
-10. updateCondition
-11. handleSearch
-12. handleReset
-13. PageHeader
-14. SearchPanel
-15. DataTable
+1. `types.ts`: 검색조건과 Row 계약
+2. `config.ts`: Context, 검색 단수, 초기값, 컬럼
+3. `mock.ts`: Mock 원본 데이터
+4. `repository.ts`: 조회와 향후 API 교체 경계
+5. `Page.tsx`: 상태, 이벤트, 공통 컴포넌트 조립
+6. `index.ts`: 외부 공개 범위
 ```
 
-이 순서를 유지하면 신규 개발자가 기존 화면을 복사해 새 화면으로 변환하기 쉽다.
+Page 파일에 타입, 대규모 컬럼 설정, Mock 조회 구현을 다시 합치지 않는다.
 
 ---
 
@@ -211,21 +223,9 @@ const result = await searchSampleType1(condition);
 
 이번 샘플을 통해 확인된 다음 개선 후보는 다음과 같다.
 
-### 7.1 programRegistry 분리
+### 7.1 Repository 비동기 계약
 
-현재 `AppLayout.tsx`에서 화면 컴포넌트를 직접 import하고 `programComponents`에 매핑한다.
-
-화면 수가 늘어나면 다음 구조로 분리한다.
-
-```text
-src/config/programRegistry.tsx
-```
-
-역할:
-
-```text
-PROGRAM_KEY → 실제 React Page 컴포넌트
-```
+현재 Mock Repository는 동기 조회다. REST 연결 단계에서는 `Promise` 기반 Repository 계약과 loading/error 상태를 표준화한다.
 
 ---
 
@@ -290,10 +290,9 @@ VITE_SHOW_DEV_GUIDE=true
 3. Page 컴포넌트명 변경
 4. Row 타입 변경
 5. mock 데이터 변경
-6. PAGE_CONFIG 변경
+6. config의 Page Context, 검색 단수, 초기조건, 컬럼 변경
 7. SearchCondition 변경
-8. columns 변경
-9. searchMockRows 조건 변경
+8. Repository 조회 조건 변경
 10. meta/programs.json과 meta/menus.json에 program/menu 등록
 11. programRegistry.tsx에 컴포넌트 연결
 12. npm run build 확인
