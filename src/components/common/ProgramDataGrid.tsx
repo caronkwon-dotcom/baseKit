@@ -36,6 +36,7 @@ interface ProgramDataGridProps<T> {
   getRowKey: (row: T) => string;
   emptyMessage?: string;
   selectable?: boolean;
+  scrollSample?: boolean;
 }
 
 function ExcelIcon() {
@@ -58,6 +59,7 @@ export default function ProgramDataGrid<T>({
   getRowKey,
   emptyMessage,
   selectable = true,
+  scrollSample = false,
 }: ProgramDataGridProps<T>) {
   const [selectedRowKeys, setSelectedRowKeys] = useState<Set<string>>(new Set());
   const program = programByKey[programKey];
@@ -73,10 +75,11 @@ export default function ProgramDataGrid<T>({
   const selectedRows = rows.filter((row) => selectedRowKeys.has(getRowKey(row)));
 
   return (
-    <section className="program-data-grid" aria-label={resolvedTitle}>
+    <section className={scrollSample ? 'program-data-grid scroll-sample' : 'program-data-grid'} aria-label={resolvedTitle}>
       <div className="grid-toolbar">
         <div className="grid-heading-group">
           <h2>{resolvedTitle}</h2>
+          <span className="grid-total">총 <strong>{rows.length}</strong>건</span>
           {metrics.map((metric) => (
             <span key={metric.label} className={`grid-metric ${metric.tone ?? 'default'}`}>
               {metric.label} <strong>{metric.value}</strong>건
@@ -103,7 +106,6 @@ export default function ProgramDataGrid<T>({
           })}
         </div>
       </div>
-      <div className="grid-result-meta">총 <strong>{rows.length}</strong>건</div>
       <DataTable
         columns={columns}
         rows={rows}

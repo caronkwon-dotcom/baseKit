@@ -105,6 +105,10 @@ const columns: DataTableColumn<SearchSampleType2Row>[] = [
   { key: 'PRIORITY', header: '우선순위', render: (row) => priorityLabels[row.PRIORITY] },
   { key: 'OWNER_NAME', header: '담당자', render: (row) => row.OWNER_NAME },
   { key: 'REQUESTED_AT', header: '요청일', render: (row) => row.REQUESTED_AT },
+  { key: 'EXPECTED_AT', header: '완료예정일', render: (row) => row.EXPECTED_AT },
+  { key: 'UPDATED_BY', header: '최종수정자', render: (row) => row.UPDATED_BY },
+  { key: 'UPDATED_AT', header: '최종수정일시', render: (row) => row.UPDATED_AT },
+  { key: 'REMARK', header: '비고', render: (row) => row.REMARK },
 ];
 
 export default function SearchSampleType2Page() {
@@ -162,6 +166,7 @@ export default function SearchSampleType2Page() {
         rows={rows}
         getRowKey={(row) => row.REQUEST_NO}
         emptyMessage="검색조건에 해당하는 업무 요청이 없습니다."
+        scrollSample
       />
     </section>
   );
