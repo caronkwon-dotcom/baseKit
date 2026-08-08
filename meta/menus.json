@@ -1,15 +1,5 @@
 [
   {
-    "menuKey": "HOME",
-    "parentMenuKey": null,
-    "menuName": "Home",
-    "menuLevel": 1,
-    "menuType": "SCREEN",
-    "programKey": "HOME",
-    "sortOrder": 0,
-    "useYn": "Y"
-  },
-  {
     "menuKey": "SYS",
     "parentMenuKey": null,
     "menuName": "시스템관리",
@@ -35,7 +25,7 @@
     "menuName": "공통코드관리",
     "menuLevel": 2,
     "menuType": "SCREEN",
-    "programKey": "CODE_MGMT",
+    "programKey": "COMMON_CODE_MGMT",
     "sortOrder": 2,
     "useYn": "Y"
   },
@@ -47,6 +37,26 @@
     "menuType": "SCREEN",
     "programKey": "MENU_MGMT",
     "sortOrder": 3,
+    "useYn": "Y"
+  },
+  {
+    "menuKey": "DEV_GUIDE",
+    "parentMenuKey": null,
+    "menuName": "개발자가이드",
+    "menuLevel": 1,
+    "menuType": "GROUP",
+    "programKey": null,
+    "sortOrder": 99,
+    "useYn": "Y"
+  },
+  {
+    "menuKey": "DEV_GUIDE.SEARCH_SAMPLE_TYPE_1",
+    "parentMenuKey": "DEV_GUIDE",
+    "menuName": "기본 검색 페이지 샘플",
+    "menuLevel": 2,
+    "menuType": "SCREEN",
+    "programKey": "DEV_SEARCH_SAMPLE_TYPE_1",
+    "sortOrder": 1,
     "useYn": "Y"
   }
 ]

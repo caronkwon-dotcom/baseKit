@@ -1,12 +1,13 @@
 [
   {
     "programKey": "HOME",
-    "programName": "Home",
+    "programName": "홈",
     "componentName": "HomePage",
     "screenType": "HOME",
-    "routePath": "/home",
+    "routePath": "/",
     "dataScope": "USER",
     "modifyScope": "NONE",
+    "actionCodes": ["MANUAL_VIEW"],
     "useYn": "Y"
   },
   {
@@ -17,16 +18,18 @@
     "routePath": "/system/users",
     "dataScope": "COMPANY",
     "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "CREATE", "UPDATE", "DELETE", "MANUAL_VIEW", "MANUAL_GENERATE", "MANUAL_EDIT"],
     "useYn": "Y"
   },
   {
-    "programKey": "CODE_MGMT",
+    "programKey": "COMMON_CODE_MGMT",
     "programName": "공통코드관리",
     "componentName": "CodeManagePage",
     "screenType": "GRID_DETAIL",
     "routePath": "/system/codes",
     "dataScope": "COMPANY",
     "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "MANUAL_VIEW", "MANUAL_GENERATE"],
     "useYn": "Y"
   },
   {
@@ -37,6 +40,18 @@
     "routePath": "/system/menus",
     "dataScope": "COMPANY",
     "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "MANUAL_VIEW", "MANUAL_GENERATE"],
+    "useYn": "Y"
+  },
+  {
+    "programKey": "DEV_SEARCH_SAMPLE_TYPE_1",
+    "programName": "기본 검색 페이지 샘플 Type 1",
+    "componentName": "SearchSampleType1Page",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/dev-guide/search-sample-type-1",
+    "dataScope": "USER",
+    "modifyScope": "NONE",
+    "actionCodes": ["SEARCH", "RESET", "MANUAL_VIEW"],
     "useYn": "Y"
   }
 ]
