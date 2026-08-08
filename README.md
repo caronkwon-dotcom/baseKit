@@ -27,6 +27,7 @@ BaseKit은 여러 SI 업무시스템에서 반복 사용할 표준 아키텍처,
 3. [새 PC 복구 가이드](docs/recovery-guide.md): 설치·검증·작업 재개
 4. `docs/01~04`: Architecture, Menu, Permission, Domain 기준
 5. `docs/decisions`: 확정된 Architecture Decision
+6. `docs/ideas`: 미구현·미확정 아이디어 Backlog
 
 ## 브랜치 운영 방식
 
