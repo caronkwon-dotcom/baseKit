@@ -852,8 +852,14 @@ button {
 }
 
 .grid-metric strong,
-.grid-result-meta strong {
+.grid-total strong {
   color: #1456b8;
+}
+
+.grid-total {
+  color: #64748b;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .grid-metric.danger strong {
@@ -889,15 +895,6 @@ button {
   stroke-width: 1.8;
 }
 
-.grid-result-meta {
-  min-height: 25px;
-  border-top: 1px solid #edf1f6;
-  padding: 5px 10px 3px;
-  color: #64748b;
-  font-size: 12px;
-  text-align: right;
-}
-
 .program-data-grid .data-section {
   border: 0;
   border-radius: 0;
@@ -905,6 +902,21 @@ button {
 
 .program-data-grid .table-wrap {
   margin-top: 0;
+}
+
+.program-data-grid.scroll-sample .table-wrap {
+  max-height: 360px;
+  overflow: auto;
+}
+
+.program-data-grid.scroll-sample table {
+  min-width: 1680px;
+}
+
+.program-data-grid.scroll-sample thead th {
+  position: sticky;
+  z-index: 2;
+  top: 0;
 }
 
 .selection-cell {

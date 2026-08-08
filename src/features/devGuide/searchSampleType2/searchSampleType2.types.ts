@@ -24,4 +24,8 @@ export interface SearchSampleType2Row {
   PRIORITY: 'HIGH' | 'NORMAL' | 'LOW';
   OWNER_NAME: string;
   REQUESTED_AT: string;
+  EXPECTED_AT: string;
+  UPDATED_BY: string;
+  UPDATED_AT: string;
+  REMARK: string;
 }
