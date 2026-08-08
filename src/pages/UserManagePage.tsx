@@ -123,19 +123,10 @@ export default function UserManagePage() {
     <section className="page">
       <PageHeader
         breadcrumbs={['시스템관리', '사용자관리']}
-        title="사용자관리"
         description="시스템 사용자의 계정과 상태를 관리합니다."
-        actions={
-          <>
-            <button type="button" className="secondary-button">
-              매뉴얼
-            </button>
-          </>
-        }
       />
 
       <SearchPanel
-        title="조회 조건"
         actions={
           <>
             <button type="button" className="secondary-button" onClick={handleReset}>

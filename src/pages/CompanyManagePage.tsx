@@ -48,8 +48,7 @@ export default function CompanyManagePage() {
   return (
     <section className="page">
       <PageHeader
-        eyebrow="System"
-        title="회사관리"
+        breadcrumbs={['시스템관리', '회사관리']}
         description="시스템에서 관리하는 회사와 고객사, 협력사 정보를 조회합니다."
       />
 

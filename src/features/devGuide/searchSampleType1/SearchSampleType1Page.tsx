@@ -13,7 +13,6 @@ import type { SearchSampleType1Row } from './searchSampleType1.types';
  */
 const PAGE_CONFIG = {
     programKey: 'DEV_SEARCH_SAMPLE_TYPE_1',
-    title: '기본 검색 페이지 샘플 Type 1',
     description:
         '검색조건 1단 + 데이터 목록으로 구성된 가장 기본적인 Search Page 샘플입니다.',
 } as const;
@@ -171,11 +170,10 @@ export default function SearchSampleType1Page() {
             {/*
        * Step 9-8-0: PageHeader 구성
        *
-       * 화면 제목, 설명, 상단 버튼을 표시한다.
-       * 버튼은 COMMON_ACTIONS 기준으로 정의하여 추후 권한/로그/라이선스와 연결할 수 있게 한다.
+       * 메뉴 경로, 프로그램 개요, 매뉴얼 아이콘을 한 줄에 표시한다.
        */}
             <PageHeader
-                title={PAGE_CONFIG.title}
+                breadcrumbs={['개발자가이드', '화면 샘플', '기본 검색 페이지 샘플']}
                 description={PAGE_CONFIG.description}
             />
             {/*
@@ -186,7 +184,6 @@ export default function SearchSampleType1Page() {
        * 업무적으로 의미 있는 조건만 배치한다.
        */}
             <SearchPanel
-                title="검색조건"
                 actions={
                     <>
                         <button type="button" data-action-code={COMMON_ACTIONS.SEARCH} onClick={handleSearch}>
