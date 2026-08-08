@@ -127,6 +127,7 @@ export default function UserManagePage() {
       />
 
       <SearchPanel
+        rows={1}
         actions={
           <>
             <button type="button" className="secondary-button" onClick={handleReset}>
