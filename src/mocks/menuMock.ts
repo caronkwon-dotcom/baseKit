@@ -1,6 +1,6 @@
-import type { Menu } from '../types';
+import type { Menu } from '../types/menu';
 
-export const menus: Menu[] = [
+export const menuMock: Menu[] = [
   {
     menuId: 'SYS',
     parentMenuId: null,

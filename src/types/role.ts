@@ -1,8 +1,9 @@
-import type { BaseEntity, UseYn } from './common';
+import type { Yn } from './common';
 
-export interface Role extends BaseEntity {
-  ROLE_ID: string;
-  ROLE_NAME: string;
-  ROLE_TYPE_CODE: string;
-  USE_YN: UseYn;
+export interface Role {
+  roleCode: string;
+  roleName: string;
+  description?: string;
+  orderNo: number;
+  useYn: Yn;
 }
