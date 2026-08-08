@@ -50,10 +50,20 @@
     "useYn": "Y"
   },
   {
-    "menuKey": "DEV_GUIDE.SEARCH_SAMPLE_TYPE_1",
+    "menuKey": "DEV_GUIDE.SAMPLES",
     "parentMenuKey": "DEV_GUIDE",
-    "menuName": "기본 검색 페이지 샘플",
+    "menuName": "화면 샘플",
     "menuLevel": 2,
+    "menuType": "GROUP",
+    "programKey": null,
+    "sortOrder": 1,
+    "useYn": "Y"
+  },
+  {
+    "menuKey": "DEV_GUIDE.SEARCH_SAMPLE_TYPE_1",
+    "parentMenuKey": "DEV_GUIDE.SAMPLES",
+    "menuName": "기본 검색 페이지 샘플",
+    "menuLevel": 3,
     "menuType": "SCREEN",
     "programKey": "DEV_SEARCH_SAMPLE_TYPE_1",
     "sortOrder": 1,

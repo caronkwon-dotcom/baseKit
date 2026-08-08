@@ -41,22 +41,13 @@ button {
   position: sticky;
   top: 0;
   z-index: 10;
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  gap: 10px;
   border-bottom: 1px solid #d6deea;
   background: #ffffff;
-}
-
-.header-primary,
-.header-secondary {
-  display: flex;
-  min-height: 42px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 0 16px;
-}
-
-.header-primary {
-  border-bottom: 1px solid #e7edf5;
+  padding: 0 12px;
 }
 
 .header-brand,
@@ -71,6 +62,7 @@ button {
 
 .header-brand {
   gap: 10px;
+  flex: 0 0 auto;
 }
 
 .brand-mark {
@@ -85,14 +77,11 @@ button {
 }
 
 .header-brand strong {
-  display: block;
   color: #111827;
   font-size: 15px;
 }
 
-.header-brand span:last-child,
-.user-area span,
-.location-label {
+.user-area span {
   color: #657084;
   font-size: 12px;
 }
@@ -101,17 +90,49 @@ button {
   gap: 10px;
 }
 
-.header-secondary {
-  min-height: 34px;
-}
-
-.header-secondary strong {
-  margin-left: 10px;
-}
-
-.header-actions,
 .button-area {
   gap: 8px;
+}
+
+.shell-icon-button,
+.mdi-navigation button,
+.mdi-management button {
+  min-height: 28px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #475569;
+}
+
+.shell-icon-button {
+  width: 30px;
+  padding: 0;
+}
+
+.top-navigation {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-self: stretch;
+  overflow-x: auto;
+}
+
+.top-menu-button {
+  flex: 0 0 auto;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  padding: 0 14px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.top-menu-button:hover,
+.top-menu-button.active {
+  border-bottom-color: #1f6feb;
+  color: #1456b8;
+  background: #f5f9ff;
 }
 
 .app-body {
@@ -121,19 +142,16 @@ button {
 }
 
 .sidebar {
-  width: 208px;
-  flex: 0 0 208px;
+  width: 220px;
+  flex: 0 0 220px;
   border-right: 1px solid #d6deea;
   background: #f8fafc;
-  padding: 14px 10px;
+  padding: 10px 8px;
 }
 
-.sidebar-nav section + section {
-  margin-top: 12px;
-}
-
-.sidebar-nav h2 {
-  margin: 0 0 6px;
+.sidebar-heading {
+  border-bottom: 1px solid #dbe3ee;
+  padding: 2px 8px 9px;
   color: #475569;
   font-size: 12px;
   font-weight: 800;
@@ -141,10 +159,14 @@ button {
 
 .sidebar-nav ul {
   display: grid;
-  gap: 4px;
+  gap: 3px;
   margin: 0;
-  padding: 0;
+  padding: 7px 0 0;
   list-style: none;
+}
+
+.sidebar-nav .nav-group ul {
+  padding: 2px 0 4px;
 }
 
 .nav-link {
@@ -159,6 +181,27 @@ button {
   padding: 0 10px;
   color: #334155;
   font-size: 13px;
+  text-align: left;
+}
+
+.nav-link.depth-3 {
+  padding-left: 24px;
+  font-size: 12px;
+}
+
+.nav-group-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 30px;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  border-radius: 6px;
+  background: #edf2f7;
+  padding: 0 10px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
   text-align: left;
 }
 
@@ -180,15 +223,58 @@ button {
   flex-direction: column;
 }
 
-.mdi-tabs {
+.mdi-bar {
   display: flex;
   min-height: 34px;
   align-items: end;
-  gap: 4px;
-  overflow-x: auto;
   border-bottom: 1px solid #d6deea;
   background: #f1f5f9;
-  padding: 4px 10px 0;
+  padding: 3px 6px 0;
+}
+
+.mdi-tabs {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.mdi-navigation,
+.mdi-management {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 3px;
+  padding-bottom: 3px;
+}
+
+.mdi-navigation {
+  margin-right: 5px;
+}
+
+.mdi-management {
+  margin-left: 5px;
+}
+
+.mdi-navigation button {
+  width: 26px;
+  padding: 0;
+  font-size: 18px;
+}
+
+.mdi-management button,
+.mdi-management select {
+  height: 28px;
+  font-size: 12px;
+}
+
+.mdi-management select {
+  max-width: 130px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: #ffffff;
+  padding: 0 6px;
 }
 
 .mdi-tab {
@@ -508,23 +594,28 @@ tbody tr.selected-row td {
 }
 
 @media (max-width: 900px) {
-  .header-primary,
-  .header-secondary,
-  .app-body {
-    flex-direction: column;
-    align-items: stretch;
+  .app-header {
+    flex-wrap: wrap;
+    padding: 6px 10px 0;
   }
 
-  .header-primary,
-  .header-secondary {
-    padding: 8px 12px;
+  .top-navigation {
+    order: 4;
+    width: 100%;
+    min-height: 36px;
   }
 
   .sidebar {
-    width: 100%;
-    flex-basis: auto;
-    border-right: 0;
-    border-bottom: 1px solid #d6deea;
+    position: fixed;
+    top: 82px;
+    bottom: 0;
+    left: 0;
+    z-index: 9;
+    box-shadow: 8px 0 20px rgb(15 23 42 / 16%);
+  }
+
+  .mdi-management button {
+    display: none;
   }
 
   .search-grid,
