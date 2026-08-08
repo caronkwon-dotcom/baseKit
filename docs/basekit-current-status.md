@@ -28,6 +28,7 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 - 검색조건 1~5단 Layout, 조건 수 Guard와 첫 1단 유지 접기
 - 개발자가이드 검색영역 1~5단 시각 검수 전환
 - 검색 샘플 `types/config/mock/repository/page` 책임 분리
+- Page 중심 구조와 실제 3단 검색을 적용한 Search Sample Type 2
 - `meta/*.json` 기반 Metadata Repository
 - Program Component Registry
 - `ROLE × PROGRAM × ACTION_CODE` 계약과 `hasAction()` 기반

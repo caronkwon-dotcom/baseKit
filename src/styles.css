@@ -632,6 +632,28 @@ button {
   margin-bottom: 6px;
 }
 
+.result-summary-bar {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+  border: 1px solid #d6deea;
+  border-radius: 7px;
+  background: #ffffff;
+  padding: 2px 6px 2px 10px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.result-summary-bar strong {
+  color: #1456b8;
+}
+
+.result-summary-bar button {
+  margin-left: auto;
+}
+
 .summary-grid,
 .dashboard-grid {
   display: grid;
