@@ -1,11 +1,15 @@
 import type { ReactNode } from 'react';
+import type { ActionCode } from '../constants/actionCodes';
 
-export type ProgramKey =
-    | 'HOME'
-    | 'USER_MGMT'
-    | 'COMMON_CODE_MGMT'
-    | 'MENU_MGMT'
-    | 'DEV_SEARCH_SAMPLE_TYPE_1';
+export const PROGRAM_KEYS = [
+  'HOME',
+  'USER_MGMT',
+  'COMMON_CODE_MGMT',
+  'MENU_MGMT',
+  'DEV_SEARCH_SAMPLE_TYPE_1',
+] as const;
+
+export type ProgramKey = (typeof PROGRAM_KEYS)[number];
 
 /**
  * programKey     : 화면 ID
@@ -13,8 +17,8 @@ export type ProgramKey =
  * componentName  : 연결될 컴포넌트 이름
  * screenType     : 화면 유형
  * routePath      : 향후 라우팅/API 확장용 경로
- * actions        : 기본 액션
- * manualActions  : 사용자가 직접 정의한 액션
+ * actionCodes    : 프로그램에서 지원하는 공통/업무 액션
+ * useYn          : 사용 여부
  */
 export interface ProgramMeta {
   programKey: ProgramKey;
@@ -22,8 +26,10 @@ export interface ProgramMeta {
   componentName: string;
   screenType: 'HOME' | 'GRID_DETAIL';
   routePath: string;
-  actions: string[];
-  manualActions: string[];
+  dataScope: 'USER' | 'COMPANY';
+  modifyScope: 'NONE' | 'ROLE';
+  actionCodes: ActionCode[];
+  useYn: 'Y' | 'N';
 }
 
 /**
@@ -49,6 +55,19 @@ export interface MenuMeta {
 
 export interface MenuNode extends MenuMeta {
   children: MenuNode[];
+}
+
+export interface ActionMeta {
+  actionCode: ActionCode;
+  actionName: string;
+  auditYn: 'Y' | 'N';
+}
+
+export interface RoleProgramAction {
+  ROLE_CODE: string;
+  PROGRAM_KEY: ProgramKey;
+  ACTION_CODE: ActionCode;
+  ALLOW_YN: 'Y' | 'N';
 }
 
 export interface MdiTab {

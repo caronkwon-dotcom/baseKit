@@ -19,11 +19,12 @@ BaseKit은 업무시스템 개발을 위한 React 기반 참조 아키텍처 프
 
 ## 브랜치 운영 방식
 
-- `main`: 기준 브랜치입니다. 직접 수정하지 않고 항상 안정된 상태를 유지합니다.
-- `dev-codex`: Codex 작업 브랜치입니다. `main` 최신 기준에서 생성하거나 최신화한 뒤 작업합니다.
-- 작업 시작 전 `main`으로 전환하고 최신 내용을 pull 합니다.
-- 기능 작업은 `dev-codex`에서만 수행합니다.
-- 작업 완료 후 변경 범위와 commit message를 보고합니다.
+- `main`: 승인된 안정 버전입니다. 직접 수정하지 않습니다.
+- `dev-pm`: 기능을 통합하고 로컬에서 검수하는 개발 브랜치입니다. 직접 수정하지 않습니다.
+- `feature/*`, `feat/*`, `fix/*`, `docs/*`, `chore/*`: 실제 작업 브랜치입니다.
+- 작업 브랜치는 최신 `dev-pm`을 기준으로 생성하고 PR 대상도 `dev-pm`으로 합니다.
+- `dev-pm` 검수와 사용자 승인 후 `dev-pm → main` 승격 PR을 병합합니다.
+- Commit, Push, Merge 전에 변경 범위와 검증 결과를 확인합니다.
 
 ## 폴더 구조
 
@@ -50,6 +51,8 @@ meta/
   programs.json
   terms.json
 ```
+
+현재 React는 `MetadataRepository`를 통해 메타데이터에 접근합니다. 권한은 `ROLE × PROGRAM × ACTION_CODE` 기준이며, 자세한 결정은 [Program Action 권한 및 메타데이터 결정 문서](docs/decisions/007-program-action-permission-metadata.md)를 참고합니다.
 
 ## 타입 정의 원칙
 

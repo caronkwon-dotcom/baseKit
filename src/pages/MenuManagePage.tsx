@@ -2,8 +2,10 @@ import DataTable, {
   type DataTableColumn,
 } from '../components/common/DataTable';
 import PageHeader from '../components/common/PageHeader';
-import { menus } from '../config/adminPrograms';
+import { metadataRepository } from '../repositories/metadataRepository';
 import type { MenuMeta } from '../types/adminShell';
+
+const menus = metadataRepository.getMenus();
 
 const menuColumns: DataTableColumn<MenuMeta>[] = [
   {

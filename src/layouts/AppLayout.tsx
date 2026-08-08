@@ -3,38 +3,16 @@ import Header from '../components/Header';
 import MdiTabs from '../components/MdiTabs';
 import Sidebar from '../components/Sidebar';
 import Workspace from '../components/Workspace';
-import { buildMenuTree, menus, programByKey } from '../config/adminPrograms';
-import CodeManagePage from '../pages/CodeManagePage';
-import HomePage from '../pages/HomePage';
-import MenuManagePage from '../pages/MenuManagePage';
-import UserManagePage from '../pages/UserManagePage';
-import { SearchSampleType1Page } from '../features/devGuide/searchSampleType1';
+import { programComponents } from '../config/programRegistry';
+import {
+  metadataRepository,
+  programByKey,
+} from '../repositories/metadataRepository';
 
 import type {
   MdiTab,
-  ProgramComponentMap,
   ProgramKey,
 } from '../types/adminShell';
-
-/**
- * 프로그램 컴포넌트 매핑
- *
- * 메뉴에서 선택한 programKey에 따라 실제로 렌더링할 화면 컴포넌트를 연결한다.
- * 현재는 샘플 단계이므로 AppLayout에서 직접 관리한다.
- * 추후 화면 수가 늘어나면 별도 registry/config 구조로 분리할 예정이다.
- *
- * 메뉴 = 사용자가 보는 목록
- * programKey = 화면을 식별하는 키
- * programComponents = 키와 실제 화면 컴포넌트를 연결하는 지도
- * Workspace = 연결된 화면을 실제로 보여주는 자리
- */
-const programComponents: ProgramComponentMap = {
-  HOME: () => <HomePage />,
-  USER_MGMT: () => <UserManagePage />,
-  COMMON_CODE_MGMT: () => <CodeManagePage />,
-  MENU_MGMT: () => <MenuManagePage />,
-  DEV_SEARCH_SAMPLE_TYPE_1: () => <SearchSampleType1Page />,
-};
 
 /**
  * 기본 홈 탭
@@ -55,7 +33,7 @@ export default function AppLayout() {
    * 추후 로그인/권한 기능이 추가되면 사용자 권한에 따라 메뉴 목록을 필터링한 뒤
    * 트리 구조로 변환하는 방식으로 확장한다.
    */
-  const menuTree = useMemo(() => buildMenuTree(menus), []);
+  const menuTree = useMemo(() => metadataRepository.getMenuTree(), []);
   /**
    * MDI 탭 상태
    *

@@ -173,7 +173,7 @@ const result = await searchSampleType1(condition);
 
 ## 6. 메뉴 및 프로그램 연결
 
-샘플 화면은 `adminPrograms.ts`에 프로그램과 메뉴로 등록한다.
+샘플 화면은 `meta/programs.json`과 `meta/menus.json`에 등록하고, React 컴포넌트는 `programRegistry.tsx`에 연결한다.
 
 ### programs
 
@@ -184,8 +184,8 @@ const result = await searchSampleType1(condition);
   componentName: 'SearchSampleType1Page',
   screenType: 'GRID_DETAIL',
   routePath: '/dev-guide/search-sample-type-1',
-  actions: ['SEARCH'],
-  manualActions: ['MANUAL_VIEW'],
+  actionCodes: ['SEARCH', 'RESET', 'MANUAL_VIEW'],
+  useYn: 'Y',
 }
 ```
 
@@ -295,8 +295,8 @@ VITE_SHOW_DEV_GUIDE=true
 7. SearchCondition 변경
 8. columns 변경
 9. searchMockRows 조건 변경
-10. adminPrograms.ts에 program/menu 등록
-11. AppLayout 또는 programRegistry에 컴포넌트 연결
+10. meta/programs.json과 meta/menus.json에 program/menu 등록
+11. programRegistry.tsx에 컴포넌트 연결
 12. npm run build 확인
 ```
 
