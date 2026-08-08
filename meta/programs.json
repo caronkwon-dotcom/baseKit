@@ -62,7 +62,7 @@
     "routePath": "/dev-guide/search-sample-type-2",
     "dataScope": "USER",
     "modifyScope": "NONE",
-    "actionCodes": ["SEARCH", "RESET", "EXCEL_DOWNLOAD", "MANUAL_VIEW"],
+    "actionCodes": ["SEARCH", "RESET", "CREATE", "DELETE", "EXCEL_DOWNLOAD", "MANUAL_VIEW"],
     "useYn": "Y"
   }
 ]

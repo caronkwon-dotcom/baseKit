@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
-  DataTable,
   PageHeader,
+  ProgramDataGrid,
   SearchPanel,
   type DataTableColumn,
   type SearchFieldConfig,
@@ -143,21 +143,21 @@ export default function SearchSampleType2Page() {
         onReset={handleReset}
       />
 
-      <div className="result-summary-bar" aria-label="조회 결과 요약">
-        <span>조회 <strong>{rows.length}</strong>건</span>
-        <span>완료 <strong>{completedCount}</strong>건</span>
-        <span>긴급 <strong>{highPriorityCount}</strong>건</span>
-        <button
-          type="button"
-          className="secondary-button"
-          data-action-code={COMMON_ACTIONS.EXCEL_DOWNLOAD}
-        >
-          Excel 다운로드
-        </button>
-      </div>
-
-      <DataTable
+      <ProgramDataGrid
+        programKey={PAGE_CONFIG.programKey}
+        roleCode="ADMIN"
         title="업무 요청 목록"
+        metrics={[
+          { label: '완료', value: completedCount, tone: 'accent' },
+          { label: '긴급', value: highPriorityCount, tone: 'danger' },
+        ]}
+        actionHandlers={{
+          [COMMON_ACTIONS.CREATE]: () => undefined,
+          [COMMON_ACTIONS.DELETE]: ({ selectedRows }) => {
+            if (selectedRows.length === 0) return;
+          },
+          [COMMON_ACTIONS.EXCEL_DOWNLOAD]: () => undefined,
+        }}
         columns={columns}
         rows={rows}
         getRowKey={(row) => row.REQUEST_NO}
