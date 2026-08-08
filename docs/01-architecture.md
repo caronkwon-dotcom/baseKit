@@ -16,11 +16,17 @@ BaseKit은 여러 SI 업무시스템에서 반복 사용할 표준 Architecture,
 
 BaseKit은 기술 데모나 범용 Framework 자체를 목표로 하지 않는다. 실제 적용 가능성, 유지보수성, 확장성, 개발자 이해도와 반복 사용 가능성을 우선하며, 필요한 범위를 검증하면서 단계적으로 확장한다.
 
+BaseKit에는 프로젝트 책임자가 IT 업계에서 축적한 경험과 SI 개발 표준을 지속적으로 반영한다. 최종적으로는 SI 개발팀장이 새 프로젝트를 시작할 때 Architecture와 공통 Foundation으로 사용할 수 있어야 한다.
+
+초급 개발자도 규칙과 개발자 가이드를 숙지하면 화면과 업무 기능을 일관된 방식으로 만들 수 있어야 한다. 개발자가 바뀔 때마다 폴더 구조, 코드 스타일, 데이터 계약과 화면 패턴이 달라지는 문제를 줄이고, 중요한 규약은 문서·타입·메타데이터·공통 컴포넌트와 검증 코드로 통제한다.
+
 ---
 
 ## 2. 1차 범위
 
 1차 범위는 **React + TypeScript + Mock Data** 기반으로 화면 골격과 공통 패턴을 확정하는 단계이다.
+
+현재 Level 1의 목표는 실제 업무 모듈보다 시스템 공통 영역을 먼저 안정화하는 것이다. Menu, Program, Role, Permission, Action, Code, Company, System, User, Login, Log를 중심으로 기준을 만든다.
 
 이 단계에서는 다음을 우선 반영한다.
 
@@ -56,6 +62,8 @@ BaseKit은 기술 데모나 범용 Framework 자체를 목표로 하지 않는�
 * AI 기반 메뉴 매뉴얼 기능 확장
 
 즉, 1차는 “화면 구조와 UX 패턴 검증”, 2차는 “실제 서비스 구조와 정책 반영”을 목표로 한다.
+
+업무 모듈이 본격적으로 추가되는 단계에서는 Frontend와 Backend를 명확히 분리하고, 공통 계약과 Adapter를 통해 연결한다. 분리는 처음부터 형식적으로 늘리지 않고 Level 1 Foundation이 안정된 뒤 진행한다.
 
 Frontend는 데이터 원본에 직접 종속되지 않고 Repository/Adapter를 통해 접근한다. 현재 Metadata는 `meta/*.json` Adapter를 사용하고, 향후 Spring REST Adapter로 교체한다. Grid, Uploader, Editor, PDF와 외부 연계도 같은 원칙으로 제품별 구현을 교체 가능하게 설계한다.
 

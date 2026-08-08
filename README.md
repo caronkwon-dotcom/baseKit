@@ -2,6 +2,8 @@
 
 BaseKit은 여러 SI 업무시스템에서 반복 사용할 표준 아키텍처, 공통 Business Foundation, 개발 생산성 기반을 만드는 프로젝트입니다. 기술 데모보다 실제 적용 가능성, 유지보수성, 확장성과 개발자 이해도를 우선합니다.
 
+초급 개발자도 규약과 가이드를 숙지하면 일관된 화면과 기능을 만들 수 있고, 참여 개발자가 바뀌어도 코드 스타일과 Architecture가 흔들리지 않는 SI 프로젝트 기반을 목표로 합니다.
+
 ## 프로젝트 목적
 
 - 업무시스템에서 반복되는 사용자, 권한, 메뉴, 공통코드 관리 구조를 표준화합니다.
@@ -27,6 +29,7 @@ BaseKit은 여러 SI 업무시스템에서 반복 사용할 표준 아키텍처,
 3. [새 PC 복구 가이드](docs/recovery-guide.md): 설치·검증·작업 재개
 4. `docs/01~04`: Architecture, Menu, Permission, Domain 기준
 5. `docs/decisions`: 확정된 Architecture Decision
+6. `docs/ideas`: 미구현·미확정 아이디어 Backlog
 
 ## 브랜치 운영 방식
 
