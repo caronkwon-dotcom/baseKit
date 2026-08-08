@@ -53,5 +53,16 @@
     "modifyScope": "NONE",
     "actionCodes": ["SEARCH", "RESET", "MANUAL_VIEW"],
     "useYn": "Y"
+  },
+  {
+    "programKey": "DEV_SEARCH_SAMPLE_TYPE_2",
+    "programName": "고급 검색 페이지 샘플 Type 2",
+    "componentName": "SearchSampleType2Page",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/dev-guide/search-sample-type-2",
+    "dataScope": "USER",
+    "modifyScope": "NONE",
+    "actionCodes": ["SEARCH", "RESET", "EXCEL_DOWNLOAD", "MANUAL_VIEW"],
+    "useYn": "Y"
   }
 ]

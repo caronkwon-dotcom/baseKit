@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { COMMON_ACTIONS } from '../../constants/actionCodes';
 
 export type SearchPanelRows = 1 | 2 | 3 | 4 | 5;
 export type SearchControlType = 'text' | 'select' | 'date';
@@ -103,9 +104,23 @@ export default function SearchPanel<T extends object>({
         ) : null}
 
         <div className="search-action-rail">
-          <button type="button" className="search-submit-button" onClick={() => onSearch(value)}>조회</button>
+          <button
+            type="button"
+            className="search-submit-button"
+            data-action-code={COMMON_ACTIONS.SEARCH}
+            onClick={() => onSearch(value)}
+          >
+            조회
+          </button>
           <div className="search-icon-actions">
-            <button type="button" className="search-icon-button" aria-label="검색조건 초기화" title="검색조건 초기화" onClick={reset}>
+            <button
+              type="button"
+              className="search-icon-button"
+              data-action-code={COMMON_ACTIONS.RESET}
+              aria-label="검색조건 초기화"
+              title="검색조건 초기화"
+              onClick={reset}
+            >
               <ResetIcon />
             </button>
             {collapsible ? (

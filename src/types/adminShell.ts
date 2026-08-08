@@ -7,6 +7,7 @@ export const PROGRAM_KEYS = [
   'COMMON_CODE_MGMT',
   'MENU_MGMT',
   'DEV_SEARCH_SAMPLE_TYPE_1',
+  'DEV_SEARCH_SAMPLE_TYPE_2',
 ] as const;
 
 export type ProgramKey = (typeof PROGRAM_KEYS)[number];

@@ -68,5 +68,15 @@
     "programKey": "DEV_SEARCH_SAMPLE_TYPE_1",
     "sortOrder": 1,
     "useYn": "Y"
+  },
+  {
+    "menuKey": "DEV_GUIDE.SEARCH_SAMPLE_TYPE_2",
+    "parentMenuKey": "DEV_GUIDE.SAMPLES",
+    "menuName": "고급 검색 페이지 샘플 Type 2",
+    "menuLevel": 3,
+    "menuType": "SCREEN",
+    "programKey": "DEV_SEARCH_SAMPLE_TYPE_2",
+    "sortOrder": 2,
+    "useYn": "Y"
   }
 ]
