@@ -71,7 +71,8 @@ export default function AppLayout() {
     <div className="app-shell">
       <Header topMenus={menuTree} activeTopMenuKey={activeTopMenuKey}
         sidebarOpen={sidebarOpen} onSelectTopMenu={setActiveTopMenuKey}
-        onToggleSidebar={() => setSidebarOpen((open) => !open)} />
+        onToggleSidebar={() => setSidebarOpen((open) => !open)}
+        onOpenProgram={openProgram} />
       <div className="app-body">
         {sidebarOpen && activeTopMenu && (
           <Sidebar menu={activeTopMenu} expandedMenuKeys={expandedMenuKeys}
