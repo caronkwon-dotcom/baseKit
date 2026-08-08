@@ -476,8 +476,8 @@ button {
 
 .search-panel-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
+  grid-template-columns: minmax(0, 1fr) auto 104px;
+  align-items: start;
   gap: 10px;
 }
 
@@ -485,11 +485,6 @@ button {
   display: grid;
   grid-template-columns: repeat(4, minmax(150px, 1fr));
   gap: 8px;
-}
-
-.search-panel-actions {
-  justify-content: flex-end;
-  align-self: end;
 }
 
 .search-grid label {
@@ -500,6 +495,96 @@ button {
   color: #475569;
   font-size: 12px;
   font-weight: 700;
+}
+
+.search-action-rail {
+  grid-column: 3;
+  display: grid;
+  width: 104px;
+  gap: 6px;
+}
+
+.search-panel-rows-1 .search-action-rail,
+.search-panel-layout.collapsed .search-action-rail {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.search-panel-rows-2:not(.collapsed) .search-action-rail {
+  grid-template-rows: 30px 30px;
+}
+
+.search-panel-rows-3:not(.collapsed) .search-action-rail,
+.search-panel-rows-4:not(.collapsed) .search-action-rail,
+.search-panel-rows-5:not(.collapsed) .search-action-rail {
+  grid-template-rows: 68px 30px;
+}
+
+.search-submit-button {
+  min-width: 66px;
+  min-height: 30px;
+  border: 1px solid #1f6feb;
+  border-radius: 6px;
+  background: #1f6feb;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.search-panel-rows-2:not(.collapsed) .search-submit-button,
+.search-panel-rows-3:not(.collapsed) .search-submit-button,
+.search-panel-rows-4:not(.collapsed) .search-submit-button,
+.search-panel-rows-5:not(.collapsed) .search-submit-button {
+  width: 100%;
+}
+
+.search-icon-actions {
+  display: flex;
+  min-width: 30px;
+  gap: 4px;
+}
+
+.search-icon-button {
+  display: grid;
+  min-width: 30px;
+  min-height: 30px;
+  flex: 1;
+  place-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #475569;
+}
+
+.search-icon-button:hover,
+.hidden-condition-indicator:hover {
+  border-color: #1f6feb;
+  color: #1456b8;
+}
+
+.search-icon-button svg,
+.hidden-condition-indicator svg {
+  width: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.hidden-condition-indicator {
+  display: flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 3px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  padding: 0 8px;
+  color: #1456b8;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .search-layout-preview {
@@ -731,8 +816,10 @@ tbody tr.selected-row td {
     grid-template-columns: 88px minmax(0, 1fr);
   }
 
-  .search-panel-actions {
-    justify-content: flex-end;
+  .hidden-condition-indicator,
+  .search-action-rail {
+    grid-column: 1;
+    justify-self: end;
   }
 
   .detail-grid div:nth-child(odd) {

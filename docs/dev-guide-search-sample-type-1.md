@@ -147,23 +147,40 @@ const result = await searchSampleType1Repository.search(condition);
 
 ### 4.5 검색영역 1단·2단·3단 표준
 
-Desktop 검색영역은 `검색조건 4열 + 버튼 영역`으로 구성한다. 초기화·조회 버튼은 검색조건과 같은 Layout 안에 있으며 마지막 단의 오른쪽에 정렬한다.
+Desktop 검색영역은 `검색조건 4열 + 공통 Action Rail`로 구성한다. 개발자는 버튼이나 입력 JSX를 작성하지 않고 검색 필드 설정만 선언한다.
 
 | `rows` | 검색조건 최대 개수 | 버튼 위치 |
 | --- | ---: | --- |
 | `1` | 4개 | 첫 번째 단 오른쪽 |
 | `2` | 8개 | 두 번째 단 오른쪽 |
 | `3` | 12개 | 세 번째 단 오른쪽 |
+| `4` | 16개 | 공통 Action Rail + 접기 |
+| `5` | 20개 | 공통 Action Rail + 접기 |
 
 ```tsx
-<SearchPanel rows={2} actions={actions}>
-  {/* 검색조건 5~8개 */}
-</SearchPanel>
+const fields = [
+  { key: 'sampleName', label: '샘플명', placeholder: '샘플명' },
+  {
+    key: 'useYn',
+    label: '사용여부',
+    controlType: 'select',
+    options: [{ value: '', label: '전체' }],
+  },
+];
+
+<SearchPanel
+  rows={2}
+  fields={fields}
+  value={condition}
+  initialValue={initialCondition}
+  onValueChange={setCondition}
+  onSearch={search}
+/>
 ```
 
-`rows`보다 많은 조건을 전달하면 공통 컴포넌트가 즉시 오류를 발생시켜 화면별 임의 배치를 막는다. 작은 화면에서는 검색조건과 버튼이 한 열로 전환된다.
+`rows`보다 많은 조건을 전달하면 공통 컴포넌트가 즉시 오류를 발생시켜 화면별 임의 배치를 막는다. 조회·초기화·접기 버튼은 공통 컴포넌트 내부에서 자동 표시된다.
 
-개발자가이드 샘플의 `1단 / 2단 / 3단` 버튼은 Layout 검수 전용이다. 선택 시 조건을 각각 4개, 8개, 12개까지 채워 초기화·조회 버튼이 마지막 단 오른쪽에 유지되는지 확인할 수 있다. 실제 업무 Page에서는 `config.ts`의 `searchRows`를 고정해서 사용한다.
+개발자가이드 샘플의 `1단 ~ 5단` 버튼은 Layout 검수 전용이다. 실제 업무 Page에서는 `config.ts`의 `searchRows`를 고정해서 사용한다.
 
 ---
 
