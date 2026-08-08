@@ -1,57 +1,95 @@
 import type { MenuNode, ProgramKey } from '../types/adminShell';
 
-/**
- * 좌측 메뉴 영역
- *
- * AppLayout에서 생성한 메뉴 트리를 받아 Sidebar에 표시한다.
- * SCREEN 메뉴 클릭 시 programKey를 AppLayout으로 전달하여
- * MDI 탭 열기와 Workspace 화면 전환이 일어나도록 한다.
- */
 interface SidebarProps {
-  menus: MenuNode[];
+  menu: MenuNode;
+  expandedMenuKeys: string[];
   activeProgramKey: ProgramKey;
+  onToggleMenu: (menuKey: string) => void;
   onOpenProgram: (programKey: ProgramKey) => void;
 }
 
-export default function Sidebar({
-  menus,
+function ScreenMenu({
+  menu,
   activeProgramKey,
+  depth,
+  onOpenProgram,
+}: {
+  menu: MenuNode;
+  activeProgramKey: ProgramKey;
+  depth: 2 | 3;
+  onOpenProgram: (programKey: ProgramKey) => void;
+}) {
+  const isActive = menu.programKey === activeProgramKey;
+
+  return (
+    <button
+      type="button"
+      className={isActive ? `nav-link depth-${depth} active` : `nav-link depth-${depth}`}
+      onClick={() => menu.programKey && onOpenProgram(menu.programKey)}
+    >
+      <span className="menu-depth-mark" aria-hidden="true">•</span>
+      <span>{menu.menuName}</span>
+    </button>
+  );
+}
+
+/** Selected 1Depth menu's 2Depth groups/screens and 3Depth screens. */
+export default function Sidebar({
+  menu,
+  expandedMenuKeys,
+  activeProgramKey,
+  onToggleMenu,
   onOpenProgram,
 }: SidebarProps) {
   return (
     <aside className="sidebar">
-      <nav className="sidebar-nav" aria-label="주 메뉴">
-        {menus.map((menu) => (
-          <section key={menu.menuKey}>
-            <h2>{menu.menuName}</h2>
-            <ul>
-              {menu.children.map((childMenu) => {
-                const isActive =
-                  childMenu.programKey !== null &&
-                  childMenu.programKey === activeProgramKey;
+      <div className="sidebar-heading">{menu.menuName}</div>
+      <nav className="sidebar-nav" aria-label={`${menu.menuName} 하위 메뉴`}>
+        <ul>
+          {menu.children.map((secondDepth) => {
+            if (secondDepth.menuType === 'SCREEN') {
+              return (
+                <li key={secondDepth.menuKey}>
+                  <ScreenMenu
+                    menu={secondDepth}
+                    depth={2}
+                    activeProgramKey={activeProgramKey}
+                    onOpenProgram={onOpenProgram}
+                  />
+                </li>
+              );
+            }
 
-                return (
-                  <li key={childMenu.menuKey}>
-                    <button
-                      type="button"
-                      className={isActive ? 'nav-link active' : 'nav-link'}
-                      onClick={() => {
-                        if (childMenu.programKey) {
-                          onOpenProgram(childMenu.programKey);
-                        }
-                      }}
-                    >
-                      <span className="menu-depth-mark" aria-hidden="true">
-                        -
-                      </span>
-                      {childMenu.menuName}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        ))}
+            const isExpanded = expandedMenuKeys.includes(secondDepth.menuKey);
+            return (
+              <li key={secondDepth.menuKey} className="nav-group">
+                <button
+                  type="button"
+                  className="nav-group-toggle"
+                  aria-expanded={isExpanded}
+                  onClick={() => onToggleMenu(secondDepth.menuKey)}
+                >
+                  <span>{secondDepth.menuName}</span>
+                  <span aria-hidden="true">{isExpanded ? '−' : '+'}</span>
+                </button>
+                {isExpanded && (
+                  <ul>
+                    {secondDepth.children.map((thirdDepth) => (
+                      <li key={thirdDepth.menuKey}>
+                        <ScreenMenu
+                          menu={thirdDepth}
+                          depth={3}
+                          activeProgramKey={activeProgramKey}
+                          onOpenProgram={onOpenProgram}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            );
+          })}
+        </ul>
       </nav>
     </aside>
   );

@@ -1,16 +1,14 @@
+import { useEffect, useRef } from 'react';
 import type { MdiTab, ProgramKey } from '../types/adminShell';
-/**
- * MDI 탭 영역
- *
- * 현재 열린 프로그램 탭 목록을 표시한다.
- * 탭 선택과 닫기 이벤트는 AppLayout으로 전달하여
- * 활성 프로그램 변경 및 탭 목록 갱신을 처리한다.
- */
+
 interface MdiTabsProps {
   tabs: MdiTab[];
   activeProgramKey: ProgramKey;
   onSelect: (programKey: ProgramKey) => void;
   onClose: (programKey: ProgramKey) => void;
+  onCloseOthers: () => void;
+  onCloseAll: () => void;
+  onMove: (direction: -1 | 1) => void;
 }
 
 export default function MdiTabs({
@@ -18,33 +16,61 @@ export default function MdiTabs({
   activeProgramKey,
   onSelect,
   onClose,
+  onCloseOthers,
+  onCloseAll,
+  onMove,
 }: MdiTabsProps) {
-  return (
-    <div className="mdi-tabs" role="tablist" aria-label="열린 프로그램">
-      {tabs.map((tab) => {
-        const isActive = tab.programKey === activeProgramKey;
+  const activeTabRef = useRef<HTMLDivElement>(null);
 
-        return (
-          <div
-            key={tab.programKey}
-            className={isActive ? 'mdi-tab active' : 'mdi-tab'}
-            role="tab"
-            aria-selected={isActive}
-          >
-            <button type="button" onClick={() => onSelect(tab.programKey)}>
-              {tab.title}
-            </button>
-            <button
-              type="button"
-              className="tab-close"
-              aria-label={`${tab.title} 닫기`}
-              onClick={() => onClose(tab.programKey)}
+  useEffect(() => {
+    activeTabRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+  }, [activeProgramKey]);
+
+  return (
+    <div className="mdi-bar">
+      <div className="mdi-navigation" aria-label="탭 이동">
+        <button type="button" aria-label="이전 탭" onClick={() => onMove(-1)}>‹</button>
+        <button type="button" aria-label="다음 탭" onClick={() => onMove(1)}>›</button>
+      </div>
+      <div className="mdi-tabs" role="tablist" aria-label="열린 프로그램">
+        {tabs.map((tab) => {
+          const isActive = tab.programKey === activeProgramKey;
+          const isHome = tab.programKey === 'HOME';
+
+          return (
+            <div
+              key={tab.programKey}
+              ref={isActive ? activeTabRef : undefined}
+              className={isActive ? 'mdi-tab active' : 'mdi-tab'}
+              role="tab"
+              aria-selected={isActive}
             >
-              x
-            </button>
-          </div>
-        );
-      })}
+              <button type="button" onClick={() => onSelect(tab.programKey)}>{tab.title}</button>
+              {!isHome && (
+                <button
+                  type="button"
+                  className="tab-close"
+                  aria-label={`${tab.title} 닫기`}
+                  onClick={() => onClose(tab.programKey)}
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div className="mdi-management">
+        <select
+          aria-label="열린 탭 목록"
+          value={activeProgramKey}
+          onChange={(event) => onSelect(event.target.value as ProgramKey)}
+        >
+          {tabs.map((tab) => <option key={tab.programKey} value={tab.programKey}>{tab.title}</option>)}
+        </select>
+        <button type="button" onClick={onCloseOthers} disabled={activeProgramKey === 'HOME' && tabs.length === 1}>현재 외 닫기</button>
+        <button type="button" onClick={onCloseAll} disabled={tabs.length === 1}>전체 닫기</button>
+      </div>
     </div>
   );
 }

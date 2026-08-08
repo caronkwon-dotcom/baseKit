@@ -18,8 +18,9 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 ## 2. 코드까지 구현 완료
 
 - React + Vite + TypeScript
-- Header / Sidebar / Workspace 기반 Admin Shell
-- MDI Tab 열기, 전환, 닫기, 동일 Program 중복 방지
+- Compact 한 줄 Header / 1Depth Top / 2~3Depth Sidebar / Workspace 기반 Admin Shell
+- Sidebar 전체 열기·닫기와 2Depth GROUP Accordion
+- MDI Tab 열기, 전환, 개별·현재 외·전체 업무 Tab 닫기, 목록 및 이전·다음 이동
 - Compact 업무 UI
 - 사용자관리, 메뉴관리, 공통코드관리 Mock 화면
 - 검색 Page Type 1 개발자 샘플
@@ -45,15 +46,12 @@ Lifecycle 문서는 `docs/basekit-business-object-lifecycle-architecture.md`에 
 
 ## 4. 코드와 문서 또는 목표의 불일치
 
-- 메뉴 목표는 1Depth Top + 2~3Depth Left지만 현재 UI는 Sidebar 중심이다.
-- Metadata는 3Depth와 4Depth 금지를 검증하지만 Sidebar는 3Depth를 표시하지 못한다.
 - `hasAction()` 기반은 있으나 로그인 사용자 Context와 버튼 자동 제어는 연결되지 않았다.
 - 회사관리, 역할관리, 시스템설정 Page 파일 일부는 존재하지만 현재 Program Registry와 메뉴에 연결되지 않았다.
 - 실제 Backend 권한 검증이 없으므로 Frontend 권한만으로 보안을 보장할 수 없다.
 
 ## 5. 아직 결정 필요
 
-- 1Depth Top과 2~3Depth Left의 상세 UX
 - 로그인 사용자/역할 Context
 - 버튼 숨김, 비활성화, 읽기전용 정책
 - Backend 권한 검증과 데이터 범위 권한
@@ -99,6 +97,14 @@ gh pr list --repo caronkwon-dotcom/baseKit
 - 4Depth Guard 검증
 - MDI 동작 유지
 
+완료 상태:
+
+- 1Depth Top Menu와 선택 영역별 Sidebar 구현
+- 2Depth GROUP Accordion과 3Depth Program 구현
+- Sidebar Toggle과 작은 화면 Overlay 구현
+- Home 고정, MDI 목록·이동·일괄 닫기 구현
+- Drag & Drop 순서 변경은 사용성 검증 후 별도 후보로 유지
+
 ### WBS 2. 로그인 권한 Context
 
 범위:
@@ -130,7 +136,7 @@ gh pr list --repo caronkwon-dotcom/baseKit
 
 ## 8. 다음 추천 작업
 
-복구 문서 PR이 `dev-pm`에 반영된 후 WBS 1 메뉴 3Depth UI를 진행한다. Metadata 구조와 4Depth 검증 기반이 이미 있으므로 실제 메뉴 정책과 UI의 불일치를 먼저 해소하는 것이 적절하다.
+WBS 1 검수·병합 후 WBS 2 로그인 권한 Context를 진행한다. 화면마다 임의로 권한을 처리하지 않도록 로그인 사용자와 역할, `hasAction(programKey, actionCode)` 사용 경계를 먼저 확정하는 것이 적절하다.
 
 연말까지의 목표는 Level 1 시스템 Foundation의 핵심 규약, 기준 화면, 개발자 가이드와 Frontend 공통 구조를 실제 다음 SI 프로젝트에서 시작점으로 사용할 수 있는 수준까지 확보하는 것이다. 주간 목표는 이 목표에 기여하는 작은 검증 단위로 나눈다.
 
