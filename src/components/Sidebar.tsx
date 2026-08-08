@@ -28,7 +28,7 @@ function ScreenMenu({
       onClick={() => menu.programKey && onOpenProgram(menu.programKey)}
     >
       <span className="menu-depth-mark" aria-hidden="true">•</span>
-      <span>{menu.menuName}</span>
+      <span className="menu-label" title={menu.menuName}>{menu.menuName}</span>
     </button>
   );
 }
@@ -69,7 +69,7 @@ export default function Sidebar({
                   aria-expanded={isExpanded}
                   onClick={() => onToggleMenu(secondDepth.menuKey)}
                 >
-                  <span>{secondDepth.menuName}</span>
+                  <span className="menu-label" title={secondDepth.menuName}>{secondDepth.menuName}</span>
                   <span aria-hidden="true">{isExpanded ? '−' : '+'}</span>
                 </button>
                 {isExpanded && (
