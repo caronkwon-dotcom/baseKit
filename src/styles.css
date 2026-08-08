@@ -327,13 +327,66 @@ button {
   margin-bottom: 8px;
 }
 
+.page-context-row,
+.page-navigation-area {
+  display: flex;
+  align-items: center;
+}
+
+.page-context-row {
+  min-height: 30px;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #dbe3ee;
+  padding: 0 2px 6px;
+}
+
+.page-navigation-area {
+  flex: 0 0 auto;
+  gap: 5px;
+}
+
 .breadcrumb {
   display: flex;
   gap: 6px;
-  margin-bottom: 4px;
   color: #64748b;
   font-size: 12px;
   font-weight: 700;
+}
+
+.manual-icon-button {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #64748b;
+}
+
+.manual-icon-button:hover {
+  background: #e1effe;
+  color: #1456b8;
+}
+
+.manual-icon-button svg {
+  width: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.program-summary {
+  min-width: 0;
+  overflow: hidden;
+  color: #64748b;
+  font-size: 12px;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .eyebrow {
@@ -419,6 +472,10 @@ button {
 .search-panel {
   margin-bottom: 8px;
   padding: 12px 14px;
+}
+
+.search-actions {
+  justify-content: flex-end;
 }
 
 .search-grid {
@@ -615,6 +672,10 @@ tbody tr.selected-row td {
   }
 
   .mdi-management button {
+    display: none;
+  }
+
+  .program-summary {
     display: none;
   }
 

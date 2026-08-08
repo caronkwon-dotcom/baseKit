@@ -40,7 +40,6 @@ export default function MenuManagePage() {
     <section className="page">
       <PageHeader
         breadcrumbs={['시스템관리', '메뉴관리']}
-        title="메뉴관리"
         description="업무 메뉴 구조와 프로그램 연결 정보를 확인합니다."
       />
 

@@ -5,8 +5,7 @@ export default function SystemConfigPage() {
   return (
     <section className="page">
       <PageHeader
-        eyebrow="System"
-        title="시스템설정"
+        breadcrumbs={['시스템관리', '시스템설정']}
         description="BaseKit 시스템의 기본 언어와 저장 기준 타임존을 확인합니다."
       />
 

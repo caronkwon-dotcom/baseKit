@@ -63,21 +63,17 @@ export default function CodeManagePage() {
     <section className="page">
       <PageHeader
         breadcrumbs={['시스템관리', '공통코드관리']}
-        title="공통코드관리"
         description="시스템 공통 코드와 코드 그룹을 관리합니다."
       />
 
       <section className="search-panel" aria-label="조회 조건">
-        <div className="section-title-row">
-          <h2>조회 조건</h2>
-          <div className="button-area">
+        <div className="search-actions button-area">
             <button type="button" className="secondary-button">
               초기화
             </button>
             <button type="button" className="primary-button">
               조회
             </button>
-          </div>
         </div>
         <div className="search-grid">
           <label>

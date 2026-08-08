@@ -4,7 +4,7 @@ export default function HomePage() {
   return (
     <section className="page">
       <PageHeader
-        title="BaseKit 대시보드"
+        breadcrumbs={['홈']}
         description="좌측 메뉴를 선택하면 프로그램 탭이 열리고 작업 영역에서 화면을 확인할 수 있습니다."
       />
 

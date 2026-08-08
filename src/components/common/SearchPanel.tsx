@@ -1,22 +1,14 @@
 import type { ReactNode } from 'react';
 
 interface SearchPanelProps {
-  title: string;
   children: ReactNode;
   actions: ReactNode;
 }
 
-export default function SearchPanel({
-  title,
-  children,
-  actions,
-}: SearchPanelProps) {
+export default function SearchPanel({ children, actions }: SearchPanelProps) {
   return (
-    <section className="search-panel" aria-label={title}>
-      <div className="section-title-row">
-        <h2>{title}</h2>
-        <div className="button-area">{actions}</div>
-      </div>
+    <section className="search-panel" aria-label="조회 조건">
+      <div className="search-actions button-area">{actions}</div>
       <div className="search-grid">{children}</div>
     </section>
   );

@@ -1,39 +1,40 @@
-import type { ReactNode } from 'react';
-
 interface PageHeaderProps {
-  eyebrow?: string;
-  title: string;
   description?: string;
-  breadcrumbs?: string[];
-  actions?: ReactNode;
+  breadcrumbs: string[];
+  onManual?: () => void;
 }
 
 export default function PageHeader({
-  eyebrow,
-  title,
   description,
   breadcrumbs,
-  actions,
+  onManual,
 }: PageHeaderProps) {
   return (
     <div className="page-header">
-      {breadcrumbs ? (
-        <nav className="breadcrumb" aria-label="breadcrumb">
-          {breadcrumbs.map((breadcrumb, index) => (
-            <span key={breadcrumb}>
-              {index > 0 ? '>' : ''}
-              {breadcrumb}
-            </span>
-          ))}
-        </nav>
-      ) : null}
-      {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
-      <div className="page-title-row">
-        <div>
-          <h1>{title}</h1>
-          {description ? <p>{description}</p> : null}
+      <div className="page-context-row">
+        <div className="page-navigation-area">
+          <nav className="breadcrumb" aria-label="현재 위치">
+            {breadcrumbs.map((breadcrumb, index) => (
+              <span key={breadcrumb}>
+                {index > 0 ? '>' : ''}
+                {breadcrumb}
+              </span>
+            ))}
+          </nav>
+          <button
+            type="button"
+            className="manual-icon-button"
+            aria-label="프로그램 매뉴얼"
+            title="프로그램 매뉴얼"
+            onClick={onManual}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11a2 2 0 0 1 2 2v15a2.5 2.5 0 0 0-2.5-2.5H4z" />
+              <path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17a2.5 2.5 0 0 1 2.5-2.5H20z" />
+            </svg>
+          </button>
         </div>
-        {actions ? <div className="button-area">{actions}</div> : null}
+        {description ? <p className="program-summary">{description}</p> : null}
       </div>
     </div>
   );

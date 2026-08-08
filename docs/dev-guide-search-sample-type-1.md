@@ -50,12 +50,11 @@ src/features/devGuide/searchSampleType1/
 
 ### 4.1 화면 설정은 `PAGE_CONFIG`로 관리
 
-화면명, 설명, programKey는 페이지 상단의 `PAGE_CONFIG`에서 관리한다.
+프로그램 설명과 programKey는 페이지 상단의 `PAGE_CONFIG`에서 관리한다. 화면명은 메뉴 경로에 이미 표시되므로 PageHeader에서 반복하지 않는다.
 
 ```ts
 const PAGE_CONFIG = {
   programKey: 'DEV_SEARCH_SAMPLE_TYPE_1',
-  title: '기본 검색 페이지 샘플 Type 1',
   description:
     '검색조건 1단 + 데이터 목록으로 구성된 가장 기본적인 Search Page 샘플입니다.',
 } as const;
@@ -194,9 +193,9 @@ const result = await searchSampleType1(condition);
 ```ts
 {
   menuKey: 'DEV_GUIDE.SEARCH_SAMPLE_TYPE_1',
-  parentMenuKey: 'DEV_GUIDE',
+  parentMenuKey: 'DEV_GUIDE.SAMPLES',
   menuName: '기본 검색 페이지 샘플',
-  menuLevel: 2,
+  menuLevel: 3,
   menuType: 'SCREEN',
   programKey: 'DEV_SEARCH_SAMPLE_TYPE_1',
   sortOrder: 1,
