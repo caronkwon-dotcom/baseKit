@@ -3,7 +3,7 @@ import DataTable, {
   type DataTableColumn,
 } from '../components/common/DataTable';
 import PageHeader from '../components/common/PageHeader';
-import SearchPanel from '../components/common/SearchPanel';
+import SearchPanel, { type SearchFieldConfig } from '../components/common/SearchPanel';
 import { users } from '../mock/users';
 import type { User } from '../types';
 
@@ -20,6 +20,22 @@ const initialSearchCondition: UserSearchCondition = {
   useYn: '',
   departmentName: '',
 };
+
+const userSearchFields: SearchFieldConfig<UserSearchCondition>[] = [
+  { key: 'userName', label: '사용자명', placeholder: '사용자명' },
+  { key: 'loginId', label: '사용자 ID', placeholder: '사용자 ID' },
+  {
+    key: 'useYn',
+    label: '사용 여부',
+    controlType: 'select',
+    options: [
+      { value: '', label: '전체' },
+      { value: 'Y', label: '사용' },
+      { value: 'N', label: '미사용' },
+    ],
+  },
+  { key: 'departmentName', label: '소속/부서', placeholder: '소속 또는 부서' },
+];
 
 const userColumns: DataTableColumn<User>[] = [
   {
@@ -90,26 +106,16 @@ export default function UserManagePage() {
     '목록에서 사용자를 선택하면 상세 정보가 표시됩니다.',
   );
 
-  const updateCondition = (
-    field: keyof UserSearchCondition,
-    value: string,
-  ) => {
-    setCondition((currentCondition) => ({
-      ...currentCondition,
-      [field]: value,
-    }));
-  };
-
-  const handleSearch = () => {
-    const nextUsers = filterUsers(condition);
+  const handleSearch = (nextCondition: UserSearchCondition) => {
+    const nextUsers = filterUsers(nextCondition);
 
     setFilteredUsers(nextUsers);
     setSelectedUser(nextUsers[0] ?? null);
     setActionMessage(`${nextUsers.length}건이 조회되었습니다.`);
   };
 
-  const handleReset = () => {
-    setCondition(initialSearchCondition);
+  const handleReset = (nextCondition: UserSearchCondition) => {
+    setCondition(nextCondition);
     setFilteredUsers(users);
     setSelectedUser(users[0]);
     setActionMessage('조회 조건과 목록을 초기 상태로 되돌렸습니다.');
@@ -128,55 +134,13 @@ export default function UserManagePage() {
 
       <SearchPanel
         rows={1}
-        actions={
-          <>
-            <button type="button" className="secondary-button" onClick={handleReset}>
-              초기화
-            </button>
-            <button type="button" className="primary-button" onClick={handleSearch}>
-              조회
-            </button>
-          </>
-        }
-      >
-        <label>
-          사용자명
-          <input
-            value={condition.userName}
-            onChange={(event) => updateCondition('userName', event.target.value)}
-            placeholder="사용자명"
-          />
-        </label>
-        <label>
-          사용자 ID
-          <input
-            value={condition.loginId}
-            onChange={(event) => updateCondition('loginId', event.target.value)}
-            placeholder="사용자 ID"
-          />
-        </label>
-        <label>
-          사용 여부
-          <select
-            value={condition.useYn}
-            onChange={(event) => updateCondition('useYn', event.target.value)}
-          >
-            <option value="">전체</option>
-            <option value="Y">사용</option>
-            <option value="N">미사용</option>
-          </select>
-        </label>
-        <label>
-          소속 또는 부서
-          <input
-            value={condition.departmentName}
-            onChange={(event) =>
-              updateCondition('departmentName', event.target.value)
-            }
-            placeholder="소속 또는 부서"
-          />
-        </label>
-      </SearchPanel>
+        fields={userSearchFields}
+        value={condition}
+        initialValue={initialSearchCondition}
+        onValueChange={setCondition}
+        onSearch={handleSearch}
+        onReset={handleReset}
+      />
 
       <div className="button-area page-actions">
         <button

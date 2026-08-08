@@ -1,12 +1,40 @@
+import { useState } from 'react';
 import DataTable, {
   type DataTableColumn,
 } from '../components/common/DataTable';
 import PageHeader from '../components/common/PageHeader';
-import SearchPanel from '../components/common/SearchPanel';
+import SearchPanel, { type SearchFieldConfig } from '../components/common/SearchPanel';
 import SummaryCard from '../components/common/SummaryCard';
 import { codeGroups } from '../mock/codeGroups';
 import { codes } from '../mock/codes';
 import type { Code, CodeGroup } from '../types';
+
+interface CodeSearchCondition {
+  codeGroup: string;
+  codeName: string;
+  useYn: '' | 'Y' | 'N';
+}
+
+const initialCodeSearchCondition: CodeSearchCondition = {
+  codeGroup: '',
+  codeName: '',
+  useYn: '',
+};
+
+const codeSearchFields: SearchFieldConfig<CodeSearchCondition>[] = [
+  { key: 'codeGroup', label: '코드그룹', placeholder: '코드그룹' },
+  { key: 'codeName', label: '코드명', placeholder: '코드명' },
+  {
+    key: 'useYn',
+    label: '사용 여부',
+    controlType: 'select',
+    options: [
+      { value: '', label: '전체' },
+      { value: 'Y', label: '사용' },
+      { value: 'N', label: '미사용' },
+    ],
+  },
+];
 
 const codeGroupColumns: DataTableColumn<CodeGroup>[] = [
   {
@@ -60,6 +88,8 @@ const codeColumns: DataTableColumn<Code>[] = [
 ];
 
 export default function CodeManagePage() {
+  const [condition, setCondition] = useState(initialCodeSearchCondition);
+
   return (
     <section className="page">
       <PageHeader
@@ -69,34 +99,12 @@ export default function CodeManagePage() {
 
       <SearchPanel
         rows={1}
-        actions={
-          <>
-            <button type="button" className="secondary-button">
-              초기화
-            </button>
-            <button type="button" className="primary-button">
-              조회
-            </button>
-          </>
-        }
-      >
-          <label>
-            코드그룹
-            <input placeholder="코드그룹" />
-          </label>
-          <label>
-            코드명
-            <input placeholder="코드명" />
-          </label>
-          <label>
-            사용 여부
-            <select defaultValue="">
-              <option value="">전체</option>
-              <option value="Y">사용</option>
-              <option value="N">미사용</option>
-            </select>
-          </label>
-      </SearchPanel>
+        fields={codeSearchFields}
+        value={condition}
+        initialValue={initialCodeSearchCondition}
+        onValueChange={setCondition}
+        onSearch={setCondition}
+      />
 
       <div className="summary-grid">
         <SummaryCard label="코드그룹" value={codeGroups.length} />

@@ -1,4 +1,4 @@
-import type { DataTableColumn } from '../../../components/common';
+import type { DataTableColumn, SearchFieldConfig } from '../../../components/common';
 import type {
     SearchSampleType1Condition,
     SearchSampleType1Row,
@@ -16,6 +16,30 @@ export const initialSearchSampleType1Condition: SearchSampleType1Condition = {
     sampleType: '',
     useYn: '',
 };
+
+export const searchSampleType1Fields: SearchFieldConfig<SearchSampleType1Condition>[] = [
+    { key: 'sampleName', label: '샘플명', placeholder: '샘플명을 입력하세요' },
+    {
+        key: 'sampleType',
+        label: '샘플유형',
+        controlType: 'select',
+        options: [
+            { value: '', label: '전체' },
+            { value: 'TYPE_A', label: 'TYPE_A' },
+            { value: 'TYPE_B', label: 'TYPE_B' },
+        ],
+    },
+    {
+        key: 'useYn',
+        label: '사용여부',
+        controlType: 'select',
+        options: [
+            { value: '', label: '전체' },
+            { value: 'Y', label: '사용' },
+            { value: 'N', label: '미사용' },
+        ],
+    },
+];
 
 export const searchSampleType1Columns: DataTableColumn<SearchSampleType1Row>[] = [
     { key: 'SAMPLE_ID', header: '샘플 ID', render: (row) => row.SAMPLE_ID },
