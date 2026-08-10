@@ -44,6 +44,17 @@
     "useYn": "Y"
   },
   {
+    "programKey": "TERM_CURATION",
+    "programName": "표준용어관리",
+    "componentName": "TermCurationPage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/terms",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "RESET", "SAVE", "EXCEL_DOWNLOAD", "MANUAL_VIEW"],
+    "useYn": "Y"
+  },
+  {
     "programKey": "DEV_SEARCH_SAMPLE_TYPE_1",
     "programName": "기본 검색 페이지 샘플 Type 1",
     "componentName": "SearchSampleType1Page",

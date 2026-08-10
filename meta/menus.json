@@ -40,6 +40,16 @@
     "useYn": "Y"
   },
   {
+    "menuKey": "SYS.TERM",
+    "parentMenuKey": "SYS",
+    "menuName": "표준용어관리",
+    "menuLevel": 2,
+    "menuType": "SCREEN",
+    "programKey": "TERM_CURATION",
+    "sortOrder": 4,
+    "useYn": "Y"
+  },
+  {
     "menuKey": "DEV_GUIDE",
     "parentMenuKey": null,
     "menuName": "개발자가이드",
