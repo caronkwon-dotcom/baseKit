@@ -1203,6 +1203,20 @@ tbody tr.selected-row td {
 .metadata-editor input:disabled { background: #f1f5f9; color: #64748b; }
 .metadata-inline-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
+.word-review-status { display: inline-block; min-width: 62px; border-radius: 999px; padding: 3px 7px; font-size: 10px; font-weight: 800; text-align: center; }
+.word-review-status.draft { background: #fef3c7; color: #92400e; }
+.word-review-status.reviewing { background: #dbeafe; color: #1d4ed8; }
+.word-review-status.approved { background: #dcfce7; color: #166534; }
+.similarity-result { margin-top: 10px; border: 1px dashed #f59e0b; border-radius: 6px; background: #fffbeb; padding: 7px; }
+.similarity-result.checked { border-color: #93c5fd; background: #eff6ff; }
+.similarity-result h3 { margin: 0 0 5px; color: #475569; font-size: 11px; }
+.similarity-result p { margin: 0; color: #64748b; font-size: 11px; }
+.similarity-result ul { display: grid; gap: 3px; max-height: 145px; overflow: auto; margin: 0; padding: 0; list-style: none; }
+.similarity-result button { display: grid; grid-template-columns: 70px 1fr auto; width: 100%; align-items: center; gap: 5px; border: 0; border-radius: 4px; background: #fff; padding: 5px 6px; color: #334155; text-align: left; }
+.similarity-result button:hover { background: #dbeafe; }
+.similarity-result button span { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.similarity-result button em { color: #1d4ed8; font-size: 10px; font-style: normal; font-weight: 800; }
+
 .term-composer { margin-bottom: 6px; border: 1px solid #b9cceb; border-radius: 8px; background: #f8fbff; padding: 9px 10px; }
 .term-composer-heading { justify-content: space-between; }
 .term-composer-heading h2 { margin: 0; color: #1e3a5f; font-size: 13px; }

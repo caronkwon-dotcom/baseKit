@@ -1,93 +1,103 @@
 [
   {
     "wordKey": "COMPANY",
-    "logicalName": "??",
+    "logicalName": "회사",
     "englishName": "Company",
     "abbreviation": "COMPANY",
     "wordType": "GENERAL",
-    "description": "??? ?? ?? ?? ??",
-    "useYn": "Y"
+    "description": "상법상 회사 또는 업무 법인",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "ORG",
-    "logicalName": "??",
+    "logicalName": "조직",
     "englishName": "Organization",
     "abbreviation": "ORG",
     "wordType": "GENERAL",
-    "description": "?? ?? ??",
-    "useYn": "Y"
+    "description": "업무 수행 조직",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "USER",
-    "logicalName": "???",
+    "logicalName": "사용자",
     "englishName": "User",
     "abbreviation": "USER",
     "wordType": "GENERAL",
-    "description": "???? ???? ??",
-    "useYn": "Y"
+    "description": "시스템을 이용하는 사람",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "LOGIN",
-    "logicalName": "???",
+    "logicalName": "로그인",
     "englishName": "Login",
     "abbreviation": "LOGIN",
     "wordType": "GENERAL",
-    "description": "??? ?? ??",
-    "useYn": "Y"
+    "description": "시스템 인증 진입",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "MENU",
-    "logicalName": "??",
+    "logicalName": "메뉴",
     "englishName": "Menu",
     "abbreviation": "MENU",
     "wordType": "GENERAL",
-    "description": "???? ?? ??",
-    "useYn": "Y"
+    "description": "프로그램 탐색 구조",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "PARENT",
-    "logicalName": "??",
+    "logicalName": "상위",
     "englishName": "Parent",
     "abbreviation": "PARENT",
     "wordType": "GENERAL",
-    "description": "??? ?? ??",
-    "useYn": "Y"
+    "description": "계층의 상위 항목",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "PROGRAM",
-    "logicalName": "????",
+    "logicalName": "프로그램",
     "englishName": "Program",
     "abbreviation": "PROGRAM",
     "wordType": "GENERAL",
-    "description": "??? ??? ?? ??",
-    "useYn": "Y"
+    "description": "실행과 권한의 화면 단위",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "ACTION",
-    "logicalName": "??",
+    "logicalName": "액션",
     "englishName": "Action",
     "abbreviation": "ACTION",
     "wordType": "GENERAL",
-    "description": "???? ?? ?? ??",
-    "useYn": "Y"
+    "description": "프로그램 내부 업무 행위",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "CREATED",
-    "logicalName": "??",
+    "logicalName": "등록",
     "englishName": "Created",
     "abbreviation": "CREATED",
     "wordType": "GENERAL",
-    "description": "?? ?? ??",
-    "useYn": "Y"
+    "description": "최초 등록 행위",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "UPDATED",
-    "logicalName": "??",
+    "logicalName": "수정",
     "englishName": "Updated",
     "abbreviation": "UPDATED",
     "wordType": "GENERAL",
-    "description": "?? ??",
-    "useYn": "Y"
+    "description": "변경 행위",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "ID",
@@ -95,125 +105,139 @@
     "englishName": "Identifier",
     "abbreviation": "ID",
     "wordType": "DOMAIN",
-    "description": "??? ?? ??",
-    "useYn": "Y"
+    "description": "식별자 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "KEY",
-    "logicalName": "?",
+    "logicalName": "키",
     "englishName": "Key",
     "abbreviation": "KEY",
     "wordType": "DOMAIN",
-    "description": "??? ?? ??",
-    "useYn": "Y"
+    "description": "고유키 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "CODE",
-    "logicalName": "??",
+    "logicalName": "코드",
     "englishName": "Code",
     "abbreviation": "CODE",
     "wordType": "DOMAIN",
-    "description": "?? ?? ??",
-    "useYn": "Y"
+    "description": "코드 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "NAME",
-    "logicalName": "?",
+    "logicalName": "명",
     "englishName": "Name",
     "abbreviation": "NAME",
     "wordType": "DOMAIN",
-    "description": "?? ?? ??",
-    "useYn": "Y"
+    "description": "명칭 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "YN",
-    "logicalName": "??",
+    "logicalName": "여부",
     "englishName": "Yes or No",
     "abbreviation": "YN",
     "wordType": "DOMAIN",
-    "description": "Y/N ?? ??",
-    "useYn": "Y"
+    "description": "Y/N 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "NO",
-    "logicalName": "??",
+    "logicalName": "번호",
     "englishName": "Number",
     "abbreviation": "NO",
     "wordType": "DOMAIN",
-    "description": "???? ?? ??",
-    "useYn": "Y"
+    "description": "업무번호 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "DATE",
-    "logicalName": "??",
+    "logicalName": "일자",
     "englishName": "Date",
     "abbreviation": "DATE",
     "wordType": "DOMAIN",
-    "description": "?? ?? ??",
-    "useYn": "Y"
+    "description": "날짜 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "AT",
-    "logicalName": "??",
+    "logicalName": "일시",
     "englishName": "Date Time",
     "abbreviation": "AT",
     "wordType": "DOMAIN",
-    "description": "?? ?? ?? ?? ??",
-    "useYn": "Y"
+    "description": "시각 포함 일시 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "BY",
-    "logicalName": "?",
+    "logicalName": "자",
     "englishName": "By",
     "abbreviation": "BY",
     "wordType": "DOMAIN",
-    "description": "??? ?? ??",
-    "useYn": "Y"
+    "description": "처리자 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "ORDER",
-    "logicalName": "??",
+    "logicalName": "순서",
     "englishName": "Order",
     "abbreviation": "ORDER",
     "wordType": "DOMAIN",
-    "description": "?? ?? ?? ??",
-    "useYn": "Y"
+    "description": "정렬 순서 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "AMOUNT",
-    "logicalName": "??",
+    "logicalName": "금액",
     "englishName": "Amount",
     "abbreviation": "AMOUNT",
     "wordType": "DOMAIN",
-    "description": "?? ?? ??",
-    "useYn": "Y"
+    "description": "금액 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "RATE",
-    "logicalName": "??",
+    "logicalName": "비율",
     "englishName": "Rate",
     "abbreviation": "RATE",
     "wordType": "DOMAIN",
-    "description": "?? ?? ??",
-    "useYn": "Y"
+    "description": "비율 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "TEXT",
-    "logicalName": "??",
+    "logicalName": "내용",
     "englishName": "Text",
     "abbreviation": "TEXT",
     "wordType": "DOMAIN",
-    "description": "? ?? ?? ??",
-    "useYn": "Y"
+    "description": "긴 내용 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "PATH",
-    "logicalName": "??",
+    "logicalName": "경로",
     "englishName": "Path",
     "abbreviation": "PATH",
     "wordType": "DOMAIN",
-    "description": "?? ?? ??",
-    "useYn": "Y"
+    "description": "경로 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "URL",
@@ -221,8 +245,9 @@
     "englishName": "URL",
     "abbreviation": "URL",
     "wordType": "DOMAIN",
-    "description": "URL ?? ??",
-    "useYn": "Y"
+    "description": "URL 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   },
   {
     "wordKey": "JSON",
@@ -230,7 +255,8 @@
     "englishName": "JSON",
     "abbreviation": "JSON",
     "wordType": "DOMAIN",
-    "description": "JSON ?? ??",
-    "useYn": "Y"
+    "description": "JSON 분류 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED"
   }
 ]

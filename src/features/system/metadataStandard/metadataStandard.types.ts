@@ -8,6 +8,7 @@ export interface StandardWord {
   wordType: 'GENERAL' | 'DOMAIN';
   description: string;
   useYn: UseYn;
+  reviewStatus: 'DRAFT' | 'REVIEWING' | 'APPROVED';
 }
 
 export interface StandardDomain {

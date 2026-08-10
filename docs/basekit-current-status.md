@@ -40,6 +40,7 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 - 로컬 개발환경 `meta/term-curation.json` 안전 저장 및 정적 배포 브라우저 임시저장·JSON 내보내기
 - 단어관리와 도메인관리 JSON Prototype
 - 등록 단어 조합, 마지막 도메인 단어 Guard와 논리명·물리명·도메인 자동 미리보기
+- 단어 신규등록·수정검토·검수완료 상태와 등록 전 유사어 검사
 
 ## 3. 문서만 설계 완료
 

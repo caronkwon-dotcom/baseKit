@@ -17,7 +17,7 @@ export default function DomainManagePage() {
   const [message, setMessage] = useState('');
 
   useEffect(() => { Promise.all([loadEditableMetadata('domains', domainsJson as StandardDomain[]), loadEditableMetadata('words', wordsJson as StandardWord[])]).then(([domainData, wordData]) => { setRows(domainData.rows); setWords(wordData.rows); setMode(domainData.mode); }); }, []);
-  const domainWords = words.filter((word) => word.wordType === 'DOMAIN' && word.useYn === 'Y');
+  const domainWords = words.filter((word) => word.wordType === 'DOMAIN' && word.useYn === 'Y' && word.reviewStatus === 'APPROVED');
   const filtered = useMemo(() => rows.filter((row) => [row.domainName, row.domainKey, row.dataType].some((value) => value.toLowerCase().includes(keyword.toLowerCase()))), [rows, keyword]);
   const select = (row: StandardDomain) => { setSelectedKey(row.domainKey); setDraft({ ...row }); };
   const saveRow = async () => {

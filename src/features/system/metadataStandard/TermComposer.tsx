@@ -3,7 +3,7 @@ import domainsJson from '../../../../meta/domains.json';
 import wordsJson from '../../../../meta/words.json';
 import type { StandardDomain, StandardWord } from './metadataStandard.types';
 
-const words = (wordsJson as StandardWord[]).filter((word) => word.useYn === 'Y');
+const words = (wordsJson as StandardWord[]).filter((word) => word.useYn === 'Y' && word.reviewStatus === 'APPROVED');
 const domains = (domainsJson as StandardDomain[]).filter((domain) => domain.useYn === 'Y');
 
 export default function TermComposer() {
