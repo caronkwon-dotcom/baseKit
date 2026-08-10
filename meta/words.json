@@ -1,0 +1,236 @@
+[
+  {
+    "wordKey": "COMPANY",
+    "logicalName": "??",
+    "englishName": "Company",
+    "abbreviation": "COMPANY",
+    "wordType": "GENERAL",
+    "description": "??? ?? ?? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "ORG",
+    "logicalName": "??",
+    "englishName": "Organization",
+    "abbreviation": "ORG",
+    "wordType": "GENERAL",
+    "description": "?? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "USER",
+    "logicalName": "???",
+    "englishName": "User",
+    "abbreviation": "USER",
+    "wordType": "GENERAL",
+    "description": "???? ???? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "LOGIN",
+    "logicalName": "???",
+    "englishName": "Login",
+    "abbreviation": "LOGIN",
+    "wordType": "GENERAL",
+    "description": "??? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "MENU",
+    "logicalName": "??",
+    "englishName": "Menu",
+    "abbreviation": "MENU",
+    "wordType": "GENERAL",
+    "description": "???? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "PARENT",
+    "logicalName": "??",
+    "englishName": "Parent",
+    "abbreviation": "PARENT",
+    "wordType": "GENERAL",
+    "description": "??? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "PROGRAM",
+    "logicalName": "????",
+    "englishName": "Program",
+    "abbreviation": "PROGRAM",
+    "wordType": "GENERAL",
+    "description": "??? ??? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "ACTION",
+    "logicalName": "??",
+    "englishName": "Action",
+    "abbreviation": "ACTION",
+    "wordType": "GENERAL",
+    "description": "???? ?? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "CREATED",
+    "logicalName": "??",
+    "englishName": "Created",
+    "abbreviation": "CREATED",
+    "wordType": "GENERAL",
+    "description": "?? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "UPDATED",
+    "logicalName": "??",
+    "englishName": "Updated",
+    "abbreviation": "UPDATED",
+    "wordType": "GENERAL",
+    "description": "?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "ID",
+    "logicalName": "ID",
+    "englishName": "Identifier",
+    "abbreviation": "ID",
+    "wordType": "DOMAIN",
+    "description": "??? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "KEY",
+    "logicalName": "?",
+    "englishName": "Key",
+    "abbreviation": "KEY",
+    "wordType": "DOMAIN",
+    "description": "??? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "CODE",
+    "logicalName": "??",
+    "englishName": "Code",
+    "abbreviation": "CODE",
+    "wordType": "DOMAIN",
+    "description": "?? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "NAME",
+    "logicalName": "?",
+    "englishName": "Name",
+    "abbreviation": "NAME",
+    "wordType": "DOMAIN",
+    "description": "?? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "YN",
+    "logicalName": "??",
+    "englishName": "Yes or No",
+    "abbreviation": "YN",
+    "wordType": "DOMAIN",
+    "description": "Y/N ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "NO",
+    "logicalName": "??",
+    "englishName": "Number",
+    "abbreviation": "NO",
+    "wordType": "DOMAIN",
+    "description": "???? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "DATE",
+    "logicalName": "??",
+    "englishName": "Date",
+    "abbreviation": "DATE",
+    "wordType": "DOMAIN",
+    "description": "?? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "AT",
+    "logicalName": "??",
+    "englishName": "Date Time",
+    "abbreviation": "AT",
+    "wordType": "DOMAIN",
+    "description": "?? ?? ?? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "BY",
+    "logicalName": "?",
+    "englishName": "By",
+    "abbreviation": "BY",
+    "wordType": "DOMAIN",
+    "description": "??? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "ORDER",
+    "logicalName": "??",
+    "englishName": "Order",
+    "abbreviation": "ORDER",
+    "wordType": "DOMAIN",
+    "description": "?? ?? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "AMOUNT",
+    "logicalName": "??",
+    "englishName": "Amount",
+    "abbreviation": "AMOUNT",
+    "wordType": "DOMAIN",
+    "description": "?? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "RATE",
+    "logicalName": "??",
+    "englishName": "Rate",
+    "abbreviation": "RATE",
+    "wordType": "DOMAIN",
+    "description": "?? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "TEXT",
+    "logicalName": "??",
+    "englishName": "Text",
+    "abbreviation": "TEXT",
+    "wordType": "DOMAIN",
+    "description": "? ?? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "PATH",
+    "logicalName": "??",
+    "englishName": "Path",
+    "abbreviation": "PATH",
+    "wordType": "DOMAIN",
+    "description": "?? ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "URL",
+    "logicalName": "URL",
+    "englishName": "URL",
+    "abbreviation": "URL",
+    "wordType": "DOMAIN",
+    "description": "URL ?? ??",
+    "useYn": "Y"
+  },
+  {
+    "wordKey": "JSON",
+    "logicalName": "JSON",
+    "englishName": "JSON",
+    "abbreviation": "JSON",
+    "wordType": "DOMAIN",
+    "description": "JSON ?? ??",
+    "useYn": "Y"
+  }
+]

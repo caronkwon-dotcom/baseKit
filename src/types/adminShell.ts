@@ -7,6 +7,8 @@ export const PROGRAM_KEYS = [
   'COMMON_CODE_MGMT',
   'MENU_MGMT',
   'TERM_CURATION',
+  'WORD_MGMT',
+  'DOMAIN_MGMT',
   'DEV_SEARCH_SAMPLE_TYPE_1',
   'DEV_SEARCH_SAMPLE_TYPE_2',
 ] as const;

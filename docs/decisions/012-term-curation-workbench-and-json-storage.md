@@ -13,7 +13,7 @@ BaseKit은 DB 도입 전이며 `meta/terms.json`, `meta/domains.json`에 최소 
 - 공공표준 CSV는 수정하지 않는 참조 원본으로 보존한다.
 - 정제 결과는 원본 전체 복제가 아니라 검토한 항목의 상태와 BaseKit 적용값만 `meta/term-curation.json`에 저장한다.
 - 검토 상태는 미검토, 검토 중, 채택, 수정 채택, 보류, 제외로 구분한다.
-- 로컬 Vite 개발환경에서는 개발 전용 API가 임시 파일 기록, JSON 재검증, 파일 교체 순서로 저장한다.
+- 로컬 Vite 개발환경에서는 개발 전용 API가 임시 파일 기록, JSON 재검증, 기존 파일 백업, 덮어쓰기, 결과 재검증 순서로 저장한다. Windows/OneDrive에서 기존 파일 대상 `rename`이 제한될 수 있으므로 백업 복구 방식을 사용한다.
 - GitHub Pages는 정적 환경이므로 Repository 파일을 수정할 수 없다. 배포 화면에서는 브라우저 저장소에 임시 저장하고 JSON 내려받기를 제공한다.
 - 향후 DB 도입 시 화면과 정제 모델을 유지하고 저장 Repository/Adapter만 교체한다.
 

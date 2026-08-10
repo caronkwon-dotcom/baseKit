@@ -46,7 +46,27 @@
     "menuLevel": 2,
     "menuType": "SCREEN",
     "programKey": "TERM_CURATION",
+    "sortOrder": 6,
+    "useYn": "Y"
+  },
+  {
+    "menuKey": "SYS.WORD",
+    "parentMenuKey": "SYS",
+    "menuName": "단어관리",
+    "menuLevel": 2,
+    "menuType": "SCREEN",
+    "programKey": "WORD_MGMT",
     "sortOrder": 4,
+    "useYn": "Y"
+  },
+  {
+    "menuKey": "SYS.DOMAIN",
+    "parentMenuKey": "SYS",
+    "menuName": "도메인관리",
+    "menuLevel": 2,
+    "menuType": "SCREEN",
+    "programKey": "DOMAIN_MGMT",
+    "sortOrder": 5,
     "useYn": "Y"
   },
   {

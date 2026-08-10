@@ -38,6 +38,8 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 - 행정안전부 공공표준용어 13,176건 조회·검색·페이징과 항목별 정제 Workbench
 - 공공표준 원본과 BaseKit 정제 결과 분리
 - 로컬 개발환경 `meta/term-curation.json` 안전 저장 및 정적 배포 브라우저 임시저장·JSON 내보내기
+- 단어관리와 도메인관리 JSON Prototype
+- 등록 단어 조합, 마지막 도메인 단어 Guard와 논리명·물리명·도메인 자동 미리보기
 
 ## 3. 문서만 설계 완료
 
@@ -68,6 +70,8 @@ Lifecycle 문서는 `docs/basekit-business-object-lifecycle-architecture.md`에 
 - 외부결재 취소·회수 및 Callback 보안
 - 공공표준 용어의 BaseKit 채택 기준과 기존 `PERMISSION` 등 명명 충돌 처리
 - 채택 용어의 `terms.json`·`domains.json` 승격 승인 절차
+- 동일한 마지막 단어에 복수 도메인이 연결될 때 도메인 선택 규칙
+- 용어 조합 결과의 승인·등록·폐기·영향 분석 Workflow
 
 ## 6. Git 및 PR 상태 확인
 
@@ -157,7 +161,8 @@ gh pr list --repo caronkwon-dotcom/baseKit
 현재 상태:
 
 - 용어 정제 List View와 JSON 저장 Prototype 구현
-- 채택 승격, 단어사전, 도메인 검증, DDL 생성은 후속 작업
+- 단어·도메인 관리와 용어 조합 Guard Prototype 구현
+- 채택 승격, 기존 용어 자동 분해, DDL 생성은 후속 작업
 
 ## 8. 다음 추천 작업
 

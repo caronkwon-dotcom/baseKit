@@ -1161,6 +1161,66 @@ tbody tr.selected-row td {
 .source-term-card dt { color: #64748b; font-weight: 800; }
 .source-term-card dd { min-width: 0; margin: 0; overflow-wrap: anywhere; color: #334155; }
 
+.metadata-toolbar,
+.metadata-list-title,
+.term-composer-heading,
+.term-composer-control,
+.term-token-list {
+  display: flex;
+  align-items: center;
+}
+
+.metadata-toolbar {
+  min-height: 38px;
+  gap: 8px;
+  margin-bottom: 6px;
+  border: 1px solid #d6deea;
+  border-radius: 7px;
+  background: #fff;
+  padding: 4px 7px 4px 10px;
+}
+
+.metadata-toolbar > label { display: flex; align-items: center; gap: 8px; color: #475569; font-size: 12px; font-weight: 800; }
+.metadata-toolbar input { width: 260px; min-height: 28px; border: 1px solid #cbd5e1; border-radius: 5px; padding: 0 8px; }
+.metadata-toolbar .persistence-badge { margin-left: auto; }
+
+.metadata-master-detail { display: grid; grid-template-columns: minmax(0, 1fr) 330px; min-height: 530px; gap: 8px; }
+.metadata-list,
+.metadata-editor { overflow: hidden; border: 1px solid #d6deea; border-radius: 8px; background: #fff; }
+.metadata-list-title { min-height: 38px; justify-content: space-between; padding: 3px 12px; }
+.metadata-list-title h2,
+.metadata-editor h2 { margin: 0; color: #1f2937; font-size: 13px; }
+.metadata-list-title span { color: #64748b; font-size: 12px; }
+.metadata-table-wrap { max-height: 530px; overflow: auto; }
+.metadata-table-wrap thead th { position: sticky; z-index: 2; top: 0; }
+.metadata-editor { padding: 10px; }
+.metadata-editor h2 { margin-bottom: 8px; }
+.metadata-editor > label,
+.metadata-inline-fields label { display: grid; gap: 4px; margin-top: 8px; color: #475569; font-size: 12px; font-weight: 800; }
+.metadata-editor input,
+.metadata-editor select,
+.metadata-editor textarea { width: 100%; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 5px; padding: 6px 8px; color: #1f2937; font: inherit; font-weight: 500; }
+.metadata-editor input:disabled { background: #f1f5f9; color: #64748b; }
+.metadata-inline-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.term-composer { margin-bottom: 6px; border: 1px solid #b9cceb; border-radius: 8px; background: #f8fbff; padding: 9px 10px; }
+.term-composer-heading { justify-content: space-between; }
+.term-composer-heading h2 { margin: 0; color: #1e3a5f; font-size: 13px; }
+.term-composer-heading p { margin: 2px 0 0; color: #64748b; font-size: 11px; }
+.term-composer-control { gap: 6px; margin-top: 8px; }
+.term-composer-control select { min-width: 340px; min-height: 29px; border: 1px solid #cbd5e1; border-radius: 5px; background: #fff; padding: 0 7px; }
+.term-token-list { min-height: 38px; gap: 5px; margin-top: 7px; border: 1px dashed #b9c8dc; border-radius: 6px; background: #fff; padding: 5px; }
+.term-token-list button { display: grid; border: 1px solid #b8c4d6; border-radius: 5px; background: #f1f5f9; padding: 3px 8px; color: #334155; font-size: 12px; font-weight: 800; }
+.term-token-list button.domain-token { border-color: #60a5fa; background: #dbeafe; color: #1d4ed8; }
+.term-token-list small { color: #64748b; font-size: 9px; font-weight: 600; }
+.term-composer-result { display: flex; align-items: center; justify-content: space-between; margin-top: 7px; border-radius: 6px; padding: 6px 8px; }
+.term-composer-result.valid { background: #dcfce7; color: #166534; }
+.term-composer-result.invalid { background: #fee2e2; color: #991b1b; }
+.term-composer-result dl { display: grid; grid-template-columns: 78px minmax(130px, auto) 78px minmax(130px, auto) 78px minmax(160px, auto); gap: 3px 6px; margin: 0; font-size: 11px; }
+.term-composer-result dt { font-weight: 800; opacity: .75; }
+.term-composer-result dd { margin: 0; font-weight: 800; }
+.term-composer-result > strong { font-size: 11px; }
+
 @media (max-width: 900px) {
   .app-header {
     flex-wrap: wrap;
@@ -1220,6 +1280,9 @@ tbody tr.selected-row td {
   }
 
   .term-workbench { grid-template-columns: 1fr; }
+  .metadata-master-detail { grid-template-columns: 1fr; }
+  .term-composer-result { align-items: flex-start; flex-direction: column; gap: 5px; }
+  .term-composer-result dl { grid-template-columns: 78px 1fr; }
   .term-workbench-summary { flex-wrap: wrap; }
   .term-workbench-summary button:first-of-type { margin-left: 0; }
 }
