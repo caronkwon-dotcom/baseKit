@@ -48,6 +48,8 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 - 용어 조합 단어 Drag & Drop 및 좌우 순서 변경
 - 1Depth 클릭 2~3Depth 레이어 메뉴, 햄버거 클릭 좌측 Sidebar, 프로그램 선택 시 자동 닫기와 Sidebar Pin 고정·해제
 - 기본·그린 스킨 선택과 핵심 색상 5개 Color Picker 기반 개인화·브라우저 저장
+- 업무용 권장 1440×900, 최소 1024×768 및 1024~1280px 태블릿 가로 반응형 기준
+- 개발·검수 사이트 검색 `noindex` 적용, 공개 데이터·대표 AI 수집 봇 robots 정책 정의(도메인 루트 적용은 배포 환경 과제)
 - Header 알림 Badge 영역과 알림 count 표시 계약
 
 ## 3. 문서만 설계 완료

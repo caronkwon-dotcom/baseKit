@@ -27,10 +27,13 @@
 
 body {
   margin: 0;
-  min-width: 320px;
+  min-width: 1024px;
   min-height: 100vh;
+  overflow-x: auto;
   font-size: 14px;
 }
+
+#root { min-width: 1024px; }
 
 button,
 input,
@@ -1322,71 +1325,18 @@ tbody tr.selected-row td {
 .term-composer-result dd { margin: 0; font-weight: 800; }
 .term-composer-result > strong { font-size: 11px; }
 
-@media (max-width: 900px) {
+@media (min-width: 1024px) and (max-width: 1280px) {
   .app-header {
-    flex-wrap: wrap;
-    padding: 6px 10px 0;
-  }
-
-  .top-navigation {
-    order: 4;
-    width: 100%;
-    min-height: 36px;
+    gap: 5px;
+    padding: 4px 8px;
   }
 
   .sidebar {
-    position: fixed;
-    top: 82px;
-    bottom: 0;
-    left: 0;
-    z-index: 9;
-    box-shadow: 8px 0 20px rgb(15 23 42 / 16%);
+    width: 200px;
+    flex-basis: 200px;
   }
 
-  .floating-navigation { top: 82px; left: 8px; width: min(360px, calc(100vw - 16px)); max-height: calc(100vh - 90px); }
-  .floating-navigation-backdrop { top: 82px; }
-
-  .mdi-management button {
-    display: none;
-  }
-
-  .program-summary {
-    display: none;
-  }
-
-  .search-grid,
-  .summary-grid,
-  .dashboard-grid,
-  .detail-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .search-panel-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .search-grid label {
-    grid-template-columns: 88px minmax(0, 1fr);
-  }
-
-  .hidden-condition-indicator,
-  .search-action-rail {
-    grid-column: 1;
-    justify-self: end;
-  }
-
-  .detail-grid div:nth-child(odd) {
-    border-right: 0;
-  }
-
-  .workspace {
-    padding: 12px;
-  }
-
-  .term-workbench { grid-template-columns: 1fr; }
-  .metadata-master-detail { grid-template-columns: 1fr; }
-  .term-composer-result { align-items: flex-start; flex-direction: column; gap: 5px; }
-  .term-composer-result dl { grid-template-columns: 78px 1fr; }
-  .term-workbench-summary { flex-wrap: wrap; }
-  .term-workbench-summary button:first-of-type { margin-left: 0; }
+  .workspace { padding: 8px; }
+  .top-menu-button { padding-right: 8px; padding-left: 8px; }
+  .floating-navigation { left: 82px; width: 340px; }
 }
