@@ -27,13 +27,13 @@
 
 body {
   margin: 0;
-  min-width: 1024px;
+  min-width: 1280px;
   min-height: 100vh;
   overflow-x: auto;
   font-size: 14px;
 }
 
-#root { min-width: 1024px; }
+#root { min-width: 1280px; }
 
 button,
 input,
@@ -1325,7 +1325,7 @@ tbody tr.selected-row td {
 .term-composer-result dd { margin: 0; font-weight: 800; }
 .term-composer-result > strong { font-size: 11px; }
 
-@media (min-width: 1024px) and (max-width: 1280px) {
+@media (min-width: 1280px) and (max-width: 1439px) {
   .app-header {
     gap: 5px;
     padding: 4px 8px;
