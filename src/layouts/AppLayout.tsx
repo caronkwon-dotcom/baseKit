@@ -37,6 +37,7 @@ export default function AppLayout() {
     setTabs((currentTabs) => currentTabs.some((tab) => tab.programKey === programKey)
       ? currentTabs : [...currentTabs, { programKey, title: program.programName }]);
     activateProgram(programKey);
+    setSidebarOpen(false);
   };
 
   const closeProgram = (programKey: ProgramKey) => {
