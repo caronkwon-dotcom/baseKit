@@ -17,6 +17,7 @@ import type {
   TermSearchCondition,
 } from './termCuration.types';
 import TermComposer from '../metadataStandard/TermComposer';
+import TermDecompositionSummary from '../metadataStandard/TermDecompositionSummary';
 
 const PAGE_SIZE = 100;
 const INITIAL_SEARCH: TermSearchCondition = { keyword: '', domainName: '', reviewStatus: '', revisionType: '' };
@@ -93,6 +94,7 @@ export default function TermCurationPage() {
   return (
     <div className="page term-curation-page">
       <PageHeader breadcrumbs={['시스템관리', '표준용어관리']} description="공공표준 원본을 보존하면서 BaseKit 채택 용어를 단계적으로 정제합니다." />
+      <TermDecompositionSummary />
       <TermComposer />
       <SearchPanel
         fields={searchFields} value={condition} initialValue={INITIAL_SEARCH} rows={1}

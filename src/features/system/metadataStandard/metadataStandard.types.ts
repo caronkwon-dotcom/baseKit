@@ -8,7 +8,12 @@ export interface StandardWord {
   wordType: 'GENERAL' | 'DOMAIN';
   description: string;
   useYn: UseYn;
-  reviewStatus: 'DRAFT' | 'REVIEWING' | 'APPROVED';
+  reviewStatus: 'IMPORTED' | 'DRAFT' | 'REVIEWING' | 'APPROVED' | 'RETIRED';
+  synonymList?: string;
+  forbiddenWordList?: string;
+  domainCategory?: string;
+  revision?: string;
+  source?: 'MOIS' | 'BASEKIT';
 }
 
 export interface StandardDomain {

@@ -1182,6 +1182,7 @@ tbody tr.selected-row td {
 
 .metadata-toolbar > label { display: flex; align-items: center; gap: 8px; color: #475569; font-size: 12px; font-weight: 800; }
 .metadata-toolbar input { width: 260px; min-height: 28px; border: 1px solid #cbd5e1; border-radius: 5px; padding: 0 8px; }
+.metadata-toolbar select { min-height: 28px; border: 1px solid #cbd5e1; border-radius: 5px; background: #fff; padding: 0 7px; }
 .metadata-toolbar .persistence-badge { margin-left: auto; }
 
 .metadata-master-detail { display: grid; grid-template-columns: minmax(0, 1fr) 330px; min-height: 530px; gap: 8px; }
@@ -1191,6 +1192,9 @@ tbody tr.selected-row td {
 .metadata-list-title h2,
 .metadata-editor h2 { margin: 0; color: #1f2937; font-size: 13px; }
 .metadata-list-title span { color: #64748b; font-size: 12px; }
+.metadata-pagination { display: flex; align-items: center; gap: 5px; }
+.metadata-pagination button { min-height: 24px; border: 1px solid #cbd5e1; border-radius: 4px; background: #fff; color: #475569; font-size: 11px; }
+.metadata-pagination button:disabled { opacity: .4; }
 .metadata-table-wrap { max-height: 530px; overflow: auto; }
 .metadata-table-wrap thead th { position: sticky; z-index: 2; top: 0; }
 .metadata-editor { padding: 10px; }
@@ -1205,8 +1209,10 @@ tbody tr.selected-row td {
 
 .word-review-status { display: inline-block; min-width: 62px; border-radius: 999px; padding: 3px 7px; font-size: 10px; font-weight: 800; text-align: center; }
 .word-review-status.draft { background: #fef3c7; color: #92400e; }
+.word-review-status.imported { background: #e0f2fe; color: #0369a1; }
 .word-review-status.reviewing { background: #dbeafe; color: #1d4ed8; }
 .word-review-status.approved { background: #dcfce7; color: #166534; }
+.word-review-status.retired { background: #f1f5f9; color: #64748b; text-decoration: line-through; }
 .similarity-result { margin-top: 10px; border: 1px dashed #f59e0b; border-radius: 6px; background: #fffbeb; padding: 7px; }
 .similarity-result.checked { border-color: #93c5fd; background: #eff6ff; }
 .similarity-result h3 { margin: 0 0 5px; color: #475569; font-size: 11px; }
@@ -1218,6 +1224,17 @@ tbody tr.selected-row td {
 .similarity-result button em { color: #1d4ed8; font-size: 10px; font-style: normal; font-weight: 800; }
 
 .term-composer { margin-bottom: 6px; border: 1px solid #b9cceb; border-radius: 8px; background: #f8fbff; padding: 9px 10px; }
+.decomposition-summary { display: flex; min-height: 42px; align-items: center; gap: 14px; margin-bottom: 6px; border: 1px solid #d6deea; border-radius: 8px; background: #fff; padding: 6px 10px; color: #64748b; font-size: 11px; }
+.decomposition-summary > div:first-child { margin-right: auto; }
+.decomposition-summary h2 { margin: 0; color: #1f2937; font-size: 13px; }
+.decomposition-summary p { margin: 2px 0 0; }
+.decomposition-summary strong { color: #1456b8; }
+.decomposition-summary .matched strong { color: #15803d; }
+.decomposition-summary .unmatched strong { color: #c2410c; }
+.decomposition-summary details { position: relative; }
+.decomposition-summary summary { cursor: pointer; color: #1456b8; font-weight: 800; }
+.decomposition-summary details div { position: absolute; z-index: 5; top: 22px; right: 0; display: grid; width: 190px; gap: 2px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; padding: 6px; box-shadow: 0 8px 20px rgb(15 23 42 / 14%); }
+.decomposition-summary em { font-style: normal; }
 .term-composer-heading { justify-content: space-between; }
 .term-composer-heading h2 { margin: 0; color: #1e3a5f; font-size: 13px; }
 .term-composer-heading p { margin: 2px 0 0; color: #64748b; font-size: 11px; }

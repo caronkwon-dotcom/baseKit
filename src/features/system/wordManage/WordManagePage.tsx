@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import wordsJson from '../../../../meta/words.json';
 import PageHeader from '../../../components/common/PageHeader';
 import { loadEditableMetadata, saveEditableMetadata, type PersistenceMode } from '../metadataStandard/editableMetadata.repository';
 import type { StandardWord } from '../metadataStandard/metadataStandard.types';
 
 const EMPTY_WORD: StandardWord = { wordKey: '', logicalName: '', englishName: '', abbreviation: '', wordType: 'GENERAL', description: '', useYn: 'Y', reviewStatus: 'DRAFT' };
-const STATUS_LABEL = { DRAFT: '신규등록', REVIEWING: '수정·검토 중', APPROVED: '검수완료' } as const;
+const STATUS_LABEL = { IMPORTED: '원본반입', DRAFT: '신규등록', REVIEWING: '수정·검토 중', APPROVED: '검수완료', RETIRED: '폐기·변경' } as const;
+const PAGE_SIZE = 100;
 
 function normalize(value: string) { return value.replace(/[\s_-]/g, '').toLowerCase(); }
 function levenshtein(left: string, right: string) {
@@ -24,17 +24,21 @@ function similarity(left: string, right: string) {
 }
 
 export default function WordManagePage() {
-  const [rows, setRows] = useState<StandardWord[]>(wordsJson as StandardWord[]);
+  const [rows, setRows] = useState<StandardWord[]>([]);
   const [selectedKey, setSelectedKey] = useState('');
   const [draft, setDraft] = useState<StandardWord>(EMPTY_WORD);
   const [keyword, setKeyword] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'' | StandardWord['reviewStatus']>('');
+  const [page, setPage] = useState(1);
   const [mode, setMode] = useState<PersistenceMode>('BROWSER');
   const [message, setMessage] = useState('');
   const [similarityChecked, setSimilarityChecked] = useState(false);
   const [similarWords, setSimilarWords] = useState<Array<{ word: StandardWord; reason: string }>>([]);
 
-  useEffect(() => { loadEditableMetadata('words', wordsJson as StandardWord[]).then((loaded) => { setRows(loaded.rows); setMode(loaded.mode); }); }, []);
-  const filtered = useMemo(() => rows.filter((row) => [row.logicalName, row.englishName, row.abbreviation].some((value) => value.toLowerCase().includes(keyword.toLowerCase()))), [rows, keyword]);
+  useEffect(() => { loadEditableMetadata<StandardWord>('words', [], `${import.meta.env.BASE_URL}data/standard-words-20251101.json`).then((loaded) => { setRows(loaded.rows); setMode(loaded.mode); }); }, []);
+  const filtered = useMemo(() => rows.filter((row) => (!statusFilter || row.reviewStatus === statusFilter) && [row.logicalName, row.englishName, row.abbreviation].some((value) => value.toLowerCase().includes(keyword.toLowerCase()))), [rows, keyword, statusFilter]);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const visibleRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const select = (row: StandardWord) => { setSelectedKey(row.wordKey); setDraft({ ...row }); setSimilarityChecked(false); setSimilarWords([]); setMessage(''); };
   const startNew = () => { setSelectedKey(''); setDraft(EMPTY_WORD); setSimilarityChecked(false); setSimilarWords([]); setMessage('신규 단어는 유사어 검사 후 저장할 수 있습니다.'); };
@@ -69,8 +73,8 @@ export default function WordManagePage() {
 
   return <div className="page metadata-manage-page">
     <PageHeader breadcrumbs={['시스템관리', '단어관리']} description="신규·수정 단어를 유사어 검사 후 검수완료 처리합니다." />
-    <section className="metadata-toolbar"><label>단어검색<input value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="논리명·영문명·약어" /></label><span className={`persistence-badge ${mode.toLowerCase()}`}>{mode === 'FILE' ? '로컬 JSON 직접 저장' : '브라우저 임시 저장'}</span><button type="button" className="secondary-button" onClick={startNew}>신규</button><button type="button" className="secondary-button" onClick={checkSimilarity}>유사어 검사</button><button type="button" className="secondary-button" onClick={() => persist(selectedKey ? 'REVIEWING' : 'DRAFT')}>임시저장</button><button type="button" className="primary-button" onClick={() => persist('APPROVED')}>검수완료</button></section>
-    <div className="metadata-master-detail"><section className="metadata-list"><div className="metadata-list-title"><h2>표준단어 목록</h2><span>총 {filtered.length.toLocaleString()}건</span></div><div className="metadata-table-wrap"><table><thead><tr><th>상태</th><th>단어키</th><th>논리명</th><th>영문명</th><th>약어</th><th>구분</th><th>사용</th></tr></thead><tbody>{filtered.map((row) => <tr key={row.wordKey} className={row.wordKey === selectedKey ? 'selected-row' : 'clickable-row'} onClick={() => select(row)}><td><span className={`word-review-status ${row.reviewStatus.toLowerCase()}`}>{STATUS_LABEL[row.reviewStatus]}</span></td><td>{row.wordKey}</td><td>{row.logicalName}</td><td>{row.englishName}</td><td>{row.abbreviation}</td><td>{row.wordType === 'DOMAIN' ? '도메인 단어' : '일반 단어'}</td><td>{row.useYn}</td></tr>)}</tbody></table></div></section>
+    <section className="metadata-toolbar"><label>단어검색<input value={keyword} onChange={(event) => { setKeyword(event.target.value); setPage(1); }} placeholder="논리명·영문명·약어" /></label><label>검수상태<select value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value as '' | StandardWord['reviewStatus']); setPage(1); }}><option value="">전체</option>{Object.entries(STATUS_LABEL).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><span className={`persistence-badge ${mode.toLowerCase()}`}>{mode === 'FILE' ? '로컬 JSON 직접 저장' : '브라우저 임시 저장'}</span><button type="button" className="secondary-button" onClick={startNew}>신규</button><button type="button" className="secondary-button" onClick={checkSimilarity}>유사어 검사</button><button type="button" className="secondary-button" onClick={() => persist(selectedKey ? 'REVIEWING' : 'DRAFT')}>임시저장</button><button type="button" className="primary-button" onClick={() => persist('APPROVED')}>검수완료</button></section>
+    <div className="metadata-master-detail"><section className="metadata-list"><div className="metadata-list-title"><h2>표준단어 목록</h2><div className="metadata-pagination"><span>총 {filtered.length.toLocaleString()}건 · {page}/{pageCount}</span><button type="button" disabled={page === 1} onClick={() => setPage((current) => current - 1)}>이전</button><button type="button" disabled={page === pageCount} onClick={() => setPage((current) => current + 1)}>다음</button></div></div><div className="metadata-table-wrap"><table><thead><tr><th>상태</th><th>단어키</th><th>논리명</th><th>영문명</th><th>약어</th><th>구분</th><th>사용</th></tr></thead><tbody>{visibleRows.map((row) => <tr key={row.wordKey} className={row.wordKey === selectedKey ? 'selected-row' : 'clickable-row'} onClick={() => select(row)}><td><span className={`word-review-status ${row.reviewStatus.toLowerCase()}`}>{STATUS_LABEL[row.reviewStatus]}</span></td><td>{row.wordKey}</td><td>{row.logicalName}</td><td>{row.englishName}</td><td>{row.abbreviation}</td><td>{row.wordType === 'DOMAIN' ? '도메인 단어' : '일반 단어'}</td><td>{row.useYn}</td></tr>)}</tbody></table></div></section>
       <aside className="metadata-editor"><h2>단어 상세</h2><label>단어키<input value={draft.wordKey} disabled={Boolean(selectedKey)} onChange={(event) => change('wordKey', event.target.value)} /></label><label>논리명<input value={draft.logicalName} onChange={(event) => change('logicalName', event.target.value)} /></label><label>영문명<input value={draft.englishName} onChange={(event) => change('englishName', event.target.value)} /></label><label>영문 약어<input value={draft.abbreviation} onChange={(event) => change('abbreviation', event.target.value)} /></label><label>단어 구분<select value={draft.wordType} onChange={(event) => change('wordType', event.target.value as StandardWord['wordType'])}><option value="GENERAL">일반 단어</option><option value="DOMAIN">도메인 단어</option></select></label><label>설명<textarea rows={3} value={draft.description} onChange={(event) => change('description', event.target.value)} /></label><label>사용 여부<select value={draft.useYn} onChange={(event) => change('useYn', event.target.value as 'Y' | 'N')}><option value="Y">사용</option><option value="N">미사용</option></select></label>
         <section className={`similarity-result ${similarityChecked ? 'checked' : ''}`}><h3>유사어 검사 {similarityChecked ? '완료' : '필요'}</h3>{similarWords.length ? <ul>{similarWords.map(({ word, reason }) => <li key={word.wordKey}><button type="button" onClick={() => select(word)}><strong>{word.logicalName}</strong><span>{word.englishName} · {word.abbreviation}</span><em>{reason}</em></button></li>)}</ul> : <p>{similarityChecked ? '유사 후보 없음' : '신규 단어 저장 전에 검사를 실행하세요.'}</p>}</section>
         <p className="status-message">{message}</p></aside>

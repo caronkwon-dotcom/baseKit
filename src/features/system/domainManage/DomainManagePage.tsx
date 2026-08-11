@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import domainsJson from '../../../../meta/domains.json';
-import wordsJson from '../../../../meta/words.json';
 import PageHeader from '../../../components/common/PageHeader';
 import { loadEditableMetadata, saveEditableMetadata, type PersistenceMode } from '../metadataStandard/editableMetadata.repository';
 import type { StandardDomain, StandardWord } from '../metadataStandard/metadataStandard.types';
@@ -9,14 +8,14 @@ const EMPTY_DOMAIN: StandardDomain = { domainKey: '', domain: '', domainName: ''
 
 export default function DomainManagePage() {
   const [rows, setRows] = useState<StandardDomain[]>(domainsJson as StandardDomain[]);
-  const [words, setWords] = useState<StandardWord[]>(wordsJson as StandardWord[]);
+  const [words, setWords] = useState<StandardWord[]>([]);
   const [selectedKey, setSelectedKey] = useState('');
   const [draft, setDraft] = useState<StandardDomain>(EMPTY_DOMAIN);
   const [keyword, setKeyword] = useState('');
   const [mode, setMode] = useState<PersistenceMode>('BROWSER');
   const [message, setMessage] = useState('');
 
-  useEffect(() => { Promise.all([loadEditableMetadata('domains', domainsJson as StandardDomain[]), loadEditableMetadata('words', wordsJson as StandardWord[])]).then(([domainData, wordData]) => { setRows(domainData.rows); setWords(wordData.rows); setMode(domainData.mode); }); }, []);
+  useEffect(() => { Promise.all([loadEditableMetadata('domains', domainsJson as StandardDomain[]), loadEditableMetadata<StandardWord>('words', [], `${import.meta.env.BASE_URL}data/standard-words-20251101.json`)]).then(([domainData, wordData]) => { setRows(domainData.rows); setWords(wordData.rows); setMode(domainData.mode); }); }, []);
   const domainWords = words.filter((word) => word.wordType === 'DOMAIN' && word.useYn === 'Y' && word.reviewStatus === 'APPROVED');
   const filtered = useMemo(() => rows.filter((row) => [row.domainName, row.domainKey, row.dataType].some((value) => value.toLowerCase().includes(keyword.toLowerCase()))), [rows, keyword]);
   const select = (row: StandardDomain) => { setSelectedKey(row.domainKey); setDraft({ ...row }); };
