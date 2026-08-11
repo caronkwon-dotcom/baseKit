@@ -6,6 +6,10 @@ interface SidebarProps {
   activeProgramKey: ProgramKey;
   onToggleMenu: (menuKey: string) => void;
   onOpenProgram: (programKey: ProgramKey) => void;
+  variant?: 'sidebar' | 'floating';
+  onPin?: () => void;
+  onUnpin?: () => void;
+  onClose?: () => void;
 }
 
 function ScreenMenu({
@@ -40,10 +44,14 @@ export default function Sidebar({
   activeProgramKey,
   onToggleMenu,
   onOpenProgram,
+  variant = 'sidebar',
+  onPin,
+  onUnpin,
+  onClose,
 }: SidebarProps) {
   return (
-    <aside className="sidebar">
-      <div className="sidebar-heading">{menu.menuName}</div>
+    <aside className={variant === 'floating' ? 'floating-navigation' : 'sidebar'}>
+      <div className="sidebar-heading"><span>{menu.menuName}</span><div className="navigation-heading-actions">{variant === 'floating' ? <><button type="button" title="사이드바 고정" aria-label="사이드바 고정" onClick={onPin}>⌖</button><button type="button" title="메뉴 닫기" aria-label="메뉴 닫기" onClick={onClose}>×</button></> : <button type="button" title="사이드바 고정 해제" aria-label="사이드바 고정 해제" onClick={onUnpin}>«</button>}</div></div>
       <nav className="sidebar-nav" aria-label={`${menu.menuName} 하위 메뉴`}>
         <ul>
           {menu.children.map((secondDepth) => {

@@ -90,6 +90,22 @@ button {
   gap: 10px;
 }
 
+.notification-button {
+  position: relative;
+  display: grid;
+  width: 30px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: #fff;
+  color: #475569;
+}
+
+.notification-button svg { width: 16px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.notification-button > span { position: absolute; top: -6px; right: -6px; min-width: 16px; height: 16px; border: 2px solid #fff; border-radius: 999px; background: #dc2626; padding: 0 3px; color: #fff; font-size: 9px; font-weight: 800; line-height: 12px; text-align: center; }
+
 .menu-search-area {
   position: relative;
 }
@@ -212,12 +228,24 @@ button {
 }
 
 .sidebar-heading {
+  display: flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: space-between;
   border-bottom: 1px solid #dbe3ee;
   padding: 2px 8px 9px;
   color: #475569;
   font-size: 12px;
   font-weight: 800;
 }
+
+.navigation-heading-actions { display: flex; gap: 3px; }
+.navigation-heading-actions button { display: grid; width: 24px; height: 24px; place-items: center; border: 0; border-radius: 4px; background: transparent; color: #64748b; font-size: 15px; }
+.navigation-heading-actions button:hover { background: #e1effe; color: #1456b8; }
+
+.floating-navigation-backdrop { position: fixed; z-index: 19; top: 46px; right: 0; bottom: 0; left: 0; border: 0; background: transparent; cursor: default; }
+.floating-navigation { position: fixed; z-index: 20; top: 46px; left: 108px; width: 360px; max-height: calc(100vh - 56px); overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 0 0 8px 8px; background: #fff; padding: 8px; box-shadow: 0 12px 28px rgb(15 23 42 / 18%); }
+.floating-navigation .sidebar-heading { color: #1456b8; }
 
 .sidebar-nav ul {
   display: grid;
@@ -1280,6 +1308,9 @@ tbody tr.selected-row td {
     z-index: 9;
     box-shadow: 8px 0 20px rgb(15 23 42 / 16%);
   }
+
+  .floating-navigation { top: 82px; left: 8px; width: min(360px, calc(100vw - 16px)); max-height: calc(100vh - 90px); }
+  .floating-navigation-backdrop { top: 82px; }
 
   .mdi-management button {
     display: none;

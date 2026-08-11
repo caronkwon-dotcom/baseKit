@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Header from '../components/Header';
 import MdiTabs from '../components/MdiTabs';
 import Sidebar from '../components/Sidebar';
@@ -18,13 +18,28 @@ function findTopMenuKeyByProgram(menuTree: MenuNode[], programKey: ProgramKey) {
 export default function AppLayout() {
   const menuTree = useMemo(() => metadataRepository.getMenuTree(), []);
   const [activeTopMenuKey, setActiveTopMenuKey] = useState(menuTree[0]?.menuKey ?? '');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => localStorage.getItem('basekit.navigation.sidebar-pinned') === 'Y');
+  const [floatingMenuOpen, setFloatingMenuOpen] = useState(false);
   const [expandedMenuKeys, setExpandedMenuKeys] = useState<string[]>(() =>
     menuTree.flatMap((menu) => menu.children.filter((child) => child.menuType === 'GROUP').map((child) => child.menuKey)),
   );
   const [tabs, setTabs] = useState<MdiTab[]>([homeTab]);
   const [activeProgramKey, setActiveProgramKey] = useState<ProgramKey>('HOME');
   const activeTopMenu = menuTree.find((menu) => menu.menuKey === activeTopMenuKey) ?? menuTree[0];
+
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setFloatingMenuOpen(false); };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, []);
+
+  const pinSidebar = () => { setSidebarOpen(true); setFloatingMenuOpen(false); localStorage.setItem('basekit.navigation.sidebar-pinned', 'Y'); };
+  const unpinSidebar = () => { setSidebarOpen(false); localStorage.setItem('basekit.navigation.sidebar-pinned', 'N'); };
+  const selectTopMenu = (menuKey: string) => {
+    const sameMenu = menuKey === activeTopMenuKey;
+    setActiveTopMenuKey(menuKey);
+    if (!sidebarOpen) setFloatingMenuOpen(sameMenu ? !floatingMenuOpen : true);
+  };
 
   const activateProgram = (programKey: ProgramKey) => {
     setActiveProgramKey(programKey);
@@ -37,7 +52,7 @@ export default function AppLayout() {
     setTabs((currentTabs) => currentTabs.some((tab) => tab.programKey === programKey)
       ? currentTabs : [...currentTabs, { programKey, title: program.programName }]);
     activateProgram(programKey);
-    setSidebarOpen(false);
+    setFloatingMenuOpen(false);
   };
 
   const closeProgram = (programKey: ProgramKey) => {
@@ -71,16 +86,17 @@ export default function AppLayout() {
   return (
     <div className="app-shell">
       <Header topMenus={menuTree} activeTopMenuKey={activeTopMenuKey}
-        sidebarOpen={sidebarOpen} onSelectTopMenu={setActiveTopMenuKey}
-        onToggleSidebar={() => setSidebarOpen((open) => !open)}
-        onOpenProgram={openProgram} />
+        sidebarOpen={sidebarOpen} onSelectTopMenu={selectTopMenu}
+        onToggleSidebar={() => sidebarOpen ? unpinSidebar() : pinSidebar()}
+        onOpenProgram={openProgram} notificationCount={3} />
+      {floatingMenuOpen && activeTopMenu ? <><button type="button" className="floating-navigation-backdrop" aria-label="플로팅 메뉴 닫기" onClick={() => setFloatingMenuOpen(false)} /><Sidebar menu={activeTopMenu} variant="floating" expandedMenuKeys={expandedMenuKeys} activeProgramKey={activeProgramKey} onToggleMenu={(menuKey) => setExpandedMenuKeys((keys) => keys.includes(menuKey) ? keys.filter((key) => key !== menuKey) : [...keys, menuKey])} onOpenProgram={openProgram} onPin={pinSidebar} onClose={() => setFloatingMenuOpen(false)} /></> : null}
       <div className="app-body">
         {sidebarOpen && activeTopMenu && (
           <Sidebar menu={activeTopMenu} expandedMenuKeys={expandedMenuKeys}
             activeProgramKey={activeProgramKey}
             onToggleMenu={(menuKey) => setExpandedMenuKeys((keys) =>
               keys.includes(menuKey) ? keys.filter((key) => key !== menuKey) : [...keys, menuKey])}
-            onOpenProgram={openProgram} />
+            onOpenProgram={openProgram} onUnpin={unpinSidebar} />
         )}
         <section className="app-main" aria-label="작업 영역">
           <MdiTabs tabs={tabs} activeProgramKey={activeProgramKey}
