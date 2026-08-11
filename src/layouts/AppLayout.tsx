@@ -43,7 +43,7 @@ export default function AppLayout() {
   const selectTopMenu = (menuKey: string) => {
     const sameMenu = menuKey === activeTopMenuKey;
     setActiveTopMenuKey(menuKey);
-    if (!sidebarPinned) setFloatingMenuOpen(sameMenu ? !floatingMenuOpen : true);
+    setFloatingMenuOpen(sameMenu ? !floatingMenuOpen : true);
   };
 
   const activateProgram = (programKey: ProgramKey) => {
