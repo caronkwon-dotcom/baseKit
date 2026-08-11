@@ -35,6 +35,13 @@ export default function AppLayout() {
 
   const pinSidebar = () => { setSidebarOpen(true); setFloatingMenuOpen(false); localStorage.setItem('basekit.navigation.sidebar-pinned', 'Y'); };
   const unpinSidebar = () => { setSidebarOpen(false); localStorage.setItem('basekit.navigation.sidebar-pinned', 'N'); };
+  const toggleNavigation = () => {
+    if (sidebarOpen) {
+      unpinSidebar();
+      return;
+    }
+    setFloatingMenuOpen((open) => !open);
+  };
   const selectTopMenu = (menuKey: string) => {
     const sameMenu = menuKey === activeTopMenuKey;
     setActiveTopMenuKey(menuKey);
@@ -86,8 +93,8 @@ export default function AppLayout() {
   return (
     <div className="app-shell">
       <Header topMenus={menuTree} activeTopMenuKey={activeTopMenuKey}
-        sidebarOpen={sidebarOpen} onSelectTopMenu={selectTopMenu}
-        onToggleSidebar={() => sidebarOpen ? unpinSidebar() : pinSidebar()}
+        sidebarOpen={sidebarOpen || floatingMenuOpen} onSelectTopMenu={selectTopMenu}
+        onToggleSidebar={toggleNavigation}
         onOpenProgram={openProgram} notificationCount={3} />
       {floatingMenuOpen && activeTopMenu ? <><button type="button" className="floating-navigation-backdrop" aria-label="플로팅 메뉴 닫기" onClick={() => setFloatingMenuOpen(false)} /><Sidebar menu={activeTopMenu} variant="floating" expandedMenuKeys={expandedMenuKeys} activeProgramKey={activeProgramKey} onToggleMenu={(menuKey) => setExpandedMenuKeys((keys) => keys.includes(menuKey) ? keys.filter((key) => key !== menuKey) : [...keys, menuKey])} onOpenProgram={openProgram} onPin={pinSidebar} onClose={() => setFloatingMenuOpen(false)} /></> : null}
       <div className="app-body">
