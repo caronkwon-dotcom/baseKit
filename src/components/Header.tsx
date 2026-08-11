@@ -35,7 +35,7 @@ export default function Header({ topMenus, activeTopMenuKey, sidebarOpen, onSele
   return (
     <header className="app-header">
       <div className="header-brand"><span className="brand-mark">B</span><strong>BaseKit</strong></div>
-      <button type="button" className="shell-icon-button" aria-label={sidebarOpen ? '사이드바 닫기' : '사이드바 열기'} aria-expanded={sidebarOpen} onClick={onToggleSidebar}>☰</button>
+      <button type="button" className="shell-icon-button navigation-button" aria-label={sidebarOpen ? '사이드바 닫기' : '사이드바 열기'} aria-expanded={sidebarOpen} onClick={onToggleSidebar}>☰ <span>메뉴</span></button>
       <nav className="top-navigation" aria-label="업무 영역">
         {topMenus.map((menu) => <button key={menu.menuKey} type="button" className={menu.menuKey === activeTopMenuKey ? 'top-menu-button active' : 'top-menu-button'} onClick={() => onSelectTopMenu(menu.menuKey)}>{menu.menuName}</button>)}
       </nav>

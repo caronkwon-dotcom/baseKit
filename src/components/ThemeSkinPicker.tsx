@@ -6,33 +6,23 @@ type ThemeToken = typeof editableTokens[number]['key'];
 const editableTokens = [
   { key: '--surface-app', label: '전체 배경' },
   { key: '--surface-panel', label: '패널 배경' },
-  { key: '--surface-muted', label: '보조 배경' },
   { key: '--text-primary', label: '기본 글자' },
-  { key: '--text-secondary', label: '보조 글자' },
-  { key: '--text-muted', label: '약한 글자' },
   { key: '--border-default', label: '기본 테두리' },
-  { key: '--border-strong', label: '강조 테두리' },
   { key: '--brand-primary', label: '주 색상' },
-  { key: '--brand-hover', label: '강조 색상' },
-  { key: '--brand-soft', label: '선택 배경' },
 ] as const;
 
 const skins: Record<'base' | 'green', ThemeColors> = {
   base: {
-    '--surface-app': '#eef2f7', '--surface-panel': '#ffffff', '--surface-muted': '#f8fafc',
-    '--text-primary': '#1d2433', '--text-secondary': '#475569', '--text-muted': '#64748b',
-    '--border-default': '#d6deea', '--border-strong': '#cbd5e1',
-    '--brand-primary': '#1f6feb', '--brand-hover': '#1456b8', '--brand-soft': '#e1effe',
+    '--surface-app': '#eef2f7', '--surface-panel': '#ffffff', '--text-primary': '#1d2433',
+    '--border-default': '#d6deea', '--brand-primary': '#1f6feb',
   },
   green: {
-    '--surface-app': '#edf4f0', '--surface-panel': '#ffffff', '--surface-muted': '#f5faf7',
-    '--text-primary': '#173329', '--text-secondary': '#3f5f52', '--text-muted': '#668076',
-    '--border-default': '#cdded6', '--border-strong': '#b9d0c5',
-    '--brand-primary': '#16835b', '--brand-hover': '#106b4a', '--brand-soft': '#dff4e9',
+    '--surface-app': '#edf4f0', '--surface-panel': '#ffffff', '--text-primary': '#173329',
+    '--border-default': '#cdded6', '--brand-primary': '#16835b',
   },
 };
 
-const storageKey = 'basekit.theme-skin.v1';
+const storageKey = 'basekit.theme-skin.v2';
 
 function applyColors(colors: ThemeColors) {
   editableTokens.forEach(({ key }) => document.documentElement.style.setProperty(key, colors[key]));
@@ -72,7 +62,7 @@ export default function ThemeSkinPicker() {
 
   return (
     <div className="theme-skin-area">
-      <button type="button" className="shell-icon-button theme-button" aria-label="화면 스킨 변경" title="화면 스킨 변경" aria-expanded={open} onClick={() => setOpen((value) => !value)}>◉</button>
+      <button type="button" className="shell-icon-button theme-button" aria-label="화면 스킨 변경" title="화면 스킨 변경" aria-expanded={open} onClick={() => setOpen((value) => !value)}><i aria-hidden="true" />스킨</button>
       {open && (
         <section className="theme-skin-popover" aria-label="개인화 스킨 설정">
           <header><strong>화면 스킨</strong><span>개인화 1단계</span></header>
@@ -81,7 +71,7 @@ export default function ThemeSkinPicker() {
             <button type="button" className={skinId === 'green' ? 'active' : ''} onClick={() => selectSkin('green')}><i className="skin-swatch green" />그린</button>
             <span className={skinId === 'custom' ? 'active' : ''}>개인 설정</span>
           </div>
-          <p>색상을 변경하면 현재 스킨을 복사한 개인 설정으로 즉시 저장됩니다.</p>
+          <p>핵심 색상 5개만 선택합니다. 나머지 색상은 자동 생성되며 변경 즉시 개인 설정으로 저장됩니다.</p>
           <div className="theme-color-grid">
             {editableTokens.map(({ key, label }) => (
               <label key={key}><span>{label}</span><input type="color" value={colors[key]} aria-label={`${label} 색상`} onChange={(event) => changeColor(key, event.target.value)} /><code>{colors[key]}</code></label>
