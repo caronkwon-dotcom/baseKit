@@ -276,6 +276,10 @@ button {
 .navigation-heading-actions button:hover { background: var(--brand-soft); color: var(--brand-hover); }
 .navigation-heading-actions button.active { background: var(--brand-soft); color: var(--brand-primary); }
 
+.floating-navigation-backdrop { position: fixed; z-index: 19; top: 46px; right: 0; bottom: 0; left: 0; border: 0; background: transparent; cursor: default; }
+.floating-navigation { position: fixed; z-index: 20; top: 46px; left: 108px; width: 360px; max-height: calc(100vh - 56px); overflow-y: auto; border: 1px solid var(--border-strong); border-radius: 0 0 8px 8px; background: var(--surface-panel); padding: 8px; box-shadow: 0 12px 28px rgb(15 23 42 / 18%); }
+.floating-navigation .sidebar-heading { color: var(--brand-hover); }
+
 
 .sidebar-nav ul {
   display: grid;
@@ -1338,6 +1342,9 @@ tbody tr.selected-row td {
     z-index: 9;
     box-shadow: 8px 0 20px rgb(15 23 42 / 16%);
   }
+
+  .floating-navigation { top: 82px; left: 8px; width: min(360px, calc(100vw - 16px)); max-height: calc(100vh - 90px); }
+  .floating-navigation-backdrop { top: 82px; }
 
   .mdi-management button {
     display: none;

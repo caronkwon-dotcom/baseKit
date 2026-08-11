@@ -46,7 +46,7 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 - 프로그램 선택 시 Sidebar 자동 닫기
 - 표준데이터관리 2Depth 아래 단어·도메인·표준용어 3Depth 구성
 - 용어 조합 단어 Drag & Drop 및 좌우 순서 변경
-- 햄버거·1Depth 클릭 좌측 2~3Depth Sidebar, 프로그램 선택 시 자동 닫기와 Pin 고정·해제
+- 1Depth 클릭 2~3Depth 레이어 메뉴, 햄버거 클릭 좌측 Sidebar, 프로그램 선택 시 자동 닫기와 Sidebar Pin 고정·해제
 - 기본·그린 스킨 선택과 핵심 색상 5개 Color Picker 기반 개인화·브라우저 저장
 - Header 알림 Badge 영역과 알림 count 표시 계약
 
