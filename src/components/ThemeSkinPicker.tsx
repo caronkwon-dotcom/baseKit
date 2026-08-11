@@ -60,6 +60,11 @@ export default function ThemeSkinPicker() {
     localStorage.setItem(storageKey, JSON.stringify({ skinId: 'custom', colors: nextColors }));
   };
 
+  const createCustomSkin = () => {
+    setTheme({ skinId: 'custom', colors });
+    localStorage.setItem(storageKey, JSON.stringify({ skinId: 'custom', colors }));
+  };
+
   return (
     <div className="theme-skin-area">
       <button type="button" className="shell-icon-button theme-button" aria-label="화면 스킨 변경" title="화면 스킨 변경" aria-expanded={open} onClick={() => setOpen((value) => !value)}><i aria-hidden="true" />스킨</button>
@@ -67,16 +72,24 @@ export default function ThemeSkinPicker() {
         <section className="theme-skin-popover" aria-label="개인화 스킨 설정">
           <header><strong>화면 스킨</strong><span>개인화 1단계</span></header>
           <div className="theme-preset-list">
-            <button type="button" className={skinId === 'base' ? 'active' : ''} onClick={() => selectSkin('base')}><i className="skin-swatch base" />기본</button>
+            <button type="button" className={skinId === 'base' ? 'active' : ''} onClick={() => selectSkin('base')}><i className="skin-swatch base" />블루(기본)</button>
             <button type="button" className={skinId === 'green' ? 'active' : ''} onClick={() => selectSkin('green')}><i className="skin-swatch green" />그린</button>
-            <span className={skinId === 'custom' ? 'active' : ''}>개인 설정</span>
           </div>
-          <p>핵심 색상 5개만 선택합니다. 나머지 색상은 자동 생성되며 변경 즉시 개인 설정으로 저장됩니다.</p>
-          <div className="theme-color-grid">
-            {editableTokens.map(({ key, label }) => (
-              <label key={key}><span>{label}</span><input type="color" value={colors[key]} aria-label={`${label} 색상`} onChange={(event) => changeColor(key, event.target.value)} /><code>{colors[key]}</code></label>
-            ))}
-          </div>
+          {skinId !== 'custom' ? (
+            <div className="theme-custom-start">
+              <p>선택한 스킨을 기준으로 나만의 색상을 만들 수 있습니다.</p>
+              <button type="button" onClick={createCustomSkin}>현재 스킨 복사하여 개인화 만들기</button>
+            </div>
+          ) : (
+            <>
+              <p className="theme-custom-status">개인화 편집 중 · 변경 즉시 저장</p>
+              <div className="theme-color-grid">
+                {editableTokens.map(({ key, label }) => (
+                  <label key={key}><span>{label}</span><input type="color" value={colors[key]} aria-label={`${label} 색상`} onChange={(event) => changeColor(key, event.target.value)} /><code>{colors[key]}</code></label>
+                ))}
+              </div>
+            </>
+          )}
           <button type="button" className="theme-reset-button" onClick={() => selectSkin('base')}>기본 스킨으로 초기화</button>
         </section>
       )}

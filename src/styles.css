@@ -117,16 +117,13 @@ button {
 .notification-button svg { width: 16px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .notification-button > span { position: absolute; top: -6px; right: -6px; min-width: 16px; height: 16px; border: 2px solid var(--surface-panel); border-radius: 999px; background: #dc2626; padding: 0 3px; color: var(--surface-panel); font-size: 9px; font-weight: 800; line-height: 12px; text-align: center; }
 .theme-skin-area { position: relative; }
-.navigation-button, .theme-button { width: auto; gap: 4px; padding: 0 7px; font-size: 11px; font-weight: 800; }
-.navigation-button { font-size: 13px; }
-.navigation-button span { font-size: 10px; }
-.theme-button { color: var(--brand-hover); }
-.theme-button i { width: 11px; height: 11px; border-radius: 50%; background: var(--brand-primary); box-shadow: inset 0 0 0 1px rgb(0 0 0 / 12%); }
+.theme-button { width: auto; gap: 4px; padding: 0 7px; color: #475569; font-size: 11px; font-weight: 800; }
+.theme-button i { width: 11px; height: 11px; border-radius: 50%; background: conic-gradient(#1f6feb, #16a34a, #f59e0b, #dc2626, #1f6feb); box-shadow: inset 0 0 0 1px rgb(0 0 0 / 12%); }
 .theme-skin-popover { position: absolute; z-index: 30; top: 34px; right: 0; width: 330px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface-panel); padding: 10px; box-shadow: 0 12px 28px rgb(15 23 42 / 18%); }
 .theme-skin-popover header { display: flex; align-items: center; justify-content: space-between; color: var(--text-primary); }
 .theme-skin-popover header span { color: var(--text-muted); font-size: 10px; }
 .theme-skin-popover > p { margin: 8px 0; color: var(--text-muted); font-size: 10px; line-height: 1.4; }
-.theme-preset-list { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top: 8px; }
+.theme-preset-list { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 8px; }
 .theme-preset-list button, .theme-preset-list > span { display: flex; min-height: 30px; align-items: center; justify-content: center; gap: 5px; border: 1px solid var(--border-default); border-radius: 5px; background: var(--surface-panel); color: var(--text-secondary); font-size: 11px; }
 .theme-preset-list .active { border-color: var(--brand-primary); background: var(--brand-soft); color: var(--brand-hover); font-weight: 800; }
 .skin-swatch { width: 12px; height: 12px; border-radius: 50%; background: var(--brand-primary); }
@@ -135,6 +132,10 @@ button {
 .theme-color-grid label { display: grid; grid-template-columns: 1fr 24px; align-items: center; gap: 4px; color: var(--text-secondary); font-size: 10px; }
 .theme-color-grid input { width: 24px; height: 22px; border: 0; background: transparent; padding: 0; cursor: pointer; }
 .theme-color-grid code { grid-column: 1 / -1; color: var(--text-muted); font-size: 9px; }
+.theme-custom-start { margin-top: 9px; border: 1px solid var(--border-default); border-radius: 6px; background: var(--surface-muted); padding: 8px; text-align: center; }
+.theme-custom-start p { margin: 0 0 7px; color: var(--text-muted); font-size: 10px; }
+.theme-custom-start button { width: 100%; min-height: 30px; border: 1px solid var(--brand-primary); border-radius: 5px; background: var(--brand-primary); color: #ffffff; font-size: 11px; font-weight: 800; }
+.theme-custom-status { border-radius: 4px; background: var(--brand-soft); padding: 6px; color: var(--brand-hover) !important; font-weight: 800; text-align: center; }
 .theme-reset-button { width: 100%; min-height: 28px; margin-top: 9px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-muted); color: var(--text-secondary); font-size: 11px; }
 
 .menu-search-area {
