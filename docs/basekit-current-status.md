@@ -52,6 +52,7 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 - 개발·검수 사이트 검색 `noindex` 적용, 공개 데이터·대표 AI 수집 봇 robots 정책 정의(도메인 루트 적용은 배포 환경 과제)
 - 고객 용어집 전환 시 변경 대상·수정 상태·영향 프로그램·재테스트 증적을 관리하는 Impact Register 아이디어 승인
 - 전체 사전 선행 정제 대신 기능 개발에 사용되는 단어·용어부터 검수하고 배포 시 APPROVED를 요구하는 점진 정제 정책 확정
+- Hibernate/JPA는 Schema·DDL 초안, MyBatis는 업무 SQL, 운영은 승인된 Migration을 사용하며 관계 등급별로 물리 FK를 선택하는 정책 확정
 - Header 알림 Badge 영역과 알림 count 표시 계약
 
 ## 3. 문서만 설계 완료
