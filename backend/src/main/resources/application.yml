@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: basekit-backend
+  datasource:
+    url: ${BASEKIT_DB_URL:jdbc:postgresql://localhost:5432/basekit}
+    username: ${BASEKIT_DB_USERNAME:basekit}
+    password: ${BASEKIT_DB_PASSWORD:basekit}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+
+mybatis:
+  mapper-locations: classpath*:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful

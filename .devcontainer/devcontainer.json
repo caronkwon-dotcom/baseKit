@@ -1,0 +1,37 @@
+{
+  "name": "BaseKit Full Stack",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "workspace",
+  "workspaceFolder": "/workspaces/baseKit",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    }
+  },
+  "forwardPorts": [5173, 8080, 5432],
+  "portsAttributes": {
+    "5173": {
+      "label": "BaseKit Frontend",
+      "onAutoForward": "openPreview"
+    },
+    "8080": {
+      "label": "BaseKit Backend API",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "BaseKit PostgreSQL",
+      "onAutoForward": "silent"
+    }
+  },
+  "postCreateCommand": "npm ci --prefix frontend && mvn -f backend/pom.xml -DskipTests dependency:go-offline",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-spring-boot"
+      ]
+    }
+  },
+  "remoteUser": "vscode"
+}

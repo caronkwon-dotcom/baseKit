@@ -14,11 +14,11 @@ BaseKit은 여러 SI 업무시스템에서 반복 사용할 표준 아키텍처,
 
 ## 기술스택
 
-- React
-- Vite
-- TypeScript
-- React Router
-- ESLint
+- Frontend: React, Vite, TypeScript, React Router, ESLint
+- Backend: Java 21, Spring Boot, Spring MVC, JPA/Hibernate, MyBatis
+- Database: PostgreSQL, Flyway
+- API 문서: OpenAPI/Swagger UI
+- 개발환경: GitHub Codespaces Dev Container
 
 기본 실행 환경은 Node.js 20.19 이상과 npm 10 이상입니다. 현재 도구 호환 범위에서 Node.js 22.12 이상도 지원합니다.
 
@@ -44,7 +44,7 @@ BaseKit은 여러 SI 업무시스템에서 반복 사용할 표준 아키텍처,
 ## 폴더 구조
 
 ```text
-src/
+frontend/src/
   components/   공통 UI 컴포넌트
   constants/    상수 정의
   layouts/      앱 레이아웃
@@ -55,10 +55,10 @@ src/
   utils/        유틸리티 함수
 ```
 
-주요 메타데이터는 `meta/` 폴더에서 관리합니다.
+주요 Frontend Mock 메타데이터는 `frontend/meta/` 폴더에서 관리합니다.
 
 ```text
-meta/
+frontend/meta/
   actions.json
   codes.json
   domains.json
@@ -71,7 +71,7 @@ meta/
 
 ## 타입 정의 원칙
 
-- 타입 파일은 `src/types`에 도메인별로 분리합니다.
+- 타입 파일은 `frontend/src/types`에 도메인별로 분리합니다.
 - 공통 감사 필드는 `BaseEntity`를 상속해서 사용합니다.
 - 사용 여부 값은 `UseYn` 타입을 사용합니다.
 - 필드명은 메타데이터, API, DB 컬럼과의 일관성을 위해 대문자 스네이크 케이스를 사용합니다.
@@ -91,7 +91,7 @@ meta/
 의존성 설치:
 
 ```bash
-npm ci
+npm ci --prefix frontend
 ```
 
 개발 서버 실행:
@@ -117,6 +117,35 @@ npm run lint
 ```bash
 npm run preview
 ```
+
+Backend 개발 서버 실행:
+
+```bash
+npm run backend:run
+```
+
+Backend 테스트:
+
+```bash
+npm run backend:test
+```
+
+기본 API 확인:
+
+- Health API: `http://localhost:8080/api/health`
+- Actuator: `http://localhost:8080/actuator/health`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+
+## Full Stack 디렉터리
+
+```text
+frontend/       React + Vite UI와 Frontend Mock Metadata
+backend/        Spring Boot REST API
+database/       검토 완료된 Flyway Migration
+.devcontainer/  Codespaces용 Java + Node + PostgreSQL 환경
+```
+
+Codespaces를 생성하면 PostgreSQL이 함께 시작되고 `5173`, `8080`, `5432` 포트가 자동 전달됩니다. Codespaces는 개발·통합검증 환경이며 상시 운영 WAS로 사용하지 않습니다.
 
 현재 실행에 필수인 `.env`나 외부 서비스 인증정보는 없습니다. 비밀키와 Token은 Repository에 저장하지 않습니다.
 

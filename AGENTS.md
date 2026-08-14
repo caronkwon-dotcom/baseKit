@@ -32,7 +32,7 @@
 
 ## 검증 및 보고
 
-- 기본 검증은 `npm run build`, `npm run lint`, `git diff --check`다.
+- 기본 검증은 `npm run build`, `npm run lint`, `npm run backend:test`, `git diff --check`다.
 - 기능 변경 시 안전한 범위에서 실제 동작을 추가 검증한다.
 - 작업 종료 시 코드와 문서의 상태를 동기화한다.
 - Commit, Push, PR 시 변경 범위와 검증 결과를 간결하게 보고한다.

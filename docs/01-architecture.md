@@ -65,7 +65,7 @@ BaseKit에는 프로젝트 책임자가 IT 업계에서 축적한 경험과 SI �
 
 업무 모듈이 본격적으로 추가되는 단계에서는 Frontend와 Backend를 명확히 분리하고, 공통 계약과 Adapter를 통해 연결한다. 분리는 처음부터 형식적으로 늘리지 않고 Level 1 Foundation이 안정된 뒤 진행한다.
 
-Frontend는 데이터 원본에 직접 종속되지 않고 Repository/Adapter를 통해 접근한다. 현재 Metadata는 `meta/*.json` Adapter를 사용하고, 향후 Spring REST Adapter로 교체한다. Grid, Uploader, Editor, PDF와 외부 연계도 같은 원칙으로 제품별 구현을 교체 가능하게 설계한다.
+Frontend는 데이터 원본에 직접 종속되지 않고 Repository/Adapter를 통해 접근한다. 현재 Metadata는 `frontend/meta/*.json` Adapter를 사용하고, 향후 Spring REST Adapter로 교체한다. Grid, Uploader, Editor, PDF와 외부 연계도 같은 원칙으로 제품별 구현을 교체 가능하게 설계한다.
 
 처음부터 거대한 Metadata Framework, BPM 또는 Rule Engine을 만들지 않는다. Lifecycle이 필요한 Business Object와 실제 반복 요구부터 공통화한다.
 

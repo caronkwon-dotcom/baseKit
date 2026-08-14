@@ -25,7 +25,7 @@ git switch -c dev-pm --track origin/dev-pm
 ```powershell
 node --version
 npm --version
-npm ci
+npm ci --prefix frontend
 npm run build
 npm run lint
 git status

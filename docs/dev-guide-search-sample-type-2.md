@@ -36,7 +36,7 @@ searchSampleType2/
 5. `columns`를 업무 Grid 순서에 맞게 변경한다.
 6. `types.ts`에서 검색조건과 API Row 타입을 변경한다.
 7. `repository.ts`의 Mock 조회를 REST Adapter로 교체한다.
-8. `meta/programs.json`, `meta/menus.json`, `programRegistry.tsx`를 연결한다.
+8. `frontend/meta/programs.json`, `frontend/meta/menus.json`, `programRegistry.tsx`를 연결한다.
 9. 조회·초기화·빈 결과·접기·긴 문자열·최대 조건 수를 검수한다.
 10. build, lint와 Metadata Guard를 통과시킨다.
 
