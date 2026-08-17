@@ -35,6 +35,25 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 - Program/Menu/Action 참조 및 메뉴 최대 3Depth 검증
 - GitHub Pages main 배포
 - dev-pm 대상 PR 자동 build
+- 행정안전부 공공표준용어 13,176건 조회·검색·페이징과 항목별 정제 Workbench
+- 공공표준 원본과 BaseKit 정제 결과 분리
+- 로컬 개발환경 `meta/term-curation.json` 안전 저장 및 정적 배포 브라우저 임시저장·JSON 내보내기
+- 단어관리와 도메인관리 JSON Prototype
+- 등록 단어 조합, 마지막 도메인 단어 Guard와 논리명·물리명·도메인 자동 미리보기
+- 단어 신규등록·수정검토·검수완료 상태와 등록 전 유사어 검사
+- 행정안전부 공통표준단어 3,284건 원본 반입과 용어 13,176건 약어 기반 자동 분리
+- 용어 완전분리 12,523건과 미매칭 653건 구분
+- 프로그램 선택 시 Sidebar 자동 닫기
+- 표준데이터관리 2Depth 아래 단어·도메인·표준용어 3Depth 구성
+- 용어 조합 단어 Drag & Drop 및 좌우 순서 변경
+- 1Depth 클릭 2~3Depth 레이어 메뉴, 햄버거 클릭 좌측 Sidebar, 프로그램 선택 시 자동 닫기와 Sidebar Pin 고정·해제
+- 기본·그린 스킨 선택과 핵심 색상 5개 Color Picker 기반 개인화·브라우저 저장
+- 업무용 최적 1920×1080, 설계 기준 1440×900, 최소 1280×800 및 1280~1439px 노트북·태블릿 가로 반응형 기준
+- 개발·검수 사이트 검색 `noindex` 적용, 공개 데이터·대표 AI 수집 봇 robots 정책 정의(도메인 루트 적용은 배포 환경 과제)
+- 고객 용어집 전환 시 변경 대상·수정 상태·영향 프로그램·재테스트 증적을 관리하는 Impact Register 아이디어 승인
+- 전체 사전 선행 정제 대신 기능 개발에 사용되는 단어·용어부터 검수하고 배포 시 APPROVED를 요구하는 점진 정제 정책 확정
+- Hibernate/JPA는 Schema·DDL 초안, MyBatis는 업무 SQL, 운영은 승인된 Migration을 사용하며 관계 등급별로 물리 FK를 선택하는 정책 확정
+- Header 알림 Badge 영역과 알림 count 표시 계약
 
 ## 3. 문서만 설계 완료
 
@@ -54,6 +73,7 @@ Lifecycle 문서는 `docs/basekit-business-object-lifecycle-architecture.md`에 
 - `hasAction()` 기반은 있으나 로그인 사용자 Context와 버튼 자동 제어는 연결되지 않았다.
 - 회사관리, 역할관리, 시스템설정 Page 파일 일부는 존재하지만 현재 Program Registry와 메뉴에 연결되지 않았다.
 - 실제 Backend 권한 검증이 없으므로 Frontend 권한만으로 보안을 보장할 수 없다.
+- 표준용어 정제 결과는 JSON 단계이며 DB 저장, 동시 편집, 세부 변경 이력은 아직 없다.
 
 ## 5. 아직 결정 필요
 
@@ -62,6 +82,10 @@ Lifecycle 문서는 `docs/basekit-business-object-lifecycle-architecture.md`에 
 - Backend 권한 검증과 데이터 범위 권한
 - Lifecycle ERD, 동시성, Projection, Outbox, Version
 - 외부결재 취소·회수 및 Callback 보안
+- 공공표준 용어의 BaseKit 채택 기준과 기존 `PERMISSION` 등 명명 충돌 처리
+- 채택 용어의 `terms.json`·`domains.json` 승격 승인 절차
+- 동일한 마지막 단어에 복수 도메인이 연결될 때 도메인 선택 규칙
+- 용어 조합 결과의 승인·등록·폐기·영향 분석 Workflow
 
 ## 6. Git 및 PR 상태 확인
 
@@ -139,9 +163,24 @@ gh pr list --repo caronkwon-dotcom/baseKit
 
 설계 승인 후에만 구현 WBS를 시작한다.
 
+### WBS 3-1. 표준용어·도메인 Foundation
+
+범위:
+
+- 공공표준용어 원본 조회와 정제 상태 관리
+- BaseKit 물리명, 도메인, 별칭과 검토 메모 관리
+- 단어·용어·도메인 관리 모델 및 검증 규칙
+- 논리명 기반 컬럼 설계와 DDL 생성으로 단계적 확장
+
+현재 상태:
+
+- 용어 정제 List View와 JSON 저장 Prototype 구현
+- 단어·도메인 관리와 용어 조합 Guard Prototype 구현
+- 채택 승격, 기존 용어 자동 분해, DDL 생성은 후속 작업
+
 ## 8. 다음 추천 작업
 
-WBS 1 검수·병합 후 WBS 2 로그인 권한 Context를 진행한다. 화면마다 임의로 권한을 처리하지 않도록 로그인 사용자와 역할, `hasAction(programKey, actionCode)` 사용 경계를 먼저 확정하는 것이 적절하다.
+표준용어 정제 화면을 검수한 뒤 채택 기준과 단어·용어·도메인 관리 모델을 확정한다. 이후 WBS 2 로그인 권한 Context와 WBS 3 시스템관리 기준 화면을 진행하며, 용어 Foundation이 신규 테이블·API 명명 기준을 제공하도록 연결한다.
 
 연말까지의 목표는 Level 1 시스템 Foundation의 핵심 규약, 기준 화면, 개발자 가이드와 Frontend 공통 구조를 실제 다음 SI 프로젝트에서 시작점으로 사용할 수 있는 수준까지 확보하는 것이다. 주간 목표는 이 목표에 기여하는 작은 검증 단위로 나눈다.
 

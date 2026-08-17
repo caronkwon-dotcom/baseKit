@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Header from '../components/Header';
 import MdiTabs from '../components/MdiTabs';
 import Sidebar from '../components/Sidebar';
@@ -18,13 +18,33 @@ function findTopMenuKeyByProgram(menuTree: MenuNode[], programKey: ProgramKey) {
 export default function AppLayout() {
   const menuTree = useMemo(() => metadataRepository.getMenuTree(), []);
   const [activeTopMenuKey, setActiveTopMenuKey] = useState(menuTree[0]?.menuKey ?? '');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarPinned, setSidebarPinned] = useState(() => localStorage.getItem('basekit.navigation.sidebar-pinned') === 'Y');
+  const [sidebarOpen, setSidebarOpen] = useState(() => localStorage.getItem('basekit.navigation.sidebar-pinned') === 'Y');
+  const [floatingMenuOpen, setFloatingMenuOpen] = useState(false);
   const [expandedMenuKeys, setExpandedMenuKeys] = useState<string[]>(() =>
     menuTree.flatMap((menu) => menu.children.filter((child) => child.menuType === 'GROUP').map((child) => child.menuKey)),
   );
   const [tabs, setTabs] = useState<MdiTab[]>([homeTab]);
   const [activeProgramKey, setActiveProgramKey] = useState<ProgramKey>('HOME');
   const activeTopMenu = menuTree.find((menu) => menu.menuKey === activeTopMenuKey) ?? menuTree[0];
+
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setFloatingMenuOpen(false);
+      if (!sidebarPinned) setSidebarOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [sidebarPinned]);
+
+  const pinSidebar = () => { setSidebarPinned(true); setSidebarOpen(true); localStorage.setItem('basekit.navigation.sidebar-pinned', 'Y'); };
+  const unpinSidebar = () => { setSidebarPinned(false); localStorage.setItem('basekit.navigation.sidebar-pinned', 'N'); };
+  const selectTopMenu = (menuKey: string) => {
+    const sameMenu = menuKey === activeTopMenuKey;
+    setActiveTopMenuKey(menuKey);
+    setFloatingMenuOpen(sameMenu ? !floatingMenuOpen : true);
+  };
 
   const activateProgram = (programKey: ProgramKey) => {
     setActiveProgramKey(programKey);
@@ -37,6 +57,8 @@ export default function AppLayout() {
     setTabs((currentTabs) => currentTabs.some((tab) => tab.programKey === programKey)
       ? currentTabs : [...currentTabs, { programKey, title: program.programName }]);
     activateProgram(programKey);
+    setFloatingMenuOpen(false);
+    if (!sidebarPinned) setSidebarOpen(false);
   };
 
   const closeProgram = (programKey: ProgramKey) => {
@@ -70,16 +92,27 @@ export default function AppLayout() {
   return (
     <div className="app-shell">
       <Header topMenus={menuTree} activeTopMenuKey={activeTopMenuKey}
-        sidebarOpen={sidebarOpen} onSelectTopMenu={setActiveTopMenuKey}
+        sidebarOpen={sidebarOpen} onSelectTopMenu={selectTopMenu}
         onToggleSidebar={() => setSidebarOpen((open) => !open)}
-        onOpenProgram={openProgram} />
+        onOpenProgram={openProgram} notificationCount={3} />
+      {floatingMenuOpen && activeTopMenu && (
+        <>
+          <button type="button" className="floating-navigation-backdrop" aria-label="플로팅 메뉴 닫기" onClick={() => setFloatingMenuOpen(false)} />
+          <Sidebar menu={activeTopMenu} variant="floating"
+            expandedMenuKeys={expandedMenuKeys} activeProgramKey={activeProgramKey}
+            onToggleMenu={(menuKey) => setExpandedMenuKeys((keys) =>
+              keys.includes(menuKey) ? keys.filter((key) => key !== menuKey) : [...keys, menuKey])}
+            onOpenProgram={openProgram} onClose={() => setFloatingMenuOpen(false)} />
+        </>
+      )}
       <div className="app-body">
         {sidebarOpen && activeTopMenu && (
           <Sidebar menu={activeTopMenu} expandedMenuKeys={expandedMenuKeys}
             activeProgramKey={activeProgramKey}
             onToggleMenu={(menuKey) => setExpandedMenuKeys((keys) =>
               keys.includes(menuKey) ? keys.filter((key) => key !== menuKey) : [...keys, menuKey])}
-            onOpenProgram={openProgram} />
+            onOpenProgram={openProgram} pinned={sidebarPinned}
+            onPin={pinSidebar} onUnpin={unpinSidebar} />
         )}
         <section className="app-main" aria-label="작업 영역">
           <MdiTabs tabs={tabs} activeProgramKey={activeProgramKey}

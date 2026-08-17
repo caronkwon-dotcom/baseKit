@@ -40,6 +40,46 @@
     "useYn": "Y"
   },
   {
+    "menuKey": "SYS.STANDARD_DATA",
+    "parentMenuKey": "SYS",
+    "menuName": "표준데이터관리",
+    "menuLevel": 2,
+    "menuType": "GROUP",
+    "programKey": null,
+    "sortOrder": 4,
+    "useYn": "Y"
+  },
+  {
+    "menuKey": "SYS.TERM",
+    "parentMenuKey": "SYS.STANDARD_DATA",
+    "menuName": "표준용어관리",
+    "menuLevel": 3,
+    "menuType": "SCREEN",
+    "programKey": "TERM_CURATION",
+    "sortOrder": 3,
+    "useYn": "Y"
+  },
+  {
+    "menuKey": "SYS.WORD",
+    "parentMenuKey": "SYS.STANDARD_DATA",
+    "menuName": "단어관리",
+    "menuLevel": 3,
+    "menuType": "SCREEN",
+    "programKey": "WORD_MGMT",
+    "sortOrder": 1,
+    "useYn": "Y"
+  },
+  {
+    "menuKey": "SYS.DOMAIN",
+    "parentMenuKey": "SYS.STANDARD_DATA",
+    "menuName": "도메인관리",
+    "menuLevel": 3,
+    "menuType": "SCREEN",
+    "programKey": "DOMAIN_MGMT",
+    "sortOrder": 2,
+    "useYn": "Y"
+  },
+  {
     "menuKey": "DEV_GUIDE",
     "parentMenuKey": null,
     "menuName": "개발자가이드",

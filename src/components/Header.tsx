@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { MenuNode, ProgramKey } from '../types/adminShell';
+import ThemeSkinPicker from './ThemeSkinPicker';
 
 interface HeaderProps {
   topMenus: MenuNode[];
@@ -8,6 +9,7 @@ interface HeaderProps {
   onSelectTopMenu: (menuKey: string) => void;
   onToggleSidebar: () => void;
   onOpenProgram: (programKey: ProgramKey) => void;
+  notificationCount?: number;
 }
 
 interface MenuSearchItem { programKey: ProgramKey; menuName: string; path: string; }
@@ -23,7 +25,7 @@ function getSearchItems(menus: MenuNode[]): MenuSearchItem[] {
   return result;
 }
 
-export default function Header({ topMenus, activeTopMenuKey, sidebarOpen, onSelectTopMenu, onToggleSidebar, onOpenProgram }: HeaderProps) {
+export default function Header({ topMenus, activeTopMenuKey, sidebarOpen, onSelectTopMenu, onToggleSidebar, onOpenProgram, notificationCount = 0 }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
   const searchItems = useMemo(() => getSearchItems(topMenus), [topMenus]);
@@ -49,6 +51,11 @@ export default function Header({ topMenus, activeTopMenuKey, sidebarOpen, onSele
           </div>
         )}
       </div>
+      <ThemeSkinPicker />
+      <button type="button" className="notification-button" aria-label={`알림 ${notificationCount}건`} title={`알림 ${notificationCount}건`}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>
+        {notificationCount > 0 ? <span>{notificationCount > 99 ? '99+' : notificationCount}</span> : null}
+      </button>
       <div className="user-area"><span>PM 검수</span><strong>admin</strong></div>
     </header>
   );

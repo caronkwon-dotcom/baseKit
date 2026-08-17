@@ -12,6 +12,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
+    ,"import:standard-words": "node scripts/import-standard-words.mjs"
   },
   "dependencies": {
     "react": "^19.2.6",
