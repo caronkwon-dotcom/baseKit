@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: ${BASEKIT_DB_URL:jdbc:postgresql://database:5432/basekit}
+
+management:
+  endpoint:
+    health:
+      show-details: always

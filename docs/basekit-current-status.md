@@ -17,6 +17,14 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 
 ## 2. 코드까지 구현 완료
 
+- `frontend/`, `backend/`, `database/` Full Stack Repository 구조
+- Java 21 + Spring Boot 3.5 기반 Backend Foundation
+- JPA/Hibernate + MyBatis 혼용 기반과 Flyway Migration 경로
+- 공통 API 성공·오류 응답과 Validation 예외 처리
+- `/api/health`, Actuator Health, OpenAPI/Swagger UI
+- Codespaces Java + Node + PostgreSQL 개발환경과 포트 전달
+- Frontend·Backend를 함께 검증하는 GitHub Actions
+
 - React + Vite + TypeScript
 - Compact 한 줄 Header / 1Depth Top / 2~3Depth Sidebar / Workspace 기반 Admin Shell
 - Sidebar 전체 열기·닫기와 2Depth GROUP Accordion
@@ -29,7 +37,7 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 - 개발자가이드 검색영역 1~5단 시각 검수 전환
 - 검색 샘플 `types/config/mock/repository/page` 책임 분리
 - Page 중심 구조와 실제 3단 검색을 적용한 Search Sample Type 2
-- `meta/*.json` 기반 Metadata Repository
+- `frontend/meta/*.json` 기반 Metadata Repository
 - Program Component Registry
 - `ROLE × PROGRAM × ACTION_CODE` 계약과 `hasAction()` 기반
 - Program/Menu/Action 참조 및 메뉴 최대 3Depth 검증
@@ -37,7 +45,7 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 - dev-pm 대상 PR 자동 build
 - 행정안전부 공공표준용어 13,176건 조회·검색·페이징과 항목별 정제 Workbench
 - 공공표준 원본과 BaseKit 정제 결과 분리
-- 로컬 개발환경 `meta/term-curation.json` 안전 저장 및 정적 배포 브라우저 임시저장·JSON 내보내기
+- 로컬 개발환경 `frontend/meta/term-curation.json` 안전 저장 및 정적 배포 브라우저 임시저장·JSON 내보내기
 - 단어관리와 도메인관리 JSON Prototype
 - 등록 단어 조합, 마지막 도메인 단어 Guard와 논리명·물리명·도메인 자동 미리보기
 - 단어 신규등록·수정검토·검수완료 상태와 등록 전 유사어 검사

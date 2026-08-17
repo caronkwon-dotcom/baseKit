@@ -222,7 +222,7 @@ BaseKit은 최소한 다음 레벨의 구분을 염두에 둔다.
 현재 단계의 의미는 다음과 같다.
 
 * Menu / Program / Action 개념 분리
-* `meta/*.json` 기반 Metadata Repository
+* `frontend/meta/*.json` 기반 Metadata Repository
 * 역할별 Program/Action 허용 데이터 예시
 * `hasAction(roleCode, programKey, actionCode)` 계약
 * 향후 Backend 권한 정책 연결 전제 확보

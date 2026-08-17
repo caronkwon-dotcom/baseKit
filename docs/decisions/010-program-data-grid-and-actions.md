@@ -15,7 +15,7 @@ Accepted
 - 제목, `총 N건`, 중요 카운트는 하나의 좌측 Toolbar 행에 표시하고 Action 버튼은 같은 행 오른쪽에 배치한다.
 - 공통 Grid Action은 `CREATE`, `DELETE`, `EXCEL_DOWNLOAD`을 우선 지원한다.
 - Program이 지원하고 `ROLE × PROGRAM × ACTION_CODE`가 허용한 Action만 공통 영역에 자동 표시한다.
-- 버튼명은 `meta/actions.json`을 사용하며 Page는 `ACTION_CODE`별 실행 함수만 `actionHandlers`로 연결한다.
+- 버튼명은 `frontend/meta/actions.json`을 사용하며 Page는 `ACTION_CODE`별 실행 함수만 `actionHandlers`로 연결한다.
 - 엑셀 다운로드는 텍스트 없는 작은 아이콘 버튼으로 표시하고 접근성 명칭을 제공한다.
 - 행 단위 Action을 위해 공통 Grid는 선택 체크박스를 지원한다.
 

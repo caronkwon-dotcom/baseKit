@@ -6,7 +6,7 @@ Accepted
 
 ## 배경
 
-BaseKit의 메뉴, 프로그램, 액션 정보가 `meta/*.json`, TypeScript 설정, 복수의 Mock 파일에 중복되어 있었다. 권한 역시 메뉴별 CRUD Y/N 필드와 Program/Action 모델이 혼재하여 업무 액션을 확장하기 어려웠다.
+BaseKit의 메뉴, 프로그램, 액션 정보가 `frontend/meta/*.json`, TypeScript 설정, 복수의 Mock 파일에 중복되어 있었다. 권한 역시 메뉴별 CRUD Y/N 필드와 Program/Action 모델이 혼재하여 업무 액션을 확장하기 어려웠다.
 
 ## 결정
 
@@ -32,7 +32,7 @@ PURCHASE_ORDER + ISSUE
 
 ### 메타데이터 Source of Truth
 
-현재 Frontend First 단계에서는 `meta/*.json`을 Mock 메타데이터 원본으로 사용한다. React 화면은 JSON을 직접 참조하지 않고 `MetadataRepository`를 통해 접근한다.
+현재 Frontend First 단계에서는 `frontend/meta/*.json`을 Mock 메타데이터 원본으로 사용한다. React 화면은 JSON을 직접 참조하지 않고 `MetadataRepository`를 통해 접근한다.
 
 ```text
 Domain Contract
@@ -64,8 +64,8 @@ hasAction(roleCode, programKey, actionCode)
 
 ## 영향
 
-- `meta/programs.json`, `meta/menus.json`, `meta/actions.json`이 현재 Mock 메타데이터 원본이 된다.
-- 역할별 허용 액션은 `meta/role-program-actions.json`에서 관리한다.
+- `frontend/meta/programs.json`, `frontend/meta/menus.json`, `frontend/meta/actions.json`이 현재 Mock 메타데이터 원본이 된다.
+- 역할별 허용 액션은 `frontend/meta/role-program-actions.json`에서 관리한다.
 - React 컴포넌트 연결은 메타데이터와 분리하여 `programRegistry.tsx`에서 관리한다.
 - 향후 Spring 연동 시 Repository 구현체를 API Adapter로 교체할 수 있다.
 - 메뉴 표시 정책과 3Depth UI 구현은 별도 작업으로 진행한다.

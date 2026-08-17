@@ -28,7 +28,7 @@
 ## 3. 폴더 구조
 
 ```text
-src/features/devGuide/searchSampleType1/
+frontend/src/features/devGuide/searchSampleType1/
  ├─ SearchSampleType1Page.tsx
  ├─ index.ts
  ├─ searchSampleType1.config.ts
@@ -203,7 +203,7 @@ Page 파일에 타입, 대규모 컬럼 설정, Mock 조회 구현을 다시 합
 
 ## 6. 메뉴 및 프로그램 연결
 
-샘플 화면은 `meta/programs.json`과 `meta/menus.json`에 등록하고, React 컴포넌트는 `programRegistry.tsx`에 연결한다.
+샘플 화면은 `frontend/meta/programs.json`과 `frontend/meta/menus.json`에 등록하고, React 컴포넌트는 `programRegistry.tsx`에 연결한다.
 
 ### programs
 
@@ -312,7 +312,7 @@ VITE_SHOW_DEV_GUIDE=true
 6. config의 Page Context, 검색 단수, 초기조건, 컬럼 변경
 7. SearchCondition 변경
 8. Repository 조회 조건 변경
-10. meta/programs.json과 meta/menus.json에 program/menu 등록
+10. frontend/meta/programs.json과 frontend/meta/menus.json에 program/menu 등록
 11. programRegistry.tsx에 컴포넌트 연결
 12. npm run build 확인
 ```

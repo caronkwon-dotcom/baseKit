@@ -55,8 +55,8 @@ export type UseYn = 'Y' | 'N';
 
 이 규칙은 다음 파일과 데이터에 적용합니다.
 
-- `src/types`의 도메인 타입
-- `src/mock`의 샘플 데이터
+- `frontend/src/types`의 도메인 타입
+- `frontend/src/mock`의 샘플 데이터
 - 향후 API request와 response 타입
 - 메타데이터 기반으로 생성되는 화면 모델
 

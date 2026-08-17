@@ -100,4 +100,14 @@ function editableMetadataLocalApi() {
 export default defineConfig({
   base: '/baseKit/',
   plugins: [react(), termCurationLocalApi(), editableMetadataLocalApi()],
+  server: {
+    host: '0.0.0.0',
+    allowedHosts: ['.app.github.dev'],
+    proxy: {
+      '/api/health': 'http://localhost:8080',
+      '/actuator': 'http://localhost:8080',
+      '/v3/api-docs': 'http://localhost:8080',
+      '/swagger-ui': 'http://localhost:8080',
+    },
+  },
 })
