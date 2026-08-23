@@ -24,6 +24,7 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 - `/api/health`, Actuator Health, OpenAPI/Swagger UI
 - Codespaces Java + Node + PostgreSQL 개발환경과 포트 전달
 - Frontend·Backend를 함께 검증하는 GitHub Actions
+- Maven Wrapper 기반의 OS 공통 Backend 실행과 PostgreSQL 없는 로컬 Spring Boot 스모크 프로필
 
 - React + Vite + TypeScript
 - Compact 한 줄 Header / 1Depth Top / 2~3Depth Sidebar / Workspace 기반 Admin Shell
