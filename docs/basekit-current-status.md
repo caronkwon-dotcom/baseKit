@@ -63,9 +63,12 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 - 전체 사전 선행 정제 대신 기능 개발에 사용되는 단어·용어부터 검수하고 배포 시 APPROVED를 요구하는 점진 정제 정책 확정
 - Hibernate/JPA는 Schema·DDL 초안, MyBatis는 업무 SQL, 운영은 승인된 Migration을 사용하며 관계 등급별로 물리 FK를 선택하는 정책 확정
 - Header 알림 Badge 영역과 알림 count 표시 계약
+- 시스템관리 > 테이블관리 메타데이터 조회 화면: 시스템 공통 V1 테이블 목록, 컬럼 정의, PK/FK, 필수 여부, 도메인과 용어 검토 상태 표시
+- `frontend/meta/schema-tables.json` 기반 시스템 공통 V1 Schema Catalog Prototype
 
 ## 3. 문서만 설계 완료
 
+- 시스템 공통 V1 DB 구조 Draft: 회사·조직·직무·사용자·계정, 내부/공급업체 사용자 배정과 역할·프로그램·액션 권한 경계. UI Catalog까지 구현했으며 실제 DDL·Migration은 미구현
 - Spring REST와 실제 DB 연동
 - Grid, Uploader, Editor, PDF Adapter
 - 조직·법인·사용자 예외 및 데이터 범위 권한
@@ -95,6 +98,8 @@ Lifecycle 문서는 `docs/basekit-business-object-lifecycle-architecture.md`에 
 - 채택 용어의 `terms.json`·`domains.json` 승격 승인 절차
 - 동일한 마지막 단어에 복수 도메인이 연결될 때 도메인 선택 규칙
 - 용어 조합 결과의 승인·등록·폐기·영향 분석 Workflow
+- PostgreSQL 예약어와 충돌 가능한 `USER` 물리 테이블의 대체 명칭
+- Schema Catalog의 REVIEW 용어 확정 및 승인된 Flyway DDL 승격 절차
 
 ## 6. Git 및 PR 상태 확인
 

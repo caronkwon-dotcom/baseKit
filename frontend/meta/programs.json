@@ -44,6 +44,17 @@
     "useYn": "Y"
   },
   {
+    "programKey": "TABLE_MGMT",
+    "programName": "테이블관리",
+    "componentName": "TableManagePage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/tables",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "RESET", "MANUAL_VIEW"],
+    "useYn": "Y"
+  },
+  {
     "programKey": "TERM_CURATION",
     "programName": "표준용어관리",
     "componentName": "TermCurationPage",

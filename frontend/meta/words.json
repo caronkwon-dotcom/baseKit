@@ -49258,5 +49258,35 @@
     "domainCategory": "",
     "revision": "6차(2023-11)(폐기)",
     "source": "MOIS"
+  },
+  {
+    "wordKey": "BASEKIT_VENDOR",
+    "logicalName": "공급업체",
+    "englishName": "Vendor",
+    "abbreviation": "VENDOR",
+    "wordType": "GENERAL",
+    "description": "구매시스템에서 재화 또는 용역을 공급하는 외부 거래업체",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED",
+    "synonymList": "협력업체,협력사,벤더",
+    "forbiddenWordList": "SUPPLIER,PARTNER",
+    "domainCategory": "",
+    "revision": "BaseKit V1",
+    "source": "BASEKIT"
+  },
+  {
+    "wordKey": "BASEKIT_EMP",
+    "logicalName": "사원",
+    "englishName": "Employee",
+    "abbreviation": "EMP",
+    "wordType": "GENERAL",
+    "description": "내부 회사에 소속된 사용자 식별에 사용하는 사원 단어",
+    "useYn": "Y",
+    "reviewStatus": "APPROVED",
+    "synonymList": "직원",
+    "forbiddenWordList": "EMPLOYEE",
+    "domainCategory": "",
+    "revision": "BaseKit V1",
+    "source": "BASEKIT"
   }
 ]
