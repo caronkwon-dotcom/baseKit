@@ -6,7 +6,8 @@
     "build": "npm run build --prefix frontend",
     "lint": "npm run lint --prefix frontend",
     "preview": "npm run preview --prefix frontend",
-    "backend:test": "mvn -f backend/pom.xml test",
-    "backend:run": "mvn -f backend/pom.xml spring-boot:run"
+    "backend:test": "node scripts/run-backend-maven.mjs test",
+    "backend:run": "node scripts/run-backend-maven.mjs spring-boot:run",
+    "backend:run:local": "node scripts/run-backend-maven.mjs -Plocal spring-boot:run -Dspring-boot.run.profiles=local"
   }
 }
