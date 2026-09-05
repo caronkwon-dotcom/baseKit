@@ -31,6 +31,8 @@ BaseKit은 여러 SI 업무시스템에서 반복 사용할 표준 아키텍처,
 5. `docs/decisions`: 확정된 Architecture Decision
 6. `docs/ideas`: 미구현·미확정 아이디어 Backlog
 
+공통 배포는 업무 프로젝트에 `basekit-system-starter`를 임베드하는 방식을 기본으로 하고, 필요할 때 같은 Starter를 사용하는 빈 Host를 둡니다. 현재 Repository는 시스템 공통 V1 계약을 완성하는 기준 개발공간으로 유지하며 즉시 분리하지 않습니다. 자세한 내용은 [공통 Starter 임베드와 선택형 Host ADR](docs/decisions/019-embedded-starter-and-optional-host-deployment.md)을 참고합니다.
+
 ## 브랜치 운영 방식
 
 - `main`: 승인된 안정 버전입니다. 직접 수정하지 않습니다.
