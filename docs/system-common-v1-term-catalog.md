@@ -147,9 +147,35 @@
 | 일시 | `AT` | `LAST_LOGIN_AT` |
 | 일자 | `DATE` | `VALID_FROM_DATE` |
 
-V1 권장 제한은 테이블명 30자 이내, 컬럼명 30자 이내다. 초과할 경우 임의 축약하지 않고 이 목록에 약어를 먼저 등록한다.
+컬럼명은 30자 이내를 권장한다. 테이블명은 ADR 017에 따라 정확히 7자리로 고정하며 임의 축약하지 않고 4자리 테이블 코드를 먼저 등록한다.
 
-## 5. 대체·폐기 예정
+## 5. 테이블 코드 및 SQL Alias
+
+| 논리 테이블 | 물리 테이블명 | 기본 Alias | Full Name | 상태 |
+|---|---|---|---|---|
+| 시스템 | `BSYSYST` | `SYST` | BaseKit System System | 명칭 검토 |
+| 회사 | `BSYCOMP` | `COMP` | BaseKit System Company | 확정 |
+| 시스템회사 | `BSYSYCO` | `SYCO` | BaseKit System System Company | 명칭 검토 |
+| 조직 | `BSYORGN` | `ORGN` | BaseKit System Organization | 확정 |
+| 직무 | `BSYJOBM` | `JOBM` | BaseKit System Job Master | 확정 |
+| 공급업체 | `BSYVNDR` | `VNDR` | BaseKit System Vendor | 확정 |
+| 사용자 | `BSYUSRM` | `USRM` | BaseKit System User Master | 예약어 회피 확정 |
+| 사용자계정 | `BSYUACT` | `UACT` | BaseKit System User Account | 확정 |
+| 내부사용자배정 | `BSYIUAS` | `IUAS` | BaseKit System Internal User Assignment | 명칭 검토 |
+| 공급업체사용자배정 | `BSYVUAS` | `VUAS` | BaseKit System Vendor User Assignment | 명칭 검토 |
+| 프로그램 | `BSYPROG` | `PROG` | BaseKit System Program | 확정 |
+| 메뉴 | `BSYMENU` | `MENU` | BaseKit System Menu | 확정 |
+| 액션 | `BSYACTN` | `ACTN` | BaseKit System Action | 확정 |
+| 프로그램액션 | `BSYPACT` | `PACT` | BaseKit System Program Action | 확정 |
+| 역할 | `BSYROLE` | `ROLE` | BaseKit System Role | 확정 |
+| 역할프로그램액션 | `BSYRPAC` | `RPAC` | BaseKit System Role Program Action | 명칭 검토 |
+| 사용자역할 | `BSYUROL` | `UROL` | BaseKit System User Role | 확정 |
+| 코드그룹 | `BSYCDGP` | `CDGP` | BaseKit System Code Group | 확정 |
+| 공통코드 | `BSYCMCD` | `CMCD` | BaseKit System Common Code | 사용자 예시 확정 |
+
+검토 대상은 의미가 겹치거나 축약만으로 바로 이해하기 어려운 `SYST`, `SYCO`, `IUAS`, `VUAS`, `RPAC`이다. 중복은 없으며 확정 전까지 Schema Draft로 유지한다.
+
+## 6. 대체·폐기 예정
 
 | 기존 용어 | 대체 용어 | 사유 |
 |---|---|---|

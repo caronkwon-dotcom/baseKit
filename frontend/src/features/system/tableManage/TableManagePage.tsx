@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
-import schemaTablesJson from '../../../../meta/schema-tables.json';
 import PageHeader from '../../../components/common/PageHeader';
-import type { SchemaReviewStatus, SchemaTable } from './tableManage.types';
+import { schemaCatalogRepository } from './schemaCatalog.repository';
+import type { SchemaReviewStatus } from './tableManage.types';
 
-const schemaTables = schemaTablesJson as SchemaTable[];
+const schemaTables = schemaCatalogRepository.getTables();
 const TERM_LABELS: Record<SchemaReviewStatus, string> = {
   EXISTING: '기존',
   APPROVED: '확정',
@@ -19,7 +19,7 @@ export default function TableManagePage() {
     const normalizedKeyword = keyword.trim().toLowerCase();
     return schemaTables.filter((table) => {
       const categoryMatched = category === 'ALL' || table.category === category;
-      const keywordMatched = !normalizedKeyword || [table.logicalName, table.physicalName, table.description]
+      const keywordMatched = !normalizedKeyword || [table.logicalName, table.physicalName, table.tableAlias, table.fullName, table.description]
         .some((value) => value.toLowerCase().includes(normalizedKeyword));
       return categoryMatched && keywordMatched;
     });
@@ -58,11 +58,11 @@ export default function TableManagePage() {
           <div className="metadata-list-title"><h2>테이블 목록</h2><span>총 {filteredTables.length}건</span></div>
           <div className="metadata-table-wrap">
             <table>
-              <thead><tr><th>업무영역</th><th>논리명</th><th>물리명</th><th>컬럼</th><th>상태</th></tr></thead>
+              <thead><tr><th>업무영역</th><th>논리명</th><th>물리명</th><th>Alias</th><th>컬럼</th><th>상태</th></tr></thead>
               <tbody>
                 {filteredTables.map((table) => (
                   <tr key={table.tableKey} className={table.tableKey === selectedTable?.tableKey ? 'selected-row' : 'clickable-row'} onClick={() => setSelectedKey(table.tableKey)}>
-                    <td>{table.category}</td><td>{table.logicalName}</td><td><code>{table.physicalName}</code></td><td>{table.columns.length}</td>
+                    <td>{table.category}</td><td>{table.logicalName}</td><td><code>{table.physicalName}</code></td><td><code>{table.tableAlias}</code></td><td>{table.columns.length}</td>
                     <td><span className={`schema-status ${table.status.toLowerCase()}`}>{table.status === 'WARNING' ? '주의' : '설계'}</span></td>
                   </tr>
                 ))}
@@ -75,7 +75,7 @@ export default function TableManagePage() {
           {selectedTable ? (
             <>
               <div className="table-definition-heading">
-                <div><span>{selectedTable.category}</span><h2>{selectedTable.logicalName} <code>{selectedTable.physicalName}</code></h2><p>{selectedTable.description}</p></div>
+                <div><span>{selectedTable.category} · {selectedTable.fullName}</span><h2>{selectedTable.logicalName} <code>{selectedTable.physicalName}</code> <em>AS {selectedTable.tableAlias}</em></h2><p>{selectedTable.description}</p></div>
                 <dl><div><dt>컬럼</dt><dd>{selectedTable.columns.length}</dd></div><div><dt>PK</dt><dd>{selectedTable.columns.filter((column) => column.pkYn === 'Y').length}</dd></div><div><dt>FK</dt><dd>{selectedTable.columns.filter((column) => column.fk).length}</dd></div></dl>
               </div>
               {selectedTable.status === 'WARNING' ? <div className="schema-warning">물리 테이블명 <strong>{selectedTable.physicalName}</strong>은 DB 예약어 충돌 가능성이 있어 DDL 확정 전에 대체 명칭을 결정해야 합니다.</div> : null}

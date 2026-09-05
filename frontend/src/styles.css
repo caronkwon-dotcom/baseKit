@@ -1284,6 +1284,7 @@ tbody tr.selected-row td {
 .table-definition-heading > div > span { color: var(--brand-hover); font-size: 10px; font-weight: 800; }
 .table-definition-heading h2 { margin: 2px 0; color: var(--text-primary); font-size: 14px; }
 .table-definition-heading h2 code { margin-left: 5px; color: var(--brand-hover); font-size: 12px; }
+.table-definition-heading h2 em { margin-left: 5px; color: var(--text-muted); font-size: 10px; font-style: normal; }
 .table-definition-heading p { margin: 0; color: var(--text-muted); font-size: 10px; }
 .table-definition-heading dl { display: flex; gap: 6px; margin: 0; }
 .table-definition-heading dl div { min-width: 48px; border: 1px solid var(--border-default); border-radius: 5px; background: var(--surface-muted); padding: 4px 7px; text-align: center; }

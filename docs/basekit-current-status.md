@@ -65,6 +65,7 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 - Header 알림 Badge 영역과 알림 count 표시 계약
 - 시스템관리 > 테이블관리 메타데이터 조회 화면: 시스템 공통 V1 테이블 목록, 컬럼 정의, PK/FK, 필수 여부, 도메인과 용어 검토 상태 표시
 - `frontend/meta/schema-tables.json` 기반 시스템 공통 V1 Schema Catalog Prototype
+- 7자리 테이블명 `B + 모듈 2자리 + 테이블 코드 4자리`와 마지막 4자리 고정 SQL Alias 규칙
 
 ## 3. 문서만 설계 완료
 
@@ -98,8 +99,8 @@ Lifecycle 문서는 `docs/basekit-business-object-lifecycle-architecture.md`에 
 - 채택 용어의 `terms.json`·`domains.json` 승격 승인 절차
 - 동일한 마지막 단어에 복수 도메인이 연결될 때 도메인 선택 규칙
 - 용어 조합 결과의 승인·등록·폐기·영향 분석 Workflow
-- PostgreSQL 예약어와 충돌 가능한 `USER` 물리 테이블의 대체 명칭
 - Schema Catalog의 REVIEW 용어 확정 및 승인된 Flyway DDL 승격 절차
+- `SYST`, `SYCO`, `IUAS`, `VUAS`, `RPAC` 테이블 코드 가독성 최종 검토
 
 ## 6. Git 및 PR 상태 확인
 
