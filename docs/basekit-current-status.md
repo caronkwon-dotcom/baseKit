@@ -4,7 +4,7 @@
 
 ## 1. 프로젝트 단계
 
-BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 패턴을 먼저 만들고, 향후 Spring REST와 실제 DB로 확장한다.
+BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundation을 함께 확장하는 Full Stack 단계다. Admin Shell과 공통 관리 화면 패턴을 유지하면서 시스템 공통 V1의 API·DB 계약을 구체화한다.
 
 목표는 여러 SI 프로젝트에서 반복 사용할 수 있는 다음 기반이다.
 
@@ -68,11 +68,13 @@ BaseKit은 React Frontend First 단계다. Admin Shell과 공통 관리 화면 �
 - 7자리 테이블명 `B + 모듈 2자리 + 테이블 코드 4자리`와 마지막 4자리 고정 SQL Alias 규칙
 - 공통 감사 컬럼 `REG_DT`, `REG_BY`, `MOD_DT`, `MOD_BY`와 사용·논리삭제 `USE_YN`, `DEL_YN` 규칙
 - Schema Catalog 공통 컬럼 자동 합성과 Frontend/Backend 공통 Base Entity 계약
+- 공통 AA가 관리하는 `basekit-core`·`basekit-system-starter`를 업무 프로젝트에 임베드하고 필요 시 빈 Host로 실행하는 배포 Architecture 결정
 
 ## 3. 문서만 설계 완료
 
 - 시스템 공통 V1 DB 구조 Draft: 회사·조직·직무·사용자·계정, 내부/공급업체 사용자 배정과 역할·프로그램·액션 권한 경계. UI Catalog까지 구현했으며 실제 DDL·Migration은 미구현
 - Spring REST와 실제 DB 연동
+- Maven Artifact 분리, 내부 Repository 발행과 소비자 샘플 프로젝트
 - Grid, Uploader, Editor, PDF Adapter
 - 조직·법인·사용자 예외 및 데이터 범위 권한
 - AI 메뉴 매뉴얼
@@ -104,6 +106,7 @@ Lifecycle 문서는 `docs/basekit-business-object-lifecycle-architecture.md`에 
 - Schema Catalog의 REVIEW 용어 확정 및 승인된 Flyway DDL 승격 절차
 - `SYST`, `SYCO`, `IUAS`, `VUAS`, `RPAC` 테이블 코드 가독성 최종 검토
 - 삭제 복구·물리 파기 예외·감사값 입력 책임·동시성 Version은 시스템 공통 구현 후 일괄 검토
+- Starter 실행 모드, Migration 소유자와 Scheduler 중복 실행 방지 방식
 
 ## 6. Git 및 PR 상태 확인
 
@@ -196,9 +199,25 @@ gh pr list --repo caronkwon-dotcom/baseKit
 - 단어·도메인 관리와 용어 조합 Guard Prototype 구현
 - 채택 승격, 기존 용어 자동 분해, DDL 생성은 후속 작업
 
+### WBS 5. 공통 Starter 배포 경계
+
+범위:
+
+- 현재 시스템 공통 V1의 공개 API·SPI·내부 구현 경계 정의
+- 임베드 Starter와 선택형 빈 Host의 동일 Artifact 사용
+- Migration·Scheduler·관리 API 중복 실행 Guard
+- 내부 Maven Repository 발행과 고정 Version 적용 절차
+- 소비자 샘플 프로젝트를 통한 Patch·영향범위·회귀검증 확인
+
+현재 상태:
+
+- 배포 Architecture와 단계적 적용 순서 확정
+- 현재 단일 Repository를 유지하며 시스템 공통 V1 계약을 먼저 완성
+- 통합 Frontend Portal과 상용 UI 라이선스 전략은 후속 아이디어로 분리
+
 ## 8. 다음 추천 작업
 
-표준용어 정제 화면을 검수한 뒤 채택 기준과 단어·용어·도메인 관리 모델을 확정한다. 이후 WBS 2 로그인 권한 Context와 WBS 3 시스템관리 기준 화면을 진행하며, 용어 Foundation이 신규 테이블·API 명명 기준을 제공하도록 연결한다.
+시스템 공통 V1의 실제 DDL과 Migration을 작성하고 사용자·회사·조직·역할·권한의 Backend 계약을 연결한다. 구현 과정에서 공개 API·SPI와 내부 패키지 경계를 적용하여 향후 Starter 추출 시 재작업을 줄인다. 통합 Frontend Portal과 라이선스 통합은 현재 개발 범위에 포함하지 않는다.
 
 연말까지의 목표는 Level 1 시스템 Foundation의 핵심 규약, 기준 화면, 개발자 가이드와 Frontend 공통 구조를 실제 다음 SI 프로젝트에서 시작점으로 사용할 수 있는 수준까지 확보하는 것이다. 주간 목표는 이 목표에 기여하는 작은 검증 단위로 나눈다.
 
