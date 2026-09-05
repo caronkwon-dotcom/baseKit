@@ -6,6 +6,7 @@ export const PROGRAM_KEYS = [
   'USER_MGMT',
   'COMMON_CODE_MGMT',
   'MENU_MGMT',
+  'TABLE_MGMT',
   'TERM_CURATION',
   'WORD_MGMT',
   'DOMAIN_MGMT',

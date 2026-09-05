@@ -1,0 +1,178 @@
+[
+  {
+    "tableKey": "SYSTEM", "logicalName": "시스템", "physicalName": "BSYSYST", "moduleCode": "SY", "tableCode": "SYST", "tableAlias": "SYST", "fullName": "BaseKit System System", "category": "기준정보", "status": "REVIEW",
+    "description": "BaseKit에서 운영하는 업무 시스템의 기준 정보",
+    "columns": [
+      { "logicalName": "시스템ID", "physicalName": "SYSTEM_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "Y", "nullableYn": "N", "termStatus": "REVIEW", "description": "시스템 식별자" },
+      { "logicalName": "시스템명", "physicalName": "SYSTEM_NAME", "domain": "NAME", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "시스템 표시명" },
+      { "logicalName": "사용여부", "physicalName": "USE_YN", "domain": "YN", "dataType": "CHAR(1)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "사용 여부" }
+    ]
+  },
+  {
+    "tableKey": "COMPANY", "logicalName": "회사", "physicalName": "BSYCOMP", "moduleCode": "SY", "tableCode": "COMP", "tableAlias": "COMP", "fullName": "BaseKit System Company", "category": "조직", "status": "REVIEW",
+    "description": "내부 법인과 공급업체가 공유하는 회사 기준 정보",
+    "columns": [
+      { "logicalName": "회사ID", "physicalName": "COMPANY_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "Y", "nullableYn": "N", "termStatus": "APPROVED", "description": "회사 식별자" },
+      { "logicalName": "회사명", "physicalName": "COMPANY_NAME", "domain": "NAME", "dataType": "VARCHAR(200)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "회사명" },
+      { "logicalName": "회사유형코드", "physicalName": "COMPANY_TYPE_CODE", "domain": "CODE", "dataType": "VARCHAR(30)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "내부회사 또는 공급업체 구분" },
+      { "logicalName": "사용여부", "physicalName": "USE_YN", "domain": "YN", "dataType": "CHAR(1)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "사용 여부" }
+    ]
+  },
+  {
+    "tableKey": "SYSTEM_COMPANY", "logicalName": "시스템회사", "physicalName": "BSYSYCO", "moduleCode": "SY", "tableCode": "SYCO", "tableAlias": "SYCO", "fullName": "BaseKit System System Company", "category": "조직", "status": "REVIEW",
+    "description": "시스템에서 사용하는 회사 범위",
+    "columns": [
+      { "logicalName": "시스템ID", "physicalName": "SYSTEM_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "Y", "nullableYn": "N", "termStatus": "REVIEW", "fk": "BSYSYST.SYSTEM_ID", "description": "시스템 식별자" },
+      { "logicalName": "회사ID", "physicalName": "COMPANY_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "Y", "nullableYn": "N", "termStatus": "APPROVED", "fk": "BSYCOMP.COMPANY_ID", "description": "회사 식별자" }
+    ]
+  },
+  {
+    "tableKey": "ORG", "logicalName": "조직", "physicalName": "BSYORGN", "moduleCode": "SY", "tableCode": "ORGN", "tableAlias": "ORGN", "fullName": "BaseKit System Organization", "category": "조직", "status": "REVIEW",
+    "description": "회사 내부 조직 계층",
+    "columns": [
+      { "logicalName": "조직ID", "physicalName": "ORG_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "Y", "nullableYn": "N", "termStatus": "REVIEW", "description": "조직 식별자" },
+      { "logicalName": "회사ID", "physicalName": "COMPANY_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "N", "nullableYn": "N", "termStatus": "APPROVED", "fk": "BSYCOMP.COMPANY_ID", "description": "소속 회사" },
+      { "logicalName": "상위조직ID", "physicalName": "PARENT_ORG_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "N", "nullableYn": "Y", "termStatus": "REVIEW", "fk": "BSYORGN.ORG_ID", "description": "상위 조직" },
+      { "logicalName": "조직명", "physicalName": "ORG_NAME", "domain": "NAME", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "조직명" }
+    ]
+  },
+  {
+    "tableKey": "JOB", "logicalName": "직무", "physicalName": "BSYJOBM", "moduleCode": "SY", "tableCode": "JOBM", "tableAlias": "JOBM", "fullName": "BaseKit System Job Master", "category": "조직", "status": "REVIEW",
+    "description": "역할과 분리된 업무상 직무 기준",
+    "columns": [
+      { "logicalName": "직무ID", "physicalName": "JOB_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "Y", "nullableYn": "N", "termStatus": "APPROVED", "description": "직무 식별자" },
+      { "logicalName": "직무명", "physicalName": "JOB_NAME", "domain": "NAME", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "직무명" }
+    ]
+  },
+  {
+    "tableKey": "VENDOR", "logicalName": "공급업체", "physicalName": "BSYVNDR", "moduleCode": "SY", "tableCode": "VNDR", "tableAlias": "VNDR", "fullName": "BaseKit System Vendor", "category": "조직", "status": "REVIEW",
+    "description": "COMPANY의 공급업체 1:1 확장 정보",
+    "columns": [
+      { "logicalName": "공급업체ID", "physicalName": "VENDOR_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "Y", "nullableYn": "N", "termStatus": "APPROVED", "fk": "BSYCOMP.COMPANY_ID", "description": "회사와 동일한 공급업체 식별자" },
+      { "logicalName": "사업자등록번호", "physicalName": "BUSINESS_REGISTRATION_NO", "domain": "NO", "dataType": "VARCHAR(20)", "pkYn": "N", "nullableYn": "Y", "termStatus": "REVIEW", "description": "사업자등록번호" }
+    ]
+  },
+  {
+    "tableKey": "USER", "logicalName": "사용자", "physicalName": "BSYUSRM", "moduleCode": "SY", "tableCode": "USRM", "tableAlias": "USRM", "fullName": "BaseKit System User Master", "category": "사용자", "status": "REVIEW",
+    "description": "내부·외부 사용자가 공유하는 사용자 기준",
+    "columns": [
+      { "logicalName": "사용자ID", "physicalName": "USER_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "Y", "nullableYn": "N", "termStatus": "EXISTING", "description": "사용자 식별자" },
+      { "logicalName": "사용자명", "physicalName": "USER_NAME", "domain": "NAME", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "사용자명" },
+      { "logicalName": "사용자유형코드", "physicalName": "USER_TYPE_CODE", "domain": "CODE", "dataType": "VARCHAR(30)", "pkYn": "N", "nullableYn": "N", "termStatus": "APPROVED", "description": "INTERNAL 또는 VENDOR" }
+    ]
+  },
+  {
+    "tableKey": "USER_ACCOUNT", "logicalName": "사용자계정", "physicalName": "BSYUACT", "moduleCode": "SY", "tableCode": "UACT", "tableAlias": "UACT", "fullName": "BaseKit System User Account", "category": "사용자", "status": "REVIEW",
+    "description": "인증 계정과 잠금·비밀번호 상태",
+    "columns": [
+      { "logicalName": "사용자계정ID", "physicalName": "USER_ACCOUNT_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "Y", "nullableYn": "N", "termStatus": "REVIEW", "description": "계정 식별자" },
+      { "logicalName": "사용자ID", "physicalName": "USER_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "fk": "BSYUSRM.USER_ID", "description": "사용자 식별자" },
+      { "logicalName": "로그인ID", "physicalName": "LOGIN_ID", "domain": "ID", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "로그인 식별값" },
+      { "logicalName": "비밀번호해시값", "physicalName": "PASSWORD_HASH_VALUE", "domain": "VALUE", "dataType": "VARCHAR(255)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "단방향 비밀번호 해시" }
+    ]
+  },
+  {
+    "tableKey": "INTERNAL_USER_ASSIGN", "logicalName": "내부사용자배정", "physicalName": "BSYIUAS", "moduleCode": "SY", "tableCode": "IUAS", "tableAlias": "IUAS", "fullName": "BaseKit System Internal User Assignment", "category": "사용자", "status": "REVIEW",
+    "description": "사원 사용자의 회사·조직·직무 배정",
+    "columns": [
+      { "logicalName": "내부사용자배정ID", "physicalName": "INTERNAL_USER_ASSIGN_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "Y", "nullableYn": "N", "termStatus": "REVIEW", "description": "배정 식별자" },
+      { "logicalName": "사용자ID", "physicalName": "USER_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "fk": "BSYUSRM.USER_ID", "description": "사용자 식별자" },
+      { "logicalName": "사원번호", "physicalName": "EMP_NO", "domain": "NO", "dataType": "VARCHAR(30)", "pkYn": "N", "nullableYn": "N", "termStatus": "APPROVED", "description": "회사 사원번호" },
+      { "logicalName": "회사ID", "physicalName": "COMPANY_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "N", "nullableYn": "N", "termStatus": "APPROVED", "fk": "BSYCOMP.COMPANY_ID", "description": "소속 회사" },
+      { "logicalName": "조직ID", "physicalName": "ORG_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "N", "nullableYn": "Y", "termStatus": "REVIEW", "fk": "BSYORGN.ORG_ID", "description": "소속 조직" },
+      { "logicalName": "직무ID", "physicalName": "JOB_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "N", "nullableYn": "Y", "termStatus": "APPROVED", "fk": "BSYJOBM.JOB_ID", "description": "담당 직무" }
+    ]
+  },
+  {
+    "tableKey": "VENDOR_USER_ASSIGN", "logicalName": "공급업체사용자배정", "physicalName": "BSYVUAS", "moduleCode": "SY", "tableCode": "VUAS", "tableAlias": "VUAS", "fullName": "BaseKit System Vendor User Assignment", "category": "사용자", "status": "REVIEW",
+    "description": "외부 사용자의 공급업체 소속과 데이터 범위",
+    "columns": [
+      { "logicalName": "공급업체사용자배정ID", "physicalName": "VENDOR_USER_ASSIGN_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "Y", "nullableYn": "N", "termStatus": "REVIEW", "description": "배정 식별자" },
+      { "logicalName": "사용자ID", "physicalName": "USER_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "fk": "BSYUSRM.USER_ID", "description": "사용자 식별자" },
+      { "logicalName": "공급업체ID", "physicalName": "VENDOR_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "N", "nullableYn": "N", "termStatus": "APPROVED", "fk": "BSYVNDR.VENDOR_ID", "description": "소속 공급업체" }
+    ]
+  },
+  {
+    "tableKey": "PROGRAM", "logicalName": "프로그램", "physicalName": "BSYPROG", "moduleCode": "SY", "tableCode": "PROG", "tableAlias": "PROG", "fullName": "BaseKit System Program", "category": "권한", "status": "REVIEW",
+    "description": "실행·MDI·권한의 기준 단위",
+    "columns": [
+      { "logicalName": "프로그램키", "physicalName": "PROGRAM_KEY", "domain": "KEY", "dataType": "VARCHAR(100)", "pkYn": "Y", "nullableYn": "N", "termStatus": "EXISTING", "description": "프로그램 고유키" },
+      { "logicalName": "프로그램명", "physicalName": "PROGRAM_NAME", "domain": "NAME", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "프로그램명" }
+    ]
+  },
+  {
+    "tableKey": "MENU", "logicalName": "메뉴", "physicalName": "BSYMENU", "moduleCode": "SY", "tableCode": "MENU", "tableAlias": "MENU", "fullName": "BaseKit System Menu", "category": "권한", "status": "REVIEW",
+    "description": "최대 3Depth 탐색 구조",
+    "columns": [
+      { "logicalName": "메뉴키", "physicalName": "MENU_KEY", "domain": "KEY", "dataType": "VARCHAR(100)", "pkYn": "Y", "nullableYn": "N", "termStatus": "EXISTING", "description": "메뉴 고유키" },
+      { "logicalName": "상위메뉴키", "physicalName": "PARENT_MENU_KEY", "domain": "KEY", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "Y", "termStatus": "EXISTING", "fk": "BSYMENU.MENU_KEY", "description": "상위 메뉴" },
+      { "logicalName": "프로그램키", "physicalName": "PROGRAM_KEY", "domain": "KEY", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "Y", "termStatus": "EXISTING", "fk": "BSYPROG.PROGRAM_KEY", "description": "실행 프로그램" }
+    ]
+  },
+  {
+    "tableKey": "ACTION", "logicalName": "액션", "physicalName": "BSYACTN", "moduleCode": "SY", "tableCode": "ACTN", "tableAlias": "ACTN", "fullName": "BaseKit System Action", "category": "권한", "status": "REVIEW",
+    "description": "프로그램 안에서 수행 가능한 업무 행위",
+    "columns": [
+      { "logicalName": "액션코드", "physicalName": "ACTION_CODE", "domain": "CODE", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "APPROVED", "description": "업무 행위 코드" },
+      { "logicalName": "액션명", "physicalName": "ACTION_NAME", "domain": "NAME", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "업무 행위명" }
+    ]
+  },
+  {
+    "tableKey": "PROGRAM_ACTION", "logicalName": "프로그램액션", "physicalName": "BSYPACT", "moduleCode": "SY", "tableCode": "PACT", "tableAlias": "PACT", "fullName": "BaseKit System Program Action", "category": "권한", "status": "REVIEW",
+    "description": "프로그램에서 지원하는 액션",
+    "columns": [
+      { "logicalName": "프로그램키", "physicalName": "PROGRAM_KEY", "domain": "KEY", "dataType": "VARCHAR(100)", "pkYn": "Y", "nullableYn": "N", "termStatus": "EXISTING", "fk": "BSYPROG.PROGRAM_KEY", "description": "프로그램 고유키" },
+      { "logicalName": "액션코드", "physicalName": "ACTION_CODE", "domain": "CODE", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "APPROVED", "fk": "BSYACTN.ACTION_CODE", "description": "액션 코드" }
+    ]
+  },
+  {
+    "tableKey": "ROLE", "logicalName": "역할", "physicalName": "BSYROLE", "moduleCode": "SY", "tableCode": "ROLE", "tableAlias": "ROLE", "fullName": "BaseKit System Role", "category": "권한", "status": "REVIEW",
+    "description": "사용자에게 부여되는 권한 묶음",
+    "columns": [
+      { "logicalName": "역할코드", "physicalName": "ROLE_CODE", "domain": "CODE", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "EXISTING", "description": "역할 코드" },
+      { "logicalName": "역할명", "physicalName": "ROLE_NAME", "domain": "NAME", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "역할명" }
+    ]
+  },
+  {
+    "tableKey": "ROLE_PROGRAM_ACTION", "logicalName": "역할프로그램액션", "physicalName": "BSYRPAC", "moduleCode": "SY", "tableCode": "RPAC", "tableAlias": "RPAC", "fullName": "BaseKit System Role Program Action", "category": "권한", "status": "REVIEW",
+    "description": "ROLE × PROGRAM × ACTION_CODE 허용 정책",
+    "columns": [
+      { "logicalName": "역할코드", "physicalName": "ROLE_CODE", "domain": "CODE", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "EXISTING", "fk": "BSYROLE.ROLE_CODE", "description": "역할 코드" },
+      { "logicalName": "프로그램키", "physicalName": "PROGRAM_KEY", "domain": "KEY", "dataType": "VARCHAR(100)", "pkYn": "Y", "nullableYn": "N", "termStatus": "EXISTING", "fk": "BSYPROG.PROGRAM_KEY", "description": "프로그램 고유키" },
+      { "logicalName": "액션코드", "physicalName": "ACTION_CODE", "domain": "CODE", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "APPROVED", "fk": "BSYACTN.ACTION_CODE", "description": "액션 코드" },
+      { "logicalName": "허용여부", "physicalName": "ALLOW_YN", "domain": "YN", "dataType": "CHAR(1)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "허용 여부" }
+    ]
+  },
+  {
+    "tableKey": "USER_ROLE", "logicalName": "사용자역할", "physicalName": "BSYUROL", "moduleCode": "SY", "tableCode": "UROL", "tableAlias": "UROL", "fullName": "BaseKit System User Role", "category": "권한", "status": "REVIEW",
+    "description": "시스템·회사 범위의 사용자 역할 배정",
+    "columns": [
+      { "logicalName": "사용자ID", "physicalName": "USER_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "Y", "nullableYn": "N", "termStatus": "EXISTING", "fk": "BSYUSRM.USER_ID", "description": "사용자 식별자" },
+      { "logicalName": "역할코드", "physicalName": "ROLE_CODE", "domain": "CODE", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "EXISTING", "fk": "BSYROLE.ROLE_CODE", "description": "역할 코드" },
+      { "logicalName": "시스템ID", "physicalName": "SYSTEM_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "Y", "nullableYn": "N", "termStatus": "REVIEW", "fk": "BSYSYST.SYSTEM_ID", "description": "권한 적용 시스템" },
+      { "logicalName": "회사ID", "physicalName": "COMPANY_ID", "domain": "ID", "dataType": "VARCHAR(36)", "pkYn": "Y", "nullableYn": "N", "termStatus": "APPROVED", "fk": "BSYCOMP.COMPANY_ID", "description": "권한 적용 회사" }
+    ]
+  },
+  {
+    "tableKey": "CODE_GROUP", "logicalName": "코드그룹", "physicalName": "BSYCDGP", "moduleCode": "SY", "tableCode": "CDGP", "tableAlias": "CDGP", "fullName": "BaseKit System Code Group", "category": "기준정보", "status": "REVIEW",
+    "description": "공통코드의 그룹 기준 정보",
+    "columns": [
+      { "logicalName": "코드그룹ID", "physicalName": "CODE_GROUP_ID", "domain": "ID", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "REVIEW", "description": "코드그룹 식별자" },
+      { "logicalName": "코드그룹명", "physicalName": "CODE_GROUP_NAME", "domain": "NAME", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "코드그룹명" },
+      { "logicalName": "설명", "physicalName": "DESCRIPTION", "domain": "TEXT", "dataType": "VARCHAR(500)", "pkYn": "N", "nullableYn": "Y", "termStatus": "EXISTING", "description": "코드그룹 설명" },
+      { "logicalName": "사용여부", "physicalName": "USE_YN", "domain": "YN", "dataType": "CHAR(1)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "사용 여부" }
+    ]
+  },
+  {
+    "tableKey": "COMMON_CODE", "logicalName": "공통코드", "physicalName": "BSYCMCD", "moduleCode": "SY", "tableCode": "CMCD", "tableAlias": "CMCD", "fullName": "BaseKit System Common Code", "category": "기준정보", "status": "REVIEW",
+    "description": "코드그룹에 속하는 공통코드 상세 정보",
+    "columns": [
+      { "logicalName": "코드ID", "physicalName": "CODE_ID", "domain": "ID", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "EXISTING", "description": "코드 식별자" },
+      { "logicalName": "코드그룹ID", "physicalName": "CODE_GROUP_ID", "domain": "ID", "dataType": "VARCHAR(50)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "fk": "BSYCDGP.CODE_GROUP_ID", "description": "소속 코드그룹" },
+      { "logicalName": "코드", "physicalName": "CODE", "domain": "CODE", "dataType": "VARCHAR(50)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "업무 코드값" },
+      { "logicalName": "코드명", "physicalName": "CODE_NAME", "domain": "NAME", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "코드 표시명" },
+      { "logicalName": "정렬순서", "physicalName": "SORT_ORDER", "domain": "NO", "dataType": "INTEGER", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "코드 표시 순서" },
+      { "logicalName": "사용여부", "physicalName": "USE_YN", "domain": "YN", "dataType": "CHAR(1)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "사용 여부" }
+    ]
+  }
+]

@@ -65,9 +65,12 @@ frontend/meta/
   menus.json
   programs.json
   terms.json
+  schema-tables.json
 ```
 
 현재 React는 `MetadataRepository`를 통해 메타데이터에 접근합니다. 권한은 `ROLE × PROGRAM × ACTION_CODE` 기준이며, 자세한 결정은 [Program Action 권한 및 메타데이터 결정 문서](docs/decisions/007-program-action-permission-metadata.md)를 참고합니다.
+
+시스템 공통 V1의 테이블·컬럼 설계 초안은 `schema-tables.json`을 기준으로 테이블관리 화면에서 조회한다. 이 메타데이터는 설계 검수용이며 승인된 Flyway DDL과 동일한 것으로 간주하지 않는다.
 
 ## 타입 정의 원칙
 

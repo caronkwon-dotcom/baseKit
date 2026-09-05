@@ -40,13 +40,23 @@
     "useYn": "Y"
   },
   {
+    "menuKey": "SYS.TABLE",
+    "parentMenuKey": "SYS",
+    "menuName": "테이블관리",
+    "menuLevel": 2,
+    "menuType": "SCREEN",
+    "programKey": "TABLE_MGMT",
+    "sortOrder": 4,
+    "useYn": "Y"
+  },
+  {
     "menuKey": "SYS.STANDARD_DATA",
     "parentMenuKey": "SYS",
     "menuName": "표준데이터관리",
     "menuLevel": 2,
     "menuType": "GROUP",
     "programKey": null,
-    "sortOrder": 4,
+    "sortOrder": 5,
     "useYn": "Y"
   },
   {
