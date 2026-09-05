@@ -8,15 +8,15 @@ import java.time.OffsetDateTime;
 @MappedSuperclass
 public abstract class BaseEntity {
 
-    @Column(name = "CREATED_AT", nullable = false, updatable = false)
-    protected OffsetDateTime CREATED_AT;
+    @Column(name = "REG_DT", nullable = false, updatable = false)
+    protected OffsetDateTime REG_DT;
 
-    @Column(name = "CREATED_BY", nullable = false, updatable = false, length = 100)
-    protected String CREATED_BY;
+    @Column(name = "REG_BY", nullable = false, updatable = false, length = 100)
+    protected String REG_BY;
 
-    @Column(name = "UPDATED_AT", nullable = false)
-    protected OffsetDateTime UPDATED_AT;
+    @Column(name = "MOD_DT", nullable = false)
+    protected OffsetDateTime MOD_DT;
 
-    @Column(name = "UPDATED_BY", nullable = false, length = 100)
-    protected String UPDATED_BY;
+    @Column(name = "MOD_BY", nullable = false, length = 100)
+    protected String MOD_BY;
 }

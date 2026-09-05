@@ -25,7 +25,7 @@ export interface SearchSampleType2Row {
   OWNER_NAME: string;
   REQUESTED_AT: string;
   EXPECTED_AT: string;
-  UPDATED_BY: string;
-  UPDATED_AT: string;
+  MOD_BY: string;
+  MOD_DT: string;
   REMARK: string;
 }

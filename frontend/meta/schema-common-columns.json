@@ -1,0 +1,8 @@
+[
+  { "logicalName": "등록일시", "physicalName": "REG_DT", "domain": "DT", "dataType": "TIMESTAMP WITH TIME ZONE", "pkYn": "N", "nullableYn": "N", "termStatus": "APPROVED", "description": "최초 등록 일시" },
+  { "logicalName": "등록자", "physicalName": "REG_BY", "domain": "BY", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "APPROVED", "description": "최초 등록 사용자" },
+  { "logicalName": "수정일시", "physicalName": "MOD_DT", "domain": "DT", "dataType": "TIMESTAMP WITH TIME ZONE", "pkYn": "N", "nullableYn": "N", "termStatus": "APPROVED", "description": "최종 수정 일시" },
+  { "logicalName": "수정자", "physicalName": "MOD_BY", "domain": "BY", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "APPROVED", "description": "최종 수정 사용자" },
+  { "logicalName": "사용여부", "physicalName": "USE_YN", "domain": "YN", "dataType": "CHAR(1)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "일시적 사용 중지 및 재사용 여부, 기본값 Y" },
+  { "logicalName": "삭제여부", "physicalName": "DEL_YN", "domain": "YN", "dataType": "CHAR(1)", "pkYn": "N", "nullableYn": "N", "termStatus": "APPROVED", "description": "논리 삭제 여부, 기본값 N" }
+]

@@ -9,7 +9,7 @@ export interface SearchSampleType1Row {
     SAMPLE_NAME : string;
     SAMPLE_TYPE : string;
     USE_YN      : 'Y' | 'N';
-    CREATED_AT  : string;
+    REG_DT  : string;
 }
 
 export interface SearchSampleType1Condition {

@@ -38,10 +38,15 @@ export interface User extends BaseEntity {
 
 ```ts
 export interface BaseEntity {
-  CREATED_AT: string;
-  CREATED_BY: string;
-  UPDATED_AT: string;
-  UPDATED_BY: string;
+  REG_DT: string;
+  REG_BY: string;
+  MOD_DT: string;
+  MOD_BY: string;
+}
+
+export interface ManagedEntity extends BaseEntity {
+  USE_YN: 'Y' | 'N';
+  DEL_YN: 'Y' | 'N';
 }
 ```
 

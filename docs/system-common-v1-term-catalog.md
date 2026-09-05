@@ -56,10 +56,11 @@
 | 액션코드 | `ACTION_CODE` | CODE | 승인 | 액션·권한 |
 | 액션명 | `ACTION_NAME` | NAME | 기존 | 액션 |
 | 사용여부 | `USE_YN` | YN | 기존 | 공통 |
-| 등록일시 | `CREATED_AT` | AT | 기존 | 공통 감사 |
-| 등록자 | `CREATED_BY` | BY | 기존 | 공통 감사 |
-| 수정일시 | `UPDATED_AT` | AT | 기존 | 공통 감사 |
-| 수정자 | `UPDATED_BY` | BY | 기존 | 공통 감사 |
+| 등록일시 | `REG_DT` | DT | 승인 | 공통 감사 |
+| 등록자 | `REG_BY` | BY | 기존 | 공통 감사 |
+| 수정일시 | `MOD_DT` | DT | 승인 | 공통 감사 |
+| 수정자 | `MOD_BY` | BY | 기존 | 공통 감사 |
+| 삭제여부 | `DEL_YN` | YN | 승인 | 공통 논리삭제 |
 
 ## 3. 신규 용어 검토 목록
 

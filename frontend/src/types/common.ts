@@ -1,9 +1,14 @@
 export interface BaseEntity {
-  CREATED_AT: string;
-  CREATED_BY: string;
-  UPDATED_AT: string;
-  UPDATED_BY: string;
+  REG_DT: string;
+  REG_BY: string;
+  MOD_DT: string;
+  MOD_BY: string;
 }
 
 export type UseYn = 'Y' | 'N';
 export type Yn = UseYn;
+
+export interface ManagedEntity extends BaseEntity {
+  USE_YN: UseYn;
+  DEL_YN: Yn;
+}

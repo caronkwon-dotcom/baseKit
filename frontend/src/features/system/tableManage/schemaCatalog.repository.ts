@@ -1,5 +1,6 @@
 import schemaTablesJson from '../../../../meta/schema-tables.json';
-import type { SchemaTable } from './tableManage.types';
+import schemaCommonColumnsJson from '../../../../meta/schema-common-columns.json';
+import type { SchemaColumn, SchemaTable } from './tableManage.types';
 
 const TABLE_NAME_PATTERN = /^B[A-Z]{2}[A-Z0-9]{4}$/;
 const TABLE_ALIAS_PATTERN = /^[A-Z0-9]{4}$/;
@@ -30,13 +31,30 @@ function validateSchemaCatalog(rows: SchemaTable[]) {
     if (aliases.has(table.tableAlias)) {
       throw new Error(`[Schema Catalog] 중복 Alias입니다: ${table.tableAlias}`);
     }
+    const columnNames = table.columns.map((column) => column.physicalName);
+    const duplicatedColumn = columnNames.find((columnName, index) => columnNames.indexOf(columnName) !== index);
+    if (duplicatedColumn) {
+      throw new Error(`[Schema Catalog] ${table.tableKey}의 중복 컬럼입니다: ${duplicatedColumn}`);
+    }
+    commonColumns.forEach((commonColumn) => {
+      if (!columnNames.includes(commonColumn.physicalName)) {
+        throw new Error(`[Schema Catalog] ${table.tableKey}에 공통 컬럼이 없습니다: ${commonColumn.physicalName}`);
+      }
+    });
 
     physicalNames.add(table.physicalName);
     aliases.add(table.tableAlias);
   });
 }
 
-const schemaTables = schemaTablesJson as SchemaTable[];
+const commonColumns = schemaCommonColumnsJson as SchemaColumn[];
+const schemaTables = (schemaTablesJson as SchemaTable[]).map((table) => ({
+  ...table,
+  columns: [
+    ...table.columns.filter((column) => !commonColumns.some((commonColumn) => commonColumn.physicalName === column.physicalName)),
+    ...commonColumns,
+  ],
+}));
 validateSchemaCatalog(schemaTables);
 
 export const schemaCatalogRepository = {
