@@ -88,6 +88,17 @@
     "useYn": "Y"
   },
   {
+    "programKey": "DOCUMENT_CENTER",
+    "programName": "BaseKit 문서센터",
+    "componentName": "DocumentCenterPage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/dev-guide/documents",
+    "dataScope": "USER",
+    "modifyScope": "NONE",
+    "actionCodes": ["SEARCH"],
+    "useYn": "Y"
+  },
+  {
     "programKey": "DEV_SEARCH_SAMPLE_TYPE_1",
     "programName": "기본 검색 페이지 샘플 Type 1",
     "componentName": "SearchSampleType1Page",
