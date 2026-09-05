@@ -1301,6 +1301,62 @@ tbody tr.selected-row td {
 .key-mark { color: #b45309; font-size: 10px; }
 .table-catalog-empty { display: grid; min-height: 500px; place-items: center; color: var(--text-muted); font-size: 12px; }
 
+.document-center-toolbar { display: flex; min-height: 38px; align-items: center; gap: 10px; margin-bottom: 6px; border: 1px solid var(--border-default); border-radius: 7px; background: var(--surface-panel); padding: 4px 7px; }
+.document-category-tabs { display: flex; gap: 3px; }
+.document-category-tabs button { min-height: 27px; border: 1px solid transparent; border-radius: 5px; background: transparent; padding: 0 9px; color: var(--text-secondary); font-size: 11px; font-weight: 700; }
+.document-category-tabs button:hover { background: var(--surface-muted); }
+.document-category-tabs button.active { border-color: var(--brand); background: var(--brand-soft); color: var(--brand-hover); }
+.document-center-toolbar label { display: flex; align-items: center; gap: 6px; margin-left: auto; color: var(--text-muted); font-size: 11px; font-weight: 700; }
+.document-center-toolbar input { width: 230px; min-height: 27px; border: 1px solid var(--border-strong); border-radius: 5px; padding: 0 8px; color: var(--text-primary); }
+.document-center-layout { display: grid; grid-template-columns: minmax(280px, 25%) minmax(0, 1fr); height: calc(100vh - 166px); min-height: 520px; gap: 8px; }
+.document-list-panel,
+.document-viewer-panel { overflow: hidden; border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-panel); }
+.document-list-heading { display: flex; min-height: 36px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-default); padding: 0 10px; }
+.document-list-heading h2 { margin: 0; color: var(--text-primary); font-size: 12px; }
+.document-list-heading span { color: var(--text-muted); font-size: 10px; }
+.document-list-scroll { height: calc(100% - 37px); overflow: auto; }
+.document-list-scroll > button { position: relative; display: grid; width: 100%; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 7px; border: 0; border-bottom: 1px solid var(--border-default); background: transparent; padding: 8px 9px; color: var(--text-secondary); text-align: left; }
+.document-list-scroll > button:hover { background: var(--surface-muted); }
+.document-list-scroll > button.active { background: var(--brand-soft); box-shadow: inset 3px 0 var(--brand); }
+.document-list-scroll > button strong { min-width: 0; overflow: hidden; color: var(--text-primary); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.document-list-scroll > button small { grid-column: 1 / 4; overflow: hidden; color: var(--text-muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.document-list-scroll > button em { font-style: normal; }
+.document-category,
+.document-status { display: inline-block; border-radius: 999px; padding: 2px 6px; font-size: 9px; font-weight: 800; white-space: nowrap; }
+.document-category { background: #e0f2fe; color: #0369a1; }
+.document-category.category-release { background: #dbeafe; color: #1d4ed8; }
+.document-category.category-decision { background: #dcfce7; color: #166534; }
+.document-category.category-idea { background: #fef3c7; color: #92400e; }
+.document-category.category-sample { background: #ede9fe; color: #6d28d9; }
+.document-status { background: var(--surface-muted); color: var(--text-muted); }
+.document-status.status-dev_pm,
+.document-status.status-current { background: #dbeafe; color: #1d4ed8; }
+.document-status.status-accepted { background: #dcfce7; color: #166534; }
+.document-status.status-idea,
+.document-status.status-review { background: #fef3c7; color: #92400e; }
+.document-viewer-panel { display: flex; min-width: 0; flex-direction: column; }
+.document-viewer-panel > header { display: flex; min-height: 36px; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--border-default); padding: 0 12px; }
+.document-viewer-panel > header div { display: flex; gap: 5px; color: var(--brand-hover); font-size: 10px; }
+.document-viewer-panel > header strong::before { content: '· '; color: var(--text-muted); }
+.document-viewer-panel > header code { overflow: hidden; color: var(--text-muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.markdown-document { flex: 1; overflow: auto; padding: 12px 18px 40px; color: var(--text-secondary); font-size: 12px; line-height: 1.65; }
+.markdown-document > :first-child { margin-top: 0; }
+.markdown-document h1 { margin: 0 0 12px; border-bottom: 1px solid var(--border-default); padding-bottom: 8px; color: var(--text-primary); font-size: 20px; }
+.markdown-document h2 { margin: 22px 0 8px; color: var(--text-primary); font-size: 15px; }
+.markdown-document h3 { margin: 17px 0 6px; color: var(--text-primary); font-size: 13px; }
+.markdown-document p { margin: 7px 0; }
+.markdown-document ul,
+.markdown-document ol { margin: 7px 0; padding-left: 22px; }
+.markdown-document pre { max-width: 100%; overflow: auto; border-radius: 6px; background: #172033; padding: 10px; color: #e2e8f0; font-size: 11px; }
+.markdown-document :not(pre) > code { border-radius: 4px; background: var(--surface-muted); padding: 2px 4px; color: var(--brand-hover); font-size: 10px; }
+.markdown-document table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.markdown-document th,
+.markdown-document td { border: 1px solid var(--border-default); padding: 5px 7px; text-align: left; }
+.markdown-document th { background: var(--surface-muted); color: var(--text-primary); }
+.markdown-document blockquote { margin: 8px 0; border-left: 3px solid var(--brand); background: var(--brand-soft); padding: 6px 10px; }
+.markdown-document a { color: var(--brand-hover); font-weight: 700; }
+.document-empty { display: grid; min-height: 150px; place-items: center; color: var(--text-muted); font-size: 11px; }
+
 @media (max-width: 1439px) {
   .table-catalog-layout { grid-template-columns: minmax(330px, 38%) minmax(0, 1fr); }
   .table-definition-heading p { display: none; }
@@ -1373,4 +1429,7 @@ tbody tr.selected-row td {
   .workspace { padding: 8px; }
   .top-menu-button { padding-right: 8px; padding-left: 8px; }
   .floating-navigation { left: 82px; width: 340px; }
+  .document-center-layout { grid-template-columns: 290px minmax(0, 1fr); }
+  .document-category-tabs button { padding-right: 6px; padding-left: 6px; }
+  .document-center-toolbar input { width: 180px; }
 }

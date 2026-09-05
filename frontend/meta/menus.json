@@ -100,13 +100,23 @@
     "useYn": "Y"
   },
   {
+    "menuKey": "DEV_GUIDE.DOCUMENT_CENTER",
+    "parentMenuKey": "DEV_GUIDE",
+    "menuName": "BaseKit 문서센터",
+    "menuLevel": 2,
+    "menuType": "SCREEN",
+    "programKey": "DOCUMENT_CENTER",
+    "sortOrder": 1,
+    "useYn": "Y"
+  },
+  {
     "menuKey": "DEV_GUIDE.SAMPLES",
     "parentMenuKey": "DEV_GUIDE",
     "menuName": "화면 샘플",
     "menuLevel": 2,
     "menuType": "GROUP",
     "programKey": null,
-    "sortOrder": 1,
+    "sortOrder": 2,
     "useYn": "Y"
   },
   {

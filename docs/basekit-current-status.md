@@ -69,6 +69,8 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - 공통 감사 컬럼 `REG_DT`, `REG_BY`, `MOD_DT`, `MOD_BY`와 사용·논리삭제 `USE_YN`, `DEL_YN` 규칙
 - Schema Catalog 공통 컬럼 자동 합성과 Frontend/Backend 공통 Base Entity 계약
 - 공통 AA가 관리하는 `basekit-core`·`basekit-system-starter`를 업무 프로젝트에 임베드하고 필요 시 빈 Host로 실행하는 배포 Architecture 결정
+- 개발자가이드 > BaseKit 문서센터에서 README와 docs Markdown 자동 수집·검색·상태별 조회
+- `docs/releases` 기반 개발 반영 공지와 실제 샘플 프로그램 검수 동선 분리
 
 ## 3. 문서만 설계 완료
 
