@@ -31,8 +31,9 @@
   { "logicalName": "공급업체ID", "physicalName": "VENDOR_ID", "domain": "ID" },
   { "logicalName": "사원번호", "physicalName": "EMP_NO", "domain": "NO" },
 
-  { "logicalName": "등록자", "physicalName": "CREATED_BY", "domain": "BY" },
-  { "logicalName": "등록일시", "physicalName": "CREATED_AT", "domain": "AT" },
-  { "logicalName": "수정자", "physicalName": "UPDATED_BY", "domain": "BY" },
-  { "logicalName": "수정일시", "physicalName": "UPDATED_AT", "domain": "AT" }
+  { "logicalName": "등록자", "physicalName": "REG_BY", "domain": "BY" },
+  { "logicalName": "등록일시", "physicalName": "REG_DT", "domain": "DT" },
+  { "logicalName": "수정자", "physicalName": "MOD_BY", "domain": "BY" },
+  { "logicalName": "수정일시", "physicalName": "MOD_DT", "domain": "DT" },
+  { "logicalName": "삭제여부", "physicalName": "DEL_YN", "domain": "YN" }
 ]

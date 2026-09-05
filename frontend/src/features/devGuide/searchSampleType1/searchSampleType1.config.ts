@@ -46,5 +46,5 @@ export const searchSampleType1Columns: DataTableColumn<SearchSampleType1Row>[] =
     { key: 'SAMPLE_NAME', header: '샘플명', render: (row) => row.SAMPLE_NAME },
     { key: 'SAMPLE_TYPE', header: '샘플유형', render: (row) => row.SAMPLE_TYPE },
     { key: 'USE_YN', header: '사용여부', render: (row) => row.USE_YN },
-    { key: 'CREATED_AT', header: '등록일시', render: (row) => row.CREATED_AT },
+    { key: 'REG_DT', header: '등록일시', render: (row) => row.REG_DT },
 ];

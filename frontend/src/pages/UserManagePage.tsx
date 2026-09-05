@@ -64,9 +64,9 @@ const userColumns: DataTableColumn<User>[] = [
     render: (user) => (user.USE_YN === 'Y' ? '사용' : '미사용'),
   },
   {
-    key: 'CREATED_AT',
+    key: 'REG_DT',
     header: '등록일시',
-    render: (user) => formatDateTime(user.CREATED_AT),
+    render: (user) => formatDateTime(user.REG_DT),
   },
 ];
 
@@ -212,11 +212,11 @@ export default function UserManagePage() {
             </div>
             <div>
               <dt>등록일시</dt>
-              <dd>{formatDateTime(selectedUser.CREATED_AT)}</dd>
+              <dd>{formatDateTime(selectedUser.REG_DT)}</dd>
             </div>
             <div>
               <dt>수정일시</dt>
-              <dd>{formatDateTime(selectedUser.UPDATED_AT)}</dd>
+              <dd>{formatDateTime(selectedUser.MOD_DT)}</dd>
             </div>
           </dl>
         ) : (

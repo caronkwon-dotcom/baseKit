@@ -1,6 +1,6 @@
-import type { BaseEntity, UseYn } from './common';
+import type { ManagedEntity, UseYn } from './common';
 
-export interface User extends BaseEntity {
+export interface User extends ManagedEntity {
   USER_ID: string;
   LOGIN_ID: string;
   USER_NAME: string;
@@ -16,5 +16,4 @@ export interface User extends BaseEntity {
   PASSWORD_CHANGED_AT: string;
   LOGIN_FAIL_COUNT: number;
   LOCKED_YN: UseYn;
-  USE_YN: UseYn;
 }

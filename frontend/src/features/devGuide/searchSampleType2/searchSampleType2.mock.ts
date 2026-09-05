@@ -9,7 +9,7 @@ const baseRows = [
   { REQUEST_NO: 'REQ-2026-006', REQUEST_NAME: '결재선 변경 적용', REQUEST_TYPE: 'CHANGE', STATUS: 'IN_PROGRESS', COMPANY_NAME: 'BaseKit 연구소', DEPARTMENT_NAME: '품질관리팀', REQUESTER_NAME: '오품질', PRIORITY: 'NORMAL', OWNER_NAME: '최관리', REQUESTED_AT: '2026-07-13' },
   { REQUEST_NO: 'REQ-2026-007', REQUEST_NAME: '협력사 사용자 일괄 등록', REQUEST_TYPE: 'STANDARD', STATUS: 'REQUESTED', COMPANY_NAME: 'BaseKit 물류', DEPARTMENT_NAME: '협력사지원팀', REQUESTER_NAME: '임지원', PRIORITY: 'NORMAL', OWNER_NAME: '이운영', REQUESTED_AT: '2026-07-15' },
   { REQUEST_NO: 'REQ-2026-008', REQUEST_NAME: '시스템 설정값 변경', REQUEST_TYPE: 'CHANGE', STATUS: 'COMPLETED', COMPANY_NAME: 'BaseKit 본사', DEPARTMENT_NAME: '시스템운영팀', REQUESTER_NAME: '서시스템', PRIORITY: 'HIGH', OWNER_NAME: '최관리', REQUESTED_AT: '2026-07-18' },
-] satisfies Omit<SearchSampleType2Row, 'EXPECTED_AT' | 'UPDATED_BY' | 'UPDATED_AT' | 'REMARK'>[];
+] satisfies Omit<SearchSampleType2Row, 'EXPECTED_AT' | 'MOD_BY' | 'MOD_DT' | 'REMARK'>[];
 
 const remarks = ['요청 내용 검토 중', '관련 부서 협의 필요', '처리 결과 확인 예정', '표준 절차에 따라 진행'];
 
@@ -22,8 +22,8 @@ export const searchSampleType2Rows: SearchSampleType2Row[] = Array.from({ length
     REQUEST_NO: `REQ-2026-${sequence}`,
     REQUESTED_AT: `2026-07-${day}`,
     EXPECTED_AT: `2026-08-${day}`,
-    UPDATED_BY: index % 2 === 0 ? '관리자' : '업무담당자',
-    UPDATED_AT: `2026-08-${day} ${String(9 + (index % 9)).padStart(2, '0')}:30`,
+    MOD_BY: index % 2 === 0 ? '관리자' : '업무담당자',
+    MOD_DT: `2026-08-${day} ${String(9 + (index % 9)).padStart(2, '0')}:30`,
     REMARK: remarks[index % remarks.length],
   };
 });

@@ -7,8 +7,9 @@ export const systemConfig: SystemConfig = {
   SYSTEM_TIMEZONE_ID: 'Asia/Seoul',
   CONFIG_LOCKED_YN: 'Y',
   USE_YN: 'Y',
-  CREATED_AT: '2026-06-01T09:00:00',
-  CREATED_BY: 'system',
-  UPDATED_AT: '2026-06-01T09:00:00',
-  UPDATED_BY: 'system',
+    DEL_YN: 'N',
+  REG_DT: '2026-06-01T09:00:00',
+  REG_BY: 'system',
+  MOD_DT: '2026-06-01T09:00:00',
+  MOD_BY: 'system',
 };

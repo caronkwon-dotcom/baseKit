@@ -106,8 +106,8 @@ const columns: DataTableColumn<SearchSampleType2Row>[] = [
   { key: 'OWNER_NAME', header: '담당자', render: (row) => row.OWNER_NAME },
   { key: 'REQUESTED_AT', header: '요청일', render: (row) => row.REQUESTED_AT },
   { key: 'EXPECTED_AT', header: '완료예정일', render: (row) => row.EXPECTED_AT },
-  { key: 'UPDATED_BY', header: '최종수정자', render: (row) => row.UPDATED_BY },
-  { key: 'UPDATED_AT', header: '최종수정일시', render: (row) => row.UPDATED_AT },
+  { key: 'MOD_BY', header: '최종수정자', render: (row) => row.MOD_BY },
+  { key: 'MOD_DT', header: '최종수정일시', render: (row) => row.MOD_DT },
   { key: 'REMARK', header: '비고', render: (row) => row.REMARK },
 ];
 

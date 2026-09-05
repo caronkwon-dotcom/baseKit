@@ -13,20 +13,20 @@ export const searchSampleTypeRows : SearchSampleType1Row[] = [
         SAMPLE_NAME: '샘플 데이터 1',
         SAMPLE_TYPE: 'TYPE_A',
         USE_YN: 'Y',
-        CREATED_AT: '2026-07-09T10:00:00',
+        REG_DT: '2026-07-09T10:00:00',
     },
     {
         SAMPLE_ID: 'SAMPLE-002',
         SAMPLE_NAME: '샘플 데이터 2',
         SAMPLE_TYPE: 'TYPE_B',
         USE_YN: 'Y',
-        CREATED_AT: '2026-07-09T11:00:00',
+        REG_DT: '2026-07-09T11:00:00',
     },
     {
         SAMPLE_ID: 'SAMPLE-003',
         SAMPLE_NAME: '샘플 데이터 3',
         SAMPLE_TYPE: 'TYPE_A',
         USE_YN: 'N',
-        CREATED_AT: '2026-07-09T12:00:00',
+        REG_DT: '2026-07-09T12:00:00',
     },
 ];

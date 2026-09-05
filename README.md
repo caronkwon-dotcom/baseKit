@@ -66,6 +66,7 @@ frontend/meta/
   programs.json
   terms.json
   schema-tables.json
+  schema-common-columns.json
 ```
 
 현재 React는 `MetadataRepository`를 통해 메타데이터에 접근합니다. 권한은 `ROLE × PROGRAM × ACTION_CODE` 기준이며, 자세한 결정은 [Program Action 권한 및 메타데이터 결정 문서](docs/decisions/007-program-action-permission-metadata.md)를 참고합니다.
