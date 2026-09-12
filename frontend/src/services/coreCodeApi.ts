@@ -7,13 +7,15 @@ interface ApiResponse<T> {
 
 interface ErrorResponse {
   MESSAGE?: string;
+  FIELD_ERRORS?: Array<{ FIELD_NAME: string; MESSAGE: string }>;
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/api/core/codes${path}`, init);
   if (!response.ok) {
     const error = await response.json().catch(() => ({})) as ErrorResponse;
-    throw new Error(error.MESSAGE ?? '공통코드 요청을 처리하지 못했습니다.');
+    const fieldMessage = error.FIELD_ERRORS?.map((field) => `${field.FIELD_NAME}: ${field.MESSAGE}`).join(', ');
+    throw new Error(fieldMessage || error.MESSAGE || '공통코드 요청을 처리하지 못했습니다.');
   }
   if (response.status === 204) return undefined as T;
   const payload = await response.json() as ApiResponse<T>;

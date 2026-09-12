@@ -6,6 +6,7 @@ import DataTable, { type DataTableColumn } from './DataTable';
 
 const GRID_ACTION_CODES = [
   COMMON_ACTIONS.CREATE,
+  COMMON_ACTIONS.UPDATE,
   COMMON_ACTIONS.DELETE,
   COMMON_ACTIONS.EXCEL_DOWNLOAD,
 ] as const;
@@ -37,6 +38,10 @@ interface ProgramDataGridProps<T> {
   emptyMessage?: string;
   selectable?: boolean;
   scrollSample?: boolean;
+  selectedRowKeys?: Set<string>;
+  onSelectedRowKeysChange?: (keys: Set<string>) => void;
+  onRowClick?: (row: T) => void;
+  getRowClassName?: (row: T) => string;
 }
 
 function ExcelIcon() {
@@ -60,8 +65,14 @@ export default function ProgramDataGrid<T>({
   emptyMessage,
   selectable = true,
   scrollSample = false,
+  selectedRowKeys: controlledSelectedRowKeys,
+  onSelectedRowKeysChange,
+  onRowClick,
+  getRowClassName,
 }: ProgramDataGridProps<T>) {
-  const [selectedRowKeys, setSelectedRowKeys] = useState<Set<string>>(new Set());
+  const [internalSelectedRowKeys, setInternalSelectedRowKeys] = useState<Set<string>>(new Set());
+  const selectedRowKeys = controlledSelectedRowKeys ?? internalSelectedRowKeys;
+  const setSelectedRowKeys = onSelectedRowKeysChange ?? setInternalSelectedRowKeys;
   const program = programByKey[programKey];
   const actionNames = useMemo(
     () => new Map(metadataRepository.getActions().map((action) => [action.actionCode, action.actionName])),
@@ -113,6 +124,8 @@ export default function ProgramDataGrid<T>({
         emptyMessage={emptyMessage}
         selectedRowKeys={selectable ? selectedRowKeys : undefined}
         onSelectedRowKeysChange={selectable ? setSelectedRowKeys : undefined}
+        onRowClick={onRowClick}
+        getRowClassName={getRowClassName}
       />
     </section>
   );
