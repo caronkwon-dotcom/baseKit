@@ -3,6 +3,8 @@ package com.caron.basekit.standarddesign.terms;
 import com.caron.basekit.standarddesign.llm.DesignLlmClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -13,10 +15,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 class StandardDesignTermLlmService {
 
+    private static final Logger log = LoggerFactory.getLogger(StandardDesignTermLlmService.class);
     private static final String NOT_FOUND_ANSWER = "회사 표준용어집에서 적합한 표준용어를 찾지 못했습니다.";
     private static final String INTERPRET_SYSTEM_PROMPT = """
             You extract search intent for a Korean standard-term glossary.
@@ -49,23 +53,58 @@ class StandardDesignTermLlmService {
     }
 
     StandardDesignTermLlmResult recommend(String question) {
+        return recommend(question, requestId());
+    }
+
+    StandardDesignTermLlmResult recommend(String question, String requestId) {
+        long requestStartedAt = System.nanoTime();
+        log.info("standard-term-llm request start requestId={}", requestId);
+
+        long stageStartedAt = System.nanoTime();
         DesignLlmClient.LlmChatResult interpretationResponse =
                 llmClient.chat(INTERPRET_SYSTEM_PROMPT, question);
         Interpretation interpretation = parseInterpretation(interpretationResponse.content(), question);
+        log.info("standard-term-llm intent extraction requestId={} elapsedMs={} keywordCount={}",
+                requestId, elapsedMillis(stageStartedAt), interpretation.searchKeywords().size());
 
+        stageStartedAt = System.nanoTime();
         List<StandardDesignTerm> initialCandidates = termService.searchTerms(question, 20);
+        log.info("standard-term-llm original CSV search requestId={} elapsedMs={} candidateCount={}",
+                requestId, elapsedMillis(stageStartedAt), initialCandidates.size());
+
         LinkedHashSet<String> keywords = new LinkedHashSet<>(interpretation.searchKeywords());
         List<StandardDesignTerm> reconstructedCandidates = new ArrayList<>();
+        stageStartedAt = System.nanoTime();
         for (String keyword : keywords) {
             reconstructedCandidates.addAll(termService.searchTerms(keyword, 20));
         }
+        log.info("standard-term-llm keyword CSV search requestId={} elapsedMs={} keywordCount={} candidateCount={}",
+                requestId, elapsedMillis(stageStartedAt), keywords.size(), reconstructedCandidates.size());
+
+        stageStartedAt = System.nanoTime();
         List<StandardDesignTerm> candidates = mergeCandidates(initialCandidates, reconstructedCandidates, 20);
-        String candidateContext = candidates.stream().map(this::candidateJson).toList().toString();
+        log.info("standard-term-llm candidate merge requestId={} elapsedMs={} candidateCount={} candidateIds={}",
+                requestId, elapsedMillis(stageStartedAt), candidates.size(), safeCandidateIds(candidates));
+
+        String secondUserPrompt = "QUESTION=" + question + "\nSEARCH_KEYWORDS=" + keywords
+                + "\nSTANDARD_TERM_CANDIDATES=" + candidates.stream().map(this::candidateJson).toList();
+        log.info("standard-term-llm recommendation LLM request start requestId={} candidateCount={} systemPromptBytes={} userPromptBytes={} inputTokens=unavailable firstResponseByte=unavailable",
+                requestId, candidates.size(), utf8Length(ANSWER_SYSTEM_PROMPT), utf8Length(secondUserPrompt));
+        stageStartedAt = System.nanoTime();
         DesignLlmClient.LlmChatResult answerResponse = llmClient.chat(
                 ANSWER_SYSTEM_PROMPT,
-                "QUESTION=" + question + "\nSEARCH_KEYWORDS=" + keywords + "\nSTANDARD_TERM_CANDIDATES=" + candidateContext
+                secondUserPrompt
         );
+        log.info("standard-term-llm recommendation LLM response requestId={} firstResponseByte=unavailable responseCompleteElapsedMs={} outputBytes={} outputTokens=unavailable totalElapsedMs={}",
+                requestId, elapsedMillis(stageStartedAt), utf8Length(answerResponse.content()),
+                elapsedMillis(stageStartedAt));
+
+        stageStartedAt = System.nanoTime();
         Answer answer = parseAnswer(answerResponse.content(), candidates);
+        log.info("standard-term-llm whitelist grounding requestId={} elapsedMs={} acceptedTermId={}",
+                requestId, elapsedMillis(stageStartedAt), safeId(answer.recommendedTermId()));
+
+        stageStartedAt = System.nanoTime();
         StandardDesignTerm recommendedTerm = null;
         if (answer.recommendedTermId() != null) {
             try {
@@ -77,7 +116,7 @@ class StandardDesignTermLlmService {
         String answerText = recommendedTerm == null
                 ? NOT_FOUND_ANSWER
                 : canonicalRecommendation(recommendedTerm);
-        return new StandardDesignTermLlmResult(
+        StandardDesignTermLlmResult result = new StandardDesignTermLlmResult(
                 question,
                 interpretation.interpretedIntent(),
                 List.copyOf(keywords),
@@ -86,6 +125,31 @@ class StandardDesignTermLlmService {
                 answerText,
                 interpretationResponse.model()
         );
+        log.info("standard-term-llm canonical relookup/response assembly requestId={} elapsedMs={} recommendedTermId={}",
+                requestId, elapsedMillis(stageStartedAt), safeId(result.recommendedTermId()));
+        log.info("standard-term-llm total/end requestId={} elapsedMs={} candidateCount={} recommendedTermId={}",
+                requestId, elapsedMillis(requestStartedAt), result.candidates().size(), safeId(result.recommendedTermId()));
+        return result;
+    }
+
+    private String requestId() {
+        return UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private long elapsedMillis(long startedAt) {
+        return (System.nanoTime() - startedAt) / 1_000_000;
+    }
+
+    private int utf8Length(String value) {
+        return value == null ? 0 : value.getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
+    }
+
+    private List<String> safeCandidateIds(List<StandardDesignTerm> candidates) {
+        return candidates.stream().map(StandardDesignTerm::TERM_ID).toList();
+    }
+
+    private String safeId(String termId) {
+        return termId == null ? "NONE" : termId;
     }
 
     private List<StandardDesignTerm> mergeCandidates(

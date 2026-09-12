@@ -7,12 +7,15 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 @Component
 class CompanyLlmClient implements DesignLlmClient {
 
+    private static final Logger log = LoggerFactory.getLogger(CompanyLlmClient.class);
     private final LlmProperties properties;
 
     CompanyLlmClient(LlmProperties properties) {
@@ -29,6 +32,9 @@ class CompanyLlmClient implements DesignLlmClient {
                 List.of(new Message("system", systemPrompt), new Message("user", userPrompt)),
                 0.7
         );
+        long startedAt = System.nanoTime();
+        log.info("company-llm HTTP request start systemPromptBytes={} userPromptBytes={} inputTokens=unavailable firstResponseByte=unavailable",
+                utf8Length(systemPrompt), utf8Length(userPrompt));
 
         try {
             ChatCompletionResponse response = RestClient.builder()
@@ -45,6 +51,8 @@ class CompanyLlmClient implements DesignLlmClient {
                     || !StringUtils.hasText(response.choices().getFirst().message().content())) {
                 throw new LlmConnectionException("회사 LLM 응답 내용이 비어 있습니다.");
             }
+            log.info("company-llm HTTP response complete responseCompleteElapsedMs={} outputBytes={} outputTokens=unavailable firstResponseByte=unavailable",
+                    elapsedMillis(startedAt), utf8Length(response.choices().getFirst().message().content()));
             return new LlmChatResult(properties.model(), response.choices().getFirst().message().content());
         } catch (LlmConnectionException exception) {
             throw exception;
@@ -59,6 +67,15 @@ class CompanyLlmClient implements DesignLlmClient {
         } catch (RuntimeException exception) {
             throw new LlmConnectionException("회사 LLM 응답 처리에 실패했습니다.");
         }
+
+    }
+
+    private int utf8Length(String value) {
+        return value == null ? 0 : value.getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
+    }
+
+    private long elapsedMillis(long startedAt) {
+        return (System.nanoTime() - startedAt) / 1_000_000;
     }
 
     private void validateConfiguration() {
