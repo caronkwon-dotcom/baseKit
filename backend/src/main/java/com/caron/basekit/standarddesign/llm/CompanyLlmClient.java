@@ -1,6 +1,7 @@
 package com.caron.basekit.standarddesign.llm;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
@@ -11,11 +12,9 @@ import java.util.List;
 @Component
 class CompanyLlmClient implements DesignLlmClient {
 
-    private final RestClient.Builder restClientBuilder;
     private final LlmProperties properties;
 
-    CompanyLlmClient(RestClient.Builder restClientBuilder, LlmProperties properties) {
-        this.restClientBuilder = restClientBuilder;
+    CompanyLlmClient(LlmProperties properties) {
         this.properties = properties;
     }
 
@@ -31,7 +30,9 @@ class CompanyLlmClient implements DesignLlmClient {
         );
 
         try {
-            ChatCompletionResponse response = restClientBuilder.build()
+            ChatCompletionResponse response = RestClient.builder()
+                    .requestFactory(new SimpleClientHttpRequestFactory())
+                    .build()
                     .post()
                     .uri(endpoint)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + properties.apiKey())
