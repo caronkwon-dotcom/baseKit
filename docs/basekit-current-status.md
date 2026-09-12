@@ -71,6 +71,9 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - 공통 AA가 관리하는 `basekit-core`·`basekit-system-starter`를 업무 프로젝트에 임베드하고 필요 시 빈 Host로 실행하는 배포 Architecture 결정
 - 개발자가이드 > BaseKit 문서센터에서 README와 docs Markdown 자동 수집·검색·상태별 조회
 - `docs/releases` 기반 개발 반영 공지와 실제 샘플 프로그램 검수 동선 분리
+- Product Module이 메뉴·프로그램·권한·Component를 소유하는 최소 Module Manifest와 Host Registry
+- Standard Design 첫 Product Module의 프로젝트 관리·고객 표준 관리·화면 설계 Skeleton
+- Standard Design 등록 제거 상태에서 BaseKit Core 단독 Production Build 검증
 
 ## 3. 문서만 설계 완료
 
@@ -109,6 +112,7 @@ Lifecycle 문서는 `docs/basekit-business-object-lifecycle-architecture.md`에 
 - `SYST`, `SYCO`, `IUAS`, `VUAS`, `RPAC` 테이블 코드 가독성 최종 검토
 - 삭제 복구·물리 파기 예외·감사값 입력 책임·동시성 Version은 시스템 공통 구현 후 일괄 검토
 - Starter 실행 모드, Migration 소유자와 Scheduler 중복 실행 방지 방식
+- Standard Design `Screen Design Schema v0.1`과 저장·검증 계약
 
 ## 6. Git 및 PR 상태 확인
 
@@ -217,9 +221,25 @@ gh pr list --repo caronkwon-dotcom/baseKit
 - 현재 단일 Repository를 유지하며 시스템 공통 V1 계약을 먼저 완성
 - 통합 Frontend Portal과 상용 UI 라이선스 전략은 후속 아이디어로 분리
 
+### WBS 6. Product Module Foundation
+
+목표: BaseKit Core를 유지하면서 Product Module이 자기 화면과 Metadata를 독립적으로 소유한다.
+
+완료 상태:
+
+- `ApplicationModule` Manifest와 Host Module Registry 구현
+- Standard Design 초기 3개 화면을 Module Manifest로 등록
+- 중앙 Program 목록은 BaseKit Core 프로그램만 관리
+- Module 등록 제거 후 BaseKit 단독 Build 검증
+
+다음 범위:
+
+- Standard Design `Screen Design Schema v0.1`
+- 설계 대상 시스템의 Menu·Role·Program Metadata와 BaseKit Runtime 권한의 명확한 분리
+
 ## 8. 다음 추천 작업
 
-시스템 공통 V1의 실제 DDL과 Migration을 작성하고 사용자·회사·조직·역할·권한의 Backend 계약을 연결한다. 구현 과정에서 공개 API·SPI와 내부 패키지 경계를 적용하여 향후 Starter 추출 시 재작업을 줄인다. 통합 Frontend Portal과 라이선스 통합은 현재 개발 범위에 포함하지 않는다.
+Standard Design의 `Screen Design Schema v0.1`을 정의하되 상세 UI 구현 전에 설계 대상, 화면 구조, 검색·그리드·상세·Action Metadata와 Version 경계를 확정한다. BaseKit 시스템 공통 V1 DDL·Backend 연결은 독립 WBS로 유지한다.
 
 연말까지의 목표는 Level 1 시스템 Foundation의 핵심 규약, 기준 화면, 개발자 가이드와 Frontend 공통 구조를 실제 다음 SI 프로젝트에서 시작점으로 사용할 수 있는 수준까지 확보하는 것이다. 주간 목표는 이 목표에 기여하는 작은 검증 단위로 나눈다.
 

@@ -49,6 +49,7 @@ BaseKit은 여러 SI 업무시스템에서 반복 사용할 표준 아키텍처,
 frontend/src/
   components/   공통 UI 컴포넌트
   constants/    상수 정의
+  modules/      BaseKit을 사용하는 Product/업무 Module
   layouts/      앱 레이아웃
   mock/         화면 개발용 mock 데이터
   pages/        라우트 단위 페이지
@@ -72,6 +73,8 @@ frontend/meta/
 ```
 
 현재 React는 `MetadataRepository`를 통해 메타데이터에 접근합니다. 권한은 `ROLE × PROGRAM × ACTION_CODE` 기준이며, 자세한 결정은 [Program Action 권한 및 메타데이터 결정 문서](docs/decisions/007-program-action-permission-metadata.md)를 참고합니다.
+
+Product Module은 자신의 Menu·Program·권한·Component 연결을 Module Manifest로 제공하고 Host Registry가 이를 조립합니다. 첫 적용은 Standard Design이며, 자세한 경계는 [Product Module Manifest ADR](docs/decisions/020-product-module-manifest-boundary.md)을 참고합니다.
 
 시스템 공통 V1의 테이블·컬럼 설계 초안은 `schema-tables.json`을 기준으로 테이블관리 화면에서 조회한다. 이 메타데이터는 설계 검수용이며 승인된 Flyway DDL과 동일한 것으로 간주하지 않는다.
 

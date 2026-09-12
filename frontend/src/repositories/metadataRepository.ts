@@ -2,8 +2,9 @@ import actionsJson from '../../meta/actions.json';
 import menusJson from '../../meta/menus.json';
 import programsJson from '../../meta/programs.json';
 import roleProgramActionsJson from '../../meta/role-program-actions.json';
+import { applicationModules } from '../config/moduleRegistry';
 import { COMMON_ACTIONS, type ActionCode } from '../constants/actionCodes';
-import { PROGRAM_KEYS } from '../types/adminShell';
+import { CORE_PROGRAM_KEYS } from '../types/adminShell';
 import type {
   ActionMeta,
   MenuMeta,
@@ -13,10 +14,22 @@ import type {
   RoleProgramAction,
 } from '../types/adminShell';
 
-const programs = programsJson as ProgramMeta[];
-const menus = menusJson as MenuMeta[];
-const actions = actionsJson as ActionMeta[];
-const roleProgramActions = roleProgramActionsJson as RoleProgramAction[];
+const programs = [
+  ...(programsJson as ProgramMeta[]),
+  ...applicationModules.flatMap((module) => module.programs),
+];
+const menus = [
+  ...(menusJson as MenuMeta[]),
+  ...applicationModules.flatMap((module) => module.menus),
+];
+const actions = [
+  ...(actionsJson as ActionMeta[]),
+  ...applicationModules.flatMap((module) => module.actions),
+];
+const roleProgramActions = [
+  ...(roleProgramActionsJson as RoleProgramAction[]),
+  ...applicationModules.flatMap((module) => module.permissions),
+];
 
 function assertUnique(values: string[], label: string) {
   const duplicates = values.filter((value, index) => values.indexOf(value) !== index);
@@ -29,16 +42,13 @@ function validateMetadata() {
   assertUnique(programs.map((program) => program.programKey), 'PROGRAM_KEY');
   assertUnique(menus.map((menu) => menu.menuKey), 'MENU_KEY');
   assertUnique(actions.map((action) => action.actionCode), 'ACTION_CODE');
+  assertUnique(applicationModules.map((module) => module.id), 'MODULE_ID');
 
   const programKeys = new Set(programs.map((program) => program.programKey));
-  const supportedProgramKeys = new Set<string>(PROGRAM_KEYS);
   const menuByKey = new Map(menus.map((menu) => [menu.menuKey, menu]));
   const actionCodes = new Set(actions.map((action) => action.actionCode));
 
   programs.forEach((program) => {
-    if (!supportedProgramKeys.has(program.programKey)) {
-      throw new Error(`지원하지 않는 PROGRAM_KEY: ${program.programKey}`);
-    }
     program.actionCodes.forEach((actionCode) => {
       if (!actionCodes.has(actionCode)) {
         throw new Error(`${program.programKey}에 정의되지 않은 ACTION_CODE: ${actionCode}`);
@@ -46,9 +56,9 @@ function validateMetadata() {
     });
   });
 
-  PROGRAM_KEYS.forEach((programKey) => {
+  CORE_PROGRAM_KEYS.forEach((programKey) => {
     if (!programKeys.has(programKey)) {
-      throw new Error(`메타데이터에 PROGRAM_KEY가 없습니다: ${programKey}`);
+      throw new Error(`Core 메타데이터에 PROGRAM_KEY가 없습니다: ${programKey}`);
     }
   });
 
