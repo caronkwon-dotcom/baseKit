@@ -76,6 +76,7 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - Standard Design 등록 제거 상태에서 BaseKit Core 단독 Production Build 검증
 - Standard Design 회사 LLM Backend 경유 연결 Port/Adapter와 화면 설계 임시 연결 점검 UI
 - 회사 LLM HTTP Client를 단순 요청 Factory로 고정하여 Windows 기동 시 JDK Client 자동구성 의존 제거
+- Standard Design 화면 설계에서 회사 LLM에 직접 질문하고 단일 응답을 확인하는 저장 없는 Prompt Panel
 
 ## 3. 문서만 설계 완료
 

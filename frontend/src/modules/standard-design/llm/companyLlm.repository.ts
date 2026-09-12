@@ -12,8 +12,8 @@ export interface CompanyLlmTestResult {
   CONTENT: string;
 }
 
-export async function testCompanyLlm(message: string): Promise<CompanyLlmTestResult> {
-  const response = await fetch('/api/standard-design/v1/llm/test', {
+async function requestCompanyLlm(path: 'test' | 'prompt', message: string): Promise<CompanyLlmTestResult> {
+  const response = await fetch(`/api/standard-design/v1/llm/${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ MESSAGE: message }),
@@ -26,4 +26,12 @@ export async function testCompanyLlm(message: string): Promise<CompanyLlmTestRes
 
   const payload = await response.json() as ApiResponse<CompanyLlmTestResult>;
   return payload.DATA;
+}
+
+export function testCompanyLlm(message: string): Promise<CompanyLlmTestResult> {
+  return requestCompanyLlm('test', message);
+}
+
+export function promptCompanyLlm(message: string): Promise<CompanyLlmTestResult> {
+  return requestCompanyLlm('prompt', message);
 }

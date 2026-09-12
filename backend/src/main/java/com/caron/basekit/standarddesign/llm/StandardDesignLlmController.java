@@ -25,6 +25,15 @@ class StandardDesignLlmController {
 
     @PostMapping("/test")
     ApiResponse<LlmTestResponse> test(@Valid @RequestBody LlmTestRequest request) {
+        return chat(request);
+    }
+
+    @PostMapping("/prompt")
+    ApiResponse<LlmTestResponse> prompt(@Valid @RequestBody LlmTestRequest request) {
+        return chat(request);
+    }
+
+    private ApiResponse<LlmTestResponse> chat(LlmTestRequest request) {
         DesignLlmClient.LlmChatResult result = llmClient.chat(SYSTEM_PROMPT, request.MESSAGE());
         return ApiResponse.success(new LlmTestResponse(result.model(), result.content()));
     }

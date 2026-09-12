@@ -22,9 +22,10 @@ Standard Design은 BaseKit을 적용하는 첫 Product Module이며 화면·DB �
 ## 현재 범위
 
 - `POST /api/standard-design/v1/llm/test`
+- `POST /api/standard-design/v1/llm/prompt`
 - System Prompt와 사용자 메시지 1건 전송
 - `choices[0].message.content` 반환
-- 화면 설계 Skeleton의 임시 연결 확인 UI
+- 화면 설계의 별도 연결 확인과 저장 없는 단일 Prompt UI
 
 ## 제외 범위
 

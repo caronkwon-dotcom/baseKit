@@ -25,9 +25,7 @@
 
 .standard-design-llm-test {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px 12px;
+  gap: 10px;
   margin-top: 10px;
   border: 1px solid var(--border-default);
   border-radius: 8px;
@@ -37,10 +35,16 @@
 
 .standard-design-llm-test h3 { margin: 0 0 3px; color: var(--text-primary); font-size: 13px; }
 .standard-design-llm-test p { margin: 0; color: var(--text-muted); font-size: 11px; }
-.standard-design-llm-result { grid-column: 1 / -1; display: grid; gap: 3px; border-radius: 6px; background: var(--surface-muted); padding: 9px 10px; color: var(--text-secondary); font-size: 11px; white-space: pre-wrap; }
-.standard-design-llm-error { grid-column: 1 / -1; color: var(--danger-text, #b42318) !important; }
+.standard-design-llm-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.standard-design-llm-form { display: grid; gap: 5px; }
+.standard-design-llm-form label { color: var(--text-secondary); font-size: 10px; font-weight: 800; }
+.standard-design-llm-form textarea { box-sizing: border-box; width: 100%; min-height: 86px; resize: vertical; border: 1px solid var(--border-default); border-radius: 6px; background: var(--surface-panel); padding: 8px 10px; color: var(--text-primary); font: inherit; font-size: 11px; line-height: 1.5; }
+.standard-design-llm-form textarea:focus { border-color: var(--brand-primary); outline: 2px solid color-mix(in srgb, var(--brand-primary) 18%, transparent); }
+.standard-design-llm-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.standard-design-llm-actions span { color: var(--text-muted); font-size: 10px; letter-spacing: 0; }
+.standard-design-llm-result { display: grid; gap: 5px; max-height: 240px; overflow: auto; border-radius: 6px; background: var(--surface-muted); padding: 10px; color: var(--text-secondary); font-size: 11px; line-height: 1.55; white-space: pre-wrap; }
+.standard-design-llm-error { color: var(--danger-text, #b42318) !important; }
 
 @media (max-width: 800px) {
-  .standard-design-llm-test { grid-template-columns: 1fr; }
-  .standard-design-llm-test button { justify-self: start; }
+  .standard-design-llm-heading { align-items: flex-start; flex-direction: column; }
 }

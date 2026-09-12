@@ -1,23 +1,37 @@
-import { useState } from 'react';
-import { testCompanyLlm, type CompanyLlmTestResult } from '../../llm/companyLlm.repository';
+import { useState, type FormEvent } from 'react';
+import { promptCompanyLlm, testCompanyLlm, type CompanyLlmTestResult } from '../../llm/companyLlm.repository';
 import StandardDesignSkeletonPage from './StandardDesignSkeletonPage';
 
 export default function ScreenDesignPage() {
+  const [prompt, setPrompt] = useState('');
   const [result, setResult] = useState<CompanyLlmTestResult | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleConnectivityTest = async () => {
+  const requestCompanyLlm = async (
+    request: (message: string) => Promise<CompanyLlmTestResult>,
+    message: string,
+  ) => {
     setLoading(true);
     setError('');
     setResult(null);
     try {
-      setResult(await testCompanyLlm("이 요청을 받았다면 '회사 LLM 연결 성공'이라고만 응답해 주세요."));
+      setResult(await request(message));
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : '회사 LLM 연결 확인에 실패했습니다.');
+      setError(requestError instanceof Error ? requestError.message : '회사 LLM 요청에 실패했습니다.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleConnectivityTest = () => {
+    void requestCompanyLlm(testCompanyLlm, "이 요청을 받았다면 '회사 LLM 연결 성공'이라고만 응답해 주세요.");
+  };
+
+  const handlePromptSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const message = prompt.trim();
+    if (message) void requestCompanyLlm(promptCompanyLlm, message);
   };
 
   return (
@@ -27,16 +41,35 @@ export default function ScreenDesignPage() {
       nextStep="Screen Design Schema v0.1을 정의한 뒤 편집 UI를 구현합니다."
     >
       <section className="standard-design-llm-test" aria-labelledby="company-llm-test-title">
-        <div>
-          <h3 id="company-llm-test-title">회사 LLM 연결 확인</h3>
-          <p>Backend를 경유하는 임시 연결 점검입니다. 실제 설계 검증 기능과 권한은 아직 연결하지 않습니다.</p>
+        <div className="standard-design-llm-heading">
+          <div>
+            <h3 id="company-llm-test-title">회사 LLM 프롬프트</h3>
+            <p>입력 내용은 BaseKit Spring Backend를 통해 회사 LLM에 전달됩니다. 대화이력은 저장하지 않습니다.</p>
+          </div>
+          <button type="button" className="secondary-button" disabled={loading} onClick={handleConnectivityTest}>
+            연결 확인
+          </button>
         </div>
-        <button type="button" className="primary-button" disabled={loading} onClick={handleConnectivityTest}>
-          {loading ? '확인 중...' : '회사 LLM 연결 확인'}
-        </button>
+        <form className="standard-design-llm-form" onSubmit={handlePromptSubmit}>
+          <label htmlFor="company-llm-prompt">프롬프트</label>
+          <textarea
+            id="company-llm-prompt"
+            rows={4}
+            value={prompt}
+            onChange={(event) => setPrompt(event.target.value)}
+            placeholder="회사 LLM에 질문할 내용을 입력하세요."
+            disabled={loading}
+          />
+          <div className="standard-design-llm-actions">
+            <span>{prompt.length.toLocaleString()}자</span>
+            <button type="submit" className="primary-button" disabled={loading || !prompt.trim()}>
+              {loading ? '응답 대기 중...' : '전송'}
+            </button>
+          </div>
+        </form>
         {result ? (
           <output className="standard-design-llm-result">
-            <strong>연결 성공 · {result.MODEL}</strong>
+            <strong>응답 완료 · {result.MODEL}</strong>
             <span>{result.CONTENT}</span>
           </output>
         ) : null}
