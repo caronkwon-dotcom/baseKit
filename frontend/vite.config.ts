@@ -8,6 +8,7 @@ import type { ViteDevServer } from 'vite'
 
 const CURATION_FILE = path.resolve('meta/term-curation.json')
 const REPOSITORY_ROOT = fileURLToPath(new URL('..', import.meta.url))
+const BACKEND_URL = process.env.BASEKIT_BACKEND_URL ?? 'http://localhost:8080'
 const DOCUMENT_VIRTUAL_ID = 'virtual:basekit-documents'
 const RESOLVED_DOCUMENT_VIRTUAL_ID = `\0${DOCUMENT_VIRTUAL_ID}`
 const EDITABLE_METADATA_FILES = new Map([
@@ -172,11 +173,11 @@ export default defineConfig({
     host: '0.0.0.0',
     allowedHosts: ['.app.github.dev'],
     proxy: {
-      '/api/health': 'http://localhost:8080',
-      '/api/standard-design': 'http://localhost:8080',
-      '/actuator': 'http://localhost:8080',
-      '/v3/api-docs': 'http://localhost:8080',
-      '/swagger-ui': 'http://localhost:8080',
+      '/api/health': BACKEND_URL,
+      '/api/standard-design': BACKEND_URL,
+      '/actuator': BACKEND_URL,
+      '/v3/api-docs': BACKEND_URL,
+      '/swagger-ui': BACKEND_URL,
     },
   },
 })
