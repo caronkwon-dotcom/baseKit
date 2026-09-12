@@ -29,7 +29,7 @@
     "routePath": "/system/codes",
     "dataScope": "COMPANY",
     "modifyScope": "ROLE",
-    "actionCodes": ["SEARCH", "MANUAL_VIEW", "MANUAL_GENERATE"],
+    "actionCodes": ["SEARCH", "CREATE", "UPDATE", "DELETE", "MANUAL_VIEW", "MANUAL_GENERATE"],
     "useYn": "Y"
   },
   {

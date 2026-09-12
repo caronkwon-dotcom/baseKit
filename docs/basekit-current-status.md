@@ -29,6 +29,7 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - Supabase PostgreSQL 17.6에서 Flyway V1 적용과 Core MyBatis Marker 조회 통합검증
 - Flyway V2 `BSYCDGP`·`BSYCMCD`, JPA Schema 검증, MyBatis CRUD와 공통코드 REST API
 - 공통코드관리 화면의 Backend 실데이터 조회 연결과 중복 Mock·타입 제거
+- 공통코드관리 표준 CRUD 화면: 코드그룹 Master 선택, 공통코드 Detail 조회, 권한 기반 등록·수정·삭제, 공통 Form Modal, 즉시 목록 갱신과 사용자 오류 메시지
 
 - React + Vite + TypeScript
 - Compact 한 줄 Header / 1Depth Top / 2~3Depth Sidebar / Workspace 기반 Admin Shell
