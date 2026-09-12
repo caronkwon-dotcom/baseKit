@@ -12,7 +12,7 @@ export default function ScreenDesignPage() {
     setError('');
     setResult(null);
     try {
-      setResult(await testCompanyLlm('BaseKit Standard Design 회사 LLM 연결 상태를 짧게 확인해 주세요.'));
+      setResult(await testCompanyLlm("이 요청을 받았다면 '회사 LLM 연결 성공'이라고만 응답해 주세요."));
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : '회사 LLM 연결 확인에 실패했습니다.');
     } finally {
@@ -34,7 +34,12 @@ export default function ScreenDesignPage() {
         <button type="button" className="primary-button" disabled={loading} onClick={handleConnectivityTest}>
           {loading ? '확인 중...' : '회사 LLM 연결 확인'}
         </button>
-        {result ? <output className="standard-design-llm-result"><strong>{result.MODEL}</strong><span>{result.CONTENT}</span></output> : null}
+        {result ? (
+          <output className="standard-design-llm-result">
+            <strong>연결 성공 · {result.MODEL}</strong>
+            <span>{result.CONTENT}</span>
+          </output>
+        ) : null}
         {error ? <p className="standard-design-llm-error" role="alert">{error}</p> : null}
       </section>
     </StandardDesignSkeletonPage>

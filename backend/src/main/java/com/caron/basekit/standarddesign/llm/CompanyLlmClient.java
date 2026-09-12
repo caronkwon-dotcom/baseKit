@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.util.List;
 
@@ -47,8 +48,16 @@ class CompanyLlmClient implements DesignLlmClient {
             return new LlmChatResult(properties.model(), response.choices().getFirst().message().content());
         } catch (LlmConnectionException exception) {
             throw exception;
+        } catch (RestClientResponseException exception) {
+            throw new LlmConnectionException(
+                    "회사 LLM이 요청을 거부했습니다. (HTTP " + exception.getStatusCode().value() + ")"
+            );
         } catch (RestClientException exception) {
             throw new LlmConnectionException("회사 LLM 연결에 실패했습니다.");
+        } catch (IllegalArgumentException exception) {
+            throw new LlmConnectionException("회사 LLM 연결 설정 형식을 확인해 주세요.");
+        } catch (RuntimeException exception) {
+            throw new LlmConnectionException("회사 LLM 응답 처리에 실패했습니다.");
         }
     }
 
@@ -56,7 +65,8 @@ class CompanyLlmClient implements DesignLlmClient {
         if (!properties.enabled()) {
             throw new LlmConnectionException("회사 LLM 연동이 비활성화되어 있습니다.");
         }
-        if (!StringUtils.hasText(properties.baseUrl()) || !StringUtils.hasText(properties.apiKey())) {
+        if (!StringUtils.hasText(properties.baseUrl()) || !StringUtils.hasText(properties.apiKey())
+                || !StringUtils.hasText(properties.model()) || !StringUtils.hasText(properties.chatCompletionsPath())) {
             throw new LlmConnectionException("회사 LLM 연결 설정이 완료되지 않았습니다.");
         }
     }
