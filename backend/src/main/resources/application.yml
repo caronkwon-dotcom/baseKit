@@ -39,6 +39,8 @@ server:
   shutdown: graceful
 
 standard-design:
+  terms:
+    csv-path: ${STANDARD_DESIGN_TERMS_CSV_PATH:../frontend/public/data/common-standard-terms-20251101.csv}
   llm:
     enabled: ${COMPANY_LLM_ENABLED:false}
     base-url: ${COMPANY_LLM_BASE_URL:}
