@@ -1,15 +1,18 @@
 import PageHeader from '../../../../components/common/PageHeader';
+import type { ReactNode } from 'react';
 
 interface StandardDesignSkeletonPageProps {
   title: string;
   description: string;
   nextStep: string;
+  children?: ReactNode;
 }
 
 export default function StandardDesignSkeletonPage({
   title,
   description,
   nextStep,
+  children,
 }: StandardDesignSkeletonPageProps) {
   return (
     <div className="page standard-design-page">
@@ -28,6 +31,7 @@ export default function StandardDesignSkeletonPage({
           <div><dt>다음 작업</dt><dd>{nextStep}</dd></div>
         </dl>
       </section>
+      {children}
     </div>
   );
 }

@@ -74,6 +74,7 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - Product Module이 메뉴·프로그램·권한·Component를 소유하는 최소 Module Manifest와 Host Registry
 - Standard Design 첫 Product Module의 프로젝트 관리·고객 표준 관리·화면 설계 Skeleton
 - Standard Design 등록 제거 상태에서 BaseKit Core 단독 Production Build 검증
+- Standard Design 회사 LLM Backend 경유 연결 Port/Adapter와 화면 설계 임시 연결 점검 UI
 
 ## 3. 문서만 설계 완료
 
@@ -113,6 +114,7 @@ Lifecycle 문서는 `docs/basekit-business-object-lifecycle-architecture.md`에 
 - 삭제 복구·물리 파기 예외·감사값 입력 책임·동시성 Version은 시스템 공통 구현 후 일괄 검토
 - Starter 실행 모드, Migration 소유자와 Scheduler 중복 실행 방지 방식
 - Standard Design `Screen Design Schema v0.1`과 저장·검증 계약
+- 회사 LLM 실환경 URL·인증정보 주입 후 Connectivity 검수
 
 ## 6. Git 및 PR 상태 확인
 
