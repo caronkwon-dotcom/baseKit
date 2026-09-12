@@ -174,6 +174,7 @@ export default defineConfig({
     allowedHosts: ['.app.github.dev'],
     proxy: {
       '/api/health': BACKEND_URL,
+      '/api/core': BACKEND_URL,
       '/api/standard-design': BACKEND_URL,
       '/actuator': BACKEND_URL,
       '/v3/api-docs': BACKEND_URL,

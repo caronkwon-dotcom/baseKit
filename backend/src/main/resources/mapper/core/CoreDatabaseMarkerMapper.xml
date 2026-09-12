@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caron.basekit.core.database.CoreDatabaseMarkerMapper">
+    <resultMap id="coreDatabaseMarkerResult" type="com.caron.basekit.core.database.CoreDatabaseMarker">
+        <constructor>
+            <arg column="MARKER_CODE" javaType="java.lang.String"/>
+            <arg column="DESCRIPTION" javaType="java.lang.String"/>
+            <arg column="CREATED_AT" javaType="java.time.OffsetDateTime"/>
+        </constructor>
+    </resultMap>
+
+    <select id="findFoundationMarker" resultMap="coreDatabaseMarkerResult">
+        SELECT MARKER_CODE,
+               DESCRIPTION,
+               CREATED_AT
+          FROM BASEKIT_SCHEMA_MARKER
+         WHERE MARKER_CODE = 'BACKEND_FOUNDATION_V1'
+    </select>
+</mapper>

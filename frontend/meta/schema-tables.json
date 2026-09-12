@@ -154,7 +154,7 @@
     ]
   },
   {
-    "tableKey": "CODE_GROUP", "logicalName": "코드그룹", "physicalName": "BSYCDGP", "moduleCode": "SY", "tableCode": "CDGP", "tableAlias": "CDGP", "fullName": "BaseKit System Code Group", "category": "기준정보", "status": "REVIEW",
+    "tableKey": "CODE_GROUP", "logicalName": "코드그룹", "physicalName": "BSYCDGP", "moduleCode": "SY", "tableCode": "CDGP", "tableAlias": "CDGP", "fullName": "BaseKit System Code Group", "category": "기준정보", "status": "IMPLEMENTED",
     "description": "공통코드의 그룹 기준 정보",
     "columns": [
       { "logicalName": "코드그룹ID", "physicalName": "CODE_GROUP_ID", "domain": "ID", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "REVIEW", "description": "코드그룹 식별자" },
@@ -164,7 +164,7 @@
     ]
   },
   {
-    "tableKey": "COMMON_CODE", "logicalName": "공통코드", "physicalName": "BSYCMCD", "moduleCode": "SY", "tableCode": "CMCD", "tableAlias": "CMCD", "fullName": "BaseKit System Common Code", "category": "기준정보", "status": "REVIEW",
+    "tableKey": "COMMON_CODE", "logicalName": "공통코드", "physicalName": "BSYCMCD", "moduleCode": "SY", "tableCode": "CMCD", "tableAlias": "CMCD", "fullName": "BaseKit System Common Code", "category": "기준정보", "status": "IMPLEMENTED",
     "description": "코드그룹에 속하는 공통코드 상세 정보",
     "columns": [
       { "logicalName": "코드ID", "physicalName": "CODE_ID", "domain": "ID", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "EXISTING", "description": "코드 식별자" },
