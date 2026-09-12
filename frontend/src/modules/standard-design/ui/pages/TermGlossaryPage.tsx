@@ -30,6 +30,8 @@ export default function TermGlossaryPage() {
   const [question, setQuestion] = useState('');
   const [recommendation, setRecommendation] = useState<StandardDesignTermLlmResult | null>(null);
   const [recommendationLoading, setRecommendationLoading] = useState(false);
+  const [recommendationError, setRecommendationError] = useState('');
+  const [copyMessage, setCopyMessage] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -54,12 +56,49 @@ export default function TermGlossaryPage() {
     const nextQuestion = question.trim();
     if (!nextQuestion) return;
     setRecommendationLoading(true);
+    setRecommendationError('');
+    setRecommendation(null);
+    setCopyMessage('');
     try {
       setRecommendation(await recommendStandardDesignTerm(nextQuestion));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : '표준용어 추천에 실패했습니다.');
+      const errorMessage = error instanceof Error ? error.message : '표준용어 추천에 실패했습니다.';
+      setRecommendationError(errorMessage);
     } finally {
       setRecommendationLoading(false);
+    }
+  };
+
+  const copyRecommendation = async () => {
+    if (!recommendation) return;
+    const candidateLines = recommendation.candidates.length === 0
+      ? ['없음']
+      : recommendation.candidates.map((candidate) => [
+        candidate.termId,
+        candidate.name,
+        candidate.englishAbbreviation || '-',
+        candidate.domain || '-',
+        candidate.dataType || '-',
+        candidate.matchType,
+      ].join(' | '));
+    const plainText = [
+      'Standard Design 표준용어 LLM PoC 결과',
+      `질문: ${recommendation.question}`,
+      `검색 키워드: ${recommendation.searchKeywords.join(', ') || '없음'}`,
+      '',
+      '후보 목록',
+      'TERM_ID | 표준용어명 | 영문약어 | 도메인 | 데이터타입 | 매칭',
+      ...candidateLines,
+      '',
+      `AI 추천: ${recommendation.recommendedTermId ?? '없음'}`,
+      `추천 이유/답변: ${recommendation.answer}`,
+      `상태: ${recommendation.recommendedTermId ? '추천 완료' : '미검색 또는 확정 후보 없음'}`,
+    ].join('\n');
+    try {
+      await navigator.clipboard.writeText(plainText);
+      setCopyMessage('전체 결과를 복사했습니다.');
+    } catch {
+      setCopyMessage('복사하지 못했습니다. 브라우저 클립보드 권한을 확인해 주세요.');
     }
   };
 
@@ -87,12 +126,33 @@ export default function TermGlossaryPage() {
             {recommendationLoading ? '분석 중...' : '추천'}
           </button>
         </div>
+        <p className={`standard-design-term-ai-status ${recommendationLoading ? 'is-loading' : ''} ${recommendationError ? 'is-error' : ''}`} role={recommendationError ? 'alert' : 'status'}>
+          {recommendationLoading ? '질문 해석 → CSV 후보 검색 2회 → 후보 검증 중입니다. 잠시 기다려 주세요.' : recommendationError || (recommendation ? (recommendation.recommendedTermId ? '추천 완료 · 원본 용어집 ID 검증 완료' : '완료 · 확정 가능한 후보가 없어 미검색으로 표시') : '질문을 입력하고 추천을 실행하세요.')}
+        </p>
         {recommendation ? (
           <div className="standard-design-term-ai-result">
-            <strong>{recommendation.answer}</strong>
-            <span>의도: {recommendation.interpretedIntent}</span>
-            <span>검색어: {recommendation.searchKeywords.join(', ')}</span>
-            <span>추천 ID: {recommendation.recommendedTermId ?? '없음'}</span>
+            <div className="standard-design-term-ai-result-heading">
+              <h3>분석 결과</h3>
+              <button type="button" onClick={() => void copyRecommendation()}>전체 결과 복사</button>
+            </div>
+            {copyMessage ? <p className="standard-design-term-copy-message" role="status">{copyMessage}</p> : null}
+            <dl className="standard-design-term-ai-summary">
+              <dt>질문</dt><dd>{recommendation.question}</dd>
+              <dt>검색 키워드</dt><dd>{recommendation.searchKeywords.join(', ') || '없음'}</dd>
+              <dt>AI 추천</dt><dd>{recommendation.recommendedTermId ?? '없음'}</dd>
+              <dt>추천 이유</dt><dd>{recommendation.answer}</dd>
+            </dl>
+            <div className="standard-design-term-candidates">
+              <h4>후보 목록 ({recommendation.candidates.length}건)</h4>
+              {recommendation.candidates.length ? (
+                <div className="table-wrap">
+                  <table>
+                    <thead><tr><th>TERM_ID</th><th>표준용어명</th><th>영문약어</th><th>도메인</th><th>데이터타입</th><th>매칭</th></tr></thead>
+                    <tbody>{recommendation.candidates.map((candidate) => <tr key={candidate.termId}><td>{candidate.termId}</td><td>{candidate.name}</td><td>{candidate.englishAbbreviation || '-'}</td><td>{candidate.domain || '-'}</td><td>{candidate.dataType || '-'}</td><td>{candidate.matchType}</td></tr>)}</tbody>
+                  </table>
+                </div>
+              ) : <p>검색 후보가 없습니다. 명시적 미검색 상태입니다.</p>}
+            </div>
           </div>
         ) : null}
       </section>
