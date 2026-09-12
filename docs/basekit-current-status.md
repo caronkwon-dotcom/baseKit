@@ -25,6 +25,8 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - Codespaces Java + Node + PostgreSQL 개발환경과 포트 전달
 - Frontend·Backend를 함께 검증하는 GitHub Actions
 - Maven Wrapper 기반의 OS 공통 Backend 실행과 PostgreSQL 없는 로컬 Spring Boot 스모크 프로필
+- Core DB 상태 API와 REST → Service → MyBatis → H2 → Flyway V1 Marker 자동 통합검증
+- Supabase PostgreSQL 17.6에서 Flyway V1 적용과 Core MyBatis Marker 조회 통합검증
 
 - React + Vite + TypeScript
 - Compact 한 줄 Header / 1Depth Top / 2~3Depth Sidebar / Workspace 기반 Admin Shell
@@ -81,7 +83,6 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 ## 3. 문서만 설계 완료
 
 - 시스템 공통 V1 DB 구조 Draft: 회사·조직·직무·사용자·계정, 내부/공급업체 사용자 배정과 역할·프로그램·액션 권한 경계. UI Catalog까지 구현했으며 실제 DDL·Migration은 미구현
-- Spring REST와 실제 DB 연동
 - Maven Artifact 분리, 내부 Repository 발행과 소비자 샘플 프로젝트
 - Grid, Uploader, Editor, PDF Adapter
 - 조직·법인·사용자 예외 및 데이터 범위 권한

@@ -142,6 +142,7 @@ npm run backend:run:local
 - Java 21만 설치하면 Repository의 Maven Wrapper가 Maven을 자동으로 준비합니다.
 - `backend:run`은 PostgreSQL(`localhost:5432/basekit`)을 사용하는 표준 통합 실행입니다.
 - `backend:run:local`은 H2 파일 DB를 사용하는 단일 개발자용 스모크 실행입니다. PostgreSQL 통합검증을 대체하지 않습니다.
+- 외부 PostgreSQL/Supabase 연결은 `.env.example` 형식의 `BASEKIT_DB_*` 환경변수를 로컬 환경에만 설정합니다.
 
 Backend 테스트:
 
@@ -152,6 +153,7 @@ npm run backend:test
 기본 API 확인:
 
 - Health API: `http://localhost:8080/api/health`
+- Core DB 검증 API: `http://localhost:8080/api/core/database/status`
 - Actuator: `http://localhost:8080/actuator/health`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 
@@ -166,7 +168,7 @@ database/       검토 완료된 Flyway Migration
 
 Codespaces를 생성하면 PostgreSQL이 함께 시작되고 `5173`, `8080`, `5432` 포트가 자동 전달됩니다. Codespaces는 개발·통합검증 환경이며 상시 운영 WAS로 사용하지 않습니다.
 
-현재 실행에 필수인 `.env`나 외부 서비스 인증정보는 없습니다. 비밀키와 Token은 Repository에 저장하지 않습니다.
+H2 로컬 실행에는 외부 인증정보가 필요하지 않습니다. 외부 PostgreSQL과 LLM 접속정보는 환경변수로만 주입하며 비밀키와 Token은 Repository에 저장하지 않습니다.
 
 ## 배포
 

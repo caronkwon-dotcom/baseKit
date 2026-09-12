@@ -63,6 +63,14 @@ com.caron.basekit
 
 ## 검증
 
+Core DB 검증 API:
+
+```text
+GET http://localhost:8080/api/core/database/status
+```
+
+기본 테스트는 H2에서 REST → Service → MyBatis → Flyway Marker를 검증한다. `BASEKIT_DB_URL`이 PostgreSQL JDBC URL로 설정된 환경에서는 외부 PostgreSQL 통합 테스트도 활성화된다. 세 `BASEKIT_DB_*` 변수는 반드시 함께 설정한다.
+
 ```bash
 npm run backend:test
 npm run build
