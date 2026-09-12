@@ -22,7 +22,8 @@ export const COMMON_ACTIONS = {
   MANUAL_PUBLISH: 'MANUAL_PUBLISH',
 } as const;
 
-export type ActionCode =
+export type CommonActionCode =
   (typeof COMMON_ACTIONS)[keyof typeof COMMON_ACTIONS];
 
-export type CommonActionCode = ActionCode;
+/** Product Module은 중앙 목록 수정 없이 Module 전용 Action Code를 선언할 수 있다. */
+export type ActionCode = CommonActionCode | (string & {});

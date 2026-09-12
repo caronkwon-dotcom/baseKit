@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import type { ActionCode } from '../constants/actionCodes';
 
-export const PROGRAM_KEYS = [
+/** BaseKit Core가 소유하는 Program만 선언한다. Product Program은 Module Manifest가 소유한다. */
+export const CORE_PROGRAM_KEYS = [
   'HOME',
   'USER_MGMT',
   'COMMON_CODE_MGMT',
@@ -15,7 +16,8 @@ export const PROGRAM_KEYS = [
   'DEV_SEARCH_SAMPLE_TYPE_2',
 ] as const;
 
-export type ProgramKey = (typeof PROGRAM_KEYS)[number];
+export type CoreProgramKey = (typeof CORE_PROGRAM_KEYS)[number];
+export type ProgramKey = string;
 
 /**
  * programKey     : 화면 ID
@@ -81,4 +83,4 @@ export interface MdiTab {
   title: string;
 }
 
-export type ProgramComponentMap = Record<ProgramKey, () => ReactNode>;
+export type ProgramComponentMap = Record<string, () => ReactNode>;

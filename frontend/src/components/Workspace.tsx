@@ -18,5 +18,9 @@ export default function Workspace({
 }: WorkspaceProps) {
   const renderProgram = programComponents[activeProgramKey];
 
+  if (!renderProgram) {
+    throw new Error(`PROGRAM_KEY에 등록된 Component가 없습니다: ${activeProgramKey}`);
+  }
+
   return <main className="workspace">{renderProgram()}</main>;
 }

@@ -1,0 +1,24 @@
+.standard-design-skeleton {
+  display: grid;
+  grid-template-columns: minmax(280px, 34%) minmax(0, 1fr);
+  min-height: 180px;
+  gap: 10px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--surface-panel);
+  padding: 16px;
+}
+
+.standard-design-skeleton span {
+  color: var(--brand-hover);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.standard-design-skeleton h2 { margin: 5px 0; color: var(--text-primary); font-size: 17px; }
+.standard-design-skeleton p { margin: 0; color: var(--text-muted); font-size: 11px; }
+.standard-design-skeleton dl { display: grid; align-content: start; gap: 6px; margin: 0; }
+.standard-design-skeleton dl div { display: grid; grid-template-columns: 75px 1fr; border: 1px solid var(--border-default); border-radius: 6px; background: var(--surface-muted); padding: 8px 10px; }
+.standard-design-skeleton dt { color: var(--text-muted); font-size: 10px; font-weight: 800; }
+.standard-design-skeleton dd { margin: 0; color: var(--text-secondary); font-size: 11px; }
