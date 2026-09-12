@@ -19,8 +19,16 @@ Standard Design은 BaseKit Core 관리기능이 아니라 BaseKit 공통 계약�
 - `design-version`
 - `llm-validation`
 - `artifact`
+- `term-glossary` (read-only source lookup)
 
 현재 단계에서는 Domain Skeleton을 과도하게 세분화하지 않는다. 실제 Schema와 Use Case가 정의될 때 Module 내부에 필요한 폴더만 추가한다.
+
+## 표준용어집 경계
+
+- `SD_TERM_GLOSSARY`는 `common-standard-terms-20251101.csv`를 Backend read-only Adapter로 조회한다.
+- 목록 API는 exact → prefix → partial 검색과 페이징을 제공하고, 상세 API는 source row 기반 `TERM-000001` 식별자를 사용한다.
+- Core registry, DB migration, 원본 CSV는 이 화면을 위해 수정하지 않는다.
+- `POST /api/standard-design/terms/llm/recommend`는 질문 해석, CSV 후보 검색, 후보 제한 응답과 원본 상세 재검증만 수행하는 PoC다.
 
 ## 회사 LLM 경계
 

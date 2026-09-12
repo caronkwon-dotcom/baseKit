@@ -2,6 +2,7 @@ import { COMMON_ACTIONS } from '../../constants/actionCodes';
 import type { ApplicationModule } from '../../types/applicationModule';
 import StandardDesignSkeletonPage from './ui/pages/StandardDesignSkeletonPage';
 import ScreenDesignPage from './ui/pages/ScreenDesignPage';
+import TermGlossaryPage from './ui/pages/TermGlossaryPage';
 import './standardDesign.css';
 
 const MODULE_ID = 'standard-design';
@@ -43,6 +44,17 @@ const standardDesignModule: ApplicationModule = {
       dataScope: 'COMPANY',
       modifyScope: 'ROLE',
       actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE, STANDARD_DESIGN_ACTIONS.DESIGN_VALIDATE],
+      useYn: 'Y',
+    },
+    {
+      programKey: 'SD_TERM_GLOSSARY',
+      programName: '표준용어집',
+      componentName: 'StandardDesignTermGlossaryPage',
+      screenType: 'GRID_DETAIL',
+      routePath: '/standard-design/terms',
+      dataScope: 'COMPANY',
+      modifyScope: 'NONE',
+      actionCodes: [COMMON_ACTIONS.SEARCH],
       useYn: 'Y',
     },
   ],
@@ -87,6 +99,16 @@ const standardDesignModule: ApplicationModule = {
       sortOrder: 3,
       useYn: 'Y',
     },
+    {
+      menuKey: 'STANDARD_DESIGN.TERM_GLOSSARY',
+      parentMenuKey: 'STANDARD_DESIGN',
+      menuName: '표준용어집',
+      menuLevel: 2,
+      menuType: 'SCREEN',
+      programKey: 'SD_TERM_GLOSSARY',
+      sortOrder: 4,
+      useYn: 'Y',
+    },
   ],
   actions: [
     { actionCode: STANDARD_DESIGN_ACTIONS.DESIGN_VALIDATE, actionName: '설계검증', auditYn: 'Y' },
@@ -105,6 +127,7 @@ const standardDesignModule: ApplicationModule = {
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_SCREEN_DESIGN', ACTION_CODE: COMMON_ACTIONS.UPDATE, ALLOW_YN: 'Y' },
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_SCREEN_DESIGN', ACTION_CODE: COMMON_ACTIONS.DELETE, ALLOW_YN: 'Y' },
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_SCREEN_DESIGN', ACTION_CODE: STANDARD_DESIGN_ACTIONS.DESIGN_VALIDATE, ALLOW_YN: 'Y' },
+    { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_TERM_GLOSSARY', ACTION_CODE: COMMON_ACTIONS.SEARCH, ALLOW_YN: 'Y' },
   ],
   components: {
     SD_PROJECT_MGMT: () => (
@@ -122,6 +145,7 @@ const standardDesignModule: ApplicationModule = {
       />
     ),
     SD_SCREEN_DESIGN: ScreenDesignPage,
+    SD_TERM_GLOSSARY: TermGlossaryPage,
   },
 };
 

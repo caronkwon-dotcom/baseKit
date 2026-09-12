@@ -48,3 +48,36 @@
 @media (max-width: 800px) {
   .standard-design-llm-heading { align-items: flex-start; flex-direction: column; }
 }
+
+.standard-design-term-summary { display: flex; align-items: center; gap: 10px; margin: 10px 0; color: var(--text-secondary); font-size: 11px; }
+.standard-design-term-summary strong { margin-right: auto; color: var(--text-primary); }
+.standard-design-term-summary button { border: 1px solid var(--border-default); border-radius: 5px; background: var(--surface-panel); padding: 4px 8px; color: var(--text-secondary); }
+.standard-design-term-summary button:disabled { opacity: .45; }
+.standard-design-term-layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(260px, .8fr); gap: 10px; align-items: start; }
+.standard-design-term-detail { min-height: 300px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-panel); padding: 12px 16px; }
+.standard-design-term-detail h2 { margin: 0 0 10px; color: var(--text-primary); font-size: 14px; }
+.standard-design-term-detail dl { display: grid; grid-template-columns: 105px 1fr; gap: 7px 10px; margin: 0; font-size: 11px; }
+.standard-design-term-detail dt { color: var(--text-muted); font-weight: 800; }
+.standard-design-term-detail dd { margin: 0; color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; }
+.standard-design-term-ai { margin: 10px 0; border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-panel); padding: 12px 16px; }
+.standard-design-term-ai h2 { margin: 0; font-size: 14px; color: var(--text-primary); }
+.standard-design-term-ai p { margin: 5px 0 10px; color: var(--text-muted); font-size: 11px; }
+.standard-design-term-ai-form { display: flex; gap: 8px; }
+.standard-design-term-ai-form input { flex: 1; min-width: 0; }
+.standard-design-term-ai-form button { border: 0; border-radius: 5px; background: var(--accent-primary); color: white; padding: 6px 12px; }
+.standard-design-term-ai-form button:disabled { opacity: .5; }
+.standard-design-term-ai-result { display: grid; gap: 4px; margin-top: 10px; color: var(--text-secondary); font-size: 11px; }
+.standard-design-term-ai-status { margin: 8px 0 0; color: var(--text-muted); font-size: 11px; }
+.standard-design-term-ai-status.is-loading { color: var(--accent-primary); font-weight: 700; }
+.standard-design-term-ai-status.is-error { color: var(--danger-text, #b42318); font-weight: 700; }
+.standard-design-term-result-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.standard-design-term-ai-result-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.standard-design-term-ai-result-heading h3, .standard-design-term-candidates h4 { margin: 0; color: var(--text-primary); font-size: 12px; }
+.standard-design-term-ai-result-heading button { border: 1px solid var(--border-default); border-radius: 5px; background: var(--surface-panel); padding: 5px 9px; color: var(--text-secondary); font-size: 11px; }
+.standard-design-term-copy-message { margin: 4px 0 0; color: var(--accent-primary); font-size: 11px; }
+.standard-design-term-ai-summary { display: grid; grid-template-columns: 75px 1fr; gap: 5px 8px; margin: 8px 0 0; }
+.standard-design-term-ai-summary dt { color: var(--text-muted); font-weight: 800; }
+.standard-design-term-ai-summary dd { margin: 0; color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; }
+.standard-design-term-candidates { margin-top: 10px; }
+.standard-design-term-candidates .table-wrap { margin-top: 5px; max-height: 240px; }
+@media (max-width: 900px) { .standard-design-term-layout { grid-template-columns: 1fr; } }
