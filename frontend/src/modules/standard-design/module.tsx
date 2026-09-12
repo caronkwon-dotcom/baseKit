@@ -19,7 +19,7 @@ const standardDesignModule: ApplicationModule = {
       routePath: '/standard-design/projects',
       dataScope: 'COMPANY',
       modifyScope: 'ROLE',
-      actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE, STANDARD_DESIGN_ACTIONS.DESIGN_VALIDATE],
+      actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE],
       useYn: 'Y',
     },
     {
@@ -41,7 +41,7 @@ const standardDesignModule: ApplicationModule = {
       routePath: '/standard-design/screens',
       dataScope: 'COMPANY',
       modifyScope: 'ROLE',
-      actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE],
+      actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE, STANDARD_DESIGN_ACTIONS.DESIGN_VALIDATE],
       useYn: 'Y',
     },
   ],
