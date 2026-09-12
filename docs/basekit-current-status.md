@@ -79,6 +79,7 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - Standard Design 화면 설계에서 회사 LLM에 직접 질문하고 단일 응답을 확인하는 저장 없는 Prompt Panel
 - Standard Design 원본 CSV 기반 read-only 표준용어집 Adapter/API와 목록·상세 조회 화면
 - Standard Design LLM 표준용어 추천 PoC: 후보 제한 context와 원본 상세 ID 재검증
+- Standard Design LLM 추천 응답의 canonical CSV 재조립과 자유서술 표준정보 hallucination 차단
 
 ## 3. 문서만 설계 완료
 

@@ -17,6 +17,7 @@ import java.util.Set;
 @Service
 class StandardDesignTermLlmService {
 
+    private static final String NOT_FOUND_ANSWER = "회사 표준용어집에서 적합한 표준용어를 찾지 못했습니다.";
     private static final String INTERPRET_SYSTEM_PROMPT = """
             You extract search intent for a Korean standard-term glossary.
             Return JSON only: {"interpretedIntent":"string","searchKeywords":["string"]}.
@@ -27,8 +28,10 @@ class StandardDesignTermLlmService {
             You answer using only the supplied STANDARD_TERM_CANDIDATES JSON.
             Return JSON only: {"recommendedTermId":"TERM-######" or null,"answer":"string"}.
             recommendedTermId must be copied exactly from a candidate or be null.
-            Never invent a term, ID, domain, or field. If no candidate answers the question,
-            use null and explicitly say that no matching standard term was found.
+            The answer field is only a short recommendation reason. Do not include term names,
+            English names, abbreviations, domains, data types, lengths, scales, or other
+            standard metadata; the backend supplies all standard metadata from the CSV.
+            If no candidate answers the question, use null.
             """;
 
     private final DesignLlmClient llmClient;
@@ -63,16 +66,17 @@ class StandardDesignTermLlmService {
                 "QUESTION=" + question + "\nSEARCH_KEYWORDS=" + keywords + "\nSTANDARD_TERM_CANDIDATES=" + candidateContext
         );
         Answer answer = parseAnswer(answerResponse.content(), candidates);
+        StandardDesignTerm recommendedTerm = null;
         if (answer.recommendedTermId() != null) {
             try {
-                termService.get(answer.recommendedTermId());
+                recommendedTerm = termService.get(answer.recommendedTermId());
             } catch (StandardDesignTermNotFoundException exception) {
-                answer = new Answer(null, "추천된 용어 ID가 원본 용어집에 없어 추천하지 않았습니다.");
+                answer = new Answer(null);
             }
         }
-        String answerText = StringUtils.hasText(answer.answer())
-                ? answer.answer()
-                : candidates.isEmpty() ? "일치하는 표준용어를 찾지 못했습니다." : "후보 중 확정 가능한 표준용어를 찾지 못했습니다.";
+        String answerText = recommendedTerm == null
+                ? NOT_FOUND_ANSWER
+                : canonicalRecommendation(recommendedTerm);
         return new StandardDesignTermLlmResult(
                 question,
                 interpretation.interpretedIntent(),
@@ -151,10 +155,18 @@ class StandardDesignTermLlmService {
         try {
             JsonNode node = objectMapper.readTree(normalizeJson(content));
             String id = node.path("recommendedTermId").isTextual() ? node.path("recommendedTermId").asText() : null;
-            return new Answer(id != null && candidateIds.contains(id) ? id : null, node.path("answer").asText(""));
+            return new Answer(id != null && candidateIds.contains(id) ? id : null);
         } catch (Exception exception) {
-            return new Answer(null, "LLM 구조화 응답을 해석하지 못했습니다. 후보를 확인해 주세요.");
+            return new Answer(null);
         }
+    }
+
+    private String canonicalRecommendation(StandardDesignTerm term) {
+        return "회사 표준용어집 기준 추천 표준용어: " + term.COMMON_STANDARD_TERM_NAME()
+                + " (" + term.TERM_ID() + "), 영문약어: "
+                + term.COMMON_STANDARD_TERM_ENGLISH_ABBREVIATION_NAME()
+                + ", 도메인: " + term.COMMON_STANDARD_DOMAIN_NAME()
+                + ", 데이터타입: " + term.STORAGE_FORMAT();
     }
 
     private String normalizeJson(String content) {
@@ -172,6 +184,6 @@ class StandardDesignTermLlmService {
     private record Interpretation(String interpretedIntent, List<String> searchKeywords) {
     }
 
-    private record Answer(String recommendedTermId, String answer) {
+    private record Answer(String recommendedTermId) {
     }
 }
