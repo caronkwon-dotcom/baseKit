@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caron.basekit.core.code.CoreCodeMapper">
+    <sql id="codeGroupColumns">
+        CODE_GROUP_ID, CODE_GROUP_NAME, DESCRIPTION, USE_YN, DEL_YN,
+        REG_DT, REG_BY, MOD_DT, MOD_BY
+    </sql>
+    <sql id="codeColumns">
+        CODE_ID, CODE_GROUP_ID, CODE, CODE_NAME, SORT_ORDER, USE_YN, DEL_YN,
+        REG_DT, REG_BY, MOD_DT, MOD_BY
+    </sql>
+
+    <select id="findCodeGroups" resultType="com.caron.basekit.core.code.CodeGroupData">
+        SELECT <include refid="codeGroupColumns"/>
+          FROM BSYCDGP CDGP
+         WHERE CDGP.DEL_YN = 'N'
+        <if test="KEYWORD != null and KEYWORD != ''">
+           AND (UPPER(CDGP.CODE_GROUP_ID) LIKE CONCAT('%', UPPER(#{KEYWORD}), '%')
+                OR UPPER(CDGP.CODE_GROUP_NAME) LIKE CONCAT('%', UPPER(#{KEYWORD}), '%'))
+        </if>
+        <if test="USE_YN != null and USE_YN != ''">
+           AND CDGP.USE_YN = #{USE_YN}
+        </if>
+         ORDER BY CDGP.CODE_GROUP_ID
+    </select>
+
+    <select id="findCodeGroup" resultType="com.caron.basekit.core.code.CodeGroupData">
+        SELECT <include refid="codeGroupColumns"/>
+          FROM BSYCDGP CDGP
+         WHERE CDGP.CODE_GROUP_ID = #{CODE_GROUP_ID}
+           AND CDGP.DEL_YN = 'N'
+    </select>
+
+    <select id="countCodeGroupId" resultType="int">
+        SELECT COUNT(*) FROM BSYCDGP WHERE CODE_GROUP_ID = #{CODE_GROUP_ID}
+    </select>
+
+    <insert id="insertCodeGroup">
+        INSERT INTO BSYCDGP
+          (CODE_GROUP_ID, CODE_GROUP_NAME, DESCRIPTION, USE_YN, DEL_YN, REG_DT, REG_BY, MOD_DT, MOD_BY)
+        VALUES
+          (#{CODE_GROUP_ID}, #{CODE_GROUP_NAME}, #{DESCRIPTION}, #{USE_YN}, #{DEL_YN},
+           #{REG_DT}, #{REG_BY}, #{MOD_DT}, #{MOD_BY})
+    </insert>
+
+    <update id="updateCodeGroup">
+        UPDATE BSYCDGP CDGP
+           SET CODE_GROUP_NAME = #{CODE_GROUP_NAME},
+               DESCRIPTION = #{DESCRIPTION},
+               USE_YN = #{USE_YN},
+               MOD_DT = #{MOD_DT},
+               MOD_BY = #{MOD_BY}
+         WHERE CDGP.CODE_GROUP_ID = #{CODE_GROUP_ID}
+           AND CDGP.DEL_YN = 'N'
+    </update>
+
+    <update id="logicalDeleteCodeGroup">
+        UPDATE BSYCDGP CDGP
+           SET DEL_YN = 'Y', USE_YN = 'N', MOD_DT = CURRENT_TIMESTAMP, MOD_BY = #{MOD_BY}
+         WHERE CDGP.CODE_GROUP_ID = #{CODE_GROUP_ID}
+           AND CDGP.DEL_YN = 'N'
+    </update>
+
+    <select id="countActiveCodes" resultType="int">
+        SELECT COUNT(*) FROM BSYCMCD CMCD
+         WHERE CMCD.CODE_GROUP_ID = #{CODE_GROUP_ID} AND CMCD.DEL_YN = 'N'
+    </select>
+
+    <select id="findCodes" resultType="com.caron.basekit.core.code.CommonCodeData">
+        SELECT <include refid="codeColumns"/>
+          FROM BSYCMCD CMCD
+         WHERE CMCD.DEL_YN = 'N'
+        <if test="CODE_GROUP_ID != null and CODE_GROUP_ID != ''">
+           AND CMCD.CODE_GROUP_ID = #{CODE_GROUP_ID}
+        </if>
+        <if test="CODE_NAME != null and CODE_NAME != ''">
+           AND (UPPER(CMCD.CODE) LIKE CONCAT('%', UPPER(#{CODE_NAME}), '%')
+                OR UPPER(CMCD.CODE_NAME) LIKE CONCAT('%', UPPER(#{CODE_NAME}), '%'))
+        </if>
+        <if test="USE_YN != null and USE_YN != ''">
+           AND CMCD.USE_YN = #{USE_YN}
+        </if>
+         ORDER BY CMCD.CODE_GROUP_ID, CMCD.SORT_ORDER, CMCD.CODE
+    </select>
+
+    <select id="findCode" resultType="com.caron.basekit.core.code.CommonCodeData">
+        SELECT <include refid="codeColumns"/>
+          FROM BSYCMCD CMCD
+         WHERE CMCD.CODE_ID = #{CODE_ID} AND CMCD.DEL_YN = 'N'
+    </select>
+
+    <select id="countCodeId" resultType="int">
+        SELECT COUNT(*) FROM BSYCMCD WHERE CODE_ID = #{CODE_ID}
+    </select>
+
+    <select id="countDuplicateCode" resultType="int">
+        SELECT COUNT(*) FROM BSYCMCD CMCD
+         WHERE CMCD.CODE_GROUP_ID = #{CODE_GROUP_ID}
+           AND CMCD.CODE = #{CODE}
+           AND CMCD.DEL_YN = 'N'
+        <if test="EXCLUDE_CODE_ID != null and EXCLUDE_CODE_ID != ''">
+           AND CMCD.CODE_ID != #{EXCLUDE_CODE_ID}
+        </if>
+    </select>
+
+    <insert id="insertCode">
+        INSERT INTO BSYCMCD
+          (CODE_ID, CODE_GROUP_ID, CODE, CODE_NAME, SORT_ORDER, USE_YN, DEL_YN, REG_DT, REG_BY, MOD_DT, MOD_BY)
+        VALUES
+          (#{CODE_ID}, #{CODE_GROUP_ID}, #{CODE}, #{CODE_NAME}, #{SORT_ORDER}, #{USE_YN}, #{DEL_YN},
+           #{REG_DT}, #{REG_BY}, #{MOD_DT}, #{MOD_BY})
+    </insert>
+
+    <update id="updateCode">
+        UPDATE BSYCMCD CMCD
+           SET CODE = #{CODE}, CODE_NAME = #{CODE_NAME}, SORT_ORDER = #{SORT_ORDER},
+               USE_YN = #{USE_YN}, MOD_DT = #{MOD_DT}, MOD_BY = #{MOD_BY}
+         WHERE CMCD.CODE_ID = #{CODE_ID} AND CMCD.DEL_YN = 'N'
+    </update>
+
+    <update id="logicalDeleteCode">
+        UPDATE BSYCMCD CMCD
+           SET DEL_YN = 'Y', USE_YN = 'N', MOD_DT = CURRENT_TIMESTAMP, MOD_BY = #{MOD_BY}
+         WHERE CMCD.CODE_ID = #{CODE_ID} AND CMCD.DEL_YN = 'N'
+    </update>
+</mapper>

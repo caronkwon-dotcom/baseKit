@@ -154,6 +154,7 @@ npm run backend:test
 
 - Health API: `http://localhost:8080/api/health`
 - Core DB 검증 API: `http://localhost:8080/api/core/database/status`
+- 공통코드 API: `http://localhost:8080/api/core/codes`, `http://localhost:8080/api/core/codes/groups`
 - Actuator: `http://localhost:8080/actuator/health`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 

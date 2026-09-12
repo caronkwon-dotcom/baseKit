@@ -69,6 +69,15 @@ Core DB 검증 API:
 GET http://localhost:8080/api/core/database/status
 ```
 
+공통코드 CRUD API:
+
+```text
+GET/POST       /api/core/codes/groups
+GET/PUT/DELETE /api/core/codes/groups/{CODE_GROUP_ID}
+GET/POST       /api/core/codes
+GET/PUT/DELETE /api/core/codes/{CODE_ID}
+```
+
 기본 테스트는 H2에서 REST → Service → MyBatis → Flyway Marker를 검증한다. `BASEKIT_DB_URL`이 PostgreSQL JDBC URL로 설정된 환경에서는 외부 PostgreSQL 통합 테스트도 활성화된다. 세 `BASEKIT_DB_*` 변수는 반드시 함께 설정한다.
 
 ```bash

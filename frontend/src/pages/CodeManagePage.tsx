@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import DataTable, {
   type DataTableColumn,
 } from '../components/common/DataTable';
 import PageHeader from '../components/common/PageHeader';
 import SearchPanel, { type SearchFieldConfig } from '../components/common/SearchPanel';
 import SummaryCard from '../components/common/SummaryCard';
-import { codeGroups } from '../mock/codeGroups';
-import { codes } from '../mock/codes';
+import { coreCodeApi } from '../services/coreCodeApi';
 import type { Code, CodeGroup } from '../types';
 
 interface CodeSearchCondition {
@@ -61,6 +60,11 @@ const codeGroupColumns: DataTableColumn<CodeGroup>[] = [
 
 const codeColumns: DataTableColumn<Code>[] = [
   {
+    key: 'CODE',
+    header: '코드값',
+    render: (code) => code.CODE,
+  },
+  {
     key: 'CODE_GROUP_ID',
     header: '그룹ID',
     render: (code) => code.CODE_GROUP_ID,
@@ -89,6 +93,49 @@ const codeColumns: DataTableColumn<Code>[] = [
 
 export default function CodeManagePage() {
   const [condition, setCondition] = useState(initialCodeSearchCondition);
+  const [codeGroups, setCodeGroups] = useState<CodeGroup[]>([]);
+  const [codes, setCodes] = useState<Code[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const loadData = useCallback(async (searchCondition: CodeSearchCondition) => {
+    setLoading(true);
+    setErrorMessage('');
+    try {
+      const [nextGroups, nextCodes] = await Promise.all([
+        coreCodeApi.findGroups(searchCondition.codeGroup, searchCondition.useYn),
+        coreCodeApi.findCodes(searchCondition.codeGroup, searchCondition.codeName, searchCondition.useYn),
+      ]);
+      setCodeGroups(nextGroups);
+      setCodes(nextCodes);
+    } catch (error) {
+      setCodeGroups([]);
+      setCodes([]);
+      setErrorMessage(error instanceof Error ? error.message : '공통코드를 조회하지 못했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([coreCodeApi.findGroups(), coreCodeApi.findCodes()])
+      .then(([nextGroups, nextCodes]) => {
+        if (!active) return;
+        setCodeGroups(nextGroups);
+        setCodes(nextCodes);
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        setErrorMessage(error instanceof Error ? error.message : '공통코드를 조회하지 못했습니다.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <section className="page">
@@ -103,8 +150,11 @@ export default function CodeManagePage() {
         value={condition}
         initialValue={initialCodeSearchCondition}
         onValueChange={setCondition}
-        onSearch={setCondition}
+        onSearch={(nextCondition) => void loadData(nextCondition)}
+        onReset={(nextCondition) => void loadData(nextCondition)}
       />
+
+      {errorMessage && <p role="alert">{errorMessage}</p>}
 
       <div className="summary-grid">
         <SummaryCard label="코드그룹" value={codeGroups.length} />
@@ -114,14 +164,16 @@ export default function CodeManagePage() {
       <DataTable
         title="코드그룹"
         columns={codeGroupColumns}
-        rows={codeGroups}
+        rows={loading ? [] : codeGroups}
+        emptyMessage={loading ? '공통코드를 조회하고 있습니다.' : '조회 결과가 없습니다.'}
         getRowKey={(group) => group.CODE_GROUP_ID}
       />
 
       <DataTable
         title="공통코드"
         columns={codeColumns}
-        rows={codes}
+        rows={loading ? [] : codes}
+        emptyMessage={loading ? '공통코드를 조회하고 있습니다.' : '조회 결과가 없습니다.'}
         getRowKey={(code) => `${code.CODE_GROUP_ID}-${code.CODE_ID}`}
       />
     </section>
