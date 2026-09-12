@@ -21,3 +21,10 @@ Standard Design은 BaseKit Core 관리기능이 아니라 BaseKit 공통 계약�
 - `artifact`
 
 현재 단계에서는 Domain Skeleton을 과도하게 세분화하지 않는다. 실제 Schema와 Use Case가 정의될 때 Module 내부에 필요한 폴더만 추가한다.
+
+## 회사 LLM 경계
+
+- Browser는 회사 LLM을 직접 호출하지 않고 `/api/standard-design/v1/llm` Backend API만 호출한다.
+- Frontend Adapter는 Module 내부 `llm/`이 소유한다.
+- 실제 URL과 API Key는 Backend 환경변수로만 관리한다.
+- 현재 `화면 설계`의 연결 확인 UI는 기술 연결 점검용이며 실제 설계검증·권한 기능이 아니다.

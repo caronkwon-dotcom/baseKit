@@ -1,6 +1,7 @@
 import { COMMON_ACTIONS } from '../../constants/actionCodes';
 import type { ApplicationModule } from '../../types/applicationModule';
 import StandardDesignSkeletonPage from './ui/pages/StandardDesignSkeletonPage';
+import ScreenDesignPage from './ui/pages/ScreenDesignPage';
 import './standardDesign.css';
 
 const MODULE_ID = 'standard-design';
@@ -120,13 +121,7 @@ const standardDesignModule: ApplicationModule = {
         nextStep="BaseKit Runtime 기준정보와 섞이지 않는 설계 Metadata 계약을 정의합니다."
       />
     ),
-    SD_SCREEN_DESIGN: () => (
-      <StandardDesignSkeletonPage
-        title="화면 설계"
-        description="업무 화면의 검색·그리드·상세·Action 구조를 설계하는 영역입니다."
-        nextStep="Screen Design Schema v0.1을 정의한 뒤 편집 UI를 구현합니다."
-      />
-    ),
+    SD_SCREEN_DESIGN: ScreenDesignPage,
   },
 };
 
