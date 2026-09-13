@@ -88,6 +88,7 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - Standard Design LLM 표준용어 추천 PoC: 후보 제한 context와 원본 상세 ID 재검증
 - Standard Design LLM 추천 응답의 canonical CSV 재조립과 자유서술 표준정보 hallucination 차단
 - Standard Design DA Design Lifecycle 1차: 프로젝트 Context, 계층 WBS, 요구사항 중심 WBS·화면·테이블 추적성, 화면/필드 및 DB 테이블/컬럼 계약, Schema Catalog 참조와 CRUD UI Skeleton
+- Standard Design Lifecycle Program의 Hash 경로 동기화: 기존 MDI 메뉴 진입과 새로고침 후 프로젝트·WBS·요구사항·화면·DB 설계 화면 복원
 
 ## 3. 문서만 설계 완료
 

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import MdiTabs from '../components/MdiTabs';
 import Sidebar from '../components/Sidebar';
@@ -15,17 +16,30 @@ function findTopMenuKeyByProgram(menuTree: MenuNode[], programKey: ProgramKey) {
   return menuTree.find(containsProgram)?.menuKey;
 }
 
+function findProgramKeyByRoutePath(routePath: string): ProgramKey {
+  return Object.values(programByKey).find((program) => program.routePath === routePath)?.programKey ?? 'HOME';
+}
+
 export default function AppLayout() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const menuTree = useMemo(() => metadataRepository.getMenuTree(), []);
-  const [activeTopMenuKey, setActiveTopMenuKey] = useState(menuTree[0]?.menuKey ?? '');
+  const initialProgramKey = findProgramKeyByRoutePath(location.pathname);
+  const [activeTopMenuKey, setActiveTopMenuKey] = useState(() =>
+    findTopMenuKeyByProgram(menuTree, initialProgramKey) ?? menuTree[0]?.menuKey ?? '',
+  );
   const [sidebarPinned, setSidebarPinned] = useState(() => localStorage.getItem('basekit.navigation.sidebar-pinned') === 'Y');
   const [sidebarOpen, setSidebarOpen] = useState(() => localStorage.getItem('basekit.navigation.sidebar-pinned') === 'Y');
   const [floatingMenuOpen, setFloatingMenuOpen] = useState(false);
   const [expandedMenuKeys, setExpandedMenuKeys] = useState<string[]>(() =>
     menuTree.flatMap((menu) => menu.children.filter((child) => child.menuType === 'GROUP').map((child) => child.menuKey)),
   );
-  const [tabs, setTabs] = useState<MdiTab[]>([homeTab]);
-  const [activeProgramKey, setActiveProgramKey] = useState<ProgramKey>('HOME');
+  const [tabs, setTabs] = useState<MdiTab[]>(() =>
+    initialProgramKey === 'HOME'
+      ? [homeTab]
+      : [homeTab, { programKey: initialProgramKey, title: programByKey[initialProgramKey].programName }],
+  );
+  const [activeProgramKey, setActiveProgramKey] = useState<ProgramKey>(initialProgramKey);
   const activeTopMenu = menuTree.find((menu) => menu.menuKey === activeTopMenuKey) ?? menuTree[0];
 
   useEffect(() => {
@@ -50,6 +64,8 @@ export default function AppLayout() {
     setActiveProgramKey(programKey);
     const topMenuKey = findTopMenuKeyByProgram(menuTree, programKey);
     if (topMenuKey) setActiveTopMenuKey(topMenuKey);
+    const routePath = programByKey[programKey].routePath;
+    if (location.pathname !== routePath) navigate(routePath);
   };
 
   const openProgram = (programKey: ProgramKey) => {
