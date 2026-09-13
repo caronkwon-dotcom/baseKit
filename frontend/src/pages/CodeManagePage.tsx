@@ -24,20 +24,25 @@ const searchFields: SearchFieldConfig<CodeSearchCondition>[] = [
   ] },
 ];
 const groupColumns: DataTableColumn<CodeGroup>[] = [
-  { key: 'CODE_GROUP_ID', header: '그룹 ID', render: (row) => row.CODE_GROUP_ID },
-  { key: 'CODE_GROUP_NAME', header: '그룹명', render: (row) => row.CODE_GROUP_NAME },
-  { key: 'DESCRIPTION', header: '설명', render: (row) => row.DESCRIPTION || '-' },
-  { key: 'USE_YN', header: '사용 여부', render: (row) => row.USE_YN === 'Y' ? '사용' : '미사용' },
+  { key: 'CODE_GROUP_ID', header: '그룹 ID', width: 145, render: (row) => row.CODE_GROUP_ID },
+  { key: 'CODE_GROUP_NAME', header: '그룹명', minWidth: 120, flex: 1, render: (row) => row.CODE_GROUP_NAME },
+  { key: 'DESCRIPTION', header: '설명', minWidth: 140, flex: 1.3, render: (row) => row.DESCRIPTION || '-' },
+  { key: 'USE_YN', header: '사용 여부', width: 76, align: 'center', render: (row) => row.USE_YN === 'Y' ? '사용' : '미사용' },
 ];
 const codeColumns: DataTableColumn<Code>[] = [
-  { key: 'CODE_ID', header: '코드 ID', render: (row) => row.CODE_ID },
-  { key: 'CODE', header: '코드', render: (row) => row.CODE },
-  { key: 'CODE_NAME', header: '코드명', render: (row) => row.CODE_NAME },
-  { key: 'SORT_ORDER', header: '정렬순서', render: (row) => row.SORT_ORDER },
-  { key: 'USE_YN', header: '사용 여부', render: (row) => row.USE_YN === 'Y' ? '사용' : '미사용' },
-  { key: 'MOD_BY', header: '최종수정자', render: (row) => row.MOD_BY },
-  { key: 'MOD_DT', header: '최종수정일시', render: (row) => row.MOD_DT },
+  { key: 'CODE_ID', header: '코드 ID', width: 145, render: (row) => row.CODE_ID },
+  { key: 'CODE', header: '코드', width: 105, render: (row) => row.CODE },
+  { key: 'CODE_NAME', header: '코드명', minWidth: 130, flex: 1, render: (row) => row.CODE_NAME },
+  { key: 'SORT_ORDER', header: '정렬', width: 58, align: 'right', render: (row) => row.SORT_ORDER },
+  { key: 'USE_YN', header: '사용', width: 58, align: 'center', render: (row) => row.USE_YN === 'Y' ? '사용' : '미사용' },
+  { key: 'MOD_BY', header: '수정자', width: 76, render: (row) => row.MOD_BY },
+  { key: 'MOD_DT', header: '최종수정일시', width: 122, render: (row) => formatDateTime(row.MOD_DT) },
 ];
+
+function formatDateTime(value: string) {
+  if (!value) return '-';
+  return value.replace('T', ' ').replace(/:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?$/, '');
+}
 
 const normalizeGroup = (value: GroupForm): GroupForm => ({
   ...value, CODE_GROUP_ID: value.CODE_GROUP_ID.trim(), CODE_GROUP_NAME: value.CODE_GROUP_NAME.trim(), DESCRIPTION: value.DESCRIPTION.trim(),

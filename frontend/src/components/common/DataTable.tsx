@@ -4,6 +4,14 @@ export interface DataTableColumn<T> {
   key: string;
   header: string;
   render: (row: T) => ReactNode;
+  /** 고정 폭(px). 식별자, 상태, 날짜처럼 예측 가능한 컬럼에 사용한다. */
+  width?: number;
+  /** 가변 컬럼의 최소 폭(px). */
+  minWidth?: number;
+  /** 남은 폭을 나누는 비율. width가 있으면 width를 우선한다. */
+  flex?: number;
+  align?: 'left' | 'center' | 'right';
+  truncate?: boolean;
 }
 
 interface DataTableProps<T> {
@@ -32,6 +40,18 @@ export default function DataTable<T>({
   const selectable = Boolean(selectedRowKeys && onSelectedRowKeysChange);
   const rowKeys = rows.map(getRowKey);
   const allSelected = rowKeys.length > 0 && rowKeys.every((key) => selectedRowKeys?.has(key));
+  const fixedWidth = columns.reduce((sum, column) => sum + (column.width ?? 0), selectable ? 34 : 0);
+  const totalFlex = columns.reduce((sum, column) => sum + (column.width ? 0 : column.flex ?? 1), 0);
+
+  const getColumnStyle = (column: DataTableColumn<T>) => {
+    if (column.width) return { width: `${column.width}px`, minWidth: `${column.width}px` };
+    const ratio = (column.flex ?? 1) / totalFlex;
+    const calculated = `calc((100% - ${fixedWidth}px) * ${ratio})`;
+    return {
+      width: column.minWidth ? `max(${column.minWidth}px, ${calculated})` : calculated,
+      minWidth: column.minWidth ? `${column.minWidth}px` : undefined,
+    };
+  };
 
   const toggleAll = () => {
     onSelectedRowKeysChange?.(allSelected ? new Set() : new Set(rowKeys));
@@ -47,8 +67,12 @@ export default function DataTable<T>({
   return (
     <div className="data-section">
       {title && <h2>{title}</h2>}
-      <div className="table-wrap">
-        <table>
+      <div className="table-wrap standard-table-wrap">
+        <table className="standard-data-table">
+          <colgroup>
+            {selectable ? <col style={{ width: '34px' }} /> : null}
+            {columns.map((column) => <col key={column.key} style={getColumnStyle(column)} />)}
+          </colgroup>
           <thead>
             <tr>
               {selectable && (
@@ -62,7 +86,7 @@ export default function DataTable<T>({
                 </th>
               )}
               {columns.map((column) => (
-                <th key={column.key}>{column.header}</th>
+                <th key={column.key} className={`cell-${column.align ?? 'left'}`}>{column.header}</th>
               ))}
             </tr>
           </thead>
@@ -101,9 +125,15 @@ export default function DataTable<T>({
                         />
                       </td>
                     )}
-                    {columns.map((column) => (
-                      <td key={column.key}>{column.render(row)}</td>
-                    ))}
+                    {columns.map((column) => {
+                      const content = column.render(row);
+                      const title = typeof content === 'string' || typeof content === 'number' ? String(content) : undefined;
+                      return (
+                        <td key={column.key} className={`cell-${column.align ?? 'left'}`}>
+                          <span className={column.truncate === false ? undefined : 'cell-content'} title={title}>{content}</span>
+                        </td>
+                      );
+                    })}
                   </tr>
                 );
               })

@@ -1037,10 +1037,22 @@ button {
   margin-top: 6px;
 }
 
+.standard-table-wrap {
+  min-height: 288px;
+  max-height: 416px;
+  overflow: auto;
+  border-top: 1px solid var(--border-default);
+}
+
 table {
   width: 100%;
   min-width: 760px;
   border-collapse: collapse;
+}
+
+.standard-data-table {
+  min-width: 100%;
+  table-layout: fixed;
 }
 
 th,
@@ -1052,6 +1064,24 @@ td {
   font-size: 13px;
   white-space: nowrap;
 }
+
+.standard-data-table th {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  height: 34px;
+  border-top: 0;
+}
+
+.standard-data-table td { height: 32px; }
+.standard-data-table .cell-content {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.standard-data-table .cell-center { text-align: center; }
+.standard-data-table .cell-right { text-align: right; }
 
 th {
   background: var(--surface-muted);
@@ -1437,18 +1467,12 @@ tbody tr.selected-row td {
 /* BaseKit 표준 Master/Detail CRUD 화면 */
 .master-detail-grid {
   display: grid;
-  grid-template-columns: minmax(380px, 42%) minmax(560px, 1fr);
+  grid-template-columns: minmax(0, 40%) minmax(0, 60%);
   align-items: start;
   gap: 8px;
 }
 
-.master-detail-grid .table-wrap {
-  max-height: calc(100vh - 235px);
-  overflow: auto;
-}
-
-.master-detail-grid .program-data-grid:first-child table { min-width: 620px; }
-.master-detail-grid .program-data-grid:last-child table { min-width: 940px; }
+.master-detail-grid .program-data-grid { min-width: 0; }
 tbody tr.active-master-row td { background: var(--brand-soft); }
 
 .page-message {
@@ -1523,5 +1547,5 @@ tbody tr.active-master-row td { background: var(--brand-soft); }
 .standard-form-grid .form-full-row { grid-column: 1 / -1; }
 
 @media (max-width: 1439px) {
-  .master-detail-grid { grid-template-columns: minmax(340px, 40%) minmax(520px, 1fr); }
+  .master-detail-grid { grid-template-columns: minmax(0, 40%) minmax(0, 60%); }
 }
