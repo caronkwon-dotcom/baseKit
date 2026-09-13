@@ -24,7 +24,7 @@ export type ProgramKey = string;
  * programName    : 화면명
  * componentName  : 연결될 컴포넌트 이름
  * screenType     : 화면 유형
- * routePath      : 향후 라우팅/API 확장용 경로
+ * routePath      : Hash Router와 동기화하는 MDI 프로그램 경로
  * actionCodes    : 프로그램에서 지원하는 공통/업무 액션
  * useYn          : 사용 여부
  */

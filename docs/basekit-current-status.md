@@ -88,6 +88,8 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - Standard Design 원본 CSV 기반 read-only 표준용어집 Adapter/API와 목록·상세 조회 화면
 - Standard Design LLM 표준용어 추천 PoC: 후보 제한 context와 원본 상세 ID 재검증
 - Standard Design LLM 추천 응답의 canonical CSV 재조립과 자유서술 표준정보 hallucination 차단
+- Standard Design DA Design Lifecycle 1차: 프로젝트 Context, 계층 WBS, 요구사항 중심 WBS·화면·테이블 추적성, 화면/필드 및 DB 테이블/컬럼 계약, Schema Catalog 참조와 CRUD UI Skeleton
+- Standard Design Lifecycle Program의 Hash 경로 동기화: 기존 MDI 메뉴 진입과 새로고침 후 프로젝트·WBS·요구사항·화면·DB 설계 화면 복원
 
 ## 3. 문서만 설계 완료
 
@@ -125,7 +127,7 @@ Lifecycle 문서는 `docs/basekit-business-object-lifecycle-architecture.md`에 
 - `SYST`, `SYCO`, `IUAS`, `VUAS`, `RPAC` 테이블 코드 가독성 최종 검토
 - 삭제 복구·물리 파기 예외·감사값 입력 책임·동시성 Version은 시스템 공통 구현 후 일괄 검토
 - Starter 실행 모드, Migration 소유자와 Scheduler 중복 실행 방지 방식
-- Standard Design `Screen Design Schema v0.1`과 저장·검증 계약
+- Screen Field와 DB Column의 명시적 연결 계약 및 검증 정책
 - 회사 LLM 실환경 URL·인증정보 주입 후 Connectivity 검수
 
 ## 6. Git 및 PR 상태 확인
@@ -248,7 +250,7 @@ gh pr list --repo caronkwon-dotcom/baseKit
 
 다음 범위:
 
-- Standard Design `Screen Design Schema v0.1`
+- Screen Field-to-Column 수동 연결과 검증 정책
 - 설계 대상 시스템의 Menu·Role·Program Metadata와 BaseKit Runtime 권한의 명확한 분리
 
 ## 8. 다음 추천 작업
