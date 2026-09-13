@@ -10,6 +10,15 @@
   --brand-primary: #1f6feb;
   --brand-hover: color-mix(in srgb, var(--brand-primary) 82%, #000000);
   --brand-soft: color-mix(in srgb, var(--brand-primary) 14%, var(--surface-panel));
+  --multi-grid-master-width: 40%;
+  --multi-grid-master-min-width: 360px;
+  --multi-grid-workspace-min-height: 520px;
+  --multi-grid-detail-top-ratio: 38fr;
+  --multi-grid-detail-bottom-ratio: 62fr;
+  --multi-grid-detail-top-min-height: 180px;
+  --multi-grid-detail-bottom-min-height: 240px;
+  --multi-grid-gap: 8px;
+  --multi-grid-message-height: 32px;
   font-family:
     Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #1d2433;
@@ -47,8 +56,10 @@ button {
 
 .app-shell {
   display: flex;
+  height: 100vh;
   min-height: 100vh;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .app-header {
@@ -537,13 +548,17 @@ button {
 }
 
 .workspace {
+  display: flex;
   min-width: 0;
+  min-height: 0;
   flex: 1;
+  flex-direction: column;
   overflow: auto;
   padding: 8px 12px 12px;
 }
 
 .page {
+  width: 100%;
   max-width: none;
 }
 
@@ -1464,21 +1479,20 @@ tbody tr.selected-row td {
   .document-center-toolbar input { width: 180px; }
 }
 
-/* BaseKit 표준 Master/Detail CRUD 화면 */
-.master-detail-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 40%) minmax(0, 60%);
-  align-items: start;
-  gap: 8px;
-}
-
-.master-detail-grid .program-data-grid { min-width: 0; }
-.code-detail-panel { min-width: 0; }
-.code-detail-tabs { display: flex; gap: 2px; min-height: 32px; border: 1px solid var(--border-default); border-bottom: 0; border-radius: 7px 7px 0 0; background: var(--surface-muted); padding: 3px 5px 0; }
-.code-detail-tabs button { border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--text-secondary); padding: 4px 12px; font-size: 12px; font-weight: 800; cursor: pointer; }
-.code-detail-tabs button.active { border-bottom-color: var(--brand-primary); color: var(--brand-primary); background: var(--surface-panel); }
-.code-detail-tabs span { margin-left: 3px; color: var(--text-muted); }
-.code-detail-panel > .program-data-grid { border-radius: 0 0 8px 8px; }
+/* BaseKit 표준 Master/Detail Multi-Grid 화면 */
+.multi-grid-page { display: flex; min-height: 0; flex: 1; flex-direction: column; }
+.multi-grid-workspace { display: flex; min-height: var(--multi-grid-workspace-min-height); flex: 1; flex-direction: column; gap: 6px; }
+.master-detail-multi-grid { display: grid; min-height: 0; flex: 1; grid-template-columns: minmax(var(--multi-grid-master-min-width), var(--multi-grid-master-width)) minmax(0, 1fr); gap: var(--multi-grid-gap); }
+.multi-grid-master,
+.multi-grid-detail,
+.multi-grid-detail-top,
+.multi-grid-detail-bottom { min-width: 0; min-height: 0; }
+.multi-grid-detail { display: grid; grid-template-rows: minmax(var(--multi-grid-detail-top-min-height), var(--multi-grid-detail-top-ratio)) minmax(var(--multi-grid-detail-bottom-min-height), var(--multi-grid-detail-bottom-ratio)); gap: var(--multi-grid-gap); }
+.master-detail-multi-grid .program-data-grid { display: flex; height: 100%; min-height: 0; flex-direction: column; }
+.master-detail-multi-grid .program-data-grid .data-section { display: flex; min-height: 0; flex: 1; flex-direction: column; }
+.master-detail-multi-grid .program-data-grid .standard-table-wrap { min-height: 0; max-height: none; flex: 1; }
+.multi-grid-message-area { min-height: var(--multi-grid-message-height); flex: 0 0 var(--multi-grid-message-height); }
+.multi-grid-message-area .page-message { height: var(--multi-grid-message-height); margin: 0; padding: 6px 10px; }
 .metadata-form-section { margin: 14px 0 0; border: 1px solid var(--border-default); border-radius: 7px; padding: 12px; }
 .metadata-form-section legend { padding: 0 6px; color: var(--text-secondary); font-size: 12px; font-weight: 800; }
 .metadata-switch { display: flex; align-items: center; gap: 7px; min-height: 32px; }
@@ -1560,5 +1574,5 @@ tbody tr.active-master-row td { background: var(--brand-soft); }
 .standard-form-grid .form-full-row { grid-column: 1 / -1; }
 
 @media (max-width: 1439px) {
-  .master-detail-grid { grid-template-columns: minmax(0, 40%) minmax(0, 60%); }
+  :root { --multi-grid-master-min-width: 340px; }
 }
