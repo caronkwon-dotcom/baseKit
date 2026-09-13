@@ -93,11 +93,18 @@
     ]
   },
   {
-    "tableKey": "PROGRAM", "logicalName": "프로그램", "physicalName": "BSYPROG", "moduleCode": "SY", "tableCode": "PROG", "tableAlias": "PROG", "fullName": "BaseKit System Program", "category": "권한", "status": "REVIEW",
+    "tableKey": "PROGRAM", "logicalName": "프로그램", "physicalName": "BSYPROG", "moduleCode": "SY", "tableCode": "PROG", "tableAlias": "PROG", "fullName": "BaseKit System Program", "category": "권한", "status": "IMPLEMENTED",
     "description": "실행·MDI·권한의 기준 단위",
     "columns": [
-      { "logicalName": "프로그램키", "physicalName": "PROGRAM_KEY", "domain": "KEY", "dataType": "VARCHAR(100)", "pkYn": "Y", "nullableYn": "N", "termStatus": "EXISTING", "description": "프로그램 고유키" },
-      { "logicalName": "프로그램명", "physicalName": "PROGRAM_NAME", "domain": "NAME", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "프로그램명" }
+      { "logicalName": "프로그램ID", "physicalName": "PROGRAM_ID", "domain": "ID", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "REVIEW", "description": "물리 프로그램 식별자" },
+      { "logicalName": "프로그램키", "physicalName": "PROGRAM_KEY", "domain": "KEY", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "Frontend Registry와 권한에서 사용하는 고유키" },
+      { "logicalName": "프로그램명", "physicalName": "PROGRAM_NAME", "domain": "NAME", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "프로그램명" },
+      { "logicalName": "모듈코드", "physicalName": "MODULE_CODE", "domain": "CODE", "dataType": "VARCHAR(50)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "PROGRAM_MODULE_CODE 공통코드" },
+      { "logicalName": "프로그램유형코드", "physicalName": "PROGRAM_TYPE_CODE", "domain": "CODE", "dataType": "VARCHAR(50)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "PROGRAM_TYPE_CODE 공통코드" },
+      { "logicalName": "경로", "physicalName": "ROUTE", "domain": "TEXT", "dataType": "VARCHAR(255)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "논리적인 화면 경로" },
+      { "logicalName": "설명", "physicalName": "DESCRIPTION", "domain": "TEXT", "dataType": "VARCHAR(500)", "pkYn": "N", "nullableYn": "Y", "termStatus": "EXISTING", "description": "프로그램 설명" },
+      { "logicalName": "사용여부", "physicalName": "USE_YN", "domain": "YN", "dataType": "CHAR(1)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "일시 사용 중지 여부" },
+      { "logicalName": "삭제여부", "physicalName": "DEL_YN", "domain": "YN", "dataType": "CHAR(1)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "논리 삭제 여부" }
     ]
   },
   {

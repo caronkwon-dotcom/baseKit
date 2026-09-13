@@ -4,13 +4,14 @@ interface MetadataFormProps {
   fields: FieldDefinition[];
   values: Record<string, string>;
   onChange: (values: Record<string, string>) => void;
+  legend?: string;
 }
 
-export default function MetadataForm({ fields, values, onChange }: MetadataFormProps) {
+export default function MetadataForm({ fields, values, onChange, legend = '추가 속성' }: MetadataFormProps) {
   const update = (key: string, value: string) => onChange({ ...values, [key]: value });
   if (fields.length === 0) return null;
   return <fieldset className="metadata-form-section">
-    <legend>그룹별 추가 속성</legend>
+    <legend>{legend}</legend>
     <div className="standard-form-grid">
       {fields.map((field) => <label key={field.key}>
         <span>{field.label}{field.required ? <em> *</em> : null}</span>

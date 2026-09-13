@@ -1,5 +1,6 @@
 import CodeManagePage from '../pages/CodeManagePage';
 import HomePage from '../pages/HomePage';
+import ProgramManagePage from '../pages/ProgramManagePage';
 import MenuManagePage from '../pages/MenuManagePage';
 import UserManagePage from '../pages/UserManagePage';
 import { SearchSampleType1Page } from '../features/devGuide/searchSampleType1';
@@ -17,6 +18,7 @@ const coreProgramComponents: ProgramComponentMap = {
   HOME: () => <HomePage />,
   USER_MGMT: () => <UserManagePage />,
   COMMON_CODE_MGMT: () => <CodeManagePage />,
+  PROGRAM_MGMT: () => <ProgramManagePage />,
   MENU_MGMT: () => <MenuManagePage />,
   TABLE_MGMT: () => <TableManagePage />,
   TERM_CURATION: () => <TermCurationPage />,

@@ -6,6 +6,7 @@ export const CORE_PROGRAM_KEYS = [
   'HOME',
   'USER_MGMT',
   'COMMON_CODE_MGMT',
+  'PROGRAM_MGMT',
   'MENU_MGMT',
   'TABLE_MGMT',
   'TERM_CURATION',
