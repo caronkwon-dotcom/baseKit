@@ -174,5 +174,28 @@
       { "logicalName": "정렬순서", "physicalName": "SORT_ORDER", "domain": "NO", "dataType": "INTEGER", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "코드 표시 순서" },
       { "logicalName": "사용여부", "physicalName": "USE_YN", "domain": "YN", "dataType": "CHAR(1)", "pkYn": "N", "nullableYn": "N", "termStatus": "EXISTING", "description": "사용 여부" }
     ]
+  },
+  {
+    "tableKey": "CODE_ATTRIBUTE_DEF", "logicalName": "코드속성정의", "physicalName": "BSYCADF", "moduleCode": "SY", "tableCode": "CADF", "tableAlias": "CADF", "fullName": "BaseKit System Code Attribute Definition", "category": "기준정보", "status": "IMPLEMENTED",
+    "description": "코드그룹별 업무 속성의 데이터·컨트롤·표시 유형 정의",
+    "columns": [
+      { "logicalName": "속성정의ID", "physicalName": "ATTRIBUTE_DEF_ID", "domain": "ID", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "REVIEW", "description": "속성 정의 식별자" },
+      { "logicalName": "코드그룹ID", "physicalName": "CODE_GROUP_ID", "domain": "ID", "dataType": "VARCHAR(50)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "fk": "BSYCDGP.CODE_GROUP_ID", "description": "속성을 소유하는 코드그룹" },
+      { "logicalName": "속성코드", "physicalName": "ATTRIBUTE_CODE", "domain": "CODE", "dataType": "VARCHAR(50)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "그룹 내 속성 키" },
+      { "logicalName": "속성명", "physicalName": "ATTRIBUTE_NAME", "domain": "NAME", "dataType": "VARCHAR(100)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "속성 표시명" },
+      { "logicalName": "데이터유형", "physicalName": "DATA_TYPE", "domain": "CODE", "dataType": "VARCHAR(20)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "STRING/NUMBER/BOOLEAN/DATE/DATETIME" },
+      { "logicalName": "컨트롤유형", "physicalName": "CONTROL_TYPE", "domain": "CODE", "dataType": "VARCHAR(30)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "입력 Control 유형" },
+      { "logicalName": "표시유형", "physicalName": "DISPLAY_TYPE", "domain": "CODE", "dataType": "VARCHAR(20)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "Grid 표시 유형" },
+      { "logicalName": "선택지원천", "physicalName": "OPTION_SOURCE", "domain": "TEXT", "dataType": "VARCHAR(200)", "pkYn": "N", "nullableYn": "Y", "termStatus": "REVIEW", "description": "SELECT 선택지 원천" }
+    ]
+  },
+  {
+    "tableKey": "CODE_ATTRIBUTE_VALUE", "logicalName": "코드속성값", "physicalName": "BSYCAVL", "moduleCode": "SY", "tableCode": "CAVL", "tableAlias": "CAVL", "fullName": "BaseKit System Code Attribute Value", "category": "기준정보", "status": "IMPLEMENTED",
+    "description": "공통코드별 동적 업무 속성값",
+    "columns": [
+      { "logicalName": "코드ID", "physicalName": "CODE_ID", "domain": "ID", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "EXISTING", "fk": "BSYCMCD.CODE_ID", "description": "공통코드 식별자" },
+      { "logicalName": "속성정의ID", "physicalName": "ATTRIBUTE_DEF_ID", "domain": "ID", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "REVIEW", "fk": "BSYCADF.ATTRIBUTE_DEF_ID", "description": "속성 정의 식별자" },
+      { "logicalName": "속성값", "physicalName": "ATTRIBUTE_VALUE", "domain": "VALUE", "dataType": "VARCHAR(1000)", "pkYn": "N", "nullableYn": "Y", "termStatus": "REVIEW", "description": "Data Type 규칙으로 검증된 표준 문자열 값" }
+    ]
   }
 ]

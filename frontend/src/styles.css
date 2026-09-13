@@ -1037,10 +1037,22 @@ button {
   margin-top: 6px;
 }
 
+.standard-table-wrap {
+  min-height: 288px;
+  max-height: 416px;
+  overflow: auto;
+  border-top: 1px solid var(--border-default);
+}
+
 table {
   width: 100%;
   min-width: 760px;
   border-collapse: collapse;
+}
+
+.standard-data-table {
+  min-width: 100%;
+  table-layout: fixed;
 }
 
 th,
@@ -1052,6 +1064,24 @@ td {
   font-size: 13px;
   white-space: nowrap;
 }
+
+.standard-data-table th {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  height: 34px;
+  border-top: 0;
+}
+
+.standard-data-table td { height: 32px; }
+.standard-data-table .cell-content {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.standard-data-table .cell-center { text-align: center; }
+.standard-data-table .cell-right { text-align: right; }
 
 th {
   background: var(--surface-muted);
@@ -1437,18 +1467,25 @@ tbody tr.selected-row td {
 /* BaseKit 표준 Master/Detail CRUD 화면 */
 .master-detail-grid {
   display: grid;
-  grid-template-columns: minmax(380px, 42%) minmax(560px, 1fr);
+  grid-template-columns: minmax(0, 40%) minmax(0, 60%);
   align-items: start;
   gap: 8px;
 }
 
-.master-detail-grid .table-wrap {
-  max-height: calc(100vh - 235px);
-  overflow: auto;
-}
-
-.master-detail-grid .program-data-grid:first-child table { min-width: 620px; }
-.master-detail-grid .program-data-grid:last-child table { min-width: 940px; }
+.master-detail-grid .program-data-grid { min-width: 0; }
+.code-detail-panel { min-width: 0; }
+.code-detail-tabs { display: flex; gap: 2px; min-height: 32px; border: 1px solid var(--border-default); border-bottom: 0; border-radius: 7px 7px 0 0; background: var(--surface-muted); padding: 3px 5px 0; }
+.code-detail-tabs button { border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--text-secondary); padding: 4px 12px; font-size: 12px; font-weight: 800; cursor: pointer; }
+.code-detail-tabs button.active { border-bottom-color: var(--brand-primary); color: var(--brand-primary); background: var(--surface-panel); }
+.code-detail-tabs span { margin-left: 3px; color: var(--text-muted); }
+.code-detail-panel > .program-data-grid { border-radius: 0 0 8px 8px; }
+.metadata-form-section { margin: 14px 0 0; border: 1px solid var(--border-default); border-radius: 7px; padding: 12px; }
+.metadata-form-section legend { padding: 0 6px; color: var(--text-secondary); font-size: 12px; font-weight: 800; }
+.metadata-switch { display: flex; align-items: center; gap: 7px; min-height: 32px; }
+.metadata-switch input { width: auto; }
+.metadata-color-value { display: inline-flex; align-items: center; gap: 5px; }
+.metadata-color-value i { width: 13px; height: 13px; border: 1px solid var(--border-strong); border-radius: 3px; }
+.metadata-badge { display: inline-block; border-radius: 10px; background: var(--surface-muted); padding: 2px 7px; font-size: 11px; font-weight: 800; }
 tbody tr.active-master-row td { background: var(--brand-soft); }
 
 .page-message {
@@ -1523,5 +1560,5 @@ tbody tr.active-master-row td { background: var(--brand-soft); }
 .standard-form-grid .form-full-row { grid-column: 1 / -1; }
 
 @media (max-width: 1439px) {
-  .master-detail-grid { grid-template-columns: minmax(340px, 40%) minmax(520px, 1fr); }
+  .master-detail-grid { grid-template-columns: minmax(0, 40%) minmax(0, 60%); }
 }

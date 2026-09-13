@@ -1,216 +1,47 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { resolveCodeAttributeOptions, toFieldDefinitions } from '../adapters/codeAttributeFieldAdapter';
 import { FormModal, PageHeader, ProgramDataGrid, SearchPanel, type DataTableColumn, type SearchFieldConfig } from '../components/common';
+import { MetadataDataGrid, MetadataForm, type FieldOption } from '../components/metadata';
 import { COMMON_ACTIONS } from '../constants/actionCodes';
 import { coreCodeApi } from '../services/coreCodeApi';
-import type { Code, CodeGroup, UseYn } from '../types';
+import type { AttributeControlType, AttributeDataType, AttributeDisplayType, Code, CodeAttributeDefinition, CodeGroup, UseYn } from '../types';
 
-interface CodeSearchCondition { groupKeyword: string; codeName: string; useYn: '' | UseYn }
+interface Condition { groupKeyword: string; codeName: string; useYn: '' | UseYn }
 type GroupForm = Pick<CodeGroup, 'CODE_GROUP_ID' | 'CODE_GROUP_NAME' | 'DESCRIPTION' | 'USE_YN'>;
-type CodeForm = Pick<Code, 'CODE_ID' | 'CODE_GROUP_ID' | 'CODE' | 'CODE_NAME' | 'SORT_ORDER' | 'USE_YN'>;
-type Editor =
-  | { kind: 'group'; mode: 'create' | 'update'; value: GroupForm }
-  | { kind: 'code'; mode: 'create' | 'update'; value: CodeForm };
-type DeleteTarget = { kind: 'group' | 'code'; id: string; name: string };
-
-const PROGRAM_KEY = 'COMMON_CODE_MGMT' as const;
-const ROLE_CODE = 'ADMIN';
-const initialCondition: CodeSearchCondition = { groupKeyword: '', codeName: '', useYn: '' };
-const emptyGroupForm: GroupForm = { CODE_GROUP_ID: '', CODE_GROUP_NAME: '', DESCRIPTION: '', USE_YN: 'Y' };
-const searchFields: SearchFieldConfig<CodeSearchCondition>[] = [
-  { key: 'groupKeyword', label: '코드그룹', placeholder: '그룹 ID/그룹명' },
-  { key: 'codeName', label: '코드명', placeholder: '코드명' },
-  { key: 'useYn', label: '사용 여부', controlType: 'select', options: [
-    { value: '', label: '전체' }, { value: 'Y', label: '사용' }, { value: 'N', label: '미사용' },
-  ] },
-];
-const groupColumns: DataTableColumn<CodeGroup>[] = [
-  { key: 'CODE_GROUP_ID', header: '그룹 ID', render: (row) => row.CODE_GROUP_ID },
-  { key: 'CODE_GROUP_NAME', header: '그룹명', render: (row) => row.CODE_GROUP_NAME },
-  { key: 'DESCRIPTION', header: '설명', render: (row) => row.DESCRIPTION || '-' },
-  { key: 'USE_YN', header: '사용 여부', render: (row) => row.USE_YN === 'Y' ? '사용' : '미사용' },
-];
-const codeColumns: DataTableColumn<Code>[] = [
-  { key: 'CODE_ID', header: '코드 ID', render: (row) => row.CODE_ID },
-  { key: 'CODE', header: '코드', render: (row) => row.CODE },
-  { key: 'CODE_NAME', header: '코드명', render: (row) => row.CODE_NAME },
-  { key: 'SORT_ORDER', header: '정렬순서', render: (row) => row.SORT_ORDER },
-  { key: 'USE_YN', header: '사용 여부', render: (row) => row.USE_YN === 'Y' ? '사용' : '미사용' },
-  { key: 'MOD_BY', header: '최종수정자', render: (row) => row.MOD_BY },
-  { key: 'MOD_DT', header: '최종수정일시', render: (row) => row.MOD_DT },
-];
-
-const normalizeGroup = (value: GroupForm): GroupForm => ({
-  ...value, CODE_GROUP_ID: value.CODE_GROUP_ID.trim(), CODE_GROUP_NAME: value.CODE_GROUP_NAME.trim(), DESCRIPTION: value.DESCRIPTION.trim(),
-});
-const normalizeCode = (value: CodeForm): CodeForm => ({
-  ...value, CODE_ID: value.CODE_ID.trim(), CODE_GROUP_ID: value.CODE_GROUP_ID.trim(),
-  CODE: value.CODE.trim(), CODE_NAME: value.CODE_NAME.trim(), SORT_ORDER: Number(value.SORT_ORDER),
-});
+type CodeForm = Pick<Code, 'CODE_ID' | 'CODE_GROUP_ID' | 'CODE' | 'CODE_NAME' | 'SORT_ORDER' | 'USE_YN' | 'ATTRIBUTE_VALUES'>;
+type AttributeForm = Pick<CodeAttributeDefinition, 'ATTRIBUTE_CODE' | 'ATTRIBUTE_NAME' | 'DATA_TYPE' | 'CONTROL_TYPE' | 'DISPLAY_TYPE' | 'REQUIRED_YN' | 'DEFAULT_VALUE' | 'OPTION_SOURCE' | 'SORT_ORDER' | 'USE_YN'>;
+type Editor = { kind: 'group'; mode: 'create' | 'update'; value: GroupForm } | { kind: 'code'; mode: 'create' | 'update'; value: CodeForm } | { kind: 'attribute'; mode: 'create' | 'update'; id?: string; value: AttributeForm };
+type DeleteTarget = { kind: 'group' | 'code' | 'attribute'; id: string; name: string };
+const PROGRAM_KEY = 'COMMON_CODE_MGMT' as const; const ROLE_CODE = 'ADMIN';
+const initialCondition: Condition = { groupKeyword: '', codeName: '', useYn: '' };
+const emptyGroup: GroupForm = { CODE_GROUP_ID: '', CODE_GROUP_NAME: '', DESCRIPTION: '', USE_YN: 'Y' };
+const emptyAttribute: AttributeForm = { ATTRIBUTE_CODE: '', ATTRIBUTE_NAME: '', DATA_TYPE: 'STRING', CONTROL_TYPE: 'TEXT', DISPLAY_TYPE: 'TEXT', REQUIRED_YN: 'N', DEFAULT_VALUE: null, OPTION_SOURCE: null, SORT_ORDER: 0, USE_YN: 'Y' };
+const searchFields: SearchFieldConfig<Condition>[] = [{ key: 'groupKeyword', label: '코드그룹', placeholder: '그룹 ID/그룹명' }, { key: 'codeName', label: '코드명', placeholder: '코드명' }, { key: 'useYn', label: '사용 여부', controlType: 'select', options: [{ value: '', label: '전체' }, { value: 'Y', label: '사용' }, { value: 'N', label: '미사용' }] }];
+const groupColumns: DataTableColumn<CodeGroup>[] = [{ key: 'CODE_GROUP_ID', header: '그룹 ID', width: 140, render: r => r.CODE_GROUP_ID }, { key: 'CODE_GROUP_NAME', header: '그룹명', minWidth: 110, flex: 1, render: r => r.CODE_GROUP_NAME }, { key: 'DESCRIPTION', header: '설명', minWidth: 120, flex: 1, render: r => r.DESCRIPTION || '-' }, { key: 'USE_YN', header: '사용', width: 52, align: 'center', render: r => r.USE_YN }];
+const codeColumns: DataTableColumn<Code>[] = [{ key: 'CODE', header: '코드', width: 100, render: r => r.CODE }, { key: 'CODE_NAME', header: '코드명', minWidth: 110, flex: 1, render: r => r.CODE_NAME }, { key: 'SORT_ORDER', header: '정렬', width: 48, align: 'right', render: r => r.SORT_ORDER }, { key: 'USE_YN', header: '사용', width: 48, align: 'center', render: r => r.USE_YN }];
+const attributeColumns: DataTableColumn<CodeAttributeDefinition>[] = [{ key: 'ATTRIBUTE_CODE', header: '속성코드', width: 120, render: r => r.ATTRIBUTE_CODE }, { key: 'ATTRIBUTE_NAME', header: '속성명', minWidth: 100, flex: 1, render: r => r.ATTRIBUTE_NAME }, { key: 'DATA_TYPE', header: '데이터', width: 82, render: r => r.DATA_TYPE }, { key: 'CONTROL_TYPE', header: '컨트롤', width: 104, render: r => r.CONTROL_TYPE }, { key: 'OPTION_SOURCE', header: 'Option Source', minWidth: 120, flex: 1, render: r => r.OPTION_SOURCE ?? '-' }];
 
 export default function CodeManagePage() {
-  const [condition, setCondition] = useState(initialCondition);
-  const [groups, setGroups] = useState<CodeGroup[]>([]);
-  const [codes, setCodes] = useState<Code[]>([]);
-  const [selectedGroupId, setSelectedGroupId] = useState('');
-  const [selectedGroupKeys, setSelectedGroupKeys] = useState<Set<string>>(new Set());
-  const [selectedCodeKeys, setSelectedCodeKeys] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
-  const [editor, setEditor] = useState<Editor | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
-
-  const loadCodes = useCallback(async (groupId: string, searchCondition: CodeSearchCondition) => {
-    setSelectedCodeKeys(new Set());
-    if (!groupId) { setCodes([]); return; }
-    setCodes(await coreCodeApi.findCodes(groupId, searchCondition.codeName, searchCondition.useYn));
-  }, []);
-
-  const loadGroups = useCallback(async (searchCondition: CodeSearchCondition, preferredGroupId = '') => {
-    setLoading(true);
-    try {
-      const nextGroups = await coreCodeApi.findGroups(searchCondition.groupKeyword, searchCondition.useYn);
-      setGroups(nextGroups);
-      const nextGroupId = nextGroups.some((group) => group.CODE_GROUP_ID === preferredGroupId)
-        ? preferredGroupId : nextGroups[0]?.CODE_GROUP_ID ?? '';
-      setSelectedGroupId(nextGroupId);
-      setSelectedGroupKeys(nextGroupId ? new Set([nextGroupId]) : new Set());
-      await loadCodes(nextGroupId, searchCondition);
-    } catch (error) {
-      setGroups([]); setCodes([]); setSelectedGroupId(''); setSelectedGroupKeys(new Set());
-      setMessage({ tone: 'error', text: error instanceof Error ? error.message : '공통코드를 조회하지 못했습니다.' });
-    } finally { setLoading(false); }
-  }, [loadCodes]);
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => void loadGroups(initialCondition), 0);
-    return () => window.clearTimeout(timeoutId);
-  }, [loadGroups]);
-
-  const selectGroup = (group: CodeGroup) => {
-    setSelectedGroupId(group.CODE_GROUP_ID);
-    setSelectedGroupKeys(new Set([group.CODE_GROUP_ID]));
-    setMessage(null);
-    void loadCodes(group.CODE_GROUP_ID, condition).catch((error: unknown) => {
-      setCodes([]);
-      setMessage({ tone: 'error', text: error instanceof Error ? error.message : '공통코드를 조회하지 못했습니다.' });
-    });
-  };
-
-  const requireOne = <T,>(rows: T[], targetName: string): T | null => {
-    if (rows.length === 1) return rows[0];
-    setMessage({ tone: 'error', text: `${targetName}을(를) 한 건 선택해 주세요.` });
-    return null;
-  };
-
-  const saveEditor = async () => {
-    if (!editor) return;
-    setMessage(null); setSubmitting(true);
-    try {
-      if (editor.kind === 'group') {
-        const value = normalizeGroup(editor.value);
-        if (!value.CODE_GROUP_ID || !value.CODE_GROUP_NAME) throw new Error('코드그룹 ID와 그룹명은 필수입니다.');
-        if (editor.mode === 'create') await coreCodeApi.createGroup(value); else await coreCodeApi.updateGroup(value);
-        setEditor(null);
-        await loadGroups(condition, value.CODE_GROUP_ID);
-        setMessage({ tone: 'success', text: `코드그룹이 ${editor.mode === 'create' ? '등록' : '수정'}되었습니다.` });
-      } else {
-        const value = normalizeCode(editor.value);
-        if (!value.CODE_ID || !value.CODE || !value.CODE_NAME) throw new Error('코드 ID, 코드, 코드명은 필수입니다.');
-        if (!Number.isInteger(value.SORT_ORDER) || value.SORT_ORDER < 0) throw new Error('정렬순서는 0 이상의 정수로 입력해 주세요.');
-        if (editor.mode === 'create') await coreCodeApi.createCode(value); else await coreCodeApi.updateCode(value);
-        setEditor(null);
-        await loadCodes(value.CODE_GROUP_ID, condition);
-        setMessage({ tone: 'success', text: `공통코드가 ${editor.mode === 'create' ? '등록' : '수정'}되었습니다.` });
-      }
-    } catch (error) {
-      setMessage({ tone: 'error', text: error instanceof Error ? error.message : '저장하지 못했습니다.' });
-    } finally { setSubmitting(false); }
-  };
-
-  const deleteSelected = async () => {
-    if (!deleteTarget) return;
-    setSubmitting(true);
-    try {
-      if (deleteTarget.kind === 'group') { await coreCodeApi.deleteGroup(deleteTarget.id); await loadGroups(condition); }
-      else { await coreCodeApi.deleteCode(deleteTarget.id); await loadCodes(selectedGroupId, condition); }
-      setMessage({ tone: 'success', text: `${deleteTarget.name} 항목이 삭제되었습니다.` });
-      setDeleteTarget(null);
-    } catch (error) {
-      setMessage({ tone: 'error', text: error instanceof Error ? error.message : '삭제하지 못했습니다.' });
-    } finally { setSubmitting(false); }
-  };
-
-  return (
-    <section className="page code-manage-page">
-      <PageHeader breadcrumbs={['시스템관리', '공통코드관리']} description="코드그룹과 공통코드를 등록하고 관리합니다." />
-      <SearchPanel rows={1} fields={searchFields} value={condition} initialValue={initialCondition}
-        onValueChange={setCondition} onSearch={(next) => void loadGroups(next, selectedGroupId)} onReset={(next) => void loadGroups(next)} />
-      {message ? <div className={`page-message ${message.tone}`} role={message.tone === 'error' ? 'alert' : 'status'}>{message.text}</div> : null}
-
-      <div className="master-detail-grid">
-        <ProgramDataGrid programKey={PROGRAM_KEY} roleCode={ROLE_CODE} title="코드그룹 목록"
-          columns={groupColumns} rows={loading ? [] : groups} getRowKey={(row) => row.CODE_GROUP_ID}
-          emptyMessage={loading ? '코드그룹을 조회하고 있습니다.' : '조회된 코드그룹이 없습니다.'}
-          selectedRowKeys={selectedGroupKeys}
-          onSelectedRowKeysChange={(keys) => {
-            const group = groups.find((item) => item.CODE_GROUP_ID === [...keys].at(-1));
-            if (group) selectGroup(group); else { setSelectedGroupKeys(new Set()); setSelectedGroupId(''); setCodes([]); }
-          }}
-          onRowClick={selectGroup} getRowClassName={(row) => row.CODE_GROUP_ID === selectedGroupId ? 'active-master-row' : ''}
-          actionHandlers={{
-            [COMMON_ACTIONS.CREATE]: () => setEditor({ kind: 'group', mode: 'create', value: { ...emptyGroupForm } }),
-            [COMMON_ACTIONS.UPDATE]: ({ selectedRows }) => { const row = requireOne(selectedRows, '수정할 코드그룹'); if (row) setEditor({ kind: 'group', mode: 'update', value: { ...row } }); },
-            [COMMON_ACTIONS.DELETE]: ({ selectedRows }) => { const row = requireOne(selectedRows, '삭제할 코드그룹'); if (row) setDeleteTarget({ kind: 'group', id: row.CODE_GROUP_ID, name: row.CODE_GROUP_NAME }); },
-          }} />
-
-        <ProgramDataGrid programKey={PROGRAM_KEY} roleCode={ROLE_CODE}
-          title={selectedGroupId ? `${selectedGroupId} 공통코드 목록` : '공통코드 목록'}
-          columns={codeColumns} rows={loading ? [] : codes} getRowKey={(row) => row.CODE_ID}
-          emptyMessage={selectedGroupId ? '조회된 공통코드가 없습니다.' : '코드그룹을 선택해 주세요.'}
-          selectedRowKeys={selectedCodeKeys} onSelectedRowKeysChange={setSelectedCodeKeys}
-          actionHandlers={{
-            [COMMON_ACTIONS.CREATE]: () => {
-              if (!selectedGroupId) { setMessage({ tone: 'error', text: '코드를 등록할 코드그룹을 먼저 선택해 주세요.' }); return; }
-              setEditor({ kind: 'code', mode: 'create', value: { CODE_ID: '', CODE_GROUP_ID: selectedGroupId, CODE: '', CODE_NAME: '', SORT_ORDER: 0, USE_YN: 'Y' } });
-            },
-            [COMMON_ACTIONS.UPDATE]: ({ selectedRows }) => { const row = requireOne(selectedRows, '수정할 공통코드'); if (row) setEditor({ kind: 'code', mode: 'update', value: { ...row } }); },
-            [COMMON_ACTIONS.DELETE]: ({ selectedRows }) => { const row = requireOne(selectedRows, '삭제할 공통코드'); if (row) setDeleteTarget({ kind: 'code', id: row.CODE_ID, name: row.CODE_NAME }); },
-          }} />
-      </div>
-
-      <FormModal open={editor !== null}
-        title={editor ? `${editor.kind === 'group' ? '코드그룹' : '공통코드'} ${editor.mode === 'create' ? '신규 등록' : '수정'}` : ''}
-        submitting={submitting} onClose={() => setEditor(null)} onSubmit={() => void saveEditor()}>
-        {editor?.kind === 'group' ? <GroupEditor editor={editor} setEditor={setEditor} />
-          : editor?.kind === 'code' ? <CodeEditor editor={editor} setEditor={setEditor} /> : null}
-      </FormModal>
-      <FormModal open={deleteTarget !== null} title="삭제 확인" submitLabel="삭제" submitTone="danger"
-        submitting={submitting} onClose={() => setDeleteTarget(null)} onSubmit={() => void deleteSelected()}>
-        <p><strong>{deleteTarget?.name}</strong> 항목을 삭제하시겠습니까? 삭제된 항목은 목록에서 제외됩니다.</p>
-      </FormModal>
-    </section>
-  );
+  const [condition, setCondition] = useState(initialCondition), [groups, setGroups] = useState<CodeGroup[]>([]), [codes, setCodes] = useState<Code[]>([]), [definitions, setDefinitions] = useState<CodeAttributeDefinition[]>([]);
+  const [optionsBySource, setOptionsBySource] = useState(new Map<string, FieldOption[]>()), [selectedGroupId, setSelectedGroupId] = useState(''), [groupKeys, setGroupKeys] = useState<Set<string>>(new Set()), [codeKeys, setCodeKeys] = useState<Set<string>>(new Set()), [attributeKeys, setAttributeKeys] = useState<Set<string>>(new Set());
+  const [tab, setTab] = useState<'codes' | 'attributes'>('codes'), [editor, setEditor] = useState<Editor | null>(null), [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null), [submitting, setSubmitting] = useState(false), [message, setMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
+  const fields = useMemo(() => toFieldDefinitions(definitions, optionsBySource), [definitions, optionsBySource]);
+  const loadDetail = useCallback(async (groupId: string, search: Condition) => { setCodeKeys(new Set()); setAttributeKeys(new Set()); if (!groupId) { setCodes([]); setDefinitions([]); return; } const [rows, defs, values] = await Promise.all([coreCodeApi.findCodes(groupId, search.codeName, search.useYn), coreCodeApi.findAttributeDefinitions(groupId), coreCodeApi.findAttributeValues(groupId)]); const map = new Map<string, Record<string, string>>(); values.forEach(v => map.set(v.CODE_ID, { ...(map.get(v.CODE_ID) ?? {}), [v.ATTRIBUTE_CODE]: v.ATTRIBUTE_VALUE })); setCodes(rows.map(r => ({ ...r, ATTRIBUTE_VALUES: map.get(r.CODE_ID) ?? {} }))); setDefinitions(defs); setOptionsBySource(await resolveCodeAttributeOptions(defs)); }, []);
+  const loadGroups = useCallback(async (search: Condition, preferred = '') => { try { const rows = await coreCodeApi.findGroups(search.groupKeyword, search.useYn); setGroups(rows); const id = rows.some(r => r.CODE_GROUP_ID === preferred) ? preferred : rows[0]?.CODE_GROUP_ID ?? ''; setSelectedGroupId(id); setGroupKeys(id ? new Set([id]) : new Set()); await loadDetail(id, search); } catch (e) { setMessage({ tone: 'error', text: e instanceof Error ? e.message : '조회하지 못했습니다.' }); } }, [loadDetail]);
+  useEffect(() => { const timer = window.setTimeout(() => void loadGroups(initialCondition), 0); return () => window.clearTimeout(timer); }, [loadGroups]);
+  const selectGroup = (r: CodeGroup) => { setSelectedGroupId(r.CODE_GROUP_ID); setGroupKeys(new Set([r.CODE_GROUP_ID])); void loadDetail(r.CODE_GROUP_ID, condition); };
+  const one = <T,>(rows: T[], name: string) => { if (rows.length === 1) return rows[0]; setMessage({ tone: 'error', text: `${name}을(를) 한 건 선택해 주세요.` }); return null; };
+  const save = async () => { if (!editor) return; setSubmitting(true); try { if (editor.kind === 'group') { const v = { ...editor.value, CODE_GROUP_ID: editor.value.CODE_GROUP_ID.trim(), CODE_GROUP_NAME: editor.value.CODE_GROUP_NAME.trim(), DESCRIPTION: editor.value.DESCRIPTION.trim() }; if (!v.CODE_GROUP_ID || !v.CODE_GROUP_NAME) throw new Error('코드그룹 ID와 그룹명은 필수입니다.'); await (editor.mode === 'create' ? coreCodeApi.createGroup(v) : coreCodeApi.updateGroup(v)); await loadGroups(condition, v.CODE_GROUP_ID); } else if (editor.kind === 'code') { const v = { ...editor.value, CODE_ID: editor.value.CODE_ID.trim(), CODE: editor.value.CODE.trim(), CODE_NAME: editor.value.CODE_NAME.trim(), SORT_ORDER: Number(editor.value.SORT_ORDER) }; if (!v.CODE_ID || !v.CODE || !v.CODE_NAME) throw new Error('코드 ID, 코드, 코드명은 필수입니다.'); await (editor.mode === 'create' ? coreCodeApi.createCode(v) : coreCodeApi.updateCode(v)); await loadDetail(selectedGroupId, condition); } else { const v = { ...editor.value, ATTRIBUTE_CODE: editor.value.ATTRIBUTE_CODE.trim().toUpperCase(), ATTRIBUTE_NAME: editor.value.ATTRIBUTE_NAME.trim(), DEFAULT_VALUE: editor.value.DEFAULT_VALUE || null, OPTION_SOURCE: editor.value.CONTROL_TYPE === 'SELECT' ? editor.value.OPTION_SOURCE || null : null }; if (!v.ATTRIBUTE_CODE || !v.ATTRIBUTE_NAME) throw new Error('속성코드와 속성명은 필수입니다.'); await (editor.mode === 'create' ? coreCodeApi.createAttributeDefinition(selectedGroupId, v) : coreCodeApi.updateAttributeDefinition(editor.id!, v)); await loadDetail(selectedGroupId, condition); } setEditor(null); setMessage({ tone: 'success', text: '저장되었습니다.' }); } catch (e) { setMessage({ tone: 'error', text: e instanceof Error ? e.message : '저장하지 못했습니다.' }); } finally { setSubmitting(false); } };
+  const remove = async () => { if (!deleteTarget) return; setSubmitting(true); try { if (deleteTarget.kind === 'group') { await coreCodeApi.deleteGroup(deleteTarget.id); await loadGroups(condition); } else if (deleteTarget.kind === 'code') { await coreCodeApi.deleteCode(deleteTarget.id); await loadDetail(selectedGroupId, condition); } else { await coreCodeApi.deleteAttributeDefinition(deleteTarget.id); await loadDetail(selectedGroupId, condition); } setDeleteTarget(null); setMessage({ tone: 'success', text: '삭제되었습니다.' }); } catch (e) { setMessage({ tone: 'error', text: e instanceof Error ? e.message : '삭제하지 못했습니다.' }); } finally { setSubmitting(false); } };
+  return <section className="page code-manage-page"><PageHeader breadcrumbs={['시스템관리', '공통코드관리']} description="코드그룹, 공통코드와 그룹별 업무 속성을 관리합니다." /><SearchPanel rows={1} fields={searchFields} value={condition} initialValue={initialCondition} onValueChange={setCondition} onSearch={v => void loadGroups(v, selectedGroupId)} onReset={v => void loadGroups(v)} />{message && <div className={`page-message ${message.tone}`}>{message.text}</div>}<div className="master-detail-grid">
+    <ProgramDataGrid programKey={PROGRAM_KEY} roleCode={ROLE_CODE} title="코드그룹 목록" columns={groupColumns} rows={groups} getRowKey={r => r.CODE_GROUP_ID} selectedRowKeys={groupKeys} onSelectedRowKeysChange={keys => { const r = groups.find(x => x.CODE_GROUP_ID === [...keys].at(-1)); if (r) selectGroup(r); }} onRowClick={selectGroup} getRowClassName={r => r.CODE_GROUP_ID === selectedGroupId ? 'active-master-row' : ''} actionHandlers={{ [COMMON_ACTIONS.CREATE]: () => setEditor({ kind: 'group', mode: 'create', value: { ...emptyGroup } }), [COMMON_ACTIONS.UPDATE]: ({ selectedRows }) => { const r = one(selectedRows, '수정할 코드그룹'); if (r) setEditor({ kind: 'group', mode: 'update', value: { ...r } }); }, [COMMON_ACTIONS.DELETE]: ({ selectedRows }) => { const r = one(selectedRows, '삭제할 코드그룹'); if (r) setDeleteTarget({ kind: 'group', id: r.CODE_GROUP_ID, name: r.CODE_GROUP_NAME }); } }} />
+    <section className="code-detail-panel"><div className="code-detail-tabs"><button className={tab === 'codes' ? 'active' : ''} onClick={() => setTab('codes')}>코드목록</button><button className={tab === 'attributes' ? 'active' : ''} onClick={() => setTab('attributes')}>속성정의 <span>{definitions.length}</span></button></div>{tab === 'codes' ? <MetadataDataGrid programKey={PROGRAM_KEY} roleCode={ROLE_CODE} title={selectedGroupId ? `${selectedGroupId} 공통코드 목록` : '공통코드 목록'} baseColumns={codeColumns} fields={fields} rows={codes} getRowKey={r => r.CODE_ID} getFieldValue={(r, f) => r.ATTRIBUTE_VALUES?.[f.key]} selectedRowKeys={codeKeys} onSelectedRowKeysChange={setCodeKeys} actionHandlers={{ [COMMON_ACTIONS.CREATE]: () => selectedGroupId ? setEditor({ kind: 'code', mode: 'create', value: { CODE_ID: '', CODE_GROUP_ID: selectedGroupId, CODE: '', CODE_NAME: '', SORT_ORDER: 0, USE_YN: 'Y', ATTRIBUTE_VALUES: Object.fromEntries(fields.map(f => [f.key, f.defaultValue ?? ''])) } }) : setMessage({ tone: 'error', text: '코드그룹을 먼저 선택해 주세요.' }), [COMMON_ACTIONS.UPDATE]: ({ selectedRows }) => { const r = one(selectedRows, '수정할 공통코드'); if (r) setEditor({ kind: 'code', mode: 'update', value: { ...r, ATTRIBUTE_VALUES: { ...r.ATTRIBUTE_VALUES } } }); }, [COMMON_ACTIONS.DELETE]: ({ selectedRows }) => { const r = one(selectedRows, '삭제할 공통코드'); if (r) setDeleteTarget({ kind: 'code', id: r.CODE_ID, name: r.CODE_NAME }); } }} /> : <ProgramDataGrid programKey={PROGRAM_KEY} roleCode={ROLE_CODE} title="속성정의 목록" columns={attributeColumns} rows={definitions} getRowKey={r => r.ATTRIBUTE_DEF_ID} selectedRowKeys={attributeKeys} onSelectedRowKeysChange={setAttributeKeys} actionHandlers={{ [COMMON_ACTIONS.CREATE]: () => selectedGroupId && setEditor({ kind: 'attribute', mode: 'create', value: { ...emptyAttribute } }), [COMMON_ACTIONS.UPDATE]: ({ selectedRows }) => { const r = one(selectedRows, '수정할 속성정의'); if (r) setEditor({ kind: 'attribute', mode: 'update', id: r.ATTRIBUTE_DEF_ID, value: { ...r } }); }, [COMMON_ACTIONS.DELETE]: ({ selectedRows }) => { const r = one(selectedRows, '삭제할 속성정의'); if (r) setDeleteTarget({ kind: 'attribute', id: r.ATTRIBUTE_DEF_ID, name: r.ATTRIBUTE_NAME }); } }} />}</section>
+  </div><FormModal open={editor !== null} title={editor ? `${editor.kind === 'group' ? '코드그룹' : editor.kind === 'code' ? '공통코드' : '속성정의'} ${editor.mode === 'create' ? '등록' : '수정'}` : ''} submitting={submitting} onClose={() => setEditor(null)} onSubmit={() => void save()}>{editor?.kind === 'group' ? <GroupEditor editor={editor} setEditor={setEditor} /> : editor?.kind === 'code' ? <CodeEditor editor={editor} fields={fields} setEditor={setEditor} /> : editor?.kind === 'attribute' ? <AttributeEditor editor={editor} setEditor={setEditor} /> : null}</FormModal><FormModal open={deleteTarget !== null} title="삭제 확인" submitLabel="삭제" submitTone="danger" submitting={submitting} onClose={() => setDeleteTarget(null)} onSubmit={() => void remove()}><p><strong>{deleteTarget?.name}</strong> 항목을 삭제하시겠습니까?</p></FormModal></section>;
 }
 
-function GroupEditor({ editor, setEditor }: { editor: Extract<Editor, { kind: 'group' }>; setEditor: (value: Editor) => void }) {
-  const update = (patch: Partial<GroupForm>) => setEditor({ ...editor, value: { ...editor.value, ...patch } });
-  return <div className="standard-form-grid">
-    <label><span>코드그룹 ID <em>*</em></span><input autoFocus value={editor.value.CODE_GROUP_ID} disabled={editor.mode === 'update'} maxLength={50} onChange={(e) => update({ CODE_GROUP_ID: e.target.value })} /></label>
-    <label><span>그룹명 <em>*</em></span><input value={editor.value.CODE_GROUP_NAME} maxLength={100} onChange={(e) => update({ CODE_GROUP_NAME: e.target.value })} /></label>
-    <label className="form-full-row"><span>설명</span><textarea value={editor.value.DESCRIPTION} maxLength={500} onChange={(e) => update({ DESCRIPTION: e.target.value })} /></label>
-    <label><span>사용 여부</span><select value={editor.value.USE_YN} onChange={(e) => update({ USE_YN: e.target.value as UseYn })}><option value="Y">사용</option><option value="N">미사용</option></select></label>
-  </div>;
-}
-
-function CodeEditor({ editor, setEditor }: { editor: Extract<Editor, { kind: 'code' }>; setEditor: (value: Editor) => void }) {
-  const update = (patch: Partial<CodeForm>) => setEditor({ ...editor, value: { ...editor.value, ...patch } });
-  return <div className="standard-form-grid">
-    <label><span>코드그룹 ID</span><input value={editor.value.CODE_GROUP_ID} disabled /></label>
-    <label><span>코드 ID <em>*</em></span><input autoFocus value={editor.value.CODE_ID} disabled={editor.mode === 'update'} maxLength={50} onChange={(e) => update({ CODE_ID: e.target.value })} /></label>
-    <label><span>코드 <em>*</em></span><input value={editor.value.CODE} maxLength={50} onChange={(e) => update({ CODE: e.target.value })} /></label>
-    <label><span>코드명 <em>*</em></span><input value={editor.value.CODE_NAME} maxLength={100} onChange={(e) => update({ CODE_NAME: e.target.value })} /></label>
-    <label><span>정렬순서 <em>*</em></span><input type="number" min="0" step="1" value={editor.value.SORT_ORDER} onChange={(e) => update({ SORT_ORDER: Number(e.target.value) })} /></label>
-    <label><span>사용 여부</span><select value={editor.value.USE_YN} onChange={(e) => update({ USE_YN: e.target.value as UseYn })}><option value="Y">사용</option><option value="N">미사용</option></select></label>
-  </div>;
-}
+function GroupEditor({ editor, setEditor }: { editor: Extract<Editor, { kind: 'group' }>; setEditor: (v: Editor) => void }) { const update = (p: Partial<GroupForm>) => setEditor({ ...editor, value: { ...editor.value, ...p } }); return <div className="standard-form-grid"><Text label="코드그룹 ID" value={editor.value.CODE_GROUP_ID} disabled={editor.mode === 'update'} onChange={v => update({ CODE_GROUP_ID: v })} /><Text label="그룹명" value={editor.value.CODE_GROUP_NAME} onChange={v => update({ CODE_GROUP_NAME: v })} /><Text label="설명" value={editor.value.DESCRIPTION} onChange={v => update({ DESCRIPTION: v })} /><YesNo label="사용 여부" value={editor.value.USE_YN} onChange={v => update({ USE_YN: v })} /></div>; }
+function CodeEditor({ editor, fields, setEditor }: { editor: Extract<Editor, { kind: 'code' }>; fields: ReturnType<typeof toFieldDefinitions>; setEditor: (v: Editor) => void }) { const update = (p: Partial<CodeForm>) => setEditor({ ...editor, value: { ...editor.value, ...p } }); return <><div className="standard-form-grid"><Text label="코드 ID" value={editor.value.CODE_ID} disabled={editor.mode === 'update'} onChange={v => update({ CODE_ID: v })} /><Text label="코드" value={editor.value.CODE} onChange={v => update({ CODE: v })} /><Text label="코드명" value={editor.value.CODE_NAME} onChange={v => update({ CODE_NAME: v })} /><Text label="정렬순서" type="number" value={String(editor.value.SORT_ORDER)} onChange={v => update({ SORT_ORDER: Number(v) })} /><YesNo label="사용 여부" value={editor.value.USE_YN} onChange={v => update({ USE_YN: v })} /></div><MetadataForm fields={fields} values={editor.value.ATTRIBUTE_VALUES ?? {}} onChange={v => update({ ATTRIBUTE_VALUES: v })} /></>; }
+function AttributeEditor({ editor, setEditor }: { editor: Extract<Editor, { kind: 'attribute' }>; setEditor: (v: Editor) => void }) { const update = (p: Partial<AttributeForm>) => setEditor({ ...editor, value: { ...editor.value, ...p } }); return <div className="standard-form-grid"><Text label="속성코드" value={editor.value.ATTRIBUTE_CODE} onChange={v => update({ ATTRIBUTE_CODE: v })} /><Text label="속성명" value={editor.value.ATTRIBUTE_NAME} onChange={v => update({ ATTRIBUTE_NAME: v })} /><EnumSelect label="Data Type" value={editor.value.DATA_TYPE} values={['STRING','NUMBER','BOOLEAN','DATE','DATETIME']} onChange={(v: AttributeDataType) => update({ DATA_TYPE: v })} /><EnumSelect label="Control Type" value={editor.value.CONTROL_TYPE} values={['TEXT','NUMBER','SWITCH','SELECT','DATE_PICKER','COLOR_PICKER']} onChange={(v: AttributeControlType) => update({ CONTROL_TYPE: v })} /><EnumSelect label="Display Type" value={editor.value.DISPLAY_TYPE} values={['TEXT','NUMBER','BOOLEAN','DATE','DATETIME','COLOR','BADGE']} onChange={(v: AttributeDisplayType) => update({ DISPLAY_TYPE: v })} /><Text label="Option Source" value={editor.value.OPTION_SOURCE ?? ''} disabled={editor.value.CONTROL_TYPE !== 'SELECT'} onChange={v => update({ OPTION_SOURCE: v })} /><Text label="기본값" value={editor.value.DEFAULT_VALUE ?? ''} onChange={v => update({ DEFAULT_VALUE: v })} /><Text label="정렬순서" type="number" value={String(editor.value.SORT_ORDER)} onChange={v => update({ SORT_ORDER: Number(v) })} /><YesNo label="필수 여부" value={editor.value.REQUIRED_YN} onChange={v => update({ REQUIRED_YN: v })} /><YesNo label="사용 여부" value={editor.value.USE_YN} onChange={v => update({ USE_YN: v })} /></div>; }
+function Text({ label, value, onChange, disabled = false, type = 'text' }: { label: string; value: string; onChange: (v: string) => void; disabled?: boolean; type?: string }) { return <label><span>{label}</span><input type={type} value={value} disabled={disabled} onChange={e => onChange(e.target.value)} /></label>; }
+function YesNo({ label, value, onChange }: { label: string; value: UseYn; onChange: (v: UseYn) => void }) { return <label><span>{label}</span><select value={value} onChange={e => onChange(e.target.value as UseYn)}><option value="Y">예</option><option value="N">아니오</option></select></label>; }
+function EnumSelect<T extends string>({ label, value, values, onChange }: { label: string; value: T; values: T[]; onChange: (v: T) => void }) { return <label><span>{label}</span><select value={value} onChange={e => onChange(e.target.value as T)}>{values.map(v => <option key={v}>{v}</option>)}</select></label>; }

@@ -1,5 +1,8 @@
 export type { BaseEntity, UseYn, Yn } from './common';
-export type { Code, CodeGroup } from './code';
+export type {
+  AttributeControlType, AttributeDataType, AttributeDisplayType,
+  Code, CodeAttributeDefinition, CodeAttributeValue, CodeGroup,
+} from './code';
 export type { Company } from './company';
 export type { LoginLog } from './login';
 export type { Role } from './role';
