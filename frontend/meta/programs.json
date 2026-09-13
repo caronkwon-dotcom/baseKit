@@ -44,6 +44,17 @@
     "useYn": "Y"
   },
   {
+    "programKey": "PROGRAM_MGMT",
+    "programName": "프로그램관리",
+    "componentName": "ProgramManagePage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/programs",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "CREATE", "UPDATE", "DELETE", "MANUAL_VIEW"],
+    "useYn": "Y"
+  },
+  {
     "programKey": "TABLE_MGMT",
     "programName": "테이블관리",
     "componentName": "TableManagePage",

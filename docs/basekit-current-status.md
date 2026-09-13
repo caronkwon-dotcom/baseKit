@@ -256,6 +256,13 @@ gh pr list --repo caronkwon-dotcom/baseKit
 
 ## 8. 다음 추천 작업
 
+### 진행 중: PROGRAM 관리 DB화
+
+- `BSYPROG` Flyway V4, JPA Schema Validate, MyBatis CRUD와 REST API 구현
+- DB PROGRAM과 Frontend Component Registry 책임 분리
+- 공통코드 Option Source와 `FieldDefinition / MetadataForm / ProgramDataGrid` 재사용
+- MENU·ROLE·PERMISSION DB화는 이번 범위에서 제외
+
 Standard Design의 `Screen Design Schema v0.1`을 정의하되 상세 UI 구현 전에 설계 대상, 화면 구조, 검색·그리드·상세·Action Metadata와 Version 경계를 확정한다. BaseKit 시스템 공통 V1 DDL·Backend 연결은 독립 WBS로 유지한다.
 
 연말까지의 목표는 Level 1 시스템 Foundation의 핵심 규약, 기준 화면, 개발자 가이드와 Frontend 공통 구조를 실제 다음 SI 프로젝트에서 시작점으로 사용할 수 있는 수준까지 확보하는 것이다. 주간 목표는 이 목표에 기여하는 작은 검증 단위로 나눈다.

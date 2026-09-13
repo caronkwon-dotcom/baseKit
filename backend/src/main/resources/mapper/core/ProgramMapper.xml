@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caron.basekit.core.program.ProgramMapper">
+  <sql id="columns">PROGRAM_ID, PROGRAM_KEY, PROGRAM_NAME, MODULE_CODE, PROGRAM_TYPE_CODE, ROUTE, DESCRIPTION, USE_YN, DEL_YN, REG_DT, REG_BY, MOD_DT, MOD_BY</sql>
+  <select id="findPrograms" resultType="com.caron.basekit.core.program.ProgramData">
+    SELECT <include refid="columns"/> FROM BSYPROG PROG WHERE PROG.DEL_YN='N'
+    <if test="KEYWORD != null">AND (UPPER(PROG.PROGRAM_ID) LIKE CONCAT('%',UPPER(#{KEYWORD}),'%') OR UPPER(PROG.PROGRAM_KEY) LIKE CONCAT('%',UPPER(#{KEYWORD}),'%') OR UPPER(PROG.PROGRAM_NAME) LIKE CONCAT('%',UPPER(#{KEYWORD}),'%'))</if>
+    <if test="MODULE_CODE != null">AND PROG.MODULE_CODE=#{MODULE_CODE}</if>
+    <if test="PROGRAM_TYPE_CODE != null">AND PROG.PROGRAM_TYPE_CODE=#{PROGRAM_TYPE_CODE}</if>
+    <if test="USE_YN != null">AND PROG.USE_YN=#{USE_YN}</if>
+    ORDER BY PROG.MODULE_CODE, PROG.PROGRAM_ID
+  </select>
+  <select id="findProgram" resultType="com.caron.basekit.core.program.ProgramData">SELECT <include refid="columns"/> FROM BSYPROG PROG WHERE PROG.PROGRAM_ID=#{PROGRAM_ID} AND PROG.DEL_YN='N'</select>
+  <select id="countProgramId" resultType="int">SELECT COUNT(*) FROM BSYPROG WHERE PROGRAM_ID=#{PROGRAM_ID}</select>
+  <select id="countProgramKey" resultType="int">SELECT COUNT(*) FROM BSYPROG PROG WHERE PROG.PROGRAM_KEY=#{PROGRAM_KEY}<if test="EXCLUDE_PROGRAM_ID != null"> AND PROG.PROGRAM_ID != #{EXCLUDE_PROGRAM_ID}</if></select>
+  <insert id="insertProgram">INSERT INTO BSYPROG (<include refid="columns"/>) VALUES (#{PROGRAM_ID},#{PROGRAM_KEY},#{PROGRAM_NAME},#{MODULE_CODE},#{PROGRAM_TYPE_CODE},#{ROUTE},#{DESCRIPTION},#{USE_YN},#{DEL_YN},#{REG_DT},#{REG_BY},#{MOD_DT},#{MOD_BY})</insert>
+  <update id="updateProgram">UPDATE BSYPROG PROG SET PROGRAM_KEY=#{PROGRAM_KEY},PROGRAM_NAME=#{PROGRAM_NAME},MODULE_CODE=#{MODULE_CODE},PROGRAM_TYPE_CODE=#{PROGRAM_TYPE_CODE},ROUTE=#{ROUTE},DESCRIPTION=#{DESCRIPTION},USE_YN=#{USE_YN},MOD_DT=#{MOD_DT},MOD_BY=#{MOD_BY} WHERE PROG.PROGRAM_ID=#{PROGRAM_ID} AND PROG.DEL_YN='N'</update>
+  <update id="logicalDeleteProgram">UPDATE BSYPROG PROG SET DEL_YN='Y',USE_YN='N',MOD_DT=CURRENT_TIMESTAMP,MOD_BY=#{MOD_BY} WHERE PROG.PROGRAM_ID=#{PROGRAM_ID} AND PROG.DEL_YN='N'</update>
+</mapper>

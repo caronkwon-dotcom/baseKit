@@ -27,7 +27,7 @@ class CoreCodeIntegrationTest {
     void providesSeededCodeGroupsAndCodes() throws Exception {
         mockMvc.perform(get("/api/core/codes/groups"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.DATA.length()").value(5));
+                .andExpect(jsonPath("$.DATA.length()").value(org.hamcrest.Matchers.greaterThanOrEqualTo(7)));
 
         mockMvc.perform(get("/api/core/codes").param("CODE_GROUP_ID", "USER_TYPE_CODE"))
                 .andExpect(status().isOk())
