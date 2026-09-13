@@ -4,7 +4,7 @@ import MasterDetailMultiGrid from '../../../../components/common/MasterDetailMul
 import PageHeader from '../../../../components/common/PageHeader';
 import { schemaCatalogRepository } from '../../../../features/system/tableManage/schemaCatalog.repository';
 import { designLifecycleRepository } from '../../design-lifecycle/designLifecycle.repository';
-import type { DbColumnDefinition, DesignStatus, ScreenField } from '../../design-lifecycle/designLifecycle.types';
+import type { DbColumnDefinition, DesignProject, DesignStatus, ScreenField } from '../../design-lifecycle/designLifecycle.types';
 
 type LifecycleView = 'overview' | 'wbs' | 'requirements' | 'screens' | 'database';
 type LifecycleItem = ReturnType<typeof getRows>[number];
@@ -75,7 +75,131 @@ function DbColumnGrid({ rows }: { rows: DbColumnDefinition[] }) {
   </section>;
 }
 
-export default function DesignLifecyclePage({ view, supplement }: { view: LifecycleView; supplement?: ReactNode }) {
+type ProjectWorkspaceMode = 'LIST' | 'DETAIL' | 'DETAIL_EXPANDED';
+
+const projectColumns: DataTableColumn<DesignProject>[] = [
+  { key: 'id', header: 'ID', render: (project) => project.PROJECT_ID, minWidth: 95 },
+  { key: 'name', header: '프로젝트명', render: (project) => project.PROJECT_NAME, minWidth: 150, flex: 2 },
+  { key: 'customer', header: '고객명', render: (project) => project.CUSTOMER_NAME, minWidth: 110 },
+  { key: 'status', header: '상태', render: (project) => project.STATUS, width: 90, align: 'center' },
+];
+
+function ProjectManagementPage() {
+  const [, setRevision] = useState(0);
+  const [workspaceMode, setWorkspaceMode] = useState<ProjectWorkspaceMode>('LIST');
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const [message, setMessage] = useState('프로젝트를 선택한 후 상세 열기를 선택하세요.');
+  const projects = designLifecycleRepository.getData().projects;
+  const selectedProject = projects.find((project) => project.PROJECT_ID === selectedProjectId);
+  const refresh = () => setRevision((value) => value + 1);
+
+  const selectProject = (project: DesignProject) => {
+    setSelectedProjectId(project.PROJECT_ID);
+    setMessage(`${project.PROJECT_NAME} 프로젝트를 선택했습니다. 상세 열기로 편집을 시작하세요.`);
+  };
+
+  const openDetail = () => {
+    if (!selectedProject) {
+      setMessage('상세로 열 프로젝트를 먼저 선택하세요.');
+      return;
+    }
+    designLifecycleRepository.setSelectedProjectId(selectedProject.PROJECT_ID);
+    setWorkspaceMode('DETAIL');
+    setMessage(`${selectedProject.PROJECT_NAME} 프로젝트 상세 정보를 열었습니다.`);
+  };
+
+  const createProject = () => {
+    setSelectedProjectId('');
+    setWorkspaceMode('DETAIL');
+    setMessage('신규 등록 모드입니다. 필수 항목을 입력한 후 저장하세요.');
+  };
+
+  const saveProject = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const projectId = selectedProjectId || nextId('SDP', projects.length);
+    const project = {
+      PROJECT_ID: projectId,
+      PROJECT_NAME: String(form.get('PROJECT_NAME')).trim(),
+      CUSTOMER_NAME: String(form.get('CUSTOMER_NAME')).trim(),
+      DESCRIPTION: String(form.get('DESCRIPTION')).trim(),
+      STATUS: form.get('STATUS') as DesignStatus,
+    };
+
+    designLifecycleRepository.saveProject(project);
+    designLifecycleRepository.setSelectedProjectId(projectId);
+    setSelectedProjectId(projectId);
+    setWorkspaceMode('DETAIL');
+    setMessage(`${project.PROJECT_NAME} 프로젝트 정보를 저장했습니다.`);
+    refresh();
+  };
+
+  const deleteProject = () => {
+    if (!selectedProject) {
+      setMessage('삭제할 프로젝트를 먼저 선택하세요.');
+      return;
+    }
+
+    const nextProjectId = projects.find((project) => project.PROJECT_ID !== selectedProject.PROJECT_ID)?.PROJECT_ID ?? '';
+    designLifecycleRepository.deleteItem('projects', selectedProject.PROJECT_ID);
+    designLifecycleRepository.setSelectedProjectId(nextProjectId);
+    setSelectedProjectId('');
+    setWorkspaceMode('LIST');
+    setMessage(`${selectedProject.PROJECT_NAME} 프로젝트를 삭제했습니다.`);
+    refresh();
+  };
+
+  return <div className="page standard-design-page standard-design-lifecycle-page standard-design-project-page">
+    <PageHeader breadcrumbs={['Standard Design', '프로젝트 관리']} description="프로젝트 목록에서 상세를 열어 설계 Lifecycle의 Project Context를 관리합니다." />
+    <section className="standard-design-lifecycle-toolbar" aria-label="프로젝트 관리 기능">
+      <span className="standard-design-project-context">Project Context: <strong>{designLifecycleRepository.getData().projects.find((project) => project.PROJECT_ID === designLifecycleRepository.getSelectedProjectId())?.PROJECT_NAME ?? '프로젝트 없음'}</strong></span>
+      <div className="standard-design-lifecycle-actions">
+        <button type="button" className="secondary-button" data-action-code="SEARCH" onClick={() => { refresh(); setMessage('프로젝트 목록을 조회했습니다.'); }}>조회</button>
+        <button type="button" className="secondary-button" onClick={openDetail}>상세 열기</button>
+        <button type="button" className="primary-button" data-action-code="CREATE" onClick={createProject}>등록</button>
+        <button type="submit" form="project-detail-form" className="primary-button" data-action-code="UPDATE" disabled={workspaceMode === 'LIST'}>저장</button>
+        <button type="button" className="danger-button" data-action-code="DELETE" onClick={deleteProject}>삭제</button>
+      </div>
+    </section>
+    <section className={`standard-design-project-workspace project-list-detail-workspace project-list-detail-workspace--${workspaceMode}`} aria-label="프로젝트 목록 및 상세">
+      <section className="project-list-detail-workspace__list">
+        <DataTable
+          title={`프로젝트 목록 (${projects.length}건)`}
+          columns={projectColumns}
+          rows={projects}
+          getRowKey={(project) => project.PROJECT_ID}
+          onRowClick={selectProject}
+          selectedRowKeys={selectedProjectId ? new Set([selectedProjectId]) : new Set()}
+          onSelectedRowKeysChange={(keys) => {
+            const project = projects.find((candidate) => candidate.PROJECT_ID === [...keys][0]);
+            if (project) selectProject(project);
+            else setSelectedProjectId('');
+          }}
+          emptyMessage="등록된 프로젝트가 없습니다."
+        />
+      </section>
+      {workspaceMode !== 'LIST' ? <section className="project-list-detail-workspace__detail">
+        <form id="project-detail-form" key={selectedProjectId || 'new'} className="standard-design-lifecycle-form standard-design-project-form" onSubmit={saveProject}>
+          <div className="standard-design-project-detail-heading">
+            <div><h2>{selectedProject ? '프로젝트 상세' : '신규 등록'}</h2><p>{selectedProject ? '프로젝트 기본정보를 수정할 수 있습니다.' : '저장 시 프로젝트 ID가 자동으로 부여됩니다.'}</p></div>
+            <button type="button" className="secondary-button" onClick={() => setWorkspaceMode(workspaceMode === 'DETAIL' ? 'DETAIL_EXPANDED' : 'DETAIL')}>{workspaceMode === 'DETAIL' ? '목록 접기' : '목록 펼치기'}</button>
+          </div>
+          <div className="standard-design-project-fields">
+            <label><span>프로젝트 ID</span><input value={selectedProject?.PROJECT_ID ?? '저장 시 자동 부여'} readOnly /></label>
+            <label><span>프로젝트명</span><input name="PROJECT_NAME" required defaultValue={selectedProject?.PROJECT_NAME ?? ''} /></label>
+            <label><span>고객명</span><input name="CUSTOMER_NAME" required defaultValue={selectedProject?.CUSTOMER_NAME ?? ''} /></label>
+            <label><span>상태</span><select name="STATUS" defaultValue={selectedProject?.STATUS ?? 'DRAFT'}>{STATUS.map((status) => <option key={status}>{status}</option>)}</select></label>
+            <label className="standard-design-project-description"><span>설명</span><textarea name="DESCRIPTION" rows={5} defaultValue={selectedProject?.DESCRIPTION ?? ''} /></label>
+          </div>
+          <section className="standard-design-project-participant-region" aria-label="향후 참여자 관리 확장 영역" />
+        </form>
+      </section> : null}
+    </section>
+    <div className="multi-grid-message-area standard-design-project-message" aria-live="polite">{message}</div>
+  </div>;
+}
+
+function LifecycleDetailPage({ view, supplement }: { view: LifecycleView; supplement?: ReactNode }) {
   const [, setRevision] = useState(0);
   const [projectId, setProjectId] = useState(designLifecycleRepository.getSelectedProjectId());
   const [selectedId, setSelectedId] = useState('');
@@ -160,4 +284,10 @@ export default function DesignLifecyclePage({ view, supplement }: { view: Lifecy
       message={message}
     />
   </div>;
+}
+
+export default function DesignLifecyclePage({ view, supplement }: { view: LifecycleView; supplement?: ReactNode }) {
+  return view === 'overview'
+    ? <ProjectManagementPage />
+    : <LifecycleDetailPage view={view} supplement={supplement} />;
 }
