@@ -1,6 +1,7 @@
 import { COMMON_ACTIONS } from '../../constants/actionCodes';
 import type { ApplicationModule } from '../../types/applicationModule';
 import StandardDesignSkeletonPage from './ui/pages/StandardDesignSkeletonPage';
+import DesignLifecyclePage from './ui/pages/DesignLifecyclePage';
 import ScreenDesignPage from './ui/pages/ScreenDesignPage';
 import TermGlossaryPage from './ui/pages/TermGlossaryPage';
 import './standardDesign.css';
@@ -15,10 +16,32 @@ const standardDesignModule: ApplicationModule = {
   programs: [
     {
       programKey: 'SD_PROJECT_MGMT',
-      programName: '프로젝트 관리',
-      componentName: 'StandardDesignProjectPage',
+      programName: '프로젝트 개요',
+      componentName: 'StandardDesignProjectOverviewPage',
       screenType: 'GRID_DETAIL',
       routePath: '/standard-design/projects',
+      dataScope: 'COMPANY',
+      modifyScope: 'ROLE',
+      actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE],
+      useYn: 'Y',
+    },
+    {
+      programKey: 'SD_WBS_DESIGN',
+      programName: 'WBS',
+      componentName: 'StandardDesignWbsPage',
+      screenType: 'GRID_DETAIL',
+      routePath: '/standard-design/wbs',
+      dataScope: 'COMPANY',
+      modifyScope: 'ROLE',
+      actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE],
+      useYn: 'Y',
+    },
+    {
+      programKey: 'SD_REQUIREMENT_DESIGN',
+      programName: '요구사항 관리',
+      componentName: 'StandardDesignRequirementPage',
+      screenType: 'GRID_DETAIL',
+      routePath: '/standard-design/requirements',
       dataScope: 'COMPANY',
       modifyScope: 'ROLE',
       actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE],
@@ -44,6 +67,17 @@ const standardDesignModule: ApplicationModule = {
       dataScope: 'COMPANY',
       modifyScope: 'ROLE',
       actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE, STANDARD_DESIGN_ACTIONS.DESIGN_VALIDATE],
+      useYn: 'Y',
+    },
+    {
+      programKey: 'SD_DATABASE_DESIGN',
+      programName: 'DB 설계',
+      componentName: 'StandardDesignDatabasePage',
+      screenType: 'GRID_DETAIL',
+      routePath: '/standard-design/database',
+      dataScope: 'COMPANY',
+      modifyScope: 'ROLE',
+      actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE],
       useYn: 'Y',
     },
     {
@@ -80,13 +114,33 @@ const standardDesignModule: ApplicationModule = {
       useYn: 'Y',
     },
     {
+      menuKey: 'STANDARD_DESIGN.WBS',
+      parentMenuKey: 'STANDARD_DESIGN',
+      menuName: 'WBS',
+      menuLevel: 2,
+      menuType: 'SCREEN',
+      programKey: 'SD_WBS_DESIGN',
+      sortOrder: 2,
+      useYn: 'Y',
+    },
+    {
+      menuKey: 'STANDARD_DESIGN.REQUIREMENT',
+      parentMenuKey: 'STANDARD_DESIGN',
+      menuName: '요구사항 관리',
+      menuLevel: 2,
+      menuType: 'SCREEN',
+      programKey: 'SD_REQUIREMENT_DESIGN',
+      sortOrder: 3,
+      useYn: 'Y',
+    },
+    {
       menuKey: 'STANDARD_DESIGN.CUSTOMER_STANDARD',
       parentMenuKey: 'STANDARD_DESIGN',
       menuName: '고객 표준 관리',
       menuLevel: 2,
       menuType: 'SCREEN',
       programKey: 'SD_CUSTOMER_STANDARD',
-      sortOrder: 2,
+      sortOrder: 4,
       useYn: 'Y',
     },
     {
@@ -96,7 +150,17 @@ const standardDesignModule: ApplicationModule = {
       menuLevel: 2,
       menuType: 'SCREEN',
       programKey: 'SD_SCREEN_DESIGN',
-      sortOrder: 3,
+      sortOrder: 5,
+      useYn: 'Y',
+    },
+    {
+      menuKey: 'STANDARD_DESIGN.DATABASE',
+      parentMenuKey: 'STANDARD_DESIGN',
+      menuName: 'DB 설계',
+      menuLevel: 2,
+      menuType: 'SCREEN',
+      programKey: 'SD_DATABASE_DESIGN',
+      sortOrder: 6,
       useYn: 'Y',
     },
     {
@@ -106,7 +170,7 @@ const standardDesignModule: ApplicationModule = {
       menuLevel: 2,
       menuType: 'SCREEN',
       programKey: 'SD_TERM_GLOSSARY',
-      sortOrder: 4,
+      sortOrder: 7,
       useYn: 'Y',
     },
   ],
@@ -118,6 +182,12 @@ const standardDesignModule: ApplicationModule = {
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_PROJECT_MGMT', ACTION_CODE: COMMON_ACTIONS.CREATE, ALLOW_YN: 'Y' },
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_PROJECT_MGMT', ACTION_CODE: COMMON_ACTIONS.UPDATE, ALLOW_YN: 'Y' },
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_PROJECT_MGMT', ACTION_CODE: COMMON_ACTIONS.DELETE, ALLOW_YN: 'Y' },
+    ...(['SD_WBS_DESIGN', 'SD_REQUIREMENT_DESIGN', 'SD_DATABASE_DESIGN'] as const).flatMap((programKey) => [
+      { ROLE_CODE: 'ADMIN', PROGRAM_KEY: programKey, ACTION_CODE: COMMON_ACTIONS.SEARCH, ALLOW_YN: 'Y' as const },
+      { ROLE_CODE: 'ADMIN', PROGRAM_KEY: programKey, ACTION_CODE: COMMON_ACTIONS.CREATE, ALLOW_YN: 'Y' as const },
+      { ROLE_CODE: 'ADMIN', PROGRAM_KEY: programKey, ACTION_CODE: COMMON_ACTIONS.UPDATE, ALLOW_YN: 'Y' as const },
+      { ROLE_CODE: 'ADMIN', PROGRAM_KEY: programKey, ACTION_CODE: COMMON_ACTIONS.DELETE, ALLOW_YN: 'Y' as const },
+    ]),
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_CUSTOMER_STANDARD', ACTION_CODE: COMMON_ACTIONS.SEARCH, ALLOW_YN: 'Y' },
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_CUSTOMER_STANDARD', ACTION_CODE: COMMON_ACTIONS.CREATE, ALLOW_YN: 'Y' },
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_CUSTOMER_STANDARD', ACTION_CODE: COMMON_ACTIONS.UPDATE, ALLOW_YN: 'Y' },
@@ -130,13 +200,9 @@ const standardDesignModule: ApplicationModule = {
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_TERM_GLOSSARY', ACTION_CODE: COMMON_ACTIONS.SEARCH, ALLOW_YN: 'Y' },
   ],
   components: {
-    SD_PROJECT_MGMT: () => (
-      <StandardDesignSkeletonPage
-        title="프로젝트 관리"
-        description="Standard Design 작업 단위와 고객 프로젝트를 관리하는 영역입니다."
-        nextStep="프로젝트 기본정보와 고객 표준 연결 모델을 정의합니다."
-      />
-    ),
+    SD_PROJECT_MGMT: () => <DesignLifecyclePage view="overview" />,
+    SD_WBS_DESIGN: () => <DesignLifecyclePage view="wbs" />,
+    SD_REQUIREMENT_DESIGN: () => <DesignLifecyclePage view="requirements" />,
     SD_CUSTOMER_STANDARD: () => (
       <StandardDesignSkeletonPage
         title="고객 표준 관리"
@@ -144,7 +210,8 @@ const standardDesignModule: ApplicationModule = {
         nextStep="BaseKit Runtime 기준정보와 섞이지 않는 설계 Metadata 계약을 정의합니다."
       />
     ),
-    SD_SCREEN_DESIGN: ScreenDesignPage,
+    SD_SCREEN_DESIGN: () => <><DesignLifecyclePage view="screens" /><ScreenDesignPage /></>,
+    SD_DATABASE_DESIGN: () => <DesignLifecyclePage view="database" />,
     SD_TERM_GLOSSARY: TermGlossaryPage,
   },
 };
