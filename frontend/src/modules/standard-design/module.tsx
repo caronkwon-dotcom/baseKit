@@ -210,7 +210,7 @@ const standardDesignModule: ApplicationModule = {
         nextStep="BaseKit Runtime 기준정보와 섞이지 않는 설계 Metadata 계약을 정의합니다."
       />
     ),
-    SD_SCREEN_DESIGN: () => <><DesignLifecyclePage view="screens" /><ScreenDesignPage /></>,
+    SD_SCREEN_DESIGN: ScreenDesignPage,
     SD_DATABASE_DESIGN: () => <DesignLifecyclePage view="database" />,
     SD_TERM_GLOSSARY: TermGlossaryPage,
   },

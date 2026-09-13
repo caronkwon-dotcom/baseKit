@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { promptCompanyLlm, testCompanyLlm, type CompanyLlmTestResult } from '../../llm/companyLlm.repository';
-import StandardDesignSkeletonPage from './StandardDesignSkeletonPage';
+import DesignLifecyclePage from './DesignLifecyclePage';
 
 export default function ScreenDesignPage() {
   const [prompt, setPrompt] = useState('');
@@ -35,11 +35,7 @@ export default function ScreenDesignPage() {
   };
 
   return (
-    <StandardDesignSkeletonPage
-      title="화면 설계"
-      description="업무 화면의 검색·그리드·상세·Action 구조를 설계하는 영역입니다."
-      nextStep="Screen Design Schema v0.1을 정의한 뒤 편집 UI를 구현합니다."
-    >
+    <DesignLifecyclePage view="screens" supplement={
       <section className="standard-design-llm-test" aria-labelledby="company-llm-test-title">
         <div className="standard-design-llm-heading">
           <div>
@@ -75,6 +71,6 @@ export default function ScreenDesignPage() {
         ) : null}
         {error ? <p className="standard-design-llm-error" role="alert">{error}</p> : null}
       </section>
-    </StandardDesignSkeletonPage>
+    } />
   );
 }
