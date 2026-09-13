@@ -1,4 +1,4 @@
-import type { Code, CodeGroup } from '../types';
+import type { Code, CodeAttributeDefinition, CodeAttributeValue, CodeGroup } from '../types';
 
 interface ApiResponse<T> {
   SUCCESS: boolean;
@@ -42,10 +42,17 @@ export const coreCodeApi = {
     request<void>(`/groups/${encodeURIComponent(codeGroupId)}`, { method: 'DELETE' }),
   findCodes: (codeGroupId = '', codeName = '', useYn = '') =>
     request<Code[]>(queryString({ CODE_GROUP_ID: codeGroupId, CODE_NAME: codeName, USE_YN: useYn })),
-  createCode: (code: Pick<Code, 'CODE_ID' | 'CODE_GROUP_ID' | 'CODE' | 'CODE_NAME' | 'SORT_ORDER' | 'USE_YN'>) =>
+  createCode: (code: Pick<Code, 'CODE_ID' | 'CODE_GROUP_ID' | 'CODE' | 'CODE_NAME' | 'SORT_ORDER' | 'USE_YN' | 'ATTRIBUTE_VALUES'>) =>
     request<Code>('', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(code) }),
-  updateCode: (code: Pick<Code, 'CODE_ID' | 'CODE_GROUP_ID' | 'CODE' | 'CODE_NAME' | 'SORT_ORDER' | 'USE_YN'>) =>
+  updateCode: (code: Pick<Code, 'CODE_ID' | 'CODE_GROUP_ID' | 'CODE' | 'CODE_NAME' | 'SORT_ORDER' | 'USE_YN' | 'ATTRIBUTE_VALUES'>) =>
     request<Code>(`/${encodeURIComponent(code.CODE_ID)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(code) }),
   deleteCode: (codeId: string) =>
     request<void>(`/${encodeURIComponent(codeId)}`, { method: 'DELETE' }),
+  findAttributeDefinitions: (codeGroupId: string) => request<CodeAttributeDefinition[]>(`/groups/${encodeURIComponent(codeGroupId)}/attribute-definitions`),
+  findAttributeValues: (codeGroupId: string) => request<CodeAttributeValue[]>(`/groups/${encodeURIComponent(codeGroupId)}/attribute-values`),
+  createAttributeDefinition: (codeGroupId: string, value: Omit<CodeAttributeDefinition, 'ATTRIBUTE_DEF_ID' | 'CODE_GROUP_ID' | 'DEL_YN' | 'REG_DT' | 'REG_BY' | 'MOD_DT' | 'MOD_BY'>) =>
+    request<CodeAttributeDefinition>(`/groups/${encodeURIComponent(codeGroupId)}/attribute-definitions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(value) }),
+  updateAttributeDefinition: (attributeDefId: string, value: Omit<CodeAttributeDefinition, 'ATTRIBUTE_DEF_ID' | 'CODE_GROUP_ID' | 'DEL_YN' | 'REG_DT' | 'REG_BY' | 'MOD_DT' | 'MOD_BY'>) =>
+    request<CodeAttributeDefinition>(`/attribute-definitions/${encodeURIComponent(attributeDefId)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(value) }),
+  deleteAttributeDefinition: (attributeDefId: string) => request<void>(`/attribute-definitions/${encodeURIComponent(attributeDefId)}`, { method: 'DELETE' }),
 };

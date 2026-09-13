@@ -90,4 +90,31 @@ class CoreCodeIntegrationTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.ERROR_CODE").value("CORE_CODE_CONFLICT"));
     }
+
+    @Test
+    void managesMetadataDefinitionAndPersistsDynamicCodeValue() throws Exception {
+        String definition = """
+                {"ATTRIBUTE_CODE":"TEST_LABEL","ATTRIBUTE_NAME":"테스트라벨",
+                 "DATA_TYPE":"STRING","CONTROL_TYPE":"TEXT","DISPLAY_TYPE":"BADGE",
+                 "REQUIRED_YN":"Y","DEFAULT_VALUE":null,"OPTION_SOURCE":null,
+                 "SORT_ORDER":90,"USE_YN":"Y"}
+                """;
+        String definitionId = com.jayway.jsonpath.JsonPath.read(mockMvc.perform(post("/api/core/codes/groups/USER_TYPE_CODE/attribute-definitions")
+                        .contentType(MediaType.APPLICATION_JSON).content(definition))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString(), "$.DATA.ATTRIBUTE_DEF_ID");
+
+        String code = """
+                {"CODE_ID":"USER_TYPE_META_TEST","CODE_GROUP_ID":"USER_TYPE_CODE","CODE":"META_TEST",
+                 "CODE_NAME":"Metadata Test","SORT_ORDER":99,"USE_YN":"Y",
+                 "ATTRIBUTE_VALUES":{"TEST_LABEL":"검증완료"}}
+                """;
+        mockMvc.perform(post("/api/core/codes").contentType(MediaType.APPLICATION_JSON).content(code))
+                .andExpect(status().isCreated());
+        mockMvc.perform(get("/api/core/codes/groups/USER_TYPE_CODE/attribute-values"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.DATA[?(@.CODE_ID == 'USER_TYPE_META_TEST')].ATTRIBUTE_VALUE").value("검증완료"));
+
+        mockMvc.perform(delete("/api/core/codes/USER_TYPE_META_TEST")).andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/core/codes/attribute-definitions/{id}", definitionId)).andExpect(status().isNoContent());
+    }
 }

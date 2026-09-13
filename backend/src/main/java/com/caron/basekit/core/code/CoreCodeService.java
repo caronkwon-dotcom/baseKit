@@ -14,9 +14,11 @@ public class CoreCodeService {
     private static final ZoneId SYSTEM_ZONE = ZoneId.of("Asia/Seoul");
 
     private final CoreCodeMapper mapper;
+    private final CodeAttributeService attributeService;
 
-    CoreCodeService(CoreCodeMapper mapper) {
+    CoreCodeService(CoreCodeMapper mapper, CodeAttributeService attributeService) {
         this.mapper = mapper;
+        this.attributeService = attributeService;
     }
 
     @Transactional(readOnly = true)
@@ -92,6 +94,7 @@ public class CoreCodeService {
                 request.CODE_ID(), request.CODE_GROUP_ID(), request.CODE(), request.CODE_NAME(), request.SORT_ORDER(),
                 request.USE_YN(), "N", now, SYSTEM_ACTOR, now, SYSTEM_ACTOR);
         mapper.insertCode(row);
+        attributeService.saveValues(row.CODE_ID(), row.CODE_GROUP_ID(), request.ATTRIBUTE_VALUES());
         return findCode(request.CODE_ID());
     }
 
@@ -106,12 +109,14 @@ public class CoreCodeService {
                 request.USE_YN(), current.DEL_YN(), current.REG_DT(), current.REG_BY(),
                 OffsetDateTime.now(SYSTEM_ZONE), SYSTEM_ACTOR);
         mapper.updateCode(row);
+        attributeService.saveValues(row.CODE_ID(), row.CODE_GROUP_ID(), request.ATTRIBUTE_VALUES());
         return findCode(codeId);
     }
 
     @Transactional
     public void deleteCode(String codeId) {
         findCode(codeId);
+        attributeService.deleteValuesForCode(codeId);
         mapper.logicalDeleteCode(codeId, SYSTEM_ACTOR);
     }
 

@@ -21,9 +21,11 @@ import java.util.List;
 public class CoreCodeController {
 
     private final CoreCodeService service;
+    private final CodeAttributeService attributeService;
 
-    CoreCodeController(CoreCodeService service) {
+    CoreCodeController(CoreCodeService service, CodeAttributeService attributeService) {
         this.service = service;
+        this.attributeService = attributeService;
     }
 
     @GetMapping("/groups")
@@ -54,6 +56,35 @@ public class CoreCodeController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteCodeGroup(@PathVariable String codeGroupId) {
         service.deleteCodeGroup(codeGroupId);
+    }
+
+    @GetMapping("/groups/{codeGroupId}/attribute-definitions")
+    ApiResponse<List<CodeAttributeDefinitionData>> findAttributeDefinitions(@PathVariable String codeGroupId) {
+        return ApiResponse.success(attributeService.findDefinitions(codeGroupId));
+    }
+
+    @PostMapping("/groups/{codeGroupId}/attribute-definitions")
+    @ResponseStatus(HttpStatus.CREATED)
+    ApiResponse<CodeAttributeDefinitionData> createAttributeDefinition(
+            @PathVariable String codeGroupId, @Valid @RequestBody CodeAttributeDefinitionSaveRequest request) {
+        return ApiResponse.success(attributeService.createDefinition(codeGroupId, request));
+    }
+
+    @PutMapping("/attribute-definitions/{attributeDefId}")
+    ApiResponse<CodeAttributeDefinitionData> updateAttributeDefinition(
+            @PathVariable String attributeDefId, @Valid @RequestBody CodeAttributeDefinitionSaveRequest request) {
+        return ApiResponse.success(attributeService.updateDefinition(attributeDefId, request));
+    }
+
+    @DeleteMapping("/attribute-definitions/{attributeDefId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteAttributeDefinition(@PathVariable String attributeDefId) {
+        attributeService.deleteDefinition(attributeDefId);
+    }
+
+    @GetMapping("/groups/{codeGroupId}/attribute-values")
+    ApiResponse<List<CodeAttributeValueData>> findAttributeValues(@PathVariable String codeGroupId) {
+        return ApiResponse.success(attributeService.findValues(codeGroupId));
     }
 
     @GetMapping

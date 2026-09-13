@@ -26,7 +26,7 @@ export type GridActionHandlers<T> = Partial<
   Record<ActionCode, (context: GridActionContext<T>) => void>
 >;
 
-interface ProgramDataGridProps<T> {
+export interface ProgramDataGridProps<T> {
   programKey: ProgramKey;
   roleCode: string;
   title?: string;
