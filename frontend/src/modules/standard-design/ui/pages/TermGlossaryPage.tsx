@@ -91,7 +91,7 @@ export default function TermGlossaryPage() {
       ...candidateLines,
       '',
       `AI 추천: ${recommendation.recommendedTermId ?? '없음'}`,
-      `추천 이유/답변: ${recommendation.answer}`,
+      `추천 이유: ${recommendation.reason ?? recommendation.message}`,
       `상태: ${recommendation.recommendedTermId ? '추천 완료' : '미검색 또는 확정 후보 없음'}`,
     ].join('\n');
     try {
@@ -139,9 +139,21 @@ export default function TermGlossaryPage() {
             <dl className="standard-design-term-ai-summary">
               <dt>질문</dt><dd>{recommendation.question}</dd>
               <dt>검색 키워드</dt><dd>{recommendation.searchKeywords.join(', ') || '없음'}</dd>
-              <dt>AI 추천</dt><dd>{recommendation.recommendedTermId ?? '없음'}</dd>
-              <dt>추천 이유</dt><dd>{recommendation.answer}</dd>
+              <dt>상태</dt><dd>{recommendation.message}</dd>
             </dl>
+            {recommendation.recommendedTerm ? (
+              <article className="standard-design-term-recommended">
+                <h4>추천 표준용어</h4>
+                <div className="standard-design-term-recommended-grid">
+                  <span><strong>TERM_ID</strong>{recommendation.recommendedTerm.TERM_ID}</span>
+                  <span><strong>표준용어명</strong>{recommendation.recommendedTerm.COMMON_STANDARD_TERM_NAME}</span>
+                  <span><strong>영문약어</strong>{recommendation.recommendedTerm.COMMON_STANDARD_TERM_ENGLISH_ABBREVIATION_NAME || '-'}</span>
+                  <span><strong>도메인</strong>{recommendation.recommendedTerm.COMMON_STANDARD_DOMAIN_NAME || '-'}</span>
+                  <span><strong>저장 형식</strong>{recommendation.recommendedTerm.STORAGE_FORMAT || '-'}</span>
+                </div>
+                <p><strong>추천 이유</strong> {recommendation.reason || '후보와 질문의 의미가 일치합니다.'}</p>
+              </article>
+            ) : null}
             <div className="standard-design-term-candidates">
               <h4>후보 목록 ({recommendation.candidates.length}건)</h4>
               {recommendation.candidates.length ? (

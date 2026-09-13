@@ -8,7 +8,9 @@ record StandardDesignTermLlmResult(
         List<String> searchKeywords,
         List<StandardTermCandidate> candidates,
         String recommendedTermId,
-        String answer,
+        StandardDesignTerm recommendedTerm,
+        String reason,
+        String message,
         String model
 ) {
 }

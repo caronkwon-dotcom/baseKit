@@ -41,6 +41,8 @@ export interface StandardDesignTermLlmResult {
   searchKeywords: string[];
   candidates: StandardTermCandidate[];
   recommendedTermId: string | null;
-  answer: string;
+  recommendedTerm: StandardDesignTerm | null;
+  reason: string | null;
+  message: string;
   model: string;
 }

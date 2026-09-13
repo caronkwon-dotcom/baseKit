@@ -30,11 +30,11 @@ class StandardDesignTermLlmService {
             """;
     private static final String ANSWER_SYSTEM_PROMPT = """
             You answer using only the supplied STANDARD_TERM_CANDIDATES JSON.
-            Return JSON only: {"recommendedTermId":"TERM-######" or null,"answer":"string"}.
+            Return JSON only: {"recommendedTermId":"TERM-######" or null,"reason":"short string"}.
             recommendedTermId must be copied exactly from a candidate or be null.
-            The answer field is only a short recommendation reason. Do not include term names,
-            English names, abbreviations, domains, data types, lengths, scales, or other
-            standard metadata; the backend supplies all standard metadata from the CSV.
+            reason is a short recommendation reason only. Do not include term names, English
+            names, abbreviations, domains, data types, lengths, scales, or other standard
+            metadata; the backend supplies all standard metadata from the CSV.
             If no candidate answers the question, use null.
             """;
 
@@ -110,19 +110,19 @@ class StandardDesignTermLlmService {
             try {
                 recommendedTerm = termService.get(answer.recommendedTermId());
             } catch (StandardDesignTermNotFoundException exception) {
-                answer = new Answer(null);
+                answer = new Answer(null, null);
             }
         }
-        String answerText = recommendedTerm == null
-                ? NOT_FOUND_ANSWER
-                : canonicalRecommendation(recommendedTerm);
+        String message = recommendedTerm == null ? NOT_FOUND_ANSWER : "회사 표준용어집에서 추천 후보를 확인했습니다.";
         StandardDesignTermLlmResult result = new StandardDesignTermLlmResult(
                 question,
                 interpretation.interpretedIntent(),
                 List.copyOf(keywords),
                 candidates.stream().map(term -> toCandidate(term, keywords)).toList(),
                 answer.recommendedTermId(),
-                answerText,
+                recommendedTerm,
+                recommendedTerm == null ? null : answer.reason(),
+                message,
                 interpretationResponse.model()
         );
         log.info("standard-term-llm canonical relookup/response assembly requestId={} elapsedMs={} recommendedTermId={}",
@@ -219,18 +219,11 @@ class StandardDesignTermLlmService {
         try {
             JsonNode node = objectMapper.readTree(normalizeJson(content));
             String id = node.path("recommendedTermId").isTextual() ? node.path("recommendedTermId").asText() : null;
-            return new Answer(id != null && candidateIds.contains(id) ? id : null);
+            String reason = node.path("reason").isTextual() ? node.path("reason").asText().trim() : null;
+            return new Answer(id != null && candidateIds.contains(id) ? id : null, reason);
         } catch (Exception exception) {
-            return new Answer(null);
+            return new Answer(null, null);
         }
-    }
-
-    private String canonicalRecommendation(StandardDesignTerm term) {
-        return "회사 표준용어집 기준 추천 표준용어: " + term.COMMON_STANDARD_TERM_NAME()
-                + " (" + term.TERM_ID() + "), 영문약어: "
-                + term.COMMON_STANDARD_TERM_ENGLISH_ABBREVIATION_NAME()
-                + ", 도메인: " + term.COMMON_STANDARD_DOMAIN_NAME()
-                + ", 데이터타입: " + term.STORAGE_FORMAT();
     }
 
     private String normalizeJson(String content) {
@@ -248,6 +241,6 @@ class StandardDesignTermLlmService {
     private record Interpretation(String interpretedIntent, List<String> searchKeywords) {
     }
 
-    private record Answer(String recommendedTermId) {
+    private record Answer(String recommendedTermId, String reason) {
     }
 }
