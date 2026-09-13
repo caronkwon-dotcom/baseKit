@@ -120,12 +120,28 @@ export default function TermGlossaryPage() {
       <section className="standard-design-term-ai">
         <h2>LLM 표준용어 PoC</h2>
         <p>LLM은 질문과 CSV 검색 후보만 사용하며, 추천 ID는 원본 상세 조회로 검증합니다.</p>
-        <div className="standard-design-term-ai-form">
-          <input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="예: 구매요청 번호" />
-          <button type="button" disabled={recommendationLoading || !question.trim()} onClick={() => void requestRecommendation()}>
+        <form
+          className="standard-design-term-ai-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void requestRecommendation();
+          }}
+        >
+          <input
+            type="text"
+            value={question}
+            onChange={(event) => setQuestion(event.target.value)}
+            placeholder="예: 구매요청 번호"
+            disabled={recommendationLoading}
+          />
+          <button
+            type="submit"
+            className="primary-button standard-design-term-ai-button"
+            disabled={recommendationLoading || !question.trim()}
+          >
             {recommendationLoading ? '분석 중...' : '추천'}
           </button>
-        </div>
+        </form>
         <p className={`standard-design-term-ai-status ${recommendationLoading ? 'is-loading' : ''} ${recommendationError ? 'is-error' : ''}`} role={recommendationError ? 'alert' : 'status'}>
           {recommendationLoading ? '질문 해석 → CSV 후보 검색 2회 → 후보 검증 중입니다. 잠시 기다려 주세요.' : recommendationError || (recommendation ? (recommendation.recommendedTermId ? '추천 완료 · 원본 용어집 ID 검증 완료' : '완료 · 확정 가능한 후보가 없어 미검색으로 표시') : '질문을 입력하고 추천을 실행하세요.')}
         </p>
