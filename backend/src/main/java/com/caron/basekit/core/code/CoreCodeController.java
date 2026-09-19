@@ -57,6 +57,10 @@ public class CoreCodeController {
     void deleteCodeGroup(@PathVariable String codeGroupId) {
         service.deleteCodeGroup(codeGroupId);
     }
+    @PostMapping("/groups/batch")
+    ApiResponse<BatchSaveResult> saveCodeGroupBatch(@Valid @RequestBody CodeGroupBatchSaveRequest request) {
+        return ApiResponse.success(service.saveCodeGroupBatch(request));
+    }
 
     @GetMapping("/groups/{codeGroupId}/attribute-definitions")
     ApiResponse<List<CodeAttributeDefinitionData>> findAttributeDefinitions(@PathVariable String codeGroupId) {
@@ -80,6 +84,11 @@ public class CoreCodeController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteAttributeDefinition(@PathVariable String attributeDefId) {
         attributeService.deleteDefinition(attributeDefId);
+    }
+    @PostMapping("/groups/{codeGroupId}/attributes/batch")
+    ApiResponse<BatchSaveResult> saveAttributeBatch(@PathVariable String codeGroupId,
+                                                     @Valid @RequestBody CodeAttributeDefinitionBatchSaveRequest request) {
+        return ApiResponse.success(attributeService.saveDefinitionBatch(codeGroupId, request));
     }
 
     @GetMapping("/groups/{codeGroupId}/attribute-values")
@@ -116,5 +125,10 @@ public class CoreCodeController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteCode(@PathVariable String codeId) {
         service.deleteCode(codeId);
+    }
+    @PostMapping("/groups/{codeGroupId}/codes/batch")
+    ApiResponse<BatchSaveResult> saveCodeBatch(@PathVariable String codeGroupId,
+                                                @Valid @RequestBody CommonCodeBatchSaveRequest request) {
+        return ApiResponse.success(service.saveCodeBatch(codeGroupId, request));
     }
 }

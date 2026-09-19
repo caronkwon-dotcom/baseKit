@@ -33,6 +33,8 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - 공통 DataTable/Grid 규격: 288px 기본 최소 높이, 416px 최대 높이 내부 Scroll, Header 34px, Row 32px, fixed/min/flex 컬럼 폭과 말줄임·전체값 Tooltip
 - 공통코드 그룹별 동적 업무속성 기반: DATA/CONTROL/DISPLAY TYPE 분리, `BSYCADF` 정의·`BSYCAVL` 값, `FieldDefinition` Adapter와 공유 Metadata Grid/Form Renderer
 - 공통 Master-Detail Multi-Grid 표준: 40:60 좌우 분할, Detail 38:62 상하 분할, 가용 Workspace 높이 기반 Grid와 고정 Message Area
+- 공통 ActionButton: 동일 Action Code를 Icon + Text 또는 Icon Only로 렌더링하고, neutral compact token을 사용
+- 공통코드관리 AG Grid Inline Batch CRUD 1차: 코드그룹·속성정의·공통코드의 INSERTED/UPDATED/DELETED 상태 추적, 삭제 예정 표시와 배치 트랜잭션 저장 API
 
 - React + Vite + TypeScript
 - Compact 한 줄 Header / 1Depth Top / 2~3Depth Sidebar / Workspace 기반 Admin Shell

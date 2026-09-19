@@ -78,6 +78,20 @@ public class CodeAttributeService {
         mapper.logicalDeleteValuesByDefinition(attributeDefId, SYSTEM_ACTOR);
         mapper.logicalDeleteDefinition(attributeDefId, SYSTEM_ACTOR);
     }
+    @Transactional
+    public BatchSaveResult saveDefinitionBatch(String groupId, CodeAttributeDefinitionBatchSaveRequest request) {
+        requireCodeGroup(groupId);
+        request.INSERTED().forEach(row -> createDefinition(groupId, row));
+        request.UPDATED().forEach(row -> {
+            requireDefinitionGroup(groupId, row.ATTRIBUTE_DEF_ID());
+            updateDefinition(row.ATTRIBUTE_DEF_ID(), row.VALUE());
+        });
+        request.DELETED().forEach(id -> {
+            requireDefinitionGroup(groupId, id);
+            deleteDefinition(id);
+        });
+        return new BatchSaveResult(request.INSERTED().size(), request.UPDATED().size(), request.DELETED().size());
+    }
 
     @Transactional
     public void saveValues(String codeId, String codeGroupId, Map<String, String> values) {
@@ -195,6 +209,12 @@ public class CodeAttributeService {
         CodeAttributeDefinitionData result = mapper.findDefinition(id);
         if (result == null) throw new CoreCodeNotFoundException("코드 속성 정의를 찾을 수 없습니다.");
         return result;
+    }
+
+    private void requireDefinitionGroup(String groupId, String attributeDefId) {
+        if (!groupId.equals(requireDefinition(attributeDefId).CODE_GROUP_ID())) {
+            throw new CoreCodeConflictException("속성정의가 요청 코드그룹에 속하지 않습니다.");
+        }
     }
 
     private static String normalizedCode(String value) { return value.trim().toUpperCase(); }
