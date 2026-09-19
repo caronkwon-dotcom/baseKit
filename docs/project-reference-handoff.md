@@ -59,3 +59,7 @@ Project 전용 페이지 분기, module scoped CSS, module 내부 workspace/정�
 ## 사용자 승인 후 통합
 
 사용자가 dev-pm 병합을 요청해 통합을 승인했다. 원격 origin/dev-pm의 0708b72를 feature에 먼저 결합했다. 프로젝트 페이지와 scoped CSS의 이전 UX 구현 충돌은 검증된 Phase 2 구현을 유지해 해결하고, 원격에서 추가한 현재 상태 문서는 보존했다. 위 Git 통합 대기 설명은 인계 당시의 이력이며 이번 승인으로 해제된다. 원래 작업 commit 5af197e는 이력에 보존한다.
+
+## 후속 마무리 — Codex
+
+2026-09-19 기준 `codex/project-reference-refine`에서 Project Management Reference UI의 후속 UX를 반영했다. Project Context 전역 표기를 제거하고 검색/목록 영역을 Working Set 왼쪽 pane으로 이동했으며, 상세 화면에는 `[검색]` Mini Search Dialog와 `[목록으로]`, 신규/복사/저장/삭제 액션을 배치했다. 검색 결과에서 프로젝트를 선택하면 결과 집합과 선택 프로젝트를 유지한 채 상세로 전환하고, 목록 복귀 시 검색 조건·Working Set·선택 상태를 유지한다. 기존 30/70 splitter와 dirty guard, 단순 복사 규칙은 유지했다.

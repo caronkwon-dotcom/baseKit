@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import DataTable, { type DataTableColumn } from '../../../../components/common/DataTable';
+import ActionButton from '../../../../components/common/ActionButton';
 import MasterDetailMultiGrid from '../../../../components/common/MasterDetailMultiGrid';
 import PageHeader from '../../../../components/common/PageHeader';
 import SearchPanel, { type SearchFieldConfig } from '../../../../components/common/SearchPanel';
@@ -12,6 +13,7 @@ import {
   type ProjectSearchCondition, type ProjectEditor, type ProjectDraft, type ProjectMessageTone,
 } from '../components/projectReference';
 import ProjectListDetailWorkspace, { type ProjectWorkspaceMode } from '../components/ProjectListDetailWorkspace';
+import ProjectSearchDialog from '../components/ProjectSearchDialog';
 
 type LifecycleView = 'overview' | 'wbs' | 'requirements' | 'screens' | 'database';
 type LifecycleItem = ReturnType<typeof getRows>[number];
@@ -131,6 +133,7 @@ function ProjectManagementPage() {
   const [appliedCondition, setAppliedCondition] = useState<ProjectSearchCondition>(initialProjectSearchCondition);
   const [editor, setEditor] = useState<ProjectEditor | null>(null);
   const [message, setMessage] = useState<ProjectMessage | null>(null);
+  const [projectSearchOpen, setProjectSearchOpen] = useState(false);
   const filteredProjects = filterProjects(projects, appliedCondition);
   const appliedSearchDescription = getAppliedSearchDescription(appliedCondition);
   const activeProject = editor?.mode === 'EDIT'
@@ -191,6 +194,25 @@ function ProjectManagementPage() {
     const draft = toProjectDraft(activeProject);
     setEditor({ mode: 'COPY', initialDraft: draft, draft });
     setWorkspaceMode('DETAIL');
+    setMessage(null);
+  };
+
+  const openProjectSearch = () => {
+    if (!confirmDiscardChanges()) return;
+    setProjectSearchOpen(true);
+  };
+
+  const selectProjectFromSearch = (project: DesignProject, resultRows: DesignProject[], condition: ProjectSearchCondition) => {
+    if (!confirmDiscardChanges()) return;
+    const draft = toProjectDraft(project);
+    designLifecycleRepository.setSelectedProjectId(project.PROJECT_ID);
+    setProjects(resultRows);
+    setSearchCondition(condition);
+    setAppliedCondition(condition);
+    setSelectedProjectId(project.PROJECT_ID);
+    setEditor({ mode: 'EDIT', sourceProjectId: project.PROJECT_ID, initialDraft: draft, draft });
+    setWorkspaceMode('DETAIL');
+    setProjectSearchOpen(false);
     setMessage(null);
   };
 
@@ -309,45 +331,37 @@ function ProjectManagementPage() {
       ? '신규 등록 (복사)'
       : '신규 등록';
   const editorDescription = editor?.mode === 'EDIT'
-    ? `조회 결과 ${filteredProjects.length}건 / 적용 조건: ${appliedSearchDescription}`
+    ? '프로젝트 기본 정보를 수정합니다.'
     : editor?.mode === 'COPY'
       ? '프로젝트명, 고객명, 설명, 상태만 복사했습니다. 저장 시 새 프로젝트가 생성됩니다.'
       : '저장 시 새 프로젝트 ID가 생성됩니다.';
-  const projectContext = projects.find((project) => project.PROJECT_ID === designLifecycleRepository.getSelectedProjectId());
-
   return <div className="page standard-design-page standard-design-lifecycle-page standard-design-project-page">
     <PageHeader breadcrumbs={['Standard Design', '프로젝트 관리']} />
-    <section className="standard-design-lifecycle-toolbar" aria-label="프로젝트 관리 기능">
-      <span className="standard-design-project-context">Project Context: <strong>{projectContext?.PROJECT_NAME ?? '프로젝트 없음'}</strong></span>
-      <div className="standard-design-lifecycle-actions">
-        {workspaceMode === 'LIST' ? (
-          <button type="button" className="primary-button" data-action-code="CREATE" onClick={createProject}>신규</button>
-        ) : (
-          <>
-            <button type="button" className="secondary-button" onClick={returnToList}>목록으로</button>
-            <button type="button" className="primary-button" data-action-code="CREATE" onClick={createProject}>신규</button>
-            <button type="button" className="secondary-button" data-action-code="CREATE" onClick={copyProject} disabled={!activeProject}>복사</button>
-            <button type="submit" form="project-detail-form" className="primary-button" data-action-code={editor?.mode === 'EDIT' ? 'UPDATE' : 'CREATE'} disabled={!editor}>저장</button>
-            <button type="button" className="danger-button" data-action-code="DELETE" onClick={deleteProject} disabled={!activeProject}>삭제</button>
-          </>
-        )}
-      </div>
-    </section>
-    {workspaceMode === 'LIST' ? (
-      <SearchPanel
-        rows={1}
-        fields={projectSearchFields}
-        value={searchCondition}
-        initialValue={initialProjectSearchCondition}
-        onValueChange={setSearchCondition}
-        onSearch={runSearch}
-        onReset={runSearch}
-      />
-    ) : null}
     <ProjectListDetailWorkspace
       mode={workspaceMode}
       onModeChange={setWorkspaceMode}
       list={<div className="project-list-detail-workspace__list-content">
+        <div className="project-list-pane-actions">
+          {workspaceMode === 'LIST' ? (
+            <ActionButton actionCode="CREATE" label="신규" tone="primary" onClick={createProject} />
+          ) : (
+            <>
+              <ActionButton actionCode="SEARCH" label="검색" tone="primary" onClick={openProjectSearch} />
+              <button type="button" className="secondary-button" onClick={returnToList}>목록으로</button>
+            </>
+          )}
+        </div>
+        {workspaceMode === 'LIST' ? (
+          <SearchPanel
+            rows={1}
+            fields={projectSearchFields}
+            value={searchCondition}
+            initialValue={initialProjectSearchCondition}
+            onValueChange={setSearchCondition}
+            onSearch={runSearch}
+            onReset={runSearch}
+          />
+        ) : null}
         <p className="standard-design-project-result-context" title={`적용 조건: ${appliedSearchDescription}`}>적용 조건: {appliedSearchDescription} / {filteredProjects.length}건</p>
         <DataTable
           title={`프로젝트 목록 (${filteredProjects.length}건)`}
@@ -376,6 +390,13 @@ function ProjectManagementPage() {
               </div>
             </dl>
           </div>
+          <div className="standard-design-project-detail-actions" aria-label="프로젝트 상세 기능">
+            <button type="button" className="secondary-button" onClick={returnToList}>목록으로</button>
+            <ActionButton actionCode="CREATE" label="신규" tone="primary" onClick={createProject} />
+            <ActionButton actionCode="CREATE" label="복사" onClick={copyProject} disabled={!activeProject} />
+            <button type="submit" className="primary-button" data-action-code={editor.mode === 'EDIT' ? 'UPDATE' : 'CREATE'}>저장</button>
+            <ActionButton actionCode="DELETE" label="삭제" tone="danger" onClick={deleteProject} disabled={!activeProject} />
+          </div>
           <div className="standard-design-project-fields">
             <label><span>프로젝트명</span><input name="PROJECT_NAME" required value={editor.draft.PROJECT_NAME} onChange={(event) => updateDraft('PROJECT_NAME', event.target.value)} /></label>
             <label><span>고객명</span><input name="CUSTOMER_NAME" required value={editor.draft.CUSTOMER_NAME} onChange={(event) => updateDraft('CUSTOMER_NAME', event.target.value)} /></label>
@@ -386,6 +407,13 @@ function ProjectManagementPage() {
       ) : null}
     />
     {message ? <ProjectMessageBanner message={message} /> : null}
+    {projectSearchOpen ? <ProjectSearchDialog
+      projects={designLifecycleRepository.getData().projects}
+      initialCondition={searchCondition}
+      fields={projectSearchFields}
+      onClose={() => setProjectSearchOpen(false)}
+      onSelect={selectProjectFromSearch}
+    /> : null}
   </div>;
 }
 
