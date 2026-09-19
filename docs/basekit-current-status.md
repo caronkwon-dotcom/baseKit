@@ -90,6 +90,7 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - Standard Design LLM 추천 응답의 canonical CSV 재조립과 자유서술 표준정보 hallucination 차단
 - Standard Design DA Design Lifecycle 1차: 프로젝트 Context, 계층 WBS, 요구사항 중심 WBS·화면·테이블 추적성, 화면/필드 및 DB 테이블/컬럼 계약, Schema Catalog 참조와 CRUD UI Skeleton
 - Standard Design DA Lifecycle UI 표준화 Phase 1: Project/WBS/Requirement/Screen/DB 화면에 공통 Master-Detail Multi-Grid, 32px Message Area, retained Project Context, CRUD Toolbar와 Screen Field/DB Column Detail Grid 적용
+- Standard Design 프로젝트 관리 Reference UX Phase 2: LIST 100%, 기본 30/70 resizable List-Detail, splitter 기반 목록 접기/펼치기와 Detail 100%, 검색·조회결과·선택 유지, compact ID, 저장 전 신규·SIMPLE_COPY 초안, 의미 있는 상태 메시지와 내부 scroll 적용. 현재 기준 branch에는 공통 List-Detail workspace가 없으므로 Module 내부 구성으로만 구현. feature branch에서 검증 완료, 사용자 검수 및 통합 대기([인계 보고서](project-reference-handoff.md))
 - Standard Design Lifecycle Program의 Hash 경로 동기화: 기존 MDI 메뉴 진입과 새로고침 후 프로젝트·WBS·요구사항·화면·DB 설계 화면 복원
 
 ## 3. 문서만 설계 완료
