@@ -1494,6 +1494,21 @@ tbody tr.selected-row td {
 .multi-grid-message-area { min-height: var(--multi-grid-message-height); flex: 0 0 var(--multi-grid-message-height); }
 .multi-grid-message-area .page-message { height: var(--multi-grid-message-height); margin: 0; padding: 6px 10px; }
 
+/* BaseKit 표준 List/Detail 작업 영역 */
+.list-detail-workspace { display: flex; min-width: 0; min-height: 0; flex: 1; gap: 8px; }
+.list-detail-workspace__list,
+.list-detail-workspace__detail { display: flex; min-width: 0; min-height: 0; flex-direction: column; overflow: hidden; }
+.list-detail-workspace__list { min-width: min(320px, 30%); flex: 0 1 30%; }
+.list-detail-workspace__detail { position: relative; min-width: min(480px, 70%); flex: 1 1 70%; }
+.list-detail-workspace__content { display: flex; min-width: 0; min-height: 0; flex: 1; flex-direction: column; overflow: auto; }
+.list-detail-workspace--LIST .list-detail-workspace__list { flex: 1 1 100%; }
+.list-detail-workspace--DETAIL .list-detail-workspace__list { flex-basis: 30%; }
+.list-detail-workspace--DETAIL_EXPANDED .list-detail-workspace__list { display: none; }
+.list-detail-workspace--DETAIL_EXPANDED .list-detail-workspace__detail { flex-basis: 100%; }
+.list-detail-workspace__toggle { position: absolute; z-index: 1; top: 12px; right: 12px; }
+.list-detail-workspace__list .data-section { display: flex; min-height: 0; flex: 1; flex-direction: column; }
+.list-detail-workspace__list .standard-table-wrap { min-height: 0; max-height: none; flex: 1; }
+
 .standard-grid-page { display: flex; min-height: 0; flex: 1; flex-direction: column; }
 .standard-grid-workspace { display: flex; min-height: 0; flex: 1; flex-direction: column; gap: 8px; }
 .standard-grid-workspace > .program-data-grid { min-height: var(--data-grid-min-height); flex: 1; }

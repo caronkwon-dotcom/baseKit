@@ -3,6 +3,8 @@ export type { DataTableColumn } from './DataTable';
 export { default as PageHeader } from './PageHeader';
 export { default as FormModal } from './FormModal';
 export { default as MasterDetailMultiGrid } from './MasterDetailMultiGrid';
+export { default as ListDetailWorkspace } from './ListDetailWorkspace';
+export type { ListDetailWorkspaceMode } from './ListDetailWorkspace';
 export { default as ProgramDataGrid } from './ProgramDataGrid';
 export type { GridActionContext, GridActionHandlers, GridMetric } from './ProgramDataGrid';
 export { default as SearchPanel } from './SearchPanel';

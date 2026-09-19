@@ -141,17 +141,6 @@
 .standard-design-lifecycle-guide p { margin: 0; color: var(--text-muted); line-height: 1.5; }
 .standard-design-lifecycle-guide .standard-design-llm-test { margin-top: 0; }
 .standard-design-project-page { display: flex; min-height: 0; flex: 1; flex-direction: column; }
-.standard-design-project-workspace { display: flex; min-height: 0; flex: 1; gap: 8px; }
-.project-list-detail-workspace__list,
-.project-list-detail-workspace__detail { display: flex; min-width: 0; min-height: 0; flex-direction: column; }
-.project-list-detail-workspace__list { flex: 0 1 30%; }
-.project-list-detail-workspace__detail { flex: 1 1 70%; overflow: auto; }
-.project-list-detail-workspace--LIST .project-list-detail-workspace__list { flex-basis: 100%; }
-.project-list-detail-workspace--DETAIL .project-list-detail-workspace__list { flex-basis: 30%; }
-.project-list-detail-workspace--DETAIL_EXPANDED .project-list-detail-workspace__list { display: none; }
-.project-list-detail-workspace--DETAIL_EXPANDED .project-list-detail-workspace__detail { flex-basis: 100%; }
-.standard-design-project-workspace .data-section { display: flex; min-height: 0; flex: 1; flex-direction: column; }
-.standard-design-project-workspace .standard-table-wrap { min-height: 0; max-height: none; flex: 1; }
 .standard-design-project-form { min-height: 100%; }
 .standard-design-project-detail-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .standard-design-project-detail-heading h2 { margin: 0; color: var(--text-primary); font-size: 14px; }

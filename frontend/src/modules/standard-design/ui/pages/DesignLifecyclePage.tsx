@@ -1,5 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import DataTable, { type DataTableColumn } from '../../../../components/common/DataTable';
+import ListDetailWorkspace, { type ListDetailWorkspaceMode } from '../../../../components/common/ListDetailWorkspace';
 import MasterDetailMultiGrid from '../../../../components/common/MasterDetailMultiGrid';
 import PageHeader from '../../../../components/common/PageHeader';
 import { schemaCatalogRepository } from '../../../../features/system/tableManage/schemaCatalog.repository';
@@ -75,8 +76,6 @@ function DbColumnGrid({ rows }: { rows: DbColumnDefinition[] }) {
   </section>;
 }
 
-type ProjectWorkspaceMode = 'LIST' | 'DETAIL' | 'DETAIL_EXPANDED';
-
 const projectColumns: DataTableColumn<DesignProject>[] = [
   { key: 'id', header: 'ID', render: (project) => project.PROJECT_ID, minWidth: 95 },
   { key: 'name', header: '프로젝트명', render: (project) => project.PROJECT_NAME, minWidth: 150, flex: 2 },
@@ -86,7 +85,7 @@ const projectColumns: DataTableColumn<DesignProject>[] = [
 
 function ProjectManagementPage() {
   const [, setRevision] = useState(0);
-  const [workspaceMode, setWorkspaceMode] = useState<ProjectWorkspaceMode>('LIST');
+  const [workspaceMode, setWorkspaceMode] = useState<ListDetailWorkspaceMode>('LIST');
   const [selectedProjectId, setSelectedProjectId] = useState('');
   const [message, setMessage] = useState('프로젝트를 선택한 후 상세 열기를 선택하세요.');
   const projects = designLifecycleRepository.getData().projects;
@@ -161,8 +160,10 @@ function ProjectManagementPage() {
         <button type="button" className="danger-button" data-action-code="DELETE" onClick={deleteProject}>삭제</button>
       </div>
     </section>
-    <section className={`standard-design-project-workspace project-list-detail-workspace project-list-detail-workspace--${workspaceMode}`} aria-label="프로젝트 목록 및 상세">
-      <section className="project-list-detail-workspace__list">
+    <ListDetailWorkspace
+      mode={workspaceMode}
+      onModeChange={setWorkspaceMode}
+      list={
         <DataTable
           title={`프로젝트 목록 (${projects.length}건)`}
           columns={projectColumns}
@@ -177,12 +178,11 @@ function ProjectManagementPage() {
           }}
           emptyMessage="등록된 프로젝트가 없습니다."
         />
-      </section>
-      {workspaceMode !== 'LIST' ? <section className="project-list-detail-workspace__detail">
+      }
+      detail={
         <form id="project-detail-form" key={selectedProjectId || 'new'} className="standard-design-lifecycle-form standard-design-project-form" onSubmit={saveProject}>
           <div className="standard-design-project-detail-heading">
             <div><h2>{selectedProject ? '프로젝트 상세' : '신규 등록'}</h2><p>{selectedProject ? '프로젝트 기본정보를 수정할 수 있습니다.' : '저장 시 프로젝트 ID가 자동으로 부여됩니다.'}</p></div>
-            <button type="button" className="secondary-button" onClick={() => setWorkspaceMode(workspaceMode === 'DETAIL' ? 'DETAIL_EXPANDED' : 'DETAIL')}>{workspaceMode === 'DETAIL' ? '목록 접기' : '목록 펼치기'}</button>
           </div>
           <div className="standard-design-project-fields">
             <label><span>프로젝트 ID</span><input value={selectedProject?.PROJECT_ID ?? '저장 시 자동 부여'} readOnly /></label>
@@ -193,8 +193,8 @@ function ProjectManagementPage() {
           </div>
           <section className="standard-design-project-participant-region" aria-label="향후 참여자 관리 확장 영역" />
         </form>
-      </section> : null}
-    </section>
+      }
+    />
     <div className="multi-grid-message-area standard-design-project-message" aria-live="polite">{message}</div>
   </div>;
 }
