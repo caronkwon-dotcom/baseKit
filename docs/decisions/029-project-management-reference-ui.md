@@ -2,7 +2,7 @@
 
 ## 상태
 
-Accepted / Implemented on feature branch / 사용자 검수 대기
+Accepted / Implemented / 사용자 승인으로 dev-pm 통합
 
 ## 범위
 

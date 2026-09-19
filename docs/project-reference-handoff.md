@@ -55,3 +55,7 @@
 ## 변경 범위
 
 Project 전용 페이지 분기, module scoped CSS, module 내부 workspace/정책 함수, 회귀 테스트, 문서. 다른 Lifecycle view, Core 공통 컴포넌트, 권한 Framework, Backend/DB 변경 없음. Deep Copy는 원칙만 문서화.
+
+## 사용자 승인 후 통합
+
+사용자가 dev-pm 병합을 요청해 통합을 승인했다. 원격 origin/dev-pm의 0708b72를 feature에 먼저 결합했다. 프로젝트 페이지와 scoped CSS의 이전 UX 구현 충돌은 검증된 Phase 2 구현을 유지해 해결하고, 원격에서 추가한 현재 상태 문서는 보존했다. 위 Git 통합 대기 설명은 인계 당시의 이력이며 이번 승인으로 해제된다. 원래 작업 commit 5af197e는 이력에 보존한다.
