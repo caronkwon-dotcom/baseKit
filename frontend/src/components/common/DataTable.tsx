@@ -14,7 +14,7 @@ export interface DataTableColumn<T> {
   truncate?: boolean;
 }
 
-interface DataTableProps<T> {
+export interface DataTableProps<T> {
   title?: string;
   columns: DataTableColumn<T>[];
   rows: T[];

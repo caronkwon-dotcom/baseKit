@@ -256,6 +256,13 @@ gh pr list --repo caronkwon-dotcom/baseKit
 
 ## 8. 다음 추천 작업
 
+### 검수 대기: AG Grid Community 1차 PoC
+
+- 코드관리 3개 Grid에만 AG Grid Community 36.2.0 Wrapper/Adapter 적용. FieldDefinition·MetadataForm·Backend/DB 계약과 기존 Grid 보존.
+- 20/500/2,000행 동적 컬럼·스크롤, 선택·정렬·Resize, 독립 Inline Editing Fixture 검수 완료.
+- Build/TypeScript/Lint, Backend 21 tests, Adapter 검사 통과. 상세 결과와 화면 캡처는 [PoC 보고서](poc/ag-grid-community-poc.md) 참고.
+- dev-pm에 PoC를 반영했으며, 전면 채택 또는 다른 화면 Migration은 결정·구현하지 않았다.
+- 다음 작업: PoC 결과를 기준으로 전체 채택 여부와 후속 화면 Migration 범위를 결정한다.
 ### 진행 중: PROGRAM 관리 DB화
 
 - `BSYPROG` Flyway V4, JPA Schema Validate, MyBatis CRUD와 REST API 구현

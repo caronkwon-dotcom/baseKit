@@ -1,0 +1,9 @@
+.basekit-ag-grid { height: 288px; min-width: 0; width: 100%; }
+.master-detail-multi-grid .basekit-ag-grid { height: auto; min-height: 0; flex: 1; }
+.basekit-ag-grid .basekit-grid-cell-right { text-align: right; }
+.basekit-ag-grid .basekit-grid-cell-center { text-align: center; }
+.basekit-ag-grid .ag-row.active-master-row { background: var(--brand-soft); }
+.basekit-ag-grid .ag-row.grid-dirty-row { box-shadow: inset 3px 0 var(--brand-primary); background: var(--brand-soft); }
+.basekit-ag-grid .ag-header-cell-text { font-weight: 600; }
+.basekit-ag-grid .ag-cell { overflow: hidden; text-overflow: ellipsis; }
+.basekit-ag-grid .ag-overlay { color: var(--text-muted); }

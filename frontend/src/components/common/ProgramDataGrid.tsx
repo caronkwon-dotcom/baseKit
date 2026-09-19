@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { COMMON_ACTIONS, type ActionCode } from '../../constants/actionCodes';
 import { hasAction, metadataRepository, programByKey } from '../../repositories/metadataRepository';
 import type { ProgramKey } from '../../types/adminShell';
-import DataTable, { type DataTableColumn } from './DataTable';
+import DataTable, { type DataTableColumn, type DataTableProps } from './DataTable';
 
 const GRID_ACTION_CODES = [
   COMMON_ACTIONS.CREATE,
@@ -27,6 +27,8 @@ export type GridActionHandlers<T> = Partial<
 >;
 
 export interface ProgramDataGridProps<T> {
+  /** Shared UI adapter seam. Pages use a wrapper; the default remains DataTable. */
+  renderTable?: (props: DataTableProps<T>) => ReactNode;
   programKey: ProgramKey;
   roleCode: string;
   title?: string;
@@ -69,6 +71,7 @@ export default function ProgramDataGrid<T>({
   onSelectedRowKeysChange,
   onRowClick,
   getRowClassName,
+  renderTable = (props) => <DataTable {...props} />,
 }: ProgramDataGridProps<T>) {
   const [internalSelectedRowKeys, setInternalSelectedRowKeys] = useState<Set<string>>(new Set());
   const selectedRowKeys = controlledSelectedRowKeys ?? internalSelectedRowKeys;
@@ -117,16 +120,10 @@ export default function ProgramDataGrid<T>({
           })}
         </div>
       </div>
-      <DataTable
-        columns={columns}
-        rows={rows}
-        getRowKey={getRowKey}
-        emptyMessage={emptyMessage}
-        selectedRowKeys={selectable ? selectedRowKeys : undefined}
-        onSelectedRowKeysChange={selectable ? setSelectedRowKeys : undefined}
-        onRowClick={onRowClick}
-        getRowClassName={getRowClassName}
-      />
+      {renderTable({ columns, rows, getRowKey, emptyMessage,
+        selectedRowKeys: selectable ? selectedRowKeys : undefined,
+        onSelectedRowKeysChange: selectable ? setSelectedRowKeys : undefined,
+        onRowClick, getRowClassName })}
     </section>
   );
 }
