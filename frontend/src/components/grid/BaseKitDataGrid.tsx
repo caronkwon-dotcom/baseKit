@@ -13,11 +13,11 @@ const theme = themeQuartz.withParams({
 });
 
 export interface GridEditing<T> {
+  mode?: 'cell' | 'row';
   keys: string[];
   onChange: (row: T, key: string, value: string) => void;
   isEditable?: (row: T, key: string) => boolean;
 }
-
 export interface BaseKitDataGridProps<T> extends Omit<ProgramDataGridProps<T>, 'renderTable'> {
   fields?: FieldDefinition[];
   getFieldValue?: (row: T, field: FieldDefinition) => string | undefined;
@@ -58,6 +58,8 @@ function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRo
     onRowClicked={(event) => event.data && onRowClick?.(event.data)}
     getRowClass={(params) => params.data ? [getRowClassName?.(params.data), getRowKey(params.data) === currentRowKey ? 'basekit-current-row' : ''].filter(Boolean).join(' ') : ''}
     readOnlyEdit={Boolean(editing)}
+    editType={editing?.mode === 'row' ? 'fullRow' : undefined}
+    stopEditingWhenCellsLoseFocus
     onCellEditRequest={(event) => event.data && editing?.onChange(event.data, event.column.getColId(), String(event.newValue ?? ''))}
     overlayNoRowsTemplate={`<span>${emptyMessage ?? '조회 결과가 없습니다.'}</span>`}
   /></div></div>;

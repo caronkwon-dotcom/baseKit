@@ -18,7 +18,6 @@ export interface GridMetric {
   value: number;
   tone?: 'default' | 'accent' | 'danger';
 }
-
 export interface GridActionContext<T> {
   rows: T[];
   selectedRows: T[];

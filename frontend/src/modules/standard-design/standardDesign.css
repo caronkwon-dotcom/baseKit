@@ -152,10 +152,15 @@
 .project-list-detail-workspace--DETAIL_EXPANDED .project-list-detail-workspace__detail { flex-basis: 100%; }
 .standard-design-project-workspace .data-section { display: flex; min-height: 0; flex: 1; flex-direction: column; }
 .standard-design-project-workspace .standard-table-wrap { min-height: 0; max-height: none; flex: 1; }
+.standard-design-project-workspace .search-panel { flex: 0 0 auto; }
 .standard-design-project-form { min-height: 100%; }
 .standard-design-project-detail-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .standard-design-project-detail-heading h2 { margin: 0; color: var(--text-primary); font-size: 14px; }
 .standard-design-project-detail-heading p { margin: 3px 0 0; color: var(--text-muted); font-size: 11px; }
+.standard-design-project-name-link { display: block; max-width: 100%; min-height: 0; overflow: hidden; padding: 0; color: var(--brand-primary); font: inherit; font-weight: 700; text-align: left; text-decoration: underline; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.standard-design-project-name-link:hover { color: var(--brand-hover); }
+.standard-design-project-name-link:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 2px; }
+.standard-design-project-layout-control { display: flex; flex: 0 0 auto; align-items: center; border-left: 1px solid var(--border-default); padding-left: 10px; }
 .standard-design-project-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .standard-design-project-fields label { display: grid; gap: 4px; }
 .standard-design-project-fields label > span { color: var(--text-muted); font-size: 11px; font-weight: 700; }
@@ -167,6 +172,6 @@
 .standard-design-project-description textarea { resize: vertical; }
 .standard-design-project-participant-region { min-height: 0; }
 .standard-design-project-message { margin-top: 6px; }
-@media (max-width: 900px) { .standard-design-lifecycle-toolbar { align-items: flex-start; flex-wrap: wrap; }.standard-design-project-context { width: 100%; }.standard-design-lifecycle-actions { margin-left: auto; } }
+@media (max-width: 900px) { .standard-design-lifecycle-toolbar { align-items: flex-start; flex-wrap: wrap; }.standard-design-project-context { width: 100%; }.standard-design-lifecycle-actions { margin-left: auto; }.standard-design-project-detail-heading { flex-wrap: wrap; }.standard-design-project-layout-control { margin-left: auto; } }
 @media (max-width: 900px) { .standard-design-term-layout { grid-template-columns: 1fr; } }
 @media (max-width: 900px) { .standard-design-term-recommended-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

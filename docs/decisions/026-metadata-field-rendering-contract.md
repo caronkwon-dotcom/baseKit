@@ -31,3 +31,9 @@ V1에서는 다국어를 구현하지 않는다. 향후 CODE, CODE_GROUP, ATTRIB
 - Core Code Attribute REST/Service/MyBatis
 - Shared UI `FieldDefinition`, `MetadataDataGrid`, `MetadataForm`
 - 공통코드관리 `[코드목록] / [속성정의]`
+
+## AG Grid Community 렌더링 PoC
+
+코드관리 3개 Grid에서만 `FieldDefinition → BaseKit Adapter → AG Grid ColDef`를 검증한다. 기존 MetadataDataGrid와 MetadataForm 계약은 유지하며 ProgramDataGrid의 제품 독립적인 선택적 렌더링 연결점으로 Toolbar/권한 처리를 재사용한다. AG Grid API는 Shared UI 내부에만 둔다.
+
+이는 기존 계약 안에서의 병행 PoC이며 전체 Grid 엔진 채택 결정은 아니다. 결과·검수 범위·제약은 [AG Grid Community PoC 보고서](../poc/ag-grid-community-poc.md)를 참고한다.

@@ -93,6 +93,7 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - Standard Design DA Design Lifecycle 1차: 프로젝트 Context, 계층 WBS, 요구사항 중심 WBS·화면·테이블 추적성, 화면/필드 및 DB 테이블/컬럼 계약, Schema Catalog 참조와 CRUD UI Skeleton
 - Standard Design DA Lifecycle UI 표준화 Phase 1: Project/WBS/Requirement/Screen/DB 화면에 공통 Master-Detail Multi-Grid, 32px Message Area, retained Project Context, CRUD Toolbar와 Screen Field/DB Column Detail Grid 적용
 - Standard Design Lifecycle Program의 Hash 경로 동기화: 기존 MDI 메뉴 진입과 새로고침 후 프로젝트·WBS·요구사항·화면·DB 설계 화면 복원
+- Standard Design 프로젝트 관리 List-Detail UX: 프로젝트명 직접 상세 열기, LIST/DETAIL/DETAIL_EXPANDED 분리, 공통 SearchPanel 기반 프론트엔드 필터와 조회 조건 유지, 신규·수정·삭제 흐름 정리
 
 ## 3. 문서만 설계 완료
 
@@ -258,6 +259,13 @@ gh pr list --repo caronkwon-dotcom/baseKit
 
 ## 8. 다음 추천 작업
 
+### 검수 대기: AG Grid Community 1차 PoC
+
+- 코드관리 3개 Grid에만 AG Grid Community 36.2.0 Wrapper/Adapter 적용. FieldDefinition·MetadataForm·Backend/DB 계약과 기존 Grid 보존.
+- 20/500/2,000행 동적 컬럼·스크롤, 선택·정렬·Resize, 독립 Inline Editing Fixture 검수 완료.
+- Build/TypeScript/Lint, Backend 21 tests, Adapter 검사 통과. 상세 결과와 화면 캡처는 [PoC 보고서](poc/ag-grid-community-poc.md) 참고.
+- dev-pm에 PoC를 반영했으며, 전면 채택 또는 다른 화면 Migration은 결정·구현하지 않았다.
+- 다음 작업: PoC 결과를 기준으로 전체 채택 여부와 후속 화면 Migration 범위를 결정한다.
 ### 진행 중: PROGRAM 관리 DB화
 
 - `BSYPROG` Flyway V4, JPA Schema Validate, MyBatis CRUD와 REST API 구현
