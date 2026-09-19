@@ -10,6 +10,14 @@
   --brand-primary: #1f6feb;
   --brand-hover: color-mix(in srgb, var(--brand-primary) 82%, #000000);
   --brand-soft: color-mix(in srgb, var(--brand-primary) 14%, var(--surface-panel));
+  --action-bg: #f8fafc;
+  --action-bg-hover: #eef2f6;
+  --action-border: #cbd5e1;
+  --action-text: #334155;
+  --action-primary-bg: #e2e8f0;
+  --action-primary-text: #1e293b;
+  --action-danger: #b45356;
+  --action-disabled: #94a3b8;
   --multi-grid-master-width: 40%;
   --multi-grid-master-min-width: 360px;
   --multi-grid-workspace-min-height: 520px;
@@ -673,6 +681,14 @@ button {
   font-size: 13px;
   font-weight: 700;
 }
+
+.action-button { display: inline-flex; min-height: 29px; align-items: center; justify-content: center; gap: 5px; border: 1px solid var(--action-border); border-radius: 5px; background: var(--action-bg); padding: 0 8px; color: var(--action-text); font-size: 13px; font-weight: 700; }
+.action-button:hover:not(:disabled) { background: var(--action-bg-hover); }
+.action-button.primary { border-color: #b8c4d1; background: var(--action-primary-bg); color: var(--action-primary-text); }
+.action-button.danger { border-color: color-mix(in srgb, var(--action-danger) 45%, var(--action-border)); color: var(--action-danger); }
+.action-button.icon-only { width: 29px; padding: 0; }
+.action-button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.action-button:disabled { border-color: var(--action-border); background: var(--surface-muted); color: var(--action-disabled); cursor: not-allowed; }
 
 .primary-button {
   border: 1px solid var(--brand-primary);

@@ -67,6 +67,13 @@ public class CoreCodeService {
         }
         mapper.logicalDeleteCodeGroup(codeGroupId, SYSTEM_ACTOR);
     }
+    @Transactional
+    public BatchSaveResult saveCodeGroupBatch(CodeGroupBatchSaveRequest request) {
+        request.INSERTED().forEach(this::createCodeGroup);
+        request.UPDATED().forEach(row -> updateCodeGroup(row.CODE_GROUP_ID(), row));
+        request.DELETED().forEach(this::deleteCodeGroup);
+        return new BatchSaveResult(request.INSERTED().size(), request.UPDATED().size(), request.DELETED().size());
+    }
 
     @Transactional(readOnly = true)
     public List<CommonCodeData> findCodes(String codeGroupId, String codeName, String useYn) {
@@ -118,6 +125,24 @@ public class CoreCodeService {
         findCode(codeId);
         attributeService.deleteValuesForCode(codeId);
         mapper.logicalDeleteCode(codeId, SYSTEM_ACTOR);
+    }
+    @Transactional
+    public BatchSaveResult saveCodeBatch(String groupId, CommonCodeBatchSaveRequest request) {
+        findCodeGroup(groupId);
+        request.INSERTED().forEach(row -> {
+            requireMatchingId(groupId, row.CODE_GROUP_ID(), "코드그룹 ID");
+            createCode(row);
+        });
+        request.UPDATED().forEach(row -> {
+            requireMatchingId(groupId, row.CODE_GROUP_ID(), "코드그룹 ID");
+            updateCode(row.CODE_ID(), row);
+        });
+        request.DELETED().forEach(id -> {
+            CommonCodeData row = findCode(id);
+            requireMatchingId(groupId, row.CODE_GROUP_ID(), "코드그룹 ID");
+            deleteCode(id);
+        });
+        return new BatchSaveResult(request.INSERTED().size(), request.UPDATED().size(), request.DELETED().size());
     }
 
     private void ensureUniqueCode(String codeGroupId, String code, String excludeCodeId) {

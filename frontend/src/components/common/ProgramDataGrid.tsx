@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react';
 import { COMMON_ACTIONS, type ActionCode } from '../../constants/actionCodes';
 import { hasAction, metadataRepository, programByKey } from '../../repositories/metadataRepository';
 import type { ProgramKey } from '../../types/adminShell';
-import DataTable, { type DataTableColumn } from './DataTable';
+import DataTable, { type DataTableColumn, type DataTableProps } from './DataTable';
+import type { ReactNode } from 'react';
+import ActionButton, { type ActionButtonDisplay, type ActionButtonTone } from './ActionButton';
 
 const GRID_ACTION_CODES = [
   COMMON_ACTIONS.CREATE,
@@ -25,13 +27,17 @@ export interface GridActionContext<T> {
 export type GridActionHandlers<T> = Partial<
   Record<ActionCode, (context: GridActionContext<T>) => void>
 >;
+export interface GridToolbarAction<T> { actionCode: ActionCode; label: string; tone?: ActionButtonTone; disabled?: boolean; onClick: (context: GridActionContext<T>) => void; }
 
 export interface ProgramDataGridProps<T> {
+  renderTable?: (props: DataTableProps<T>) => ReactNode;
   programKey: ProgramKey;
   roleCode: string;
   title?: string;
   metrics?: GridMetric[];
   actionHandlers?: GridActionHandlers<T>;
+  toolbarActions?: GridToolbarAction<T>[];
+  buttonDisplay?: ActionButtonDisplay;
   columns: DataTableColumn<T>[];
   rows: T[];
   getRowKey: (row: T) => string;
@@ -44,21 +50,14 @@ export interface ProgramDataGridProps<T> {
   getRowClassName?: (row: T) => string;
 }
 
-function ExcelIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M6 3h8l4 4v14H6z" />
-      <path d="M14 3v5h5M9 12l5 5m0-5-5 5" />
-    </svg>
-  );
-}
-
 export default function ProgramDataGrid<T>({
   programKey,
   roleCode,
   title,
   metrics = [],
   actionHandlers = {},
+  toolbarActions,
+  buttonDisplay = 'text',
   columns,
   rows,
   getRowKey,
@@ -69,6 +68,7 @@ export default function ProgramDataGrid<T>({
   onSelectedRowKeysChange,
   onRowClick,
   getRowClassName,
+  renderTable = (tableProps) => <DataTable {...tableProps} />,
 }: ProgramDataGridProps<T>) {
   const [internalSelectedRowKeys, setInternalSelectedRowKeys] = useState<Set<string>>(new Set());
   const selectedRowKeys = controlledSelectedRowKeys ?? internalSelectedRowKeys;
@@ -98,35 +98,16 @@ export default function ProgramDataGrid<T>({
           ))}
         </div>
         <div className="grid-actions" aria-label="목록 기능">
-          {visibleActions.map((actionCode) => {
+          {toolbarActions ? toolbarActions.map((action) => <ActionButton key={action.actionCode} actionCode={action.actionCode} label={action.label} tone={action.tone} display={buttonDisplay} disabled={action.disabled} onClick={() => action.onClick({ rows, selectedRows })} />) : visibleActions.map((actionCode) => {
             const actionName = actionNames.get(actionCode) ?? actionCode;
             const iconOnly = actionCode === COMMON_ACTIONS.EXCEL_DOWNLOAD;
             return (
-              <button
-                key={actionCode}
-                type="button"
-                className={iconOnly ? 'grid-icon-button excel' : actionCode === COMMON_ACTIONS.DELETE ? 'danger-button' : 'primary-button'}
-                data-action-code={actionCode}
-                aria-label={actionName}
-                title={actionName}
-                onClick={() => actionHandlers[actionCode]?.({ rows, selectedRows })}
-              >
-                {iconOnly ? <ExcelIcon /> : actionName}
-              </button>
+              <ActionButton key={actionCode} actionCode={actionCode} label={actionName} display={iconOnly ? 'icon' : buttonDisplay} tone={actionCode === COMMON_ACTIONS.DELETE ? 'danger' : 'default'} onClick={() => actionHandlers[actionCode]?.({ rows, selectedRows })} />
             );
           })}
         </div>
       </div>
-      <DataTable
-        columns={columns}
-        rows={rows}
-        getRowKey={getRowKey}
-        emptyMessage={emptyMessage}
-        selectedRowKeys={selectable ? selectedRowKeys : undefined}
-        onSelectedRowKeysChange={selectable ? setSelectedRowKeys : undefined}
-        onRowClick={onRowClick}
-        getRowClassName={getRowClassName}
-      />
+      {renderTable({ columns, rows, getRowKey, emptyMessage, selectedRowKeys: selectable ? selectedRowKeys : undefined, onSelectedRowKeysChange: selectable ? setSelectedRowKeys : undefined, onRowClick, getRowClassName })}
     </section>
   );
 }

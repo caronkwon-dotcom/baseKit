@@ -92,6 +92,33 @@ class CoreCodeIntegrationTest {
     }
 
     @Test
+    void savesBatchAndRollsBackEveryRowWhenAnyRowFails() throws Exception {
+        String success = """
+                {"INSERTED":[
+                  {"CODE_GROUP_ID":"BATCH_TYPE_CODE","CODE_GROUP_NAME":"Batch Test","DESCRIPTION":"batch","USE_YN":"Y"}
+                ],"UPDATED":[],"DELETED":[]}
+                """;
+        mockMvc.perform(post("/api/core/codes/groups/batch")
+                        .contentType(MediaType.APPLICATION_JSON).content(success))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.DATA.INSERTED_COUNT").value(1));
+        mockMvc.perform(get("/api/core/codes/groups/BATCH_TYPE_CODE"))
+                .andExpect(status().isOk());
+
+        String invalid = """
+                {"INSERTED":[
+                  {"CODE_GROUP_ID":"BATCH_ROLLBACK_CODE","CODE_GROUP_NAME":"First","DESCRIPTION":null,"USE_YN":"Y"},
+                  {"CODE_GROUP_ID":"BATCH_ROLLBACK_CODE","CODE_GROUP_NAME":"Duplicate","DESCRIPTION":null,"USE_YN":"Y"}
+                ],"UPDATED":[],"DELETED":[]}
+                """;
+        mockMvc.perform(post("/api/core/codes/groups/batch")
+                        .contentType(MediaType.APPLICATION_JSON).content(invalid))
+                .andExpect(status().isConflict());
+        mockMvc.perform(get("/api/core/codes/groups/BATCH_ROLLBACK_CODE"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void managesMetadataDefinitionAndPersistsDynamicCodeValue() throws Exception {
         String definition = """
                 {"ATTRIBUTE_CODE":"TEST_LABEL","ATTRIBUTE_NAME":"테스트라벨",

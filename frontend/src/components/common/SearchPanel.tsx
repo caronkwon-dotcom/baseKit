@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { COMMON_ACTIONS } from '../../constants/actionCodes';
+import ActionButton from './ActionButton';
 
 export type SearchPanelRows = 1 | 2 | 3 | 4 | 5;
 export type SearchControlType = 'text' | 'select' | 'date';
@@ -28,10 +28,6 @@ interface SearchPanelProps<T extends object> {
 }
 
 const SEARCH_COLUMN_COUNT = 4;
-
-function ResetIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6" /></svg>;
-}
 
 function ChevronIcon({ expanded }: { expanded: boolean }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d={expanded ? 'm6 15 6-6 6 6' : 'm6 9 6 6 6-6'} /></svg>;
@@ -104,25 +100,9 @@ export default function SearchPanel<T extends object>({
         ) : null}
 
         <div className="search-action-rail">
-          <button
-            type="button"
-            className="search-submit-button"
-            data-action-code={COMMON_ACTIONS.SEARCH}
-            onClick={() => onSearch(value)}
-          >
-            조회
-          </button>
+          <ActionButton actionCode="SEARCH" label="조회" tone="primary" onClick={() => onSearch(value)} />
           <div className="search-icon-actions">
-            <button
-              type="button"
-              className="search-icon-button"
-              data-action-code={COMMON_ACTIONS.RESET}
-              aria-label="검색조건 초기화"
-              title="검색조건 초기화"
-              onClick={reset}
-            >
-              <ResetIcon />
-            </button>
+            <ActionButton actionCode="RESET" label="검색조건 초기화" display="icon" onClick={reset} />
             {collapsible ? (
               <button
                 type="button"
