@@ -2,6 +2,7 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import DataTable, { type DataTableColumn } from '../../../../components/common/DataTable';
 import MasterDetailMultiGrid from '../../../../components/common/MasterDetailMultiGrid';
 import PageHeader from '../../../../components/common/PageHeader';
+import SearchPanel, { type SearchFieldConfig } from '../../../../components/common/SearchPanel';
 import { schemaCatalogRepository } from '../../../../features/system/tableManage/schemaCatalog.repository';
 import { designLifecycleRepository } from '../../design-lifecycle/designLifecycle.repository';
 import type { DbColumnDefinition, DesignProject, DesignStatus, ScreenField } from '../../design-lifecycle/designLifecycle.types';
@@ -77,35 +78,64 @@ function DbColumnGrid({ rows }: { rows: DbColumnDefinition[] }) {
 
 type ProjectWorkspaceMode = 'LIST' | 'DETAIL' | 'DETAIL_EXPANDED';
 
-const projectColumns: DataTableColumn<DesignProject>[] = [
-  { key: 'id', header: 'ID', render: (project) => project.PROJECT_ID, minWidth: 95 },
-  { key: 'name', header: '프로젝트명', render: (project) => project.PROJECT_NAME, minWidth: 150, flex: 2 },
-  { key: 'customer', header: '고객명', render: (project) => project.CUSTOMER_NAME, minWidth: 110 },
-  { key: 'status', header: '상태', render: (project) => project.STATUS, width: 90, align: 'center' },
+type ProjectSearchCondition = {
+  PROJECT_NAME: string;
+  CUSTOMER_NAME: string;
+  STATUS: '' | DesignStatus;
+};
+
+const initialProjectSearchCondition: ProjectSearchCondition = {
+  PROJECT_NAME: '',
+  CUSTOMER_NAME: '',
+  STATUS: '',
+};
+
+const projectSearchFields: SearchFieldConfig<ProjectSearchCondition>[] = [
+  { key: 'PROJECT_NAME', label: '프로젝트명', placeholder: '프로젝트명 입력' },
+  { key: 'CUSTOMER_NAME', label: '고객명', placeholder: '고객명 입력' },
+  {
+    key: 'STATUS',
+    label: '상태',
+    controlType: 'select',
+    options: [
+      { value: '', label: '전체' },
+      ...STATUS.map((status) => ({ value: status, label: status })),
+    ],
+  },
 ];
+
+function matchesProjectSearch(project: DesignProject, condition: ProjectSearchCondition) {
+  const includes = (value: string, searchValue: string) => value.toLowerCase().includes(searchValue.trim().toLowerCase());
+
+  return (
+    includes(project.PROJECT_NAME, condition.PROJECT_NAME)
+    && includes(project.CUSTOMER_NAME, condition.CUSTOMER_NAME)
+    && (!condition.STATUS || project.STATUS === condition.STATUS)
+  );
+}
 
 function ProjectManagementPage() {
   const [, setRevision] = useState(0);
   const [workspaceMode, setWorkspaceMode] = useState<ProjectWorkspaceMode>('LIST');
   const [selectedProjectId, setSelectedProjectId] = useState('');
-  const [message, setMessage] = useState('프로젝트를 선택한 후 상세 열기를 선택하세요.');
+  const [searchCondition, setSearchCondition] = useState<ProjectSearchCondition>(initialProjectSearchCondition);
+  const [appliedSearchCondition, setAppliedSearchCondition] = useState<ProjectSearchCondition>(initialProjectSearchCondition);
+  const [message, setMessage] = useState('행을 선택하거나 프로젝트명을 클릭해 상세 정보를 여세요.');
   const projects = designLifecycleRepository.getData().projects;
   const selectedProject = projects.find((project) => project.PROJECT_ID === selectedProjectId);
+  const filteredProjects = projects.filter((project) => matchesProjectSearch(project, appliedSearchCondition));
   const refresh = () => setRevision((value) => value + 1);
 
   const selectProject = (project: DesignProject) => {
     setSelectedProjectId(project.PROJECT_ID);
-    setMessage(`${project.PROJECT_NAME} 프로젝트를 선택했습니다. 상세 열기로 편집을 시작하세요.`);
+    setMessage(`${project.PROJECT_NAME} 프로젝트를 선택했습니다.`);
   };
 
-  const openDetail = () => {
-    if (!selectedProject) {
-      setMessage('상세로 열 프로젝트를 먼저 선택하세요.');
-      return;
-    }
-    designLifecycleRepository.setSelectedProjectId(selectedProject.PROJECT_ID);
+  const openProjectDetail = (project: DesignProject) => {
+    setSelectedProjectId(project.PROJECT_ID);
+    designLifecycleRepository.setSelectedProjectId(project.PROJECT_ID);
     setWorkspaceMode('DETAIL');
-    setMessage(`${selectedProject.PROJECT_NAME} 프로젝트 상세 정보를 열었습니다.`);
+    setMessage(`${project.PROJECT_NAME} 프로젝트 상세 정보를 열었습니다.`);
   };
 
   const createProject = () => {
@@ -134,6 +164,25 @@ function ProjectManagementPage() {
     refresh();
   };
 
+  const returnToList = () => {
+    setWorkspaceMode('LIST');
+    setMessage('프로젝트 목록으로 돌아왔습니다. 조회 조건과 결과를 유지합니다.');
+  };
+
+  const toggleWorkspaceLayout = () => {
+    setWorkspaceMode((currentMode) => currentMode === 'DETAIL_EXPANDED' ? 'DETAIL' : 'DETAIL_EXPANDED');
+  };
+
+  const searchProjects = (condition: ProjectSearchCondition) => {
+    setAppliedSearchCondition({ ...condition });
+    setMessage(`검색 조건에 맞는 프로젝트 ${projects.filter((project) => matchesProjectSearch(project, condition)).length}건을 조회했습니다.`);
+  };
+
+  const resetSearch = (condition: ProjectSearchCondition) => {
+    setAppliedSearchCondition(condition);
+    setMessage('검색 조건을 초기화했습니다.');
+  };
+
   const deleteProject = () => {
     if (!selectedProject) {
       setMessage('삭제할 프로젝트를 먼저 선택하세요.');
@@ -143,46 +192,92 @@ function ProjectManagementPage() {
     const nextProjectId = projects.find((project) => project.PROJECT_ID !== selectedProject.PROJECT_ID)?.PROJECT_ID ?? '';
     designLifecycleRepository.deleteItem('projects', selectedProject.PROJECT_ID);
     designLifecycleRepository.setSelectedProjectId(nextProjectId);
-    setSelectedProjectId('');
+    setSelectedProjectId(nextProjectId);
     setWorkspaceMode('LIST');
     setMessage(`${selectedProject.PROJECT_NAME} 프로젝트를 삭제했습니다.`);
     refresh();
   };
 
+  const projectColumns: DataTableColumn<DesignProject>[] = [
+    { key: 'id', header: 'ID', render: (project) => project.PROJECT_ID, minWidth: 95 },
+    {
+      key: 'name',
+      header: '프로젝트명',
+      render: (project) => (
+        <button
+          type="button"
+          className="ghost-button standard-design-project-name-link"
+          title={`${project.PROJECT_NAME} 프로젝트 상세 열기`}
+          onClick={(event) => {
+            event.stopPropagation();
+            openProjectDetail(project);
+          }}
+        >
+          {project.PROJECT_NAME}
+        </button>
+      ),
+      minWidth: 150,
+      flex: 2,
+    },
+    { key: 'customer', header: '고객명', render: (project) => project.CUSTOMER_NAME, minWidth: 110 },
+    { key: 'status', header: '상태', render: (project) => project.STATUS, width: 90, align: 'center' },
+  ];
+
+  const selectedVisibleProjectKeys = filteredProjects.some((project) => project.PROJECT_ID === selectedProjectId)
+    ? new Set([selectedProjectId])
+    : new Set<string>();
+
   return <div className="page standard-design-page standard-design-lifecycle-page standard-design-project-page">
     <PageHeader breadcrumbs={['Standard Design', '프로젝트 관리']} description="프로젝트 목록에서 상세를 열어 설계 Lifecycle의 Project Context를 관리합니다." />
     <section className="standard-design-lifecycle-toolbar" aria-label="프로젝트 관리 기능">
       <span className="standard-design-project-context">Project Context: <strong>{designLifecycleRepository.getData().projects.find((project) => project.PROJECT_ID === designLifecycleRepository.getSelectedProjectId())?.PROJECT_NAME ?? '프로젝트 없음'}</strong></span>
-      <div className="standard-design-lifecycle-actions">
-        <button type="button" className="secondary-button" data-action-code="SEARCH" onClick={() => { refresh(); setMessage('프로젝트 목록을 조회했습니다.'); }}>조회</button>
-        <button type="button" className="secondary-button" onClick={openDetail}>상세 열기</button>
-        <button type="button" className="primary-button" data-action-code="CREATE" onClick={createProject}>등록</button>
-        <button type="submit" form="project-detail-form" className="primary-button" data-action-code="UPDATE" disabled={workspaceMode === 'LIST'}>저장</button>
-        <button type="button" className="danger-button" data-action-code="DELETE" onClick={deleteProject}>삭제</button>
+      <div className="standard-design-lifecycle-actions standard-design-project-crud-actions">
+        {workspaceMode === 'LIST' ? (
+          <button type="button" className="primary-button" data-action-code="CREATE" onClick={createProject}>신규</button>
+        ) : (
+          <>
+            <button type="button" className="secondary-button" onClick={returnToList}>목록으로</button>
+            <button type="submit" form="project-detail-form" className="primary-button" data-action-code="UPDATE">저장</button>
+            <button type="button" className="danger-button" data-action-code="DELETE" onClick={deleteProject} disabled={!selectedProject}>삭제</button>
+          </>
+        )}
       </div>
     </section>
     <section className={`standard-design-project-workspace project-list-detail-workspace project-list-detail-workspace--${workspaceMode}`} aria-label="프로젝트 목록 및 상세">
       <section className="project-list-detail-workspace__list">
+        {workspaceMode === 'LIST' ? (
+          <SearchPanel
+            rows={1}
+            fields={projectSearchFields}
+            value={searchCondition}
+            initialValue={initialProjectSearchCondition}
+            onValueChange={setSearchCondition}
+            onSearch={searchProjects}
+            onReset={resetSearch}
+          />
+        ) : null}
         <DataTable
-          title={`프로젝트 목록 (${projects.length}건)`}
+          title={`프로젝트 목록 (${filteredProjects.length}건)`}
           columns={projectColumns}
-          rows={projects}
+          rows={filteredProjects}
           getRowKey={(project) => project.PROJECT_ID}
           onRowClick={selectProject}
-          selectedRowKeys={selectedProjectId ? new Set([selectedProjectId]) : new Set()}
+          selectedRowKeys={selectedVisibleProjectKeys}
           onSelectedRowKeysChange={(keys) => {
-            const project = projects.find((candidate) => candidate.PROJECT_ID === [...keys][0]);
+            const project = filteredProjects.find((candidate) => candidate.PROJECT_ID === [...keys][0]);
             if (project) selectProject(project);
             else setSelectedProjectId('');
           }}
-          emptyMessage="등록된 프로젝트가 없습니다."
+          emptyMessage="검색 조건에 맞는 프로젝트가 없습니다."
         />
       </section>
       {workspaceMode !== 'LIST' ? <section className="project-list-detail-workspace__detail">
         <form id="project-detail-form" key={selectedProjectId || 'new'} className="standard-design-lifecycle-form standard-design-project-form" onSubmit={saveProject}>
           <div className="standard-design-project-detail-heading">
             <div><h2>{selectedProject ? '프로젝트 상세' : '신규 등록'}</h2><p>{selectedProject ? '프로젝트 기본정보를 수정할 수 있습니다.' : '저장 시 프로젝트 ID가 자동으로 부여됩니다.'}</p></div>
-            <button type="button" className="secondary-button" onClick={() => setWorkspaceMode(workspaceMode === 'DETAIL' ? 'DETAIL_EXPANDED' : 'DETAIL')}>{workspaceMode === 'DETAIL' ? '목록 접기' : '목록 펼치기'}</button>
+            <div className="standard-design-project-layout-control" aria-label="목록 레이아웃 제어">
+              <button type="button" className="secondary-button" onClick={toggleWorkspaceLayout}>{workspaceMode === 'DETAIL' ? '목록 접기' : '목록 펼치기'}</button>
+            </div>
           </div>
           <div className="standard-design-project-fields">
             <label><span>프로젝트 ID</span><input value={selectedProject?.PROJECT_ID ?? '저장 시 자동 부여'} readOnly /></label>
