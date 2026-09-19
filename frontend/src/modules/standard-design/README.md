@@ -23,6 +23,13 @@ Standard Design은 BaseKit Core 관리기능이 아니라 BaseKit 공통 계약�
 
 현재 단계에서는 Domain Skeleton을 과도하게 세분화하지 않는다. 실제 Schema와 Use Case가 정의될 때 Module 내부에 필요한 폴더만 추가한다.
 
+## 프로젝트 관리 Reference UX
+
+- 프로젝트 관리만 `LIST 100% → 기본 30/70 List-Detail → Detail 100%` 작업 흐름을 제공한다.
+- Module 내부 `ui/components/ProjectListDetailWorkspace.tsx`가 pointer·keyboard splitter와 목록 접기/펼치기를 담당한다. 현재 BaseKit Core에는 공통 List-Detail workspace가 없으므로, 반복 적용 전에는 이 구성요소를 공통화하지 않는다.
+- 프로젝트명·고객명·상태의 입력 조건과 적용 조건, 조회 결과와 선택은 상세 진입·목록 접기/펼치기·목록 복귀 동안 유지한다.
+- `복사`는 SIMPLE_COPY이며 프로젝트명, 고객명, 설명, 상태만 새 초안에 복사한다. ID와 관계 데이터는 복사하지 않으며 저장이 새 프로젝트를 생성한다. DEEP_COPY 정책은 [ADR 029](../../../docs/decisions/029-project-management-reference-ui.md)를 따른다.
+
 ## 표준용어집 경계
 
 - `SD_TERM_GLOSSARY`는 `common-standard-terms-20251101.csv`를 Backend read-only Adapter로 조회한다.
