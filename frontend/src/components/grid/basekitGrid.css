@@ -4,7 +4,7 @@
 .basekit-ag-grid .ag-row.active-master-row { background: var(--brand-soft); }
 .basekit-ag-grid .ag-row.grid-dirty-row { box-shadow: inset 3px 0 #94a3b8; background: var(--surface-muted); }
 .basekit-ag-grid .ag-row.grid-deleted-row { opacity: .5; text-decoration: line-through; }
-.basekit-ag-grid .ag-row.grid-deleted-row .ag-cell:first-of-type::before { content: '삭제 예정'; margin-right: 5px; color: var(--action-danger); font-size: 10px; text-decoration: none; }
+.basekit-ag-grid .ag-row.grid-deleted-row .ag-cell:first-of-type::before { content: '삭제 예정'; margin-right: 5px; color: var(--action-danger-text); font-size: 10px; text-decoration: none; }
 .basekit-ag-grid .basekit-grid-cell-right { text-align: right; }
 .basekit-ag-grid .basekit-grid-cell-center { text-align: center; }
 .basekit-ag-grid .ag-header-cell-text { font-weight: 600; }

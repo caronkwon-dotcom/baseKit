@@ -34,6 +34,8 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - 공통코드 그룹별 동적 업무속성 기반: DATA/CONTROL/DISPLAY TYPE 분리, `BSYCADF` 정의·`BSYCAVL` 값, `FieldDefinition` Adapter와 공유 Metadata Grid/Form Renderer
 - 공통 Master-Detail Multi-Grid 표준: 40:60 좌우 분할, Detail 38:62 상하 분할, 가용 Workspace 높이 기반 Grid와 고정 Message Area
 - 공통 ActionButton: 동일 Action Code를 Icon + Text 또는 Icon Only로 렌더링하고, neutral compact token을 사용
+- 공통 ActionButton 개인화: `UiPreferences` Adapter/Provider 기반 `ICON_TEXT`·`ICON_ONLY` 즉시 반영과 LocalStorage 유지, Skin Accent Save/Search/Danger semantic token
+- 공통 `BaseKitMessage`: INFO/WARN/ERROR/SUCCESS 상태를 공통 icon·semantic token으로 표시하고 공통코드관리 32px 하단 Message Area에 적용
 - 공통코드관리 AG Grid Inline Batch CRUD 1차: 코드그룹·속성정의·공통코드의 INSERTED/UPDATED/DELETED 상태 추적, 삭제 예정 표시와 배치 트랜잭션 저장 API
 
 - React + Vite + TypeScript
