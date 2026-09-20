@@ -7,6 +7,27 @@ export type ProjectSearchCondition = {
 };
 
 export type ProjectEditorMode = 'EDIT' | 'NEW' | 'COPY';
+
+export interface ProjectSearchResult {
+  condition: ProjectSearchCondition;
+  rows: DesignProject[];
+}
+
+export const emptyProjectSearchCondition: ProjectSearchCondition = {
+  PROJECT_NAME: '', CUSTOMER_NAME: '', STATUS: '',
+};
+
+/** Keep the executed query and its entire result together, apart from draft inputs. */
+export function searchProjectSnapshot(projects: DesignProject[], condition: ProjectSearchCondition): ProjectSearchResult {
+  return { condition: { ...condition }, rows: filterProjects(projects, condition).map((project) => ({ ...project })) };
+}
+
+/** Editing must not silently re-filter the user's current working set. */
+export function saveToProjectWorkingSet(rows: DesignProject[], saved: DesignProject): DesignProject[] {
+  return rows.some((project) => project.PROJECT_ID === saved.PROJECT_ID)
+    ? rows.map((project) => project.PROJECT_ID === saved.PROJECT_ID ? saved : project)
+    : [...rows, saved];
+}
 export type ProjectMessageTone = 'info' | 'warning' | 'error' | 'success';
 
 export interface ProjectDraft {

@@ -287,3 +287,7 @@ Standard Design의 `Screen Design Schema v0.1`을 정의하되 상세 UI 구현 
 - 미구현 아이디어는 구현·설계 완료 항목과 섞지 않고 `docs/ideas/`에서 상태별로 관리한다.
 - 아이디어가 승인되면 관련 ADR, Architecture 문서와 WBS로 이동한다.
 - 주간 작업 종료 시 완료 내용, 남은 문제, 다음 주 목표를 갱신한다.
+
+## Project Working Set 후속 검수 (2026-09-20)
+
+`feature/project-working-set-search`에서 `fe55992` 기반 후속 초안 `5bef92f`를 보존하고 Mini Search/Working Set 개선을 마무리했다. 이번 변경은 dev-pm 미통합이다. 중복 context 제거, 좌우 action 분리, 조회 스냅샷 유지, FormModal 재사용, 상세 저장 후 작업 집합 유지가 구현됐다. build/lint, Project 회귀 9개, grid assertion 18개, backend 22개 통과. 실제 UI 주요 흐름 확인; 삭제 확인창 이후 브라우저 제어 제한과 미검증 오류 주입 범위는 [인계 보고서](project-reference-handoff.md)에 기록했다.

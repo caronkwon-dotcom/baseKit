@@ -27,7 +27,8 @@ Standard Design은 BaseKit Core 관리기능이 아니라 BaseKit 공통 계약�
 
 - 프로젝트 관리만 `LIST 100% → 기본 30/70 List-Detail → Detail 100%` 작업 흐름을 제공한다.
 - Module 내부 `ui/components/ProjectListDetailWorkspace.tsx`가 pointer·keyboard splitter와 목록 접기/펼치기를 담당한다. 현재 BaseKit Core에는 공통 List-Detail workspace가 없으므로, 반복 적용 전에는 이 구성요소를 공통화하지 않는다.
-- 프로젝트명·고객명·상태의 입력 조건과 적용 조건, 조회 결과와 선택은 상세 진입·목록 접기/펼치기·목록 복귀 동안 유지한다.
+- 프로젝트명·고객명·상태의 입력 조건과 적용 조건, Working Set과 선택은 상세 진입·목록 접기/펼치기·목록 복귀 동안 유지한다. 상세 왼쪽 검색은 FormModal/SearchPanel/DataTable 기반 Mini Search를 열고 결과 선택 시 조회 결과 전체를 교체한다. 조회 후 입력만 바꾸어도 실행 결과의 조건을 보존한다.
+- 저장은 기존 Working Set 항목을 갱신하거나 새 저장 항목만 추가한다. 조건에 맞지 않게 수정해도 재조회 전까지 작업 목록에서 제거하지 않는다.
 - `복사`는 SIMPLE_COPY이며 프로젝트명, 고객명, 설명, 상태만 새 초안에 복사한다. ID와 관계 데이터는 복사하지 않으며 저장이 새 프로젝트를 생성한다. DEEP_COPY 정책은 [ADR 029](../../../docs/decisions/029-project-management-reference-ui.md)를 따른다.
 
 ## 표준용어집 경계
