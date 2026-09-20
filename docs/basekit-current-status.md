@@ -293,3 +293,5 @@ Standard Design의 `Screen Design Schema v0.1`을 정의하되 상세 UI 구현 
 ## Project Working Set 후속 검수 (2026-09-20)
 
 `feature/project-working-set-search`에서 `fe55992` 기반 후속 초안 `5bef92f`를 보존하고 Mini Search/Working Set 개선을 마무리했다. 이번 변경은 dev-pm 미통합이다. 중복 context 제거, 좌우 action 분리, 조회 스냅샷 유지, FormModal 재사용, 상세 저장 후 작업 집합 유지가 구현됐다. build/lint, Project 회귀 9개, grid assertion 18개, backend 22개 통과. 실제 UI 주요 흐름 확인; 삭제 확인창 이후 브라우저 제어 제한과 미검증 오류 주입 범위는 [인계 보고서](project-reference-handoff.md)에 기록했다.
+
+Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 dev-pm 통합한다. 공통 버튼 설정 79f224b를 보존하여 함께 검증했으며 UI 미확인 범위는 인계 보고서를 따른다.

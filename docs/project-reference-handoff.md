@@ -100,3 +100,7 @@ Project 전용 페이지 분기, module scoped CSS, module 내부 workspace/정�
 - git diff --check 통과.
 - 변경: Project 페이지, scoped CSS, ProjectSearchDialog, projectReference 정책 함수, 회귀 테스트, ADR029/module README/current-status/본 보고서. Backend/DB/Core/다른 Lifecycle 화면 변경 없음.
 - 이번 후속 작업은 feature commit/push까지만 수행한다. dev-pm merge/push는 수행하지 않는다.
+
+## 후속 병합 승인 (2026-09-20)
+
+사용자가 dev-pm 병합을 명시적으로 승인했다. 검증된 ddb2ac6과 동시에 추가된 dev-pm의 79f224b(공통 버튼 설정)를 feature에서 충돌 없이 통합했다. 위 미통합/병합 금지 문구는 승인 전 이력이며, 이번 승인에 따라 dev-pm 병합 및 push를 진행한다. 이전 UI 미검증 항목은 그대로 남는다.
