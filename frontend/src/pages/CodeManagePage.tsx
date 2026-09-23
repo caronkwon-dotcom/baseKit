@@ -110,7 +110,10 @@ export default function CodeManagePage() {
     return () => window.removeEventListener('beforeunload', guard);
   }, [attributes.dirty, codes.dirty, groups.dirty]);
 
-  const rowClass = <T,>(state: (row: TrackedGridRow<T>) => string) => (row: TrackedGridRow<T>) => state(row) === 'DELETED' ? 'grid-deleted-row' : state(row) === 'NORMAL' ? '' : 'grid-dirty-row';
+  const rowClass = <T,>(state: (row: TrackedGridRow<T>) => string) => (row: TrackedGridRow<T>) => {
+    const rowState = state(row);
+    return rowState === 'INSERTED' ? 'grid-inserted-row' : rowState === 'UPDATED' ? 'grid-updated-row' : rowState === 'DELETED' ? 'grid-deleted-row' : '';
+  };
   const selectGroup = (row: TrackedGridRow<CodeGroup>) => {
     if (!row.CODE_GROUP_ID || row.CODE_GROUP_ID === selectedGroupId) return;
     if ((attributes.dirty || codes.dirty) && !window.confirm('미저장 변경사항이 사라집니다. 계속하시겠습니까?')) return;

@@ -61,7 +61,7 @@ function EditingPoc() {
     </div>
     <MetadataAgGrid programKey="COMMON_CODE_MGMT" roleCode="POC_VIEWER" title="편집 검증" selectable={false}
       baseColumns={columns} fields={fields} rows={draft} getRowKey={row => row.CODE_ID} getFieldValue={(row, field) => row.ATTRIBUTE_VALUES?.[field.key]}
-      getRowClassName={row => dirty.has(row.CODE_ID) ? 'grid-dirty-row' : ''}
+      getRowClassName={row => dirty.has(row.CODE_ID) ? 'grid-updated-row' : ''}
       editing={{ mode, keys: ['CODE_NAME', 'SORT_ORDER', ...fields.map(field => `ATTRIBUTE_${field.key}`)], onChange: (row, key, value) => {
         if (key === 'CODE_NAME' && !value.trim()) { setMessage('검증 실패: 코드명은 필수입니다.'); return; }
         if (key === 'SORT_ORDER' && (!value.trim() || !Number.isFinite(Number(value)))) { setMessage('검증 실패: 정렬은 숫자입니다.'); return; }

@@ -4,6 +4,7 @@ import { AllCommunityModule, themeQuartz, type ColDef, type EditableCallbackPara
 import ProgramDataGrid, { type ProgramDataGridProps } from '../common/ProgramDataGrid';
 import type { DataTableProps } from '../common/DataTable';
 import type { FieldDefinition } from '../metadata/fieldDefinition';
+import { renderMetadataValue } from './gridColumnAdapter';
 import './basekitGrid.css';
 
 const theme = themeQuartz.withParams({
@@ -34,11 +35,16 @@ function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRo
       flex: column.width ? undefined : column.flex ?? 1,
       valueGetter: (params: ValueGetterParams<T>) => params.data ? String((params.data as Record<string, unknown>)[column.key] ?? '') : '',
       cellRenderer: (params: ICellRendererParams<T>) => params.data ? column.render(params.data) : null,
+      headerClass: editing?.keys.includes(column.key) ? 'basekit-editable-header' : undefined,
+      cellClass: (params: EditableCallbackParams<T>) => params.data && editing?.keys.includes(column.key) && (editing.isEditable?.(params.data, column.key) ?? true) ? 'basekit-editable-cell' : '',
       editable: (params: EditableCallbackParams<T>) => Boolean(params.data && editing?.keys.includes(column.key) && (editing.isEditable?.(params.data, column.key) ?? true)),
     })),
     ...fields.map((field) => ({
       colId: `ATTRIBUTE_${field.key}`, headerName: field.label, flex: 1, minWidth: 100,
       valueGetter: (params: ValueGetterParams<T>) => params.data ? getFieldValue?.(params.data, field) ?? '' : '',
+      headerClass: editing?.keys.includes(`ATTRIBUTE_${field.key}`) ? 'basekit-editable-header' : undefined,
+      cellClass: (params: EditableCallbackParams<T>) => params.data && editing?.keys.includes(`ATTRIBUTE_${field.key}`) && (editing.isEditable?.(params.data, `ATTRIBUTE_${field.key}`) ?? true) ? `basekit-editable-cell basekit-grid-cell-${field.dataType === 'NUMBER' ? 'right' : field.dataType === 'BOOLEAN' ? 'center' : 'left'}` : `basekit-grid-cell-${field.dataType === 'NUMBER' ? 'right' : field.dataType === 'BOOLEAN' ? 'center' : 'left'}`,
+      cellRenderer: (params: ICellRendererParams<T>) => renderMetadataValue(params.value == null ? '' : String(params.value), field),
       editable: (params: EditableCallbackParams<T>) => Boolean(params.data && editing?.keys.includes(`ATTRIBUTE_${field.key}`) && (editing.isEditable?.(params.data, `ATTRIBUTE_${field.key}`) ?? true)),
       cellEditor: field.controlType === 'SELECT' ? 'agSelectCellEditor' : field.dataType === 'NUMBER' ? 'agNumberCellEditor' : field.dataType === 'BOOLEAN' ? 'agCheckboxCellEditor' : field.dataType === 'DATE' ? 'agDateStringCellEditor' : 'agTextCellEditor',
       cellEditorParams: field.controlType === 'SELECT' ? { values: field.options?.map((option) => option.value) ?? [] } : undefined,
@@ -47,12 +53,18 @@ function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRo
 
   useEffect(() => {
     apiRef.current?.forEachNode((node) => node.setSelected(Boolean(node.data && selectedRowKeys?.has(getRowKey(node.data)))));
+    apiRef.current?.redrawRows();
   }, [getRowKey, rows, selectedRowKeys]);
+
+  useEffect(() => {
+    apiRef.current?.redrawRows();
+  }, [currentRowKey]);
 
   return <div className="data-section"><div className="basekit-ag-grid"><AgGridReact<T>
     modules={[AllCommunityModule]} theme={theme} rowData={rows} columnDefs={columnDefs} loading={loading}
-    onGridReady={(event) => { apiRef.current = event.api; }}
+    onGridReady={(event) => { apiRef.current = event.api; event.api.redrawRows(); }}
     getRowId={(params) => getRowKey(params.data)}
+    suppressRowClickSelection
     rowSelection={{ mode: 'multiRow', enableClickSelection: false, headerCheckbox: true }}
     onSelectionChanged={(event) => onSelectedRowKeysChange?.(new Set(event.api.getSelectedRows().map(getRowKey)))}
     onRowClicked={(event) => event.data && onRowClick?.(event.data)}

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { BUTTON_DISPLAY_MODES, EDITABLE_THEME_TOKENS, SKINS, type ButtonDisplayMode, type ThemeToken } from '../preferences/uiPreferences';
 import { useUiPreferences } from '../preferences/useUiPreferences';
+import { useOutsideClick } from '../hooks/useOutsideClick';
 
 function applyColors(colors: Record<ThemeToken, string>) {
   EDITABLE_THEME_TOKENS.forEach(({ key }) => document.documentElement.style.setProperty(key, colors[key]));
@@ -13,8 +14,11 @@ const buttonModeLabels: Record<ButtonDisplayMode, string> = {
 
 export default function ThemeSkinPicker() {
   const [open, setOpen] = useState(false);
+  const areaRef = useRef<HTMLDivElement>(null);
   const { preferences, updatePreferences } = useUiPreferences();
   const { skinId, colors, buttonDisplayMode } = preferences;
+  const close = useCallback(() => setOpen(false), []);
+  useOutsideClick(areaRef, close, open);
 
   useEffect(() => {
     applyColors(colors);
@@ -31,7 +35,7 @@ export default function ThemeSkinPicker() {
   const createCustomSkin = () => updatePreferences({ skinId: 'custom' });
 
   return (
-    <div className="theme-skin-area">
+    <div className="theme-skin-area" ref={areaRef}>
       <button type="button" className="shell-icon-button theme-button" aria-label="화면 스킨 변경" title="화면 스킨 변경" aria-expanded={open} onClick={() => setOpen((value) => !value)}><i aria-hidden="true" />스킨</button>
       {open && (
         <section className="theme-skin-popover" aria-label="화면 개인화 설정">

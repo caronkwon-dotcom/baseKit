@@ -104,7 +104,7 @@ export default function SearchPanel<T extends object>({
         <div className="search-action-rail">
           <ActionButton actionCode="SEARCH" display={actionDisplay} label="조회" tone="primary" onClick={() => onSearch(value)} />
           <div className="search-icon-actions">
-            <ActionButton actionCode="RESET" label={actionDisplay === 'label' ? '초기화' : '검색조건 초기화'} display={actionDisplay ?? 'icon'} onClick={reset} />
+            <ActionButton actionCode="RESET" label="초기화" display={actionDisplay} onClick={reset} />
             {collapsible ? (
               <button
                 type="button"
