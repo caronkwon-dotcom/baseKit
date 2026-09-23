@@ -14,7 +14,7 @@ import {
 } from '../components/projectReference';
 import ProjectListDetailWorkspace, { type ProjectWorkspaceMode } from '../components/ProjectListDetailWorkspace';
 import ProjectMemberDialog from '../components/ProjectMemberDialog';
-import ProjectContextSelector from '../components/ProjectContextSelector';
+import ProjectContextSelector, { ProjectContextDialog } from '../components/ProjectContextSelector';
 import { validateProjectDates } from '../components/projectContext';
 import { useProjectContext } from '../components/useProjectContext';
 
@@ -136,7 +136,7 @@ function ProjectManagementPage() {
   const [appliedCondition, setAppliedCondition] = useState<ProjectSearchCondition>(initialProjectSearchCondition);
   const [editor, setEditor] = useState<ProjectEditor | null>(null);
   const [message, setMessage] = useState<ProjectMessage | null>(null);
-  const [projectSearchOpen, setProjectSearchOpen] = useState(false);
+  const [projectSearchDialogOpen, setProjectSearchDialogOpen] = useState(false);
   const [memberDialogOpen, setMemberDialogOpen] = useState(false);
   const [editingProjectMember, setEditingProjectMember] = useState<ProjectMember | undefined>();
   const [selectedProjectMemberId, setSelectedProjectMemberId] = useState('');
@@ -160,9 +160,9 @@ function ProjectManagementPage() {
     if (editor?.mode === 'EDIT' && editor.sourceProjectId === project.PROJECT_ID) {
       setSelectedProjectId(project.PROJECT_ID);
       setWorkspaceMode('DETAIL');
-      return;
+      return true;
     }
-    if (!confirmDiscardChanges()) return;
+    if (!confirmDiscardChanges()) return false;
 
     const draft = toProjectDraft(project);
     setSelectedProjectId(project.PROJECT_ID);
@@ -171,6 +171,7 @@ function ProjectManagementPage() {
     setSelectedProjectMemberId('');
     setWorkspaceMode('DETAIL');
     setMessage(null);
+    return true;
   };
 
   const selectProject = (project: DesignProject) => {
@@ -200,15 +201,6 @@ function ProjectManagementPage() {
     setEditor({ mode: 'COPY', initialDraft: draft, draft });
     setSelectedProjectMemberId('');
     setWorkspaceMode('DETAIL');
-    setMessage(null);
-  };
-
-  const returnToList = () => {
-    if (!confirmDiscardChanges()) return;
-
-    setEditor(null);
-    setSelectedProjectMemberId('');
-    setWorkspaceMode('LIST');
     setMessage(null);
   };
 
@@ -339,23 +331,25 @@ function ProjectManagementPage() {
     : editor?.mode === 'COPY'
       ? '프로젝트명, 고객명, 설명, 상태만 복사했습니다. 저장 시 새 프로젝트가 생성됩니다.'
       : '저장 시 새 프로젝트 ID가 생성됩니다.';
+  const projectHeaderActions = workspaceMode === 'LIST' ? (
+    <div className="standard-design-header-actions" aria-label="프로젝트 목록 기능">
+      <ActionButton display="label" actionCode="CREATE" label="신규" tone="primary" onClick={createProject} />
+    </div>
+  ) : editor ? (
+    <div className="standard-design-header-actions" aria-label="프로젝트 상세 기능">
+      <ActionButton display="label" actionCode="CREATE" label="신규" tone="primary" onClick={createProject} />
+      <ActionButton display="label" actionCode="CREATE" label="복사" onClick={copyProject} disabled={!activeProject} />
+      <button type="submit" form="project-detail-form" className="primary-button" data-action-code={editor.mode === 'EDIT' ? 'UPDATE' : 'CREATE'}>저장</button>
+      <ActionButton display="label" actionCode="DELETE" label="삭제" tone="danger" onClick={deleteProject} disabled={!activeProject} />
+    </div>
+  ) : null;
   return <div className="page standard-design-page standard-design-lifecycle-page standard-design-project-page">
-    <PageHeader breadcrumbs={['Standard Design', '프로젝트 관리']} />
+    <PageHeader breadcrumbs={['Standard Design', '프로젝트 관리']} rightContent={projectHeaderActions} />
     <ProjectListDetailWorkspace
       mode={workspaceMode}
       onModeChange={setWorkspaceMode}
       list={<div className="project-list-detail-workspace__list-content" data-applied-search={getAppliedSearchDescription(appliedCondition)}>
-        <div className="project-list-pane-actions">
-          {workspaceMode === 'LIST' ? (
-            <ActionButton display="label" actionCode="CREATE" label="신규" tone="primary" onClick={createProject} />
-          ) : (
-            <>
-              <button type="button" className="secondary-button" aria-expanded={projectSearchOpen} aria-controls="project-inline-search" onClick={() => setProjectSearchOpen((open) => !open)}>검색</button>
-              <button type="button" className="secondary-button" onClick={returnToList}>목록으로</button>
-            </>
-          )}
-        </div>
-        {workspaceMode === 'LIST' || projectSearchOpen ? (
+        {workspaceMode === 'LIST' ? (
           <div id="project-inline-search" className="project-inline-search" onKeyDown={(event) => {
             if (event.key === 'Enter' && event.target instanceof HTMLInputElement && !event.nativeEvent.isComposing) {
               event.preventDefault();
@@ -374,8 +368,12 @@ function ProjectManagementPage() {
           />
           </div>
         ) : null}
+        {workspaceMode !== 'LIST' ? <div className="project-master-heading">
+          <h2>프로젝트 목록 <span>({workingSet.length}건)</span></h2>
+          <button type="button" className="secondary-button" onClick={() => setProjectSearchDialogOpen(true)}>검색</button>
+        </div> : null}
         <DataTable
-          title={`프로젝트 목록 (${workingSet.length}건)`}
+          title={workspaceMode === 'LIST' ? `프로젝트 목록 (${workingSet.length}건)` : undefined}
           columns={projectColumns}
           rows={workingSet}
           getRowKey={(project) => project.PROJECT_ID}
@@ -386,12 +384,6 @@ function ProjectManagementPage() {
       </div>}
       detail={editor ? (
         <>
-          <div className="standard-design-project-detail-actions" aria-label="프로젝트 상세 기능">
-            <ActionButton display="label" actionCode="CREATE" label="신규" tone="primary" onClick={createProject} />
-            <ActionButton display="label" actionCode="CREATE" label="복사" onClick={copyProject} disabled={!activeProject} />
-            <button type="submit" form="project-detail-form" className="primary-button" data-action-code={editor.mode === 'EDIT' ? 'UPDATE' : 'CREATE'}>저장</button>
-            <ActionButton display="label" actionCode="DELETE" label="삭제" tone="danger" onClick={deleteProject} disabled={!activeProject} />
-          </div>
         <form id="project-detail-form" className="standard-design-lifecycle-form standard-design-project-form" noValidate onSubmit={saveProject}>
           <div className="standard-design-project-detail-heading">
             <div>
@@ -411,10 +403,10 @@ function ProjectManagementPage() {
           <div className="standard-design-project-fields">
             <label><span>프로젝트명</span><input name="PROJECT_NAME" required value={editor.draft.PROJECT_NAME} onChange={(event) => updateDraft('PROJECT_NAME', event.target.value)} /></label>
             <label><span>고객명</span><input name="CUSTOMER_NAME" required value={editor.draft.CUSTOMER_NAME} onChange={(event) => updateDraft('CUSTOMER_NAME', event.target.value)} /></label>
+            <label><span>상태</span><select name="STATUS" value={editor.draft.STATUS} onChange={(event) => updateDraft('STATUS', event.target.value as DesignStatus)}>{STATUS.map((status) => <option key={status}>{status}</option>)}</select></label>
             <label><span>시작일</span><input name="START_DATE" type="date" required value={editor.draft.START_DATE} onChange={(event) => updateDraft('START_DATE', event.target.value)} /></label>
             <label><span>종료일</span><input name="END_DATE" type="date" required value={editor.draft.END_DATE} onChange={(event) => updateDraft('END_DATE', event.target.value)} /></label>
-            <label><span>상태</span><select name="STATUS" value={editor.draft.STATUS} onChange={(event) => updateDraft('STATUS', event.target.value as DesignStatus)}>{STATUS.map((status) => <option key={status}>{status}</option>)}</select></label>
-            <label className="standard-design-project-description"><span>설명</span><textarea name="DESCRIPTION" rows={5} value={editor.draft.DESCRIPTION} onChange={(event) => updateDraft('DESCRIPTION', event.target.value)} /></label>
+            <label className="standard-design-project-description"><span>설명</span><textarea name="DESCRIPTION" rows={2} value={editor.draft.DESCRIPTION} onChange={(event) => updateDraft('DESCRIPTION', event.target.value)} /></label>
           </div>
         </form>
         {editor.mode === 'EDIT' && activeProject ? <section className="sd-project-member-section" aria-label="프로젝트 멤버 관리">
@@ -443,6 +435,18 @@ function ProjectManagementPage() {
       ) : null}
     />
     {message ? <ProjectMessageBanner message={message} /> : null}
+    {projectSearchDialogOpen ? <ProjectContextDialog
+      title="프로젝트 검색"
+      initialCondition={appliedCondition}
+      onClose={() => setProjectSearchDialogOpen(false)}
+      onSelected={(project, result) => {
+        if (!openProjectDetail(project)) return false;
+        setSearchCondition(result.condition);
+        setAppliedCondition(result.condition);
+        setWorkingSet(result.rows);
+        return true;
+      }}
+    /> : null}
     {memberDialogOpen && activeProject ? <ProjectMemberDialog project={activeProject}
       members={designLifecycleRepository.getData().members} assignments={projectMembers} editing={editingProjectMember}
       onClose={() => setMemberDialogOpen(false)} onSave={(member: DesignMember, assignment) => {
@@ -527,7 +531,7 @@ function LifecycleDetailPage({ view, supplement }: { view: LifecycleView; supple
         : <section className="standard-design-lifecycle-guide"><h2>{view === 'wbs' ? '계층 WBS' : '상세 정보'}</h2><p>{view === 'wbs' ? '상위 WBS와 레벨을 지정하면 프로젝트 범위 안에서 계층 구조를 관리합니다.' : '목록에서 대상을 선택하면 관련 상세 정보가 표시됩니다.'}</p>{supplement}</section>;
 
   return <div className="page standard-design-page standard-design-lifecycle-page">
-    <PageHeader breadcrumbs={['Standard Design', labels[view]]} description="프로젝트 Context를 유지하며 설계 산출물과 요구사항 추적성을 관리합니다." rightContent={['wbs', 'requirements', 'screens', 'database'].includes(view) ? <div className="standard-design-header-actions"><ProjectContextSelector /><div className="standard-design-lifecycle-actions" aria-label={`${labels[view]} 기능`}><button type="button" className="secondary-button" data-action-code="SEARCH" onClick={() => { refresh(); setMessage('목록을 조회했습니다.'); }}>조회</button><button type="button" className="primary-button" data-action-code="CREATE" onClick={create}>등록</button><button type="submit" form="lifecycle-detail-form" className="primary-button" data-action-code="UPDATE">저장</button><button type="button" className="danger-button" data-action-code="DELETE" onClick={remove}>삭제</button></div></div> : null} />
+    <PageHeader breadcrumbs={['Standard Design', labels[view]]} rightContent={['wbs', 'requirements', 'screens', 'database'].includes(view) ? <div className="standard-design-header-actions"><ProjectContextSelector /><div className="standard-design-lifecycle-actions" aria-label={`${labels[view]} 기능`}><button type="button" className="secondary-button" data-action-code="SEARCH" onClick={() => { refresh(); setMessage('목록을 조회했습니다.'); }}>조회</button><button type="button" className="primary-button" data-action-code="CREATE" onClick={create}>등록</button><button type="submit" form="lifecycle-detail-form" className="primary-button" data-action-code="UPDATE">저장</button><button type="button" className="danger-button" data-action-code="DELETE" onClick={remove}>삭제</button></div></div> : null} />
     <MasterDetailMultiGrid
       master={<DataTable title={`${labels[view]} 목록 (${rows.length}건)`} columns={columns} rows={rows} getRowKey={itemId} onRowClick={(item) => { setSelectedId(itemId(item)); setMessage(`${itemName(item)} 상세 정보를 불러왔습니다.`); }} selectedRowKeys={selectedId ? new Set([selectedId]) : new Set()} onSelectedRowKeysChange={(keys) => setSelectedId([...keys][0] ?? '')} emptyMessage="현재 Project Context에 등록된 항목이 없습니다." />}
       detailTop={<form id="lifecycle-detail-form" key={selectedId || 'new'} className="standard-design-lifecycle-form" onSubmit={save}><h2>{selected ? '상세 수정' : '신규 등록'}</h2><label>명칭<input name="NAME" required defaultValue={selected ? itemName(selected) : ''} /></label>{view === 'overview' ? <label>고객명<input name="CUSTOMER_NAME" required defaultValue={selected && 'CUSTOMER_NAME' in selected ? selected.CUSTOMER_NAME : ''} /></label> : null}{view === 'wbs' ? <><label>상위 WBS<select name="PARENT_WBS_ID" defaultValue={selected && 'PARENT_WBS_ID' in selected ? selected.PARENT_WBS_ID ?? '' : ''}><option value="">없음</option>{relatedWbs.filter((item) => item.WBS_ID !== selectedId).map((item) => <option key={item.WBS_ID} value={item.WBS_ID}>{item.WBS_NAME}</option>)}</select></label><label>레벨<input name="WBS_LEVEL" type="number" min="1" required defaultValue={selected && 'WBS_LEVEL' in selected ? selected.WBS_LEVEL : 1} /></label></> : null}{view === 'screens' ? <label>화면 유형<select name="SCREEN_TYPE" defaultValue={selected && 'SCREEN_TYPE' in selected ? selected.SCREEN_TYPE : 'LIST'}><option>LIST</option><option>DETAIL</option><option>POPUP</option></select></label> : null}{view === 'database' ? <><label>논리명<input name="LOGICAL_NAME" required defaultValue={selected && 'LOGICAL_NAME' in selected ? selected.LOGICAL_NAME : ''} /></label><label>Schema Catalog 참조<select name="CATALOG_TABLE_KEY" defaultValue={selected && 'CATALOG_TABLE_KEY' in selected ? selected.CATALOG_TABLE_KEY ?? '' : ''}><option value="">미지정</option>{schemaCatalogRepository.getTables().map((item) => <option key={item.tableKey} value={item.tableKey}>{item.logicalName} ({item.physicalName})</option>)}</select></label></> : null}{view === 'requirements' ? <><label>연결 WBS ID<input name="WBS_IDS" defaultValue={selected && 'WBS_IDS' in selected ? selected.WBS_IDS.join(', ') : ''} placeholder="WBS-001, WBS-002" /></label><label>연결 화면 ID<input name="SCREEN_IDS" defaultValue={selected && 'SCREEN_IDS' in selected ? selected.SCREEN_IDS.join(', ') : ''} placeholder="SCR-001" /></label><label>연결 테이블 ID<input name="TABLE_IDS" defaultValue={selected && 'TABLE_IDS' in selected ? selected.TABLE_IDS.join(', ') : ''} placeholder="TBL-001" /></label></> : null}<label>설명<textarea name="DESCRIPTION" rows={2} defaultValue={selected && 'DESCRIPTION' in selected ? selected.DESCRIPTION : ''} /></label><label>상태<select name="STATUS" defaultValue={selected?.STATUS ?? 'DRAFT'}>{STATUS.map((item) => <option key={item}>{item}</option>)}</select></label></form>}
