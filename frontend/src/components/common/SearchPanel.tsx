@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import ActionButton from './ActionButton';
+import ActionButton, { type ActionButtonDisplay } from './ActionButton';
 
 export type SearchPanelRows = 1 | 2 | 3 | 4 | 5;
 export type SearchControlType = 'text' | 'select' | 'date';
@@ -25,6 +25,7 @@ interface SearchPanelProps<T extends object> {
   onSearch: (condition: T) => void;
   onReset?: (initialValue: T) => void;
   rows?: SearchPanelRows;
+  actionDisplay?: ActionButtonDisplay;
 }
 
 const SEARCH_COLUMN_COUNT = 4;
@@ -41,6 +42,7 @@ export default function SearchPanel<T extends object>({
   onSearch,
   onReset,
   rows = 1,
+  actionDisplay,
 }: SearchPanelProps<T>) {
   const [collapsed, setCollapsed] = useState(false);
   const maxConditionCount = rows * SEARCH_COLUMN_COUNT;
@@ -100,9 +102,9 @@ export default function SearchPanel<T extends object>({
         ) : null}
 
         <div className="search-action-rail">
-          <ActionButton actionCode="SEARCH" label="조회" tone="primary" onClick={() => onSearch(value)} />
+          <ActionButton actionCode="SEARCH" display={actionDisplay} label="조회" tone="primary" onClick={() => onSearch(value)} />
           <div className="search-icon-actions">
-            <ActionButton actionCode="RESET" label="검색조건 초기화" display="icon" onClick={reset} />
+            <ActionButton actionCode="RESET" label={actionDisplay === 'label' ? '초기화' : '검색조건 초기화'} display={actionDisplay ?? 'icon'} onClick={reset} />
             {collapsible ? (
               <button
                 type="button"

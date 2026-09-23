@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { toProjectDraft, createEmptyProjectDraft, filterProjects, getNextProjectId, isProjectDraftDirty } from '../src/modules/standard-design/ui/components/projectReference.ts';
 import { getBoundedListWidth } from '../src/modules/standard-design/ui/components/projectSplitter.ts';
-import { searchProjectSnapshot, saveToProjectWorkingSet, emptyProjectSearchCondition } from '../src/modules/standard-design/ui/components/projectReference.ts';
+import { searchProjectSnapshot, saveToProjectWorkingSet, emptyProjectSearchCondition, getEditorProject } from '../src/modules/standard-design/ui/components/projectReference.ts';
 
 const source = { PROJECT_ID: 'SDP-003', PROJECT_NAME: 'BaseKit', CUSTOMER_NAME: '내부 기준', DESCRIPTION: '설명', STATUS: 'IN_PROGRESS', REG_BY: 'admin', MEMBERS: ['member'] };
 test('simple copy excludes identities and relations without mutating source', () => {
@@ -43,7 +43,7 @@ test('splitter reserves its 12px and both pane minima including narrow container
   assert.equal(getBoundedListWidth(50, 0), 30);
 });
 
-test('query snapshot keeps the executed conditions even when dialog draft is edited without searching', () => {
+test('query snapshot keeps the executed conditions even when search draft is edited without searching', () => {
   const input = { PROJECT_NAME: 'Base', CUSTOMER_NAME: '', STATUS: '' };
   const result = searchProjectSnapshot([source], input);
   input.PROJECT_NAME = 'different';
@@ -52,7 +52,7 @@ test('query snapshot keeps the executed conditions even when dialog draft is edi
   assert.notEqual(result.rows[0], source);
 });
 
-test('dialog query replaces the whole working set, including rows outside the previous set', () => {
+test('inline query replaces the whole working set, including rows outside the previous set', () => {
   const second = { ...source, PROJECT_ID: 'SDP-004', CUSTOMER_NAME: '외부 고객' };
   const all = [source, second];
   const old = searchProjectSnapshot(all, { ...emptyProjectSearchCondition, CUSTOMER_NAME: '내부' });
@@ -66,7 +66,7 @@ test('editing a matching row out of its search criteria retains its working-set 
   const second = { ...source, PROJECT_ID: 'SDP-004' };
   const rows = [source, second];
   const saved = { ...source, STATUS: 'APPROVED', CUSTOMER_NAME: '변경 고객' };
-  const next = saveToProjectWorkingSet(rows, saved);
+  const next = saveToProjectWorkingSet(rows, saved, 'EDIT');
   assert.deepEqual(next.map(row => row.PROJECT_ID), ['SDP-003', 'SDP-004']);
   assert.equal(next[0].STATUS, 'APPROVED');
   assert.equal(rows[0].STATUS, 'IN_PROGRESS');
@@ -74,7 +74,27 @@ test('editing a matching row out of its search criteria retains its working-set 
 
 test('explicit new/copy save appends just the saved project; unrelated repository rows are not loaded', () => {
   const created = { ...source, PROJECT_ID: 'SDP-006', PROJECT_NAME: '복사' };
-  const next = saveToProjectWorkingSet([source], created);
+  const next = saveToProjectWorkingSet([source], created, 'NEW');
   assert.deepEqual(next.map(row => row.PROJECT_ID), ['SDP-003', 'SDP-006']);
-  assert.deepEqual(saveToProjectWorkingSet(next, created), next);
+  assert.deepEqual(saveToProjectWorkingSet(next, created, 'EDIT'), next);
+});
+
+test('search excluding a dirty detail does not discard its saved identity or draft', () => {
+  const editor = {mode: 'EDIT', sourceProjectId: source.PROJECT_ID, initialDraft: toProjectDraft(source), draft: {...toProjectDraft(source), DESCRIPTION: 'unsaved'}};
+  const before = structuredClone(editor);
+  const result = searchProjectSnapshot([source], {...emptyProjectSearchCondition, PROJECT_NAME: 'missing'});
+  assert.deepEqual(result.rows, []);
+  assert.deepEqual(editor, before);
+  assert.equal(getEditorProject(editor).PROJECT_ID, source.PROJECT_ID);
+  assert.equal(getEditorProject(editor).DESCRIPTION, source.DESCRIPTION);
+  assert.equal(isProjectDraftDirty(editor), true);
+  assert.equal(getEditorProject({mode: 'COPY', initialDraft: editor.initialDraft, draft: editor.draft}), undefined);
+});
+
+test('saving an existing detail outside the working set never inserts it, including empty results', () => {
+  const other = {...source, PROJECT_ID: 'SDP-020'};
+  const saved = {...source, CUSTOMER_NAME: 'changed'};
+  assert.deepEqual(saveToProjectWorkingSet([other], saved, 'EDIT'), [other]);
+  assert.deepEqual(saveToProjectWorkingSet([], saved, 'EDIT'), []);
+  assert.deepEqual(saveToProjectWorkingSet([other], saved, 'COPY'), [other, saved]);
 });

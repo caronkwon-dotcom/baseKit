@@ -295,3 +295,7 @@ Standard Design의 `Screen Design Schema v0.1`을 정의하되 상세 UI 구현 
 `feature/project-working-set-search`에서 `fe55992` 기반 후속 초안 `5bef92f`를 보존하고 Mini Search/Working Set 개선을 마무리했다. 이번 변경은 dev-pm 미통합이다. 중복 context 제거, 좌우 action 분리, 조회 스냅샷 유지, FormModal 재사용, 상세 저장 후 작업 집합 유지가 구현됐다. build/lint, Project 회귀 9개, grid assertion 18개, backend 22개 통과. 실제 UI 주요 흐름 확인; 삭제 확인창 이후 브라우저 제어 제한과 미검증 오류 주입 범위는 [인계 보고서](project-reference-handoff.md)에 기록했다.
 
 Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 dev-pm 통합한다. 공통 버튼 설정 79f224b를 보존하여 함께 검증했으며 UI 미확인 범위는 인계 보고서를 따른다.
+
+## Project Inline Search 후속 개선 (2026-09-20, feature 검수 대기)
+
+`feature/project-inline-search`는 dev-pm `9b0eff5` 기준이다. 중앙 검색 Dialog를 왼쪽 Inline Search로 교체하고 폼 label/input을 좌우로 통일했다. 상세 identity와 검색 결과를 분리하며 결과 밖 기존 상세 저장은 Working Set에 추가하지 않는다. 버튼 label 표시는 Project 화면에서만 명시한다. build/lint, Project 11개, grid 18개, backend 22개 통과. 실제 UI 검증 범위와 native confirm 도구 제한은 [후속 보고서](project-inline-search-verification.md)를 참고한다. 이번 변경은 dev-pm 미통합이다.

@@ -27,8 +27,8 @@ Standard Design은 BaseKit Core 관리기능이 아니라 BaseKit 공통 계약�
 
 - 프로젝트 관리만 `LIST 100% → 기본 30/70 List-Detail → Detail 100%` 작업 흐름을 제공한다.
 - Module 내부 `ui/components/ProjectListDetailWorkspace.tsx`가 pointer·keyboard splitter와 목록 접기/펼치기를 담당한다. 현재 BaseKit Core에는 공통 List-Detail workspace가 없으므로, 반복 적용 전에는 이 구성요소를 공통화하지 않는다.
-- 프로젝트명·고객명·상태의 입력 조건과 적용 조건, Working Set과 선택은 상세 진입·목록 접기/펼치기·목록 복귀 동안 유지한다. 상세 왼쪽 검색은 FormModal/SearchPanel/DataTable 기반 Mini Search를 열고 결과 선택 시 조회 결과 전체를 교체한다. 조회 후 입력만 바꾸어도 실행 결과의 조건을 보존한다.
-- 저장은 기존 Working Set 항목을 갱신하거나 새 저장 항목만 추가한다. 조건에 맞지 않게 수정해도 재조회 전까지 작업 목록에서 제거하지 않는다.
+- 프로젝트명·고객명·상태의 입력 조건과 적용 조건, Working Set과 선택은 상세 진입·목록 접기/펼치기·목록 복귀 동안 유지한다. 상세 왼쪽 검색은 SearchPanel 기반 Inline Search를 펼친다. 조회는 기존 목록만 갱신하고 상세 편집은 보존한다. 조회 후 입력만 바꾸어도 실행 결과의 조건을 보존한다.
+- 저장은 기존 Working Set 항목을 갱신하거나 신규/복사 저장 행만 추가한다. 검색 결과 밖 기존 상세 저장은 집합에 추가하지 않는다. 조건에 맞지 않게 수정해도 재조회 전까지 작업 목록에서 제거하지 않는다.
 - `복사`는 SIMPLE_COPY이며 프로젝트명, 고객명, 설명, 상태만 새 초안에 복사한다. ID와 관계 데이터는 복사하지 않으며 저장이 새 프로젝트를 생성한다. DEEP_COPY 정책은 [ADR 029](../../../docs/decisions/029-project-management-reference-ui.md)를 따른다.
 
 ## 표준용어집 경계
@@ -44,3 +44,5 @@ Standard Design은 BaseKit Core 관리기능이 아니라 BaseKit 공통 계약�
 - Frontend Adapter는 Module 내부 `llm/`이 소유한다.
 - 실제 URL과 API Key는 Backend 환경변수로만 관리한다.
 - 현재 `화면 설계`의 연결 확인 UI는 기술 연결 점검용이며 실제 설계검증·권한 기능이 아니다.
+
+Project Reference 폼은 검색과 상세 모두 76px 왼쪽 필드명 + 오른쪽 입력칸을 유지한다. 좁은 영역은 행당 필드 개수만 줄인다. 다른 화면은 이번 변경 범위에 포함하지 않는다.

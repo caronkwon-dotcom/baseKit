@@ -222,8 +222,8 @@
 .standard-design-project-id div { display: grid; grid-template-columns: auto auto; gap: 5px; border: 1px solid var(--border-default); border-radius: 5px; background: var(--surface-muted); padding: 5px 7px; }
 .standard-design-project-id dt { color: var(--text-muted); font-size: 10px; font-weight: 800; }
 .standard-design-project-id dd { margin: 0; color: var(--text-secondary); font-size: 11px; font-weight: 700; }
-.standard-design-project-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.standard-design-project-fields label { display: grid; gap: 4px; }
+.standard-design-project-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 8px; }
+.standard-design-project-fields label { display: grid; grid-template-columns: var(--project-label-width) minmax(0, 1fr); align-items: center; gap: 8px; min-width: 0; }
 .standard-design-project-fields label > span { color: var(--text-muted); font-size: 11px; font-weight: 700; }
 .standard-design-project-fields input,
 .standard-design-project-fields select,
@@ -235,13 +235,21 @@
 .standard-design-project-message svg { width: 15px; height: 15px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .standard-design-project-message.info { border-color: #93c5fd; background: #eff6ff; color: #1d4ed8; }
 .standard-design-project-message.warning { border-color: #fcd34d; background: #fffbeb; color: #92400e; }
-.project-search-modal .form-modal { display: flex; width: min(760px, 100%); max-height: 90vh; flex-direction: column; }
-.project-search-modal .form-modal-header, .project-search-modal .form-modal-footer { flex: 0 0 auto; }
-.project-search-modal .form-modal-body { min-height: 0; overflow: auto; }
-.project-search-modal .search-grid { grid-template-columns: 1fr; }
-.project-search-modal .search-panel-layout { grid-template-columns: minmax(0, 1fr) auto; }
-.project-search-modal .search-panel { margin: 0 0 8px; }
-.project-search-modal .standard-table-wrap { max-height: 300px; }
 @media (max-width: 900px) { .standard-design-lifecycle-toolbar { align-items: flex-start; flex-wrap: wrap; }.standard-design-project-context { width: 100%; }.standard-design-lifecycle-actions { margin-left: auto; } }
 @media (max-width: 900px) { .standard-design-term-layout { grid-template-columns: 1fr; } }
 @media (max-width: 900px) { .standard-design-term-recommended-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Project reference only: labels stay beside controls at every pane width. */
+.standard-design-project-page { --project-label-width: 76px; }
+.standard-design-project-page .search-grid label { grid-template-columns: var(--project-label-width) minmax(0, 1fr); gap: 8px; }
+.standard-design-project-fields label > span, .standard-design-project-page .search-grid label > span { overflow-wrap: anywhere; }
+.standard-design-project-fields input, .standard-design-project-fields select, .standard-design-project-fields textarea { min-width: 0; }
+.standard-design-project-fields .standard-design-project-description { align-items: start; }
+.standard-design-project-description > span { padding-top: 8px; }
+.project-inline-search { flex: 0 0 auto; max-height: 55%; overflow: auto; }
+.standard-design-project-page .search-panel { padding: 8px; }
+.standard-design-project-page .search-panel-layout { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.standard-design-project-page .search-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
+.standard-design-project-page .search-action-rail { grid-column: 1; width: auto; justify-content: flex-start; }
+.project-list-detail-workspace--DETAIL .search-grid { grid-template-columns: minmax(0, 1fr); }
+.standard-design-project-page .search-panel input, .standard-design-project-page .search-panel select { min-width: 0; width: 100%; box-sizing: border-box; }
