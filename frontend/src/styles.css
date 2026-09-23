@@ -766,14 +766,15 @@ button {
 .search-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(150px, 1fr));
-  gap: 8px;
+  column-gap: 24px;
+  row-gap: 8px;
 }
 
 .search-grid label {
   display: grid;
   grid-template-columns: 68px minmax(0, 1fr);
   align-items: center;
-  gap: 6px;
+  column-gap: 8px;
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 700;
@@ -784,6 +785,18 @@ button {
   display: grid;
   width: 104px;
   gap: 6px;
+}
+
+.search-panel-layout:has(.search-action-rail [data-display-mode="ICON_TEXT"]) {
+  grid-template-columns: minmax(0, 1fr) auto 144px;
+}
+
+.search-action-rail:has([data-display-mode="ICON_TEXT"]) {
+  width: 144px;
+}
+
+.search-action-rail .action-button {
+  white-space: nowrap;
 }
 
 .search-panel-rows-1 .search-action-rail,

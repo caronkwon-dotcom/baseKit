@@ -14,7 +14,7 @@ export interface GridEditing<T> {
   onChange: (row: T, key: string, value: string) => void;
 }
 
-function display(value: string, field: FieldDefinition) {
+export function renderMetadataValue(value: string, field: FieldDefinition) {
   if (!value) return '-';
   if (field.displayType === 'COLOR') return <span className="metadata-color-value"><i style={{ background: value }} />{value}</span>;
   const label = field.options?.find(option => option.value === value)?.label ?? value;
@@ -54,7 +54,7 @@ export function toGridColumns<T>(columns: DataTableColumn<T>[], metadata: GridFi
         if (value == null || value === '') return null;
         return field.dataType === 'NUMBER' ? Number(value) : field.dataType === 'BOOLEAN' ? value === 'true' : value;
       },
-      cellRenderer: (params: ICellRendererParams<T>) => display(params.value == null ? '' : String(params.value), field),
+      cellRenderer: (params: ICellRendererParams<T>) => renderMetadataValue(params.value == null ? '' : String(params.value), field),
       tooltipValueGetter: params => params.value == null ? '' : String(params.value),
       editable: editing?.keys.includes(`ATTRIBUTE_${field.key}`) ?? false,
       cellEditor: field.controlType === 'SELECT' ? 'agSelectCellEditor' : field.dataType === 'BOOLEAN' ? 'agCheckboxCellEditor' : field.dataType === 'NUMBER' ? 'agNumberCellEditor' : 'agTextCellEditor',
