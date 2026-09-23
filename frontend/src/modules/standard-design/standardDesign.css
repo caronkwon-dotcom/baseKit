@@ -253,7 +253,11 @@
 .standard-design-project-page .search-action-rail { grid-column: 1; width: auto; justify-content: flex-start; }
 .project-list-detail-workspace--DETAIL .search-grid { grid-template-columns: minmax(0, 1fr); }
 .standard-design-project-page .search-panel input, .standard-design-project-page .search-panel select { min-width: 0; width: 100%; box-sizing: border-box; }
-.sd-project-context-selector { display: inline-flex; align-items: center; gap: 7px; max-width: min(42vw, 360px); min-height: 30px; border: 1px solid var(--border-default); border-radius: 5px; background: var(--surface-panel); padding: 4px 8px; color: var(--text-secondary); cursor: pointer; }
+.standard-design-header-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.standard-design-header-actions .standard-design-lifecycle-actions { flex: 0 0 auto; }
+.standard-design-header-actions .standard-design-lifecycle-actions button { min-height: 28px; padding: 3px 8px; }
+.sd-project-context-selector { display: inline-flex; align-items: center; gap: 7px; max-width: min(34vw, 320px); min-height: 28px; border: 1px solid var(--border-default); border-radius: 5px; background: var(--surface-panel); padding: 3px 8px; color: var(--text-secondary); cursor: pointer; }
+.sd-project-context-selector svg { width: 14px; height: 14px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
 .sd-project-context-selector strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
 .sd-project-empty-help { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 2px; color: var(--text-secondary); font-size: 12px; }
 .sd-project-empty-help p { margin: 0; }
@@ -277,3 +281,4 @@
 .sd-project-member-modal .search-panel-layout { grid-template-columns: minmax(0, 1fr); }
 .sd-project-member-modal .search-action-rail { grid-column: 1; width: auto; justify-content: flex-start; }
 @media (max-width: 620px) { .sd-member-assignment-form { grid-template-columns: minmax(0, 1fr); }.sd-member-assignment-form .sd-member-note { grid-column: 1; }.sd-member-assignment-form label { grid-template-columns: 82px minmax(0, 1fr); } }
+@media (max-width: 980px) { .standard-design-header-actions { min-width: 0; }.standard-design-header-actions .standard-design-lifecycle-actions button { min-width: 42px; }.sd-project-context-selector { max-width: 220px; } }

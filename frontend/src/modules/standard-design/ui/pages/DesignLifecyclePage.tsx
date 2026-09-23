@@ -168,6 +168,7 @@ function ProjectManagementPage() {
     setSelectedProjectId(project.PROJECT_ID);
     designLifecycleRepository.setSelectedProjectId(project.PROJECT_ID);
     setEditor({ mode: 'EDIT', sourceProjectId: project.PROJECT_ID, initialDraft: draft, draft });
+    setSelectedProjectMemberId('');
     setWorkspaceMode('DETAIL');
     setMessage(null);
   };
@@ -187,6 +188,7 @@ function ProjectManagementPage() {
     const draft = createEmptyProjectDraft();
     setSelectedProjectId('');
     setEditor({ mode: 'NEW', initialDraft: draft, draft });
+    setSelectedProjectMemberId('');
     setWorkspaceMode('DETAIL');
     setMessage(null);
   };
@@ -196,6 +198,7 @@ function ProjectManagementPage() {
 
     const draft = toProjectDraft(activeProject);
     setEditor({ mode: 'COPY', initialDraft: draft, draft });
+    setSelectedProjectMemberId('');
     setWorkspaceMode('DETAIL');
     setMessage(null);
   };
@@ -204,6 +207,7 @@ function ProjectManagementPage() {
     if (!confirmDiscardChanges()) return;
 
     setEditor(null);
+    setSelectedProjectMemberId('');
     setWorkspaceMode('LIST');
     setMessage(null);
   };
@@ -255,6 +259,7 @@ function ProjectManagementPage() {
       setWorkingSet((rows) => saveToProjectWorkingSet(rows, project, editor.mode));
       setSelectedProjectId(projectId);
       setEditor({ mode: 'EDIT', sourceProjectId: projectId, initialDraft: toProjectDraft(project), draft: toProjectDraft(project) });
+      if (editor.mode !== 'EDIT') setSelectedProjectMemberId('');
       setWorkspaceMode('DETAIL');
       setMessage({ tone: 'success', text: `${project.PROJECT_NAME} 프로젝트를 저장했습니다.` });
     } catch (error) {
@@ -277,6 +282,7 @@ function ProjectManagementPage() {
       setWorkingSet(nextRows);
       setSelectedProjectId(nextProjectId);
       setEditor(null);
+      setSelectedProjectMemberId('');
       setWorkspaceMode('LIST');
       setMessage({ tone: 'success', text: `${activeProject.PROJECT_NAME} 프로젝트를 삭제했습니다.` });
     } catch (error) {
@@ -311,6 +317,7 @@ function ProjectManagementPage() {
   const projectMembers = activeProject
     ? designLifecycleRepository.getData().projectMembers.filter((assignment) => assignment.PROJECT_ID === activeProject.PROJECT_ID)
     : [];
+  const selectedProjectMember = projectMembers.find((item) => item.PROJECT_MEMBER_ID === selectedProjectMemberId);
   const projectMemberColumns: DataTableColumn<ProjectMember>[] = [
     { key: 'name', header: '이름', render: (assignment) => designLifecycleRepository.getData().members.find((member) => member.MEMBER_ID === assignment.MEMBER_ID)?.MEMBER_NAME ?? '-', minWidth: 120, flex: 1 },
     { key: 'participation', header: '참여구분', render: (assignment) => assignment.PARTICIPATION_TYPE_CD, width: 100 },
@@ -415,14 +422,13 @@ function ProjectManagementPage() {
             <h2>프로젝트 멤버 <span>({projectMembers.length}명)</span></h2>
             <div>
               <button type="button" className="primary-button" onClick={() => { setEditingProjectMember(undefined); setMemberDialogOpen(true); }}>인원 추가</button>
-              <button type="button" className="secondary-button" disabled={!selectedProjectMemberId} onClick={() => {
-                setEditingProjectMember(projectMembers.find((item) => item.PROJECT_MEMBER_ID === selectedProjectMemberId));
+              <button type="button" className="secondary-button" disabled={!selectedProjectMember} onClick={() => {
+                setEditingProjectMember(selectedProjectMember);
                 setMemberDialogOpen(true);
               }}>수정</button>
-              <button type="button" className="danger-button" disabled={!selectedProjectMemberId} onClick={() => {
-                const row = projectMembers.find((item) => item.PROJECT_MEMBER_ID === selectedProjectMemberId);
-                if (row && window.confirm('선택한 프로젝트 참여 정보를 삭제하시겠습니까?')) {
-                  designLifecycleRepository.deleteItem('projectMembers', row.PROJECT_MEMBER_ID);
+              <button type="button" className="danger-button" disabled={!selectedProjectMember} onClick={() => {
+                if (selectedProjectMember && window.confirm('선택한 프로젝트 참여 정보를 삭제하시겠습니까?')) {
+                  designLifecycleRepository.deleteItem('projectMembers', selectedProjectMember.PROJECT_MEMBER_ID);
                   setSelectedProjectMemberId('');
                 }
               }}>삭제</button>
@@ -521,11 +527,7 @@ function LifecycleDetailPage({ view, supplement }: { view: LifecycleView; supple
         : <section className="standard-design-lifecycle-guide"><h2>{view === 'wbs' ? '계층 WBS' : '상세 정보'}</h2><p>{view === 'wbs' ? '상위 WBS와 레벨을 지정하면 프로젝트 범위 안에서 계층 구조를 관리합니다.' : '목록에서 대상을 선택하면 관련 상세 정보가 표시됩니다.'}</p>{supplement}</section>;
 
   return <div className="page standard-design-page standard-design-lifecycle-page">
-    <PageHeader breadcrumbs={['Standard Design', labels[view]]} description="프로젝트 Context를 유지하며 설계 산출물과 요구사항 추적성을 관리합니다." rightContent={['wbs', 'requirements', 'screens', 'database'].includes(view) ? <ProjectContextSelector /> : null} />
-    <section className="standard-design-lifecycle-toolbar" aria-label={`${labels[view]} 기능`}>
-      {view === 'overview' ? <label>프로젝트<select value={projectId} onChange={(event) => changeProject(event.target.value)}>{data.projects.map((item) => <option key={item.PROJECT_ID} value={item.PROJECT_ID}>{item.PROJECT_NAME}</option>)}</select></label> : null}
-      <div className="standard-design-lifecycle-actions"><button type="button" className="secondary-button" data-action-code="SEARCH" onClick={() => { refresh(); setMessage('목록을 조회했습니다.'); }}>조회</button><button type="button" className="primary-button" data-action-code="CREATE" onClick={create}>등록</button><button type="submit" form="lifecycle-detail-form" className="primary-button" data-action-code="UPDATE">저장</button><button type="button" className="danger-button" data-action-code="DELETE" onClick={remove}>삭제</button></div>
-    </section>
+    <PageHeader breadcrumbs={['Standard Design', labels[view]]} description="프로젝트 Context를 유지하며 설계 산출물과 요구사항 추적성을 관리합니다." rightContent={['wbs', 'requirements', 'screens', 'database'].includes(view) ? <div className="standard-design-header-actions"><ProjectContextSelector /><div className="standard-design-lifecycle-actions" aria-label={`${labels[view]} 기능`}><button type="button" className="secondary-button" data-action-code="SEARCH" onClick={() => { refresh(); setMessage('목록을 조회했습니다.'); }}>조회</button><button type="button" className="primary-button" data-action-code="CREATE" onClick={create}>등록</button><button type="submit" form="lifecycle-detail-form" className="primary-button" data-action-code="UPDATE">저장</button><button type="button" className="danger-button" data-action-code="DELETE" onClick={remove}>삭제</button></div></div> : null} />
     <MasterDetailMultiGrid
       master={<DataTable title={`${labels[view]} 목록 (${rows.length}건)`} columns={columns} rows={rows} getRowKey={itemId} onRowClick={(item) => { setSelectedId(itemId(item)); setMessage(`${itemName(item)} 상세 정보를 불러왔습니다.`); }} selectedRowKeys={selectedId ? new Set([selectedId]) : new Set()} onSelectedRowKeysChange={(keys) => setSelectedId([...keys][0] ?? '')} emptyMessage="현재 Project Context에 등록된 항목이 없습니다." />}
       detailTop={<form id="lifecycle-detail-form" key={selectedId || 'new'} className="standard-design-lifecycle-form" onSubmit={save}><h2>{selected ? '상세 수정' : '신규 등록'}</h2><label>명칭<input name="NAME" required defaultValue={selected ? itemName(selected) : ''} /></label>{view === 'overview' ? <label>고객명<input name="CUSTOMER_NAME" required defaultValue={selected && 'CUSTOMER_NAME' in selected ? selected.CUSTOMER_NAME : ''} /></label> : null}{view === 'wbs' ? <><label>상위 WBS<select name="PARENT_WBS_ID" defaultValue={selected && 'PARENT_WBS_ID' in selected ? selected.PARENT_WBS_ID ?? '' : ''}><option value="">없음</option>{relatedWbs.filter((item) => item.WBS_ID !== selectedId).map((item) => <option key={item.WBS_ID} value={item.WBS_ID}>{item.WBS_NAME}</option>)}</select></label><label>레벨<input name="WBS_LEVEL" type="number" min="1" required defaultValue={selected && 'WBS_LEVEL' in selected ? selected.WBS_LEVEL : 1} /></label></> : null}{view === 'screens' ? <label>화면 유형<select name="SCREEN_TYPE" defaultValue={selected && 'SCREEN_TYPE' in selected ? selected.SCREEN_TYPE : 'LIST'}><option>LIST</option><option>DETAIL</option><option>POPUP</option></select></label> : null}{view === 'database' ? <><label>논리명<input name="LOGICAL_NAME" required defaultValue={selected && 'LOGICAL_NAME' in selected ? selected.LOGICAL_NAME : ''} /></label><label>Schema Catalog 참조<select name="CATALOG_TABLE_KEY" defaultValue={selected && 'CATALOG_TABLE_KEY' in selected ? selected.CATALOG_TABLE_KEY ?? '' : ''}><option value="">미지정</option>{schemaCatalogRepository.getTables().map((item) => <option key={item.tableKey} value={item.tableKey}>{item.logicalName} ({item.physicalName})</option>)}</select></label></> : null}{view === 'requirements' ? <><label>연결 WBS ID<input name="WBS_IDS" defaultValue={selected && 'WBS_IDS' in selected ? selected.WBS_IDS.join(', ') : ''} placeholder="WBS-001, WBS-002" /></label><label>연결 화면 ID<input name="SCREEN_IDS" defaultValue={selected && 'SCREEN_IDS' in selected ? selected.SCREEN_IDS.join(', ') : ''} placeholder="SCR-001" /></label><label>연결 테이블 ID<input name="TABLE_IDS" defaultValue={selected && 'TABLE_IDS' in selected ? selected.TABLE_IDS.join(', ') : ''} placeholder="TBL-001" /></label></> : null}<label>설명<textarea name="DESCRIPTION" rows={2} defaultValue={selected && 'DESCRIPTION' in selected ? selected.DESCRIPTION : ''} /></label><label>상태<select name="STATUS" defaultValue={selected?.STATUS ?? 'DRAFT'}>{STATUS.map((item) => <option key={item}>{item}</option>)}</select></label></form>}

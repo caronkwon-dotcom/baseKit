@@ -303,3 +303,7 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 ## Project Foundation / Shared Project Context (2026-09-23, feature 검수 대기)
 
 `feature/da-project-foundation`은 최신 `origin/dev-pm` `2e48aacc`에서 시작했다. Project 기본정보에 필수 시작/종료일과 기간 검증을 추가하고, USER와 분리된 MEMBER 프로필 및 프로젝트별 PROJECT_MEMBER 투입정보를 browser localStorage 기반 Reference로 구현했다. WBS, Requirements, Screen Design, DB Design에 PageHeader Project Context 선택기를 제공하고, 컨텍스트가 없으면 진입 전 선택을 요구한다. Project Management는 선택 프로젝트가 없을 때도 진입 가능하다. DB/API Migration은 없다. 상세 정책은 [ADR-031](decisions/031-standard-design-project-foundation-and-context.md)을 따른다. 자동 검증은 frontend build/lint, frontend regression 15개, backend 22개 통과. 브라우저에서는 프로젝트 상세와 멤버 등록, context guard에서 프로젝트 선택 후 WBS 표시를 확인했다. 빈 프로젝트 저장소 상태, 다중 프로젝트 context 전환, 좁은 뷰포트 세부 접근성은 추가 검수 대상으로 남긴다.
+
+## Project Foundation UI Fix (2026-09-23, feature 검수 대기)
+
+`feature/da-project-foundation-ui-fix`는 최신 `origin/dev-pm` `03179a2`에 미병합 상태였던 Project Foundation feature를 보존 병합한 뒤 UI 검수 누락만 보완했다. WBS, Requirements, Screen Design, DB Design의 compact Project Context selector와 조회/등록/저장/삭제 Action을 PageHeader 우측 한 영역으로 정렬하고 본문의 별도 Action 행을 제거했다. Project Search Dialog는 기존 Project 검색 조건과 filter 함수를 재사용한다. 브라우저에서 Project 날짜/Member Grid, Member 추가, 2개 프로젝트 context 전환, 4개 SD 화면 context 유지, context 없는 직접 진입 Guard와 취소 시 기존 화면 유지를 확인했다. 프로젝트 전환 뒤 이전 Member 선택 ID가 남는 회귀도 함께 수정했다.
