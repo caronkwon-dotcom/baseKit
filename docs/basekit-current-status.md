@@ -37,6 +37,7 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - 공통 ActionButton 개인화: `UiPreferences` Adapter/Provider 기반 `ICON_TEXT`·`ICON_ONLY` 즉시 반영과 LocalStorage 유지, Skin Accent Save/Search/Danger semantic token
 - 공통 `BaseKitMessage`: INFO/WARN/ERROR/SUCCESS 상태를 공통 icon·semantic token으로 표시하고 공통코드관리 32px 하단 Message Area에 적용
 - 공통코드관리 AG Grid Inline Batch CRUD 1차: 코드그룹·속성정의·공통코드의 INSERTED/UPDATED/DELETED 상태 추적, 삭제 예정 표시와 배치 트랜잭션 저장 API
+- 공통 AG Grid Metadata Editor/Validation: `FieldDefinition` 기반 NUMBER·SWITCH·SELECT·COLOR Editor 선택, REQUIRED·허용값 검증과 저장 차단, Header Pencil 제거
 
 - React + Vite + TypeScript
 - Compact 한 줄 Header / 1Depth Top / 2~3Depth Sidebar / Workspace 기반 Admin Shell

@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { resolveCodeAttributeOptions, toFieldDefinitions } from '../adapters/codeAttributeFieldAdapter';
+import { codeAttributeGridFields, codeGridFields, codeGroupGridFields } from '../adapters/codeGridFieldDefinitions';
 import { BaseKitMessage, MasterDetailMultiGrid, PageHeader, SearchPanel, type BaseKitMessageType, type DataTableColumn, type SearchFieldConfig } from '../components/common';
 import BaseKitDataGrid from '../components/grid/BaseKitDataGrid';
+import { findGridValidationIssue } from '../components/grid/gridFieldValidation';
 import { useGridRowState, type TrackedGridRow } from '../components/grid/gridRowState';
 import type { FieldOption } from '../components/metadata';
 import { coreCodeApi } from '../services/coreCodeApi';
@@ -23,30 +25,34 @@ const searchFields: SearchFieldConfig<Condition>[] = [
   { key: 'useYn', label: '사용 여부', controlType: 'select', options: [{ value: '', label: '전체' }, { value: 'Y', label: '사용' }, { value: 'N', label: '미사용' }] },
 ];
 const groupColumns: DataTableColumn<CodeGroup>[] = [
-  { key: 'CODE_GROUP_ID', header: '그룹 ID', width: 140, editPolicy: 'insert-only', render: row => row.CODE_GROUP_ID },
-  { key: 'CODE_GROUP_NAME', header: '그룹명', flex: 1, render: row => row.CODE_GROUP_NAME },
-  { key: 'DESCRIPTION', header: '설명', flex: 1, render: row => row.DESCRIPTION },
-  { key: 'USE_YN', header: '사용', width: 52, render: row => row.USE_YN },
+  { key: 'CODE_GROUP_ID', header: '그룹 ID', width: 140, editPolicy: 'insert-only', fieldDefinition: codeGroupGridFields.CODE_GROUP_ID, render: row => row.CODE_GROUP_ID },
+  { key: 'CODE_GROUP_NAME', header: '그룹명', flex: 1, fieldDefinition: codeGroupGridFields.CODE_GROUP_NAME, render: row => row.CODE_GROUP_NAME },
+  { key: 'DESCRIPTION', header: '설명', flex: 1, fieldDefinition: codeGroupGridFields.DESCRIPTION, render: row => row.DESCRIPTION },
+  { key: 'USE_YN', header: '사용', width: 52, fieldDefinition: codeGroupGridFields.USE_YN, render: row => row.USE_YN },
 ];
 const codeColumns: DataTableColumn<Code>[] = [
-  { key: 'CODE_ID', header: '코드 ID', width: 130, editPolicy: 'insert-only', render: row => row.CODE_ID },
-  { key: 'CODE', header: '코드', width: 100, editPolicy: 'insert-only', render: row => row.CODE },
-  { key: 'CODE_NAME', header: '코드명', flex: 1, render: row => row.CODE_NAME },
-  { key: 'SORT_ORDER', header: '정렬', width: 55, render: row => row.SORT_ORDER },
-  { key: 'USE_YN', header: '사용', width: 52, render: row => row.USE_YN },
+  { key: 'CODE_ID', header: '코드 ID', width: 130, editPolicy: 'insert-only', fieldDefinition: codeGridFields.CODE_ID, render: row => row.CODE_ID },
+  { key: 'CODE', header: '코드', width: 100, editPolicy: 'insert-only', fieldDefinition: codeGridFields.CODE, render: row => row.CODE },
+  { key: 'CODE_NAME', header: '코드명', flex: 1, fieldDefinition: codeGridFields.CODE_NAME, render: row => row.CODE_NAME },
+  { key: 'SORT_ORDER', header: '정렬', width: 55, fieldDefinition: codeGridFields.SORT_ORDER, render: row => row.SORT_ORDER },
+  { key: 'USE_YN', header: '사용', width: 52, fieldDefinition: codeGridFields.USE_YN, render: row => row.USE_YN },
 ];
 const attributeColumns: DataTableColumn<CodeAttributeDefinition>[] = [
-  { key: 'ATTRIBUTE_CODE', header: '속성코드', width: 120, editPolicy: 'insert-only', render: row => row.ATTRIBUTE_CODE },
-  { key: 'ATTRIBUTE_NAME', header: '속성명', flex: 1, render: row => row.ATTRIBUTE_NAME },
-  { key: 'DATA_TYPE', header: '데이터', width: 84, render: row => row.DATA_TYPE },
-  { key: 'CONTROL_TYPE', header: '컨트롤', width: 96, render: row => row.CONTROL_TYPE },
-  { key: 'DISPLAY_TYPE', header: '표시', width: 82, render: row => row.DISPLAY_TYPE },
-  { key: 'REQUIRED_YN', header: '필수', width: 52, render: row => row.REQUIRED_YN },
-  { key: 'OPTION_SOURCE', header: 'Option Source', flex: 1, render: row => row.OPTION_SOURCE ?? '' },
-  { key: 'SORT_ORDER', header: '정렬', width: 55, render: row => row.SORT_ORDER },
-  { key: 'USE_YN', header: '사용', width: 52, render: row => row.USE_YN },
+  { key: 'ATTRIBUTE_CODE', header: '속성코드', width: 120, editPolicy: 'insert-only', fieldDefinition: codeAttributeGridFields.ATTRIBUTE_CODE, render: row => row.ATTRIBUTE_CODE },
+  { key: 'ATTRIBUTE_NAME', header: '속성명', flex: 1, fieldDefinition: codeAttributeGridFields.ATTRIBUTE_NAME, render: row => row.ATTRIBUTE_NAME },
+  { key: 'DATA_TYPE', header: '데이터', width: 84, fieldDefinition: codeAttributeGridFields.DATA_TYPE, render: row => row.DATA_TYPE },
+  { key: 'CONTROL_TYPE', header: '컨트롤', width: 96, fieldDefinition: codeAttributeGridFields.CONTROL_TYPE, render: row => row.CONTROL_TYPE },
+  { key: 'DISPLAY_TYPE', header: '표시', width: 82, fieldDefinition: codeAttributeGridFields.DISPLAY_TYPE, render: row => row.DISPLAY_TYPE },
+  { key: 'REQUIRED_YN', header: '필수', width: 52, fieldDefinition: codeAttributeGridFields.REQUIRED_YN, render: row => row.REQUIRED_YN },
+  { key: 'OPTION_SOURCE', header: 'Option Source', flex: 1, fieldDefinition: codeAttributeGridFields.OPTION_SOURCE, render: row => row.OPTION_SOURCE ?? '' },
+  { key: 'SORT_ORDER', header: '정렬', width: 55, fieldDefinition: codeAttributeGridFields.SORT_ORDER, render: row => row.SORT_ORDER },
+  { key: 'USE_YN', header: '사용', width: 52, fieldDefinition: codeAttributeGridFields.USE_YN, render: row => row.USE_YN },
 ];
 const clean = (value: unknown) => String(value ?? '').trim();
+const applyGridValue = <T,>(row: T, columns: DataTableColumn<T>[], key: string, value: string): T => {
+  const field = columns.find((column) => column.key === key)?.fieldDefinition;
+  return { ...row, [key]: field?.dataType === 'NUMBER' && value !== '' ? Number(value) : value };
+};
 
 export default function CodeManagePage() {
   const [condition, setCondition] = useState(initial);
@@ -123,7 +129,8 @@ export default function CodeManagePage() {
 
   const saveGroups = async () => {
     if (attributes.dirty || codes.dirty) return notify('상세 Grid 변경사항을 먼저 저장해 주세요.');
-    if (groups.changeSet.INSERTED.some(row => !clean(row.CODE_GROUP_ID) || !clean(row.CODE_GROUP_NAME))) return notify('코드그룹 ID와 그룹명은 필수입니다.');
+    const invalid = findGridValidationIssue([...groups.changeSet.INSERTED, ...groups.changeSet.UPDATED], groupColumns);
+    if (invalid) return notify(`${invalid.field.label}: ${invalid.message}`);
     setSaving(true);
     try {
       const value = (row: CodeGroup) => ({ CODE_GROUP_ID: clean(row.CODE_GROUP_ID), CODE_GROUP_NAME: clean(row.CODE_GROUP_NAME), DESCRIPTION: clean(row.DESCRIPTION), USE_YN: row.USE_YN });
@@ -137,6 +144,8 @@ export default function CodeManagePage() {
 
   const saveAttributes = async () => {
     if (!selectedGroupId || codes.dirty) return notify('공통코드 변경사항을 먼저 저장해 주세요.');
+    const invalid = findGridValidationIssue([...attributes.changeSet.INSERTED, ...attributes.changeSet.UPDATED], attributeColumns);
+    if (invalid) return notify(`${invalid.field.label}: ${invalid.message}`);
     setSaving(true);
     try {
       const value = (row: CodeAttributeDefinition) => ({ ATTRIBUTE_CODE: clean(row.ATTRIBUTE_CODE).toUpperCase(), ATTRIBUTE_NAME: clean(row.ATTRIBUTE_NAME), DATA_TYPE: row.DATA_TYPE, CONTROL_TYPE: row.CONTROL_TYPE, DISPLAY_TYPE: row.DISPLAY_TYPE, REQUIRED_YN: row.REQUIRED_YN, DEFAULT_VALUE: row.DEFAULT_VALUE, OPTION_SOURCE: row.OPTION_SOURCE, SORT_ORDER: Number(row.SORT_ORDER), USE_YN: row.USE_YN });
@@ -149,7 +158,9 @@ export default function CodeManagePage() {
   };
 
   const saveCodes = async () => {
-    if (!selectedGroupId || [...codes.changeSet.INSERTED, ...codes.changeSet.UPDATED].some(row => !clean(row.CODE_ID) || !clean(row.CODE) || !clean(row.CODE_NAME))) return notify('코드 ID, 코드, 코드명은 필수입니다.');
+    if (!selectedGroupId) return notify('코드그룹을 선택해 주세요.');
+    const invalid = findGridValidationIssue([...codes.changeSet.INSERTED, ...codes.changeSet.UPDATED], codeColumns, fields, (row, field) => row.ATTRIBUTE_VALUES?.[field.key]);
+    if (invalid) return notify(`${invalid.field.label}: ${invalid.message}`);
     setSaving(true);
     try {
       const value = (row: Code) => ({ CODE_ID: clean(row.CODE_ID), CODE_GROUP_ID: selectedGroupId, CODE: clean(row.CODE), CODE_NAME: clean(row.CODE_NAME), SORT_ORDER: Number(row.SORT_ORDER), USE_YN: row.USE_YN, ATTRIBUTE_VALUES: row.ATTRIBUTE_VALUES ?? {} });
@@ -173,9 +184,9 @@ export default function CodeManagePage() {
     <SearchPanel rows={1} fields={searchFields} value={condition} initialValue={initial} onValueChange={setCondition} onSearch={value => void loadGroups(value, selectedGroupId)} onReset={value => void loadGroups(value)} />
     <MasterDetailMultiGrid
       message={message ? <BaseKitMessage type={message.type} message={message.text} /> : null}
-      master={<BaseKitDataGrid programKey={PROGRAM_KEY} roleCode={ROLE} title="코드그룹 목록" columns={groupColumns} rows={groups.rows} getRowKey={row => row.__GRID_ROW_ID} getRowState={groups.getState} currentRowKey={groups.rows.find(row => row.CODE_GROUP_ID === selectedGroupId)?.__GRID_ROW_ID} selectedRowKeys={groupSelected} onSelectedRowKeysChange={setGroupSelected} onRowClick={selectGroup} getRowClassName={rowClass(groups.getState)} editing={{ keys: groupColumns.map(column => column.key), onChange: (row, key, value) => groups.update(row.__GRID_ROW_ID, current => ({ ...current, [key]: value })) }} toolbarActions={toolbar(() => groups.add({ ...managed, CODE_GROUP_ID: '', CODE_GROUP_NAME: '', DESCRIPTION: '' }), () => { groups.remove(groupSelected); setGroupSelected(new Set()); }, () => { groups.revert(groupSelected); setGroupSelected(new Set()); }, () => void saveGroups(), groupSelected, groups.hasChanges(groupSelected), groups.dirty)} />}
-      detailTop={<BaseKitDataGrid programKey={PROGRAM_KEY} roleCode={ROLE} title={`${selectedGroupId} 속성정의 목록`} columns={attributeColumns} rows={attributes.rows} getRowKey={row => row.__GRID_ROW_ID} getRowState={attributes.getState} selectedRowKeys={attributeSelected} onSelectedRowKeysChange={setAttributeSelected} getRowClassName={rowClass(attributes.getState)} editing={{ keys: attributeColumns.map(column => column.key), onChange: (row, key, value) => attributes.update(row.__GRID_ROW_ID, current => ({ ...current, [key]: key === 'SORT_ORDER' ? Number(value) : value })) }} toolbarActions={toolbar(() => selectedGroupId ? attributes.add({ ...managed, ATTRIBUTE_DEF_ID: '', CODE_GROUP_ID: selectedGroupId, ATTRIBUTE_CODE: '', ATTRIBUTE_NAME: '', DATA_TYPE: 'STRING', CONTROL_TYPE: 'TEXT', DISPLAY_TYPE: 'TEXT', REQUIRED_YN: 'N', DEFAULT_VALUE: null, OPTION_SOURCE: null, SORT_ORDER: 0 }) : notify('코드그룹을 선택해 주세요.'), () => { attributes.remove(attributeSelected); setAttributeSelected(new Set()); }, () => { attributes.revert(attributeSelected); setAttributeSelected(new Set()); }, () => void saveAttributes(), attributeSelected, attributes.hasChanges(attributeSelected), attributes.dirty)} />}
-      detailBottom={<BaseKitDataGrid programKey={PROGRAM_KEY} roleCode={ROLE} title={`${selectedGroupId} 공통코드 목록`} columns={codeColumns} fields={fields} rows={codes.rows} getRowKey={row => row.__GRID_ROW_ID} getRowState={codes.getState} getFieldValue={(row, field) => row.ATTRIBUTE_VALUES?.[field.key]} selectedRowKeys={codeSelected} onSelectedRowKeysChange={setCodeSelected} getRowClassName={rowClass(codes.getState)} editing={{ keys: [...codeColumns.map(column => column.key), ...fields.map(field => `ATTRIBUTE_${field.key}`)], onChange: (row, key, value) => codes.update(row.__GRID_ROW_ID, current => key.startsWith('ATTRIBUTE_') ? { ...current, ATTRIBUTE_VALUES: { ...current.ATTRIBUTE_VALUES, [key.slice(10)]: value } } : { ...current, [key]: key === 'SORT_ORDER' ? Number(value) : value }) }} toolbarActions={toolbar(() => selectedGroupId ? codes.add({ ...managed, CODE_ID: '', CODE_GROUP_ID: selectedGroupId, CODE: '', CODE_NAME: '', SORT_ORDER: 0, ATTRIBUTE_VALUES: Object.fromEntries(fields.map(field => [field.key, field.defaultValue ?? ''])) }) : notify('코드그룹을 선택해 주세요.'), () => { codes.remove(codeSelected); setCodeSelected(new Set()); }, () => { codes.revert(codeSelected); setCodeSelected(new Set()); }, () => void saveCodes(), codeSelected, codes.hasChanges(codeSelected), codes.dirty)} />}
+      master={<BaseKitDataGrid programKey={PROGRAM_KEY} roleCode={ROLE} title="코드그룹 목록" columns={groupColumns} rows={groups.rows} getRowKey={row => row.__GRID_ROW_ID} getRowState={groups.getState} currentRowKey={groups.rows.find(row => row.CODE_GROUP_ID === selectedGroupId)?.__GRID_ROW_ID} selectedRowKeys={groupSelected} onSelectedRowKeysChange={setGroupSelected} onRowClick={selectGroup} getRowClassName={rowClass(groups.getState)} editing={{ keys: groupColumns.map(column => column.key), onChange: (row, key, value) => groups.update(row.__GRID_ROW_ID, current => applyGridValue(current, groupColumns, key, value)) }} toolbarActions={toolbar(() => groups.add({ ...managed, CODE_GROUP_ID: '', CODE_GROUP_NAME: '', DESCRIPTION: '' }), () => { groups.remove(groupSelected); setGroupSelected(new Set()); }, () => { groups.revert(groupSelected); setGroupSelected(new Set()); }, () => void saveGroups(), groupSelected, groups.hasChanges(groupSelected), groups.dirty)} />}
+      detailTop={<BaseKitDataGrid programKey={PROGRAM_KEY} roleCode={ROLE} title={`${selectedGroupId} 속성정의 목록`} columns={attributeColumns} rows={attributes.rows} getRowKey={row => row.__GRID_ROW_ID} getRowState={attributes.getState} selectedRowKeys={attributeSelected} onSelectedRowKeysChange={setAttributeSelected} getRowClassName={rowClass(attributes.getState)} editing={{ keys: attributeColumns.map(column => column.key), onChange: (row, key, value) => attributes.update(row.__GRID_ROW_ID, current => applyGridValue(current, attributeColumns, key, value)) }} toolbarActions={toolbar(() => selectedGroupId ? attributes.add({ ...managed, ATTRIBUTE_DEF_ID: '', CODE_GROUP_ID: selectedGroupId, ATTRIBUTE_CODE: '', ATTRIBUTE_NAME: '', DATA_TYPE: 'STRING', CONTROL_TYPE: 'TEXT', DISPLAY_TYPE: 'TEXT', REQUIRED_YN: 'N', DEFAULT_VALUE: null, OPTION_SOURCE: null, SORT_ORDER: 0 }) : notify('코드그룹을 선택해 주세요.'), () => { attributes.remove(attributeSelected); setAttributeSelected(new Set()); }, () => { attributes.revert(attributeSelected); setAttributeSelected(new Set()); }, () => void saveAttributes(), attributeSelected, attributes.hasChanges(attributeSelected), attributes.dirty)} />}
+      detailBottom={<BaseKitDataGrid programKey={PROGRAM_KEY} roleCode={ROLE} title={`${selectedGroupId} 공통코드 목록`} columns={codeColumns} fields={fields} rows={codes.rows} getRowKey={row => row.__GRID_ROW_ID} getRowState={codes.getState} getFieldValue={(row, field) => row.ATTRIBUTE_VALUES?.[field.key]} selectedRowKeys={codeSelected} onSelectedRowKeysChange={setCodeSelected} getRowClassName={rowClass(codes.getState)} editing={{ keys: [...codeColumns.map(column => column.key), ...fields.map(field => `ATTRIBUTE_${field.key}`)], onChange: (row, key, value) => codes.update(row.__GRID_ROW_ID, current => key.startsWith('ATTRIBUTE_') ? { ...current, ATTRIBUTE_VALUES: { ...current.ATTRIBUTE_VALUES, [key.slice(10)]: value } } : applyGridValue(current, codeColumns, key, value)) }} toolbarActions={toolbar(() => selectedGroupId ? codes.add({ ...managed, CODE_ID: '', CODE_GROUP_ID: selectedGroupId, CODE: '', CODE_NAME: '', SORT_ORDER: 0, ATTRIBUTE_VALUES: Object.fromEntries(fields.map(field => [field.key, field.defaultValue ?? ''])) }) : notify('코드그룹을 선택해 주세요.'), () => { codes.remove(codeSelected); setCodeSelected(new Set()); }, () => { codes.revert(codeSelected); setCodeSelected(new Set()); }, () => void saveCodes(), codeSelected, codes.hasChanges(codeSelected), codes.dirty)} />}
     />
   </section>;
 }
