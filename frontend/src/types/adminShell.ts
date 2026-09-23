@@ -39,6 +39,7 @@ export interface ProgramMeta {
   modifyScope: 'NONE' | 'ROLE';
   actionCodes: ActionCode[];
   useYn: 'Y' | 'N';
+  requiresProjectContext?: boolean;
 }
 
 /**

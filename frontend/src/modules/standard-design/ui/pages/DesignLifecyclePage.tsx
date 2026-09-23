@@ -6,13 +6,17 @@ import PageHeader from '../../../../components/common/PageHeader';
 import SearchPanel, { type SearchFieldConfig } from '../../../../components/common/SearchPanel';
 import { schemaCatalogRepository } from '../../../../features/system/tableManage/schemaCatalog.repository';
 import { designLifecycleRepository } from '../../design-lifecycle/designLifecycle.repository';
-import type { DbColumnDefinition, DesignProject, DesignStatus, ScreenField } from '../../design-lifecycle/designLifecycle.types';
+import type { DbColumnDefinition, DesignProject, DesignStatus, ScreenField, DesignMember, ProjectMember } from '../../design-lifecycle/designLifecycle.types';
 import {
   toProjectDraft, createEmptyProjectDraft, searchProjectSnapshot, saveToProjectWorkingSet,
   getNextProjectId, isProjectDraftDirty, getEditorProject, getAppliedSearchDescription,
   type ProjectSearchCondition, type ProjectEditor, type ProjectDraft, type ProjectMessageTone,
 } from '../components/projectReference';
 import ProjectListDetailWorkspace, { type ProjectWorkspaceMode } from '../components/ProjectListDetailWorkspace';
+import ProjectMemberDialog from '../components/ProjectMemberDialog';
+import ProjectContextSelector from '../components/ProjectContextSelector';
+import { validateProjectDates } from '../components/projectContext';
+import { useProjectContext } from '../components/useProjectContext';
 
 type LifecycleView = 'overview' | 'wbs' | 'requirements' | 'screens' | 'database';
 type LifecycleItem = ReturnType<typeof getRows>[number];
@@ -133,6 +137,9 @@ function ProjectManagementPage() {
   const [editor, setEditor] = useState<ProjectEditor | null>(null);
   const [message, setMessage] = useState<ProjectMessage | null>(null);
   const [projectSearchOpen, setProjectSearchOpen] = useState(false);
+  const [memberDialogOpen, setMemberDialogOpen] = useState(false);
+  const [editingProjectMember, setEditingProjectMember] = useState<ProjectMember | undefined>();
+  const [selectedProjectMemberId, setSelectedProjectMemberId] = useState('');
   const activeProject = getEditorProject(editor);
   const hasUnsavedChanges = isProjectDraftDirty(editor);
 
@@ -158,8 +165,8 @@ function ProjectManagementPage() {
     if (!confirmDiscardChanges()) return;
 
     const draft = toProjectDraft(project);
-    designLifecycleRepository.setSelectedProjectId(project.PROJECT_ID);
     setSelectedProjectId(project.PROJECT_ID);
+    designLifecycleRepository.setSelectedProjectId(project.PROJECT_ID);
     setEditor({ mode: 'EDIT', sourceProjectId: project.PROJECT_ID, initialDraft: draft, draft });
     setWorkspaceMode('DETAIL');
     setMessage(null);
@@ -171,6 +178,7 @@ function ProjectManagementPage() {
       return;
     }
     setSelectedProjectId(project.PROJECT_ID);
+    designLifecycleRepository.setSelectedProjectId(project.PROJECT_ID);
   };
 
   const createProject = () => {
@@ -234,6 +242,8 @@ function ProjectManagementPage() {
       setMessage({ tone: 'error', text: '프로젝트명과 고객명은 필수입니다.' });
       return;
     }
+    const dateError = validateProjectDates(draft.START_DATE, draft.END_DATE);
+    if (dateError) { setMessage({ tone: 'error', text: dateError }); return; }
 
     try {
       const projectId = editor.mode === 'EDIT' ? editor.sourceProjectId : getNextProjectId(designLifecycleRepository.getData().projects);
@@ -297,6 +307,19 @@ function ProjectManagementPage() {
     },
     { key: 'customer', header: '고객명', render: (project) => project.CUSTOMER_NAME, minWidth: 76, flex: 1.4 },
     { key: 'status', header: '상태', render: (project) => project.STATUS, width: 64, align: 'center' },
+  ];
+  const projectMembers = activeProject
+    ? designLifecycleRepository.getData().projectMembers.filter((assignment) => assignment.PROJECT_ID === activeProject.PROJECT_ID)
+    : [];
+  const projectMemberColumns: DataTableColumn<ProjectMember>[] = [
+    { key: 'name', header: '이름', render: (assignment) => designLifecycleRepository.getData().members.find((member) => member.MEMBER_ID === assignment.MEMBER_ID)?.MEMBER_NAME ?? '-', minWidth: 120, flex: 1 },
+    { key: 'participation', header: '참여구분', render: (assignment) => assignment.PARTICIPATION_TYPE_CD, width: 100 },
+    { key: 'role', header: '역할', render: (assignment) => assignment.ROLE_CD, width: 80 },
+    { key: 'grade', header: '등급', render: (assignment) => ({ BEGINNER: '초급', INTERMEDIATE: '중급', ADVANCED: '고급', EXPERT: '특급' })[assignment.GRADE_CD], width: 70 },
+    { key: 'start', header: '투입 시작', render: (assignment) => assignment.START_DATE, width: 105 },
+    { key: 'end', header: '투입 종료', render: (assignment) => assignment.END_DATE, width: 105 },
+    { key: 'mm', header: '계획 MM', render: (assignment) => assignment.PLAN_MM, width: 76, align: 'right' },
+    { key: 'status', header: '상태', render: (assignment) => assignment.STATUS_CD === 'ACTIVE' ? '참여' : '미참여', width: 76 },
   ];
 
   const editorTitle = editor?.mode === 'EDIT'
@@ -381,32 +404,66 @@ function ProjectManagementPage() {
           <div className="standard-design-project-fields">
             <label><span>프로젝트명</span><input name="PROJECT_NAME" required value={editor.draft.PROJECT_NAME} onChange={(event) => updateDraft('PROJECT_NAME', event.target.value)} /></label>
             <label><span>고객명</span><input name="CUSTOMER_NAME" required value={editor.draft.CUSTOMER_NAME} onChange={(event) => updateDraft('CUSTOMER_NAME', event.target.value)} /></label>
+            <label><span>시작일</span><input name="START_DATE" type="date" required value={editor.draft.START_DATE} onChange={(event) => updateDraft('START_DATE', event.target.value)} /></label>
+            <label><span>종료일</span><input name="END_DATE" type="date" required value={editor.draft.END_DATE} onChange={(event) => updateDraft('END_DATE', event.target.value)} /></label>
             <label><span>상태</span><select name="STATUS" value={editor.draft.STATUS} onChange={(event) => updateDraft('STATUS', event.target.value as DesignStatus)}>{STATUS.map((status) => <option key={status}>{status}</option>)}</select></label>
             <label className="standard-design-project-description"><span>설명</span><textarea name="DESCRIPTION" rows={5} value={editor.draft.DESCRIPTION} onChange={(event) => updateDraft('DESCRIPTION', event.target.value)} /></label>
           </div>
         </form>
+        {editor.mode === 'EDIT' && activeProject ? <section className="sd-project-member-section" aria-label="프로젝트 멤버 관리">
+          <div className="sd-project-member-heading">
+            <h2>프로젝트 멤버 <span>({projectMembers.length}명)</span></h2>
+            <div>
+              <button type="button" className="primary-button" onClick={() => { setEditingProjectMember(undefined); setMemberDialogOpen(true); }}>인원 추가</button>
+              <button type="button" className="secondary-button" disabled={!selectedProjectMemberId} onClick={() => {
+                setEditingProjectMember(projectMembers.find((item) => item.PROJECT_MEMBER_ID === selectedProjectMemberId));
+                setMemberDialogOpen(true);
+              }}>수정</button>
+              <button type="button" className="danger-button" disabled={!selectedProjectMemberId} onClick={() => {
+                const row = projectMembers.find((item) => item.PROJECT_MEMBER_ID === selectedProjectMemberId);
+                if (row && window.confirm('선택한 프로젝트 참여 정보를 삭제하시겠습니까?')) {
+                  designLifecycleRepository.deleteItem('projectMembers', row.PROJECT_MEMBER_ID);
+                  setSelectedProjectMemberId('');
+                }
+              }}>삭제</button>
+            </div>
+          </div>
+          <DataTable columns={projectMemberColumns} rows={projectMembers} getRowKey={(item) => item.PROJECT_MEMBER_ID}
+            onRowClick={(item) => setSelectedProjectMemberId(item.PROJECT_MEMBER_ID)}
+            getRowClassName={(item) => item.PROJECT_MEMBER_ID === selectedProjectMemberId ? 'selected-row' : ''}
+            emptyMessage="등록된 프로젝트 멤버가 없습니다." />
+        </section> : null}
         </>
       ) : null}
     />
     {message ? <ProjectMessageBanner message={message} /> : null}
+    {memberDialogOpen && activeProject ? <ProjectMemberDialog project={activeProject}
+      members={designLifecycleRepository.getData().members} assignments={projectMembers} editing={editingProjectMember}
+      onClose={() => setMemberDialogOpen(false)} onSave={(member: DesignMember, assignment) => {
+        designLifecycleRepository.saveMember(member);
+        designLifecycleRepository.saveProjectMember(assignment);
+        setSelectedProjectMemberId(assignment.PROJECT_MEMBER_ID);
+        setMemberDialogOpen(false);
+        setMessage({ tone: 'success', text: `${member.MEMBER_NAME} 프로젝트 참여정보를 저장했습니다.` });
+      }} /> : null}
   </div>;
 }
 
 function LifecycleDetailPage({ view, supplement }: { view: LifecycleView; supplement?: ReactNode }) {
   const [, setRevision] = useState(0);
-  const [projectId, setProjectId] = useState(designLifecycleRepository.getSelectedProjectId());
-  const [selectedId, setSelectedId] = useState('');
+  const { projectId } = useProjectContext();
+  const [selection, setSelection] = useState({ projectId: '', id: '' });
+  const selectedId = selection.projectId === projectId ? selection.id : '';
+  const setSelectedId = (id: string) => setSelection({ projectId, id });
   const [message, setMessage] = useState('목록에서 대상을 선택하거나 신규 등록을 시작하세요.');
   const data = designLifecycleRepository.getData();
-  const project = data.projects.find((item) => item.PROJECT_ID === projectId);
   const rows = getRows(view, projectId);
   const selected = rows.find((item) => itemId(item) === selectedId);
   const refresh = () => setRevision((value) => value + 1);
   const changeProject = (value: string) => {
     designLifecycleRepository.setSelectedProjectId(value);
-    setProjectId(value);
     setSelectedId('');
-    setMessage('프로젝트 Context를 변경했습니다. 이후 Lifecycle 화면에서도 유지됩니다.');
+    setMessage('Project Context를 변경했습니다. 현재 프로젝트 기준으로 목록을 다시 표시합니다.');
   };
   const create = () => {
     setSelectedId('');
@@ -422,7 +479,7 @@ function LifecycleDetailPage({ view, supplement }: { view: LifecycleView; supple
     const status = form.get('STATUS') as DesignStatus;
     if (view === 'overview') {
       const id = selectedId || nextId('SDP', data.projects.length);
-      designLifecycleRepository.saveProject({ PROJECT_ID: id, PROJECT_NAME: String(form.get('NAME')).trim(), CUSTOMER_NAME: String(form.get('CUSTOMER_NAME')).trim(), DESCRIPTION: String(form.get('DESCRIPTION')).trim(), STATUS: status });
+      designLifecycleRepository.saveProject({ PROJECT_ID: id, PROJECT_NAME: String(form.get('NAME')).trim(), CUSTOMER_NAME: String(form.get('CUSTOMER_NAME')).trim(), DESCRIPTION: String(form.get('DESCRIPTION')).trim(), STATUS: status, START_DATE: String(form.get('START_DATE') ?? ''), END_DATE: String(form.get('END_DATE') ?? '') });
       if (!projectId) changeProject(id);
     }
     if (view === 'wbs') designLifecycleRepository.saveWbs({ WBS_ID: selectedId || nextId('WBS', data.wbsItems.length), PROJECT_ID: projectId, PARENT_WBS_ID: String(form.get('PARENT_WBS_ID')) || null, WBS_NAME: String(form.get('NAME')).trim(), WBS_LEVEL: Number(form.get('WBS_LEVEL')), STATUS: status });
@@ -442,7 +499,6 @@ function LifecycleDetailPage({ view, supplement }: { view: LifecycleView; supple
     if (view === 'overview' && selectedId === projectId) {
       const nextProjectId = data.projects.find((item) => item.PROJECT_ID !== selectedId)?.PROJECT_ID ?? '';
       designLifecycleRepository.setSelectedProjectId(nextProjectId);
-      setProjectId(nextProjectId);
     }
     setSelectedId('');
     setMessage(`${labels[view]} 정보를 삭제했습니다.`);
@@ -465,9 +521,9 @@ function LifecycleDetailPage({ view, supplement }: { view: LifecycleView; supple
         : <section className="standard-design-lifecycle-guide"><h2>{view === 'wbs' ? '계층 WBS' : '상세 정보'}</h2><p>{view === 'wbs' ? '상위 WBS와 레벨을 지정하면 프로젝트 범위 안에서 계층 구조를 관리합니다.' : '목록에서 대상을 선택하면 관련 상세 정보가 표시됩니다.'}</p>{supplement}</section>;
 
   return <div className="page standard-design-page standard-design-lifecycle-page">
-    <PageHeader breadcrumbs={['Standard Design', labels[view]]} description="프로젝트 Context를 유지하며 설계 산출물과 요구사항 추적성을 관리합니다." />
+    <PageHeader breadcrumbs={['Standard Design', labels[view]]} description="프로젝트 Context를 유지하며 설계 산출물과 요구사항 추적성을 관리합니다." rightContent={['wbs', 'requirements', 'screens', 'database'].includes(view) ? <ProjectContextSelector /> : null} />
     <section className="standard-design-lifecycle-toolbar" aria-label={`${labels[view]} 기능`}>
-      {view === 'overview' ? <label>프로젝트<select value={projectId} onChange={(event) => changeProject(event.target.value)}>{data.projects.map((item) => <option key={item.PROJECT_ID} value={item.PROJECT_ID}>{item.PROJECT_NAME}</option>)}</select></label> : <span className="standard-design-project-context">Project Context: <strong>{project?.PROJECT_NAME ?? '프로젝트 없음'}</strong></span>}
+      {view === 'overview' ? <label>프로젝트<select value={projectId} onChange={(event) => changeProject(event.target.value)}>{data.projects.map((item) => <option key={item.PROJECT_ID} value={item.PROJECT_ID}>{item.PROJECT_NAME}</option>)}</select></label> : null}
       <div className="standard-design-lifecycle-actions"><button type="button" className="secondary-button" data-action-code="SEARCH" onClick={() => { refresh(); setMessage('목록을 조회했습니다.'); }}>조회</button><button type="button" className="primary-button" data-action-code="CREATE" onClick={create}>등록</button><button type="submit" form="lifecycle-detail-form" className="primary-button" data-action-code="UPDATE">저장</button><button type="button" className="danger-button" data-action-code="DELETE" onClick={remove}>삭제</button></div>
     </section>
     <MasterDetailMultiGrid

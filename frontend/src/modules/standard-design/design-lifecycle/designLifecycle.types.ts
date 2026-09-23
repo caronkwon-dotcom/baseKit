@@ -6,6 +6,34 @@ export interface DesignProject {
   CUSTOMER_NAME: string;
   DESCRIPTION: string;
   STATUS: DesignStatus;
+  START_DATE: string;
+  END_DATE: string;
+}
+
+/** Design personnel profile, independent from login and project assignment. */
+export interface DesignMember {
+  MEMBER_ID: string;
+  USER_ID: string | null;
+  MEMBER_NAME: string;
+  ORG_ID: string;
+  CAREER_YEARS: number | null;
+  MAIN_SKILL: string;
+  NOTE: string;
+}
+
+/** Assignment facts belong to a person-in-a-project, never to the member profile. */
+export interface ProjectMember {
+  PROJECT_MEMBER_ID: string;
+  PROJECT_ID: string;
+  MEMBER_ID: string;
+  PARTICIPATION_TYPE_CD: 'INTERNAL' | 'PARTNER' | 'CUSTOMER';
+  ROLE_CD: string;
+  GRADE_CD: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
+  START_DATE: string;
+  END_DATE: string;
+  PLAN_MM: number;
+  STATUS_CD: 'ACTIVE' | 'INACTIVE';
+  NOTE: string;
 }
 
 export interface WbsItem {
@@ -71,6 +99,8 @@ export interface DbTableDefinition {
 
 export type DesignLifecycleData = {
   projects: DesignProject[];
+  members: DesignMember[];
+  projectMembers: ProjectMember[];
   wbsItems: WbsItem[];
   requirements: DesignRequirement[];
   screens: ScreenDefinition[];
