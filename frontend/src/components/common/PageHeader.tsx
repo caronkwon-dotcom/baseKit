@@ -1,13 +1,17 @@
+import type { ReactNode } from 'react';
+
 interface PageHeaderProps {
   description?: string;
   breadcrumbs: string[];
   onManual?: () => void;
+  rightContent?: ReactNode;
 }
 
 export default function PageHeader({
   description,
   breadcrumbs,
   onManual,
+  rightContent,
 }: PageHeaderProps) {
   return (
     <div className="page-header">
@@ -35,6 +39,7 @@ export default function PageHeader({
           </button>
         </div>
         {description ? <p className="program-summary">{description}</p> : null}
+        {rightContent ? <div className="page-context-actions">{rightContent}</div> : null}
       </div>
     </div>
   );

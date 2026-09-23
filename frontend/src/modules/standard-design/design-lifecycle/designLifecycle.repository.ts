@@ -2,6 +2,8 @@ import type {
   DbTableDefinition,
   DesignLifecycleData,
   DesignProject,
+  DesignMember,
+  ProjectMember,
   DesignRequirement,
   ScreenDefinition,
   WbsItem,
@@ -11,7 +13,9 @@ const STORAGE_KEY = 'basekit.standard-design.lifecycle.v1';
 const PROJECT_CONTEXT_KEY = 'basekit.standard-design.project-context.v1';
 
 const initialData: DesignLifecycleData = {
-  projects: [{ PROJECT_ID: 'SDP-001', PROJECT_NAME: 'BaseKit 적용 설계', CUSTOMER_NAME: '내부 기준', DESCRIPTION: '설계 산출물과 추적성을 검증하는 기준 프로젝트입니다.', STATUS: 'IN_PROGRESS' }],
+  projects: [{ PROJECT_ID: 'SDP-001', PROJECT_NAME: 'BaseKit 적용 설계', CUSTOMER_NAME: '내부 기준', DESCRIPTION: '설계 산출물과 추적성을 검증하는 기준 프로젝트입니다.', STATUS: 'IN_PROGRESS', START_DATE: '2026-01-01', END_DATE: '2026-12-31' }],
+  members: [],
+  projectMembers: [],
   wbsItems: [
     { WBS_ID: 'WBS-001', PROJECT_ID: 'SDP-001', PARENT_WBS_ID: null, WBS_NAME: '요구사항 분석', WBS_LEVEL: 1, STATUS: 'IN_PROGRESS' },
     { WBS_ID: 'WBS-002', PROJECT_ID: 'SDP-001', PARENT_WBS_ID: 'WBS-001', WBS_NAME: '표준 관리 분석', WBS_LEVEL: 2, STATUS: 'DRAFT' },
@@ -29,7 +33,16 @@ function loadData(): DesignLifecycleData {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) return clone(initialData);
   try {
-    return JSON.parse(stored) as DesignLifecycleData;
+    const data = JSON.parse(stored) as Partial<DesignLifecycleData>;
+    return {
+      ...clone(initialData),
+      ...data,
+      projects: (data.projects ?? initialData.projects).map((project) => ({
+        ...project, START_DATE: project.START_DATE ?? '', END_DATE: project.END_DATE ?? '',
+      })),
+      members: data.members ?? [],
+      projectMembers: data.projectMembers ?? [],
+    };
   } catch {
     throw new Error('저장된 설계 Lifecycle 데이터 형식이 올바르지 않습니다.');
   }
@@ -46,11 +59,28 @@ function upsert<T, K extends keyof T>(rows: T[], item: T, key: K) {
 
 export const designLifecycleRepository = {
   getData: () => loadData(),
-  getSelectedProjectId: () => localStorage.getItem(PROJECT_CONTEXT_KEY) ?? loadData().projects[0]?.PROJECT_ID ?? '',
-  setSelectedProjectId: (projectId: string) => localStorage.setItem(PROJECT_CONTEXT_KEY, projectId),
+  getSelectedProjectId: () => {
+    const projects = loadData().projects;
+    const saved = localStorage.getItem(PROJECT_CONTEXT_KEY);
+    return projects.some((project) => project.PROJECT_ID === saved) ? saved! : '';
+  },
+  getSelectedProject: () => loadData().projects.find((project) => project.PROJECT_ID === designLifecycleRepository.getSelectedProjectId()) ?? null,
+  setSelectedProjectId: (projectId: string) => {
+    if (projectId) localStorage.setItem(PROJECT_CONTEXT_KEY, projectId);
+    else localStorage.removeItem(PROJECT_CONTEXT_KEY);
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event('basekit:project-context-changed'));
+  },
   saveProject: (project: DesignProject) => {
     const data = loadData();
     saveData({ ...data, projects: upsert(data.projects, project, 'PROJECT_ID') });
+  },
+  saveMember: (member: DesignMember) => {
+    const data = loadData();
+    saveData({ ...data, members: upsert(data.members, member, 'MEMBER_ID') });
+  },
+  saveProjectMember: (assignment: ProjectMember) => {
+    const data = loadData();
+    saveData({ ...data, projectMembers: upsert(data.projectMembers, assignment, 'PROJECT_MEMBER_ID') });
   },
   saveWbs: (item: WbsItem) => {
     const data = loadData();
@@ -68,9 +98,20 @@ export const designLifecycleRepository = {
     const data = loadData();
     saveData({ ...data, tables: upsert(data.tables, item, 'TABLE_ID') });
   },
-  deleteItem: (type: keyof Pick<DesignLifecycleData, 'projects' | 'wbsItems' | 'requirements' | 'screens' | 'tables'>, id: string) => {
+  deleteItem: (type: keyof Pick<DesignLifecycleData, 'projects' | 'members' | 'projectMembers' | 'wbsItems' | 'requirements' | 'screens' | 'tables'>, id: string) => {
     const data = loadData();
-    if (type === 'projects') saveData({ ...data, projects: data.projects.filter((item) => item.PROJECT_ID !== id) });
+    if (type === 'projects') {
+      const projects = data.projects.filter((item) => item.PROJECT_ID !== id);
+      saveData({ ...data, projects, projectMembers: data.projectMembers.filter((item) => item.PROJECT_ID !== id) });
+      if (localStorage.getItem(PROJECT_CONTEXT_KEY) === id) {
+        const nextId = projects[0]?.PROJECT_ID ?? '';
+        if (nextId) localStorage.setItem(PROJECT_CONTEXT_KEY, nextId);
+        else localStorage.removeItem(PROJECT_CONTEXT_KEY);
+        if (typeof window !== 'undefined') window.dispatchEvent(new Event('basekit:project-context-changed'));
+      }
+    }
+    if (type === 'members') saveData({ ...data, members: data.members.filter((item) => item.MEMBER_ID !== id) });
+    if (type === 'projectMembers') saveData({ ...data, projectMembers: data.projectMembers.filter((item) => item.PROJECT_MEMBER_ID !== id) });
     if (type === 'wbsItems') saveData({ ...data, wbsItems: data.wbsItems.filter((item) => item.WBS_ID !== id) });
     if (type === 'requirements') saveData({ ...data, requirements: data.requirements.filter((item) => item.REQUIREMENT_ID !== id) });
     if (type === 'screens') saveData({ ...data, screens: data.screens.filter((item) => item.SCREEN_ID !== id) });

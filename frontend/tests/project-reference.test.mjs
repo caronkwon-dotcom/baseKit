@@ -4,10 +4,10 @@ import { toProjectDraft, createEmptyProjectDraft, filterProjects, getNextProject
 import { getBoundedListWidth } from '../src/modules/standard-design/ui/components/projectSplitter.ts';
 import { searchProjectSnapshot, saveToProjectWorkingSet, emptyProjectSearchCondition, getEditorProject } from '../src/modules/standard-design/ui/components/projectReference.ts';
 
-const source = { PROJECT_ID: 'SDP-003', PROJECT_NAME: 'BaseKit', CUSTOMER_NAME: '내부 기준', DESCRIPTION: '설명', STATUS: 'IN_PROGRESS', REG_BY: 'admin', MEMBERS: ['member'] };
+const source = { PROJECT_ID: 'SDP-003', PROJECT_NAME: 'BaseKit', CUSTOMER_NAME: '내부 기준', DESCRIPTION: '설명', STATUS: 'IN_PROGRESS', START_DATE: '2026-01-01', END_DATE: '2026-12-31', REG_BY: 'admin', MEMBERS: ['member'] };
 test('simple copy excludes identities and relations without mutating source', () => {
   const draft = toProjectDraft(source);
-  assert.deepEqual(Object.keys(draft).sort(), ['PROJECT_NAME', 'CUSTOMER_NAME', 'DESCRIPTION', 'STATUS'].sort());
+  assert.deepEqual(Object.keys(draft).sort(), ['PROJECT_NAME', 'CUSTOMER_NAME', 'DESCRIPTION', 'STATUS', 'START_DATE', 'END_DATE'].sort());
   draft.PROJECT_NAME = 'Copy';
   assert.equal(source.PROJECT_NAME, 'BaseKit');
 });

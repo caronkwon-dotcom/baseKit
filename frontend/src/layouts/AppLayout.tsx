@@ -7,6 +7,8 @@ import Workspace from '../components/Workspace';
 import { programComponents } from '../config/programRegistry';
 import { metadataRepository, programByKey } from '../repositories/metadataRepository';
 import type { MdiTab, MenuNode, ProgramKey } from '../types/adminShell';
+import { designLifecycleRepository } from '../modules/standard-design/design-lifecycle/designLifecycle.repository';
+import { ProjectContextDialog } from '../modules/standard-design/ui/components/ProjectContextSelector';
 
 const homeTab: MdiTab = { programKey: 'HOME', title: programByKey.HOME.programName };
 
@@ -25,6 +27,7 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const menuTree = useMemo(() => metadataRepository.getMenuTree(), []);
   const initialProgramKey = findProgramKeyByRoutePath(location.pathname);
+  const initialContextMissing = Boolean(programByKey[initialProgramKey].requiresProjectContext && !designLifecycleRepository.getSelectedProjectId());
   const [activeTopMenuKey, setActiveTopMenuKey] = useState(() =>
     findTopMenuKeyByProgram(menuTree, initialProgramKey) ?? menuTree[0]?.menuKey ?? '',
   );
@@ -35,11 +38,13 @@ export default function AppLayout() {
     menuTree.flatMap((menu) => menu.children.filter((child) => child.menuType === 'GROUP').map((child) => child.menuKey)),
   );
   const [tabs, setTabs] = useState<MdiTab[]>(() =>
-    initialProgramKey === 'HOME'
+    initialProgramKey === 'HOME' || initialContextMissing
       ? [homeTab]
       : [homeTab, { programKey: initialProgramKey, title: programByKey[initialProgramKey].programName }],
   );
-  const [activeProgramKey, setActiveProgramKey] = useState<ProgramKey>(initialProgramKey);
+  const [activeProgramKey, setActiveProgramKey] = useState<ProgramKey>(initialContextMissing ? 'HOME' : initialProgramKey);
+  const [projectContextDialogOpen, setProjectContextDialogOpen] = useState(initialContextMissing);
+  const [pendingProjectProgramKey, setPendingProjectProgramKey] = useState<ProgramKey | null>(initialContextMissing ? initialProgramKey : null);
   const activeTopMenu = menuTree.find((menu) => menu.menuKey === activeTopMenuKey) ?? menuTree[0];
 
   useEffect(() => {
@@ -52,6 +57,10 @@ export default function AppLayout() {
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [sidebarPinned]);
 
+  useEffect(() => {
+    if (initialContextMissing) navigate(programByKey.HOME.routePath, { replace: true });
+  }, [initialContextMissing, navigate]);
+
   const pinSidebar = () => { setSidebarPinned(true); setSidebarOpen(true); localStorage.setItem('basekit.navigation.sidebar-pinned', 'Y'); };
   const unpinSidebar = () => { setSidebarPinned(false); localStorage.setItem('basekit.navigation.sidebar-pinned', 'N'); };
   const selectTopMenu = (menuKey: string) => {
@@ -60,7 +69,7 @@ export default function AppLayout() {
     setFloatingMenuOpen(sameMenu ? !floatingMenuOpen : true);
   };
 
-  const activateProgram = (programKey: ProgramKey) => {
+  const activateProgramImmediately = (programKey: ProgramKey) => {
     setActiveProgramKey(programKey);
     const topMenuKey = findTopMenuKeyByProgram(menuTree, programKey);
     if (topMenuKey) setActiveTopMenuKey(topMenuKey);
@@ -68,7 +77,23 @@ export default function AppLayout() {
     if (location.pathname !== routePath) navigate(routePath);
   };
 
+  const activateProgram = (programKey: ProgramKey) => {
+    if (programByKey[programKey].requiresProjectContext && !designLifecycleRepository.getSelectedProjectId()) {
+      setPendingProjectProgramKey(programKey);
+      setProjectContextDialogOpen(true);
+      return;
+    }
+    activateProgramImmediately(programKey);
+  };
+
   const openProgram = (programKey: ProgramKey) => {
+    if (programByKey[programKey].requiresProjectContext && !designLifecycleRepository.getSelectedProjectId()) {
+      setPendingProjectProgramKey(programKey);
+      setProjectContextDialogOpen(true);
+      setFloatingMenuOpen(false);
+      if (!sidebarPinned) setSidebarOpen(false);
+      return;
+    }
     const program = programByKey[programKey];
     setTabs((currentTabs) => currentTabs.some((tab) => tab.programKey === programKey)
       ? currentTabs : [...currentTabs, { programKey, title: program.programName }]);
@@ -137,6 +162,24 @@ export default function AppLayout() {
           <Workspace activeProgramKey={activeProgramKey} programComponents={programComponents} />
         </section>
       </div>
+      {projectContextDialogOpen ? <ProjectContextDialog
+        onClose={() => { setProjectContextDialogOpen(false); setPendingProjectProgramKey(null); }}
+        onOpenProjectManagement={() => {
+          setProjectContextDialogOpen(false);
+          setPendingProjectProgramKey(null);
+          openProgram('SD_PROJECT_MGMT');
+        }}
+        onSelected={() => {
+          const pending = pendingProjectProgramKey;
+          setProjectContextDialogOpen(false);
+          setPendingProjectProgramKey(null);
+          if (pending) {
+            const program = programByKey[pending];
+            setTabs((currentTabs) => currentTabs.some((tab) => tab.programKey === pending)
+              ? currentTabs : [...currentTabs, { programKey: pending, title: program.programName }]);
+            activateProgramImmediately(pending);
+          }
+        }} /> : null}
     </div>
   );
 }

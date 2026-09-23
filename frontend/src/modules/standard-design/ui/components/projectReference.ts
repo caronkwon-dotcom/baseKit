@@ -35,6 +35,8 @@ export interface ProjectDraft {
   CUSTOMER_NAME: string;
   DESCRIPTION: string;
   STATUS: DesignStatus;
+  START_DATE: string;
+  END_DATE: string;
 }
 
 export interface ProjectEditor {
@@ -50,6 +52,8 @@ export function toProjectDraft(project: DesignProject): ProjectDraft {
     CUSTOMER_NAME: project.CUSTOMER_NAME,
     DESCRIPTION: project.DESCRIPTION,
     STATUS: project.STATUS,
+    START_DATE: project.START_DATE ?? '',
+    END_DATE: project.END_DATE ?? '',
   };
 }
 
@@ -59,6 +63,8 @@ export function createEmptyProjectDraft(): ProjectDraft {
     CUSTOMER_NAME: '',
     DESCRIPTION: '',
     STATUS: 'DRAFT',
+    START_DATE: '',
+    END_DATE: '',
   };
 }
 
