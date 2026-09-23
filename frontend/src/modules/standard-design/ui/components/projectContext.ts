@@ -69,4 +69,3 @@ export function isActiveProjectMemberDuplicate(
   return assignments.some((item) => item.PROJECT_ID === projectId && item.MEMBER_ID === memberId
     && item.STATUS_CD === 'ACTIVE' && item.PROJECT_MEMBER_ID !== exceptId);
 }
-
