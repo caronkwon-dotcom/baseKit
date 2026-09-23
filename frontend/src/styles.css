@@ -42,7 +42,8 @@
   --grid-state-updated-bg: color-mix(in srgb, var(--grid-state-updated) 5%, var(--surface-panel));
   --grid-state-deleted: #dc2626;
   --grid-state-deleted-bg: color-mix(in srgb, var(--grid-state-deleted) 5%, var(--surface-panel));
-  --grid-editable-cell-bg: color-mix(in srgb, #dbeafe 38%, var(--surface-panel));
+  --grid-editable-border: #cbd5e1;
+  --grid-editable-border-hover: #94a3b8;
   --multi-grid-master-width: 40%;
   --multi-grid-master-min-width: 360px;
   --multi-grid-workspace-min-height: 520px;
