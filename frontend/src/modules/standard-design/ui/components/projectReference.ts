@@ -23,10 +23,10 @@ export function searchProjectSnapshot(projects: DesignProject[], condition: Proj
 }
 
 /** Editing must not silently re-filter the user's current working set. */
-export function saveToProjectWorkingSet(rows: DesignProject[], saved: DesignProject): DesignProject[] {
+export function saveToProjectWorkingSet(rows: DesignProject[], saved: DesignProject, mode: ProjectEditorMode): DesignProject[] {
   return rows.some((project) => project.PROJECT_ID === saved.PROJECT_ID)
     ? rows.map((project) => project.PROJECT_ID === saved.PROJECT_ID ? saved : project)
-    : [...rows, saved];
+    : mode === 'EDIT' ? rows : [...rows, saved];
 }
 export type ProjectMessageTone = 'info' | 'warning' | 'error' | 'success';
 
@@ -94,4 +94,11 @@ export function getNextProjectId(projects: DesignProject[]) {
 
 export function isProjectDraftDirty(editor: ProjectEditor | null) {
   return Boolean(editor && (editor.mode === 'COPY' || JSON.stringify(editor.draft) !== JSON.stringify(editor.initialDraft)));
+}
+
+/** Saved detail identity must remain available even outside the current search result. */
+export function getEditorProject(editor: ProjectEditor | null): DesignProject | undefined {
+  return editor?.mode === 'EDIT' && editor.sourceProjectId
+    ? { PROJECT_ID: editor.sourceProjectId, ...editor.initialDraft }
+    : undefined;
 }

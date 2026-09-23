@@ -1,7 +1,7 @@
 import type { ActionCode } from '../../constants/actionCodes';
 import { useUiPreferences } from '../../preferences/useUiPreferences';
 
-export type ActionButtonDisplay = 'text' | 'icon';
+export type ActionButtonDisplay = 'text' | 'icon' | 'label';
 export type ActionButtonDisplayMode = 'ICON_TEXT' | 'ICON_ONLY';
 export type ActionButtonTone = 'default' | 'primary' | 'danger';
 
@@ -27,10 +27,10 @@ function ActionIcon({ actionCode }: { actionCode: ActionCode }) {
 /** One semantic action, rendered as compact Icon + Text or Icon Only. */
 export default function ActionButton({ actionCode, label, display, displayMode, tone = 'default', disabled = false, onClick }: ActionButtonProps) {
   const { preferences } = useUiPreferences();
-  const resolvedDisplayMode = displayMode ?? (display === 'icon' ? 'ICON_ONLY' : display === 'text' ? 'ICON_TEXT' : preferences.buttonDisplayMode);
+  const resolvedDisplayMode = displayMode ?? (display === 'icon' ? 'ICON_ONLY' : display === 'text' || display === 'label' ? 'ICON_TEXT' : preferences.buttonDisplayMode);
   const iconOnly = resolvedDisplayMode === 'ICON_ONLY';
   return <button type="button" className={`action-button ${iconOnly ? 'icon-only' : ''} ${tone}`} data-action-code={actionCode} data-display-mode={resolvedDisplayMode} aria-label={label} title={label} disabled={disabled} onClick={onClick}>
-    <ActionIcon actionCode={actionCode} />
+    {display !== 'label' ? <ActionIcon actionCode={actionCode} /> : null}
     {!iconOnly ? <span>{label}</span> : null}
   </button>;
 }

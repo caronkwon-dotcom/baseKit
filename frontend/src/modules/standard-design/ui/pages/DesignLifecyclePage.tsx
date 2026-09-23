@@ -9,11 +9,10 @@ import { designLifecycleRepository } from '../../design-lifecycle/designLifecycl
 import type { DbColumnDefinition, DesignProject, DesignStatus, ScreenField } from '../../design-lifecycle/designLifecycle.types';
 import {
   toProjectDraft, createEmptyProjectDraft, searchProjectSnapshot, saveToProjectWorkingSet,
-  getNextProjectId, isProjectDraftDirty,
-  type ProjectSearchCondition, type ProjectSearchResult, type ProjectEditor, type ProjectDraft, type ProjectMessageTone,
+  getNextProjectId, isProjectDraftDirty, getEditorProject, getAppliedSearchDescription,
+  type ProjectSearchCondition, type ProjectEditor, type ProjectDraft, type ProjectMessageTone,
 } from '../components/projectReference';
 import ProjectListDetailWorkspace, { type ProjectWorkspaceMode } from '../components/ProjectListDetailWorkspace';
-import ProjectSearchDialog from '../components/ProjectSearchDialog';
 
 type LifecycleView = 'overview' | 'wbs' | 'requirements' | 'screens' | 'database';
 type LifecycleItem = ReturnType<typeof getRows>[number];
@@ -134,9 +133,7 @@ function ProjectManagementPage() {
   const [editor, setEditor] = useState<ProjectEditor | null>(null);
   const [message, setMessage] = useState<ProjectMessage | null>(null);
   const [projectSearchOpen, setProjectSearchOpen] = useState(false);
-  const activeProject = editor?.mode === 'EDIT'
-    ? workingSet.find((project) => project.PROJECT_ID === editor.sourceProjectId)
-    : undefined;
+  const activeProject = getEditorProject(editor);
   const hasUnsavedChanges = isProjectDraftDirty(editor);
 
   useEffect(() => {
@@ -195,22 +192,6 @@ function ProjectManagementPage() {
     setMessage(null);
   };
 
-  const openProjectSearch = () => setProjectSearchOpen(true);
-
-  const selectProjectFromSearch = (project: DesignProject, result: ProjectSearchResult) => {
-    if (!confirmDiscardChanges()) return;
-    const draft = toProjectDraft(project);
-    designLifecycleRepository.setSelectedProjectId(project.PROJECT_ID);
-    setWorkingSet(result.rows);
-    setSearchCondition(result.condition);
-    setAppliedCondition(result.condition);
-    setSelectedProjectId(project.PROJECT_ID);
-    setEditor({ mode: 'EDIT', sourceProjectId: project.PROJECT_ID, initialDraft: draft, draft });
-    setWorkspaceMode('DETAIL');
-    setProjectSearchOpen(false);
-    setMessage(null);
-  };
-
   const returnToList = () => {
     if (!confirmDiscardChanges()) return;
 
@@ -261,7 +242,7 @@ function ProjectManagementPage() {
       const project: DesignProject = { PROJECT_ID: projectId, ...draft };
       designLifecycleRepository.saveProject(project);
       designLifecycleRepository.setSelectedProjectId(projectId);
-      setWorkingSet((rows) => saveToProjectWorkingSet(rows, project));
+      setWorkingSet((rows) => saveToProjectWorkingSet(rows, project, editor.mode));
       setSelectedProjectId(projectId);
       setEditor({ mode: 'EDIT', sourceProjectId: projectId, initialDraft: toProjectDraft(project), draft: toProjectDraft(project) });
       setWorkspaceMode('DETAIL');
@@ -333,19 +314,26 @@ function ProjectManagementPage() {
     <ProjectListDetailWorkspace
       mode={workspaceMode}
       onModeChange={setWorkspaceMode}
-      list={<div className="project-list-detail-workspace__list-content">
+      list={<div className="project-list-detail-workspace__list-content" data-applied-search={getAppliedSearchDescription(appliedCondition)}>
         <div className="project-list-pane-actions">
           {workspaceMode === 'LIST' ? (
-            <ActionButton actionCode="CREATE" label="신규" tone="primary" onClick={createProject} />
+            <ActionButton display="label" actionCode="CREATE" label="신규" tone="primary" onClick={createProject} />
           ) : (
             <>
-              <ActionButton actionCode="SEARCH" label="검색" tone="primary" onClick={openProjectSearch} />
+              <button type="button" className="secondary-button" aria-expanded={projectSearchOpen} aria-controls="project-inline-search" onClick={() => setProjectSearchOpen((open) => !open)}>검색</button>
               <button type="button" className="secondary-button" onClick={returnToList}>목록으로</button>
             </>
           )}
         </div>
-        {workspaceMode === 'LIST' ? (
+        {workspaceMode === 'LIST' || projectSearchOpen ? (
+          <div id="project-inline-search" className="project-inline-search" onKeyDown={(event) => {
+            if (event.key === 'Enter' && event.target instanceof HTMLInputElement && !event.nativeEvent.isComposing) {
+              event.preventDefault();
+              runSearch(searchCondition);
+            }
+          }}>
           <SearchPanel
+            actionDisplay="label"
             rows={1}
             fields={projectSearchFields}
             value={searchCondition}
@@ -354,6 +342,7 @@ function ProjectManagementPage() {
             onSearch={runSearch}
             onReset={runSearch}
           />
+          </div>
         ) : null}
         <DataTable
           title={`프로젝트 목록 (${workingSet.length}건)`}
@@ -368,10 +357,10 @@ function ProjectManagementPage() {
       detail={editor ? (
         <>
           <div className="standard-design-project-detail-actions" aria-label="프로젝트 상세 기능">
-            <ActionButton actionCode="CREATE" label="신규" tone="primary" onClick={createProject} />
-            <ActionButton actionCode="CREATE" label="복사" onClick={copyProject} disabled={!activeProject} />
+            <ActionButton display="label" actionCode="CREATE" label="신규" tone="primary" onClick={createProject} />
+            <ActionButton display="label" actionCode="CREATE" label="복사" onClick={copyProject} disabled={!activeProject} />
             <button type="submit" form="project-detail-form" className="primary-button" data-action-code={editor.mode === 'EDIT' ? 'UPDATE' : 'CREATE'}>저장</button>
-            <ActionButton actionCode="DELETE" label="삭제" tone="danger" onClick={deleteProject} disabled={!activeProject} />
+            <ActionButton display="label" actionCode="DELETE" label="삭제" tone="danger" onClick={deleteProject} disabled={!activeProject} />
           </div>
         <form id="project-detail-form" className="standard-design-lifecycle-form standard-design-project-form" noValidate onSubmit={saveProject}>
           <div className="standard-design-project-detail-heading">
@@ -400,13 +389,6 @@ function ProjectManagementPage() {
       ) : null}
     />
     {message ? <ProjectMessageBanner message={message} /> : null}
-    {projectSearchOpen ? <ProjectSearchDialog
-      initialResult={{ rows: workingSet, condition: appliedCondition }}
-      onSearch={(condition) => searchProjectSnapshot(designLifecycleRepository.getData().projects, condition)}
-      fields={projectSearchFields}
-      onClose={() => setProjectSearchOpen(false)}
-      onSelect={selectProjectFromSearch}
-    /> : null}
   </div>;
 }
 

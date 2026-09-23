@@ -2,7 +2,7 @@
 
 ## 상태
 
-Accepted / Phase 2는 사용자 승인으로 dev-pm 통합 / Working Set 후속 개선은 feature 검수 대기
+Accepted / Working Set까지 dev-pm 통합 / Inline Search 후속 개선은 feature 검수 대기
 
 ## 범위
 
@@ -42,14 +42,24 @@ Standard Design Product Module의 **프로젝트 관리** 화면만 대상으로
 - 기본 30% List pane에서 불필요한 가로 scroll이 생기지 않도록 ID·상태는 compact fixed width로, 프로젝트명·고객명은 ellipsis와 tooltip을 제공하는 가변 폭으로 둔다. 우선순위는 프로젝트명, 고객명, ID, 상태 순서다.
 - 프로젝트명은 keyboard 접근 가능한 action link로 상세를 연다.
 
-### 3a. Mini Search와 Working Set
+### 3a. Inline Search와 Working Set
 
-- 상세 검색은 기존 `FormModal`, `SearchPanel`, `DataTable`을 조합한 dialog다. 새 외부 라이브러리나 공통 framework를 추가하지 않는다.
-- 입력 초안과 실행한 조회 결과/조건을 분리한다. 결과 선택 시 전체 결과, 적용 조건, 선택 ID, 상세를 함께 변경하고 dialog를 닫는다. 조회 후 입력만 변경해도 이전 실행 조건이 결과와 함께 적용된다.
-- Dialog 열기/취소는 편집을 버리지 않는다. 결과 선택 시 기존 dirty guard를 적용하며 자동 저장하지 않는다.
-- Working Set은 마지막 실행 조회의 스냅샷이다. splitter/상세/목록 전환으로 재조회하거나 재필터링하지 않는다. 기존 항목 저장은 위치와 소속을 유지하고, 신규/복사 명시적 저장은 저장한 항목만 추가한다. 삭제는 해당 항목만 제거한다. 전체 재조회 시 집합을 교체한다.
-- 초기화는 빈 조건으로 전체 조회한다. 오류 시 기존 결과를 유지하되 선택을 막고 오류를 표시한다.
-- 키보드 진입 focus, Tab 순환, Escape 닫기, opener focus 복원을 지원한다.
+- 상세 왼쪽 `검색`은 버튼 아래 검색영역을 펼치거나 접는다. 중앙 Dialog/backdrop 및 중복 결과 Grid를 사용하지 않는다. 기존 SearchPanel과 목록 DataTable을 재사용한다.
+- 검색조건과 실행 조건을 분리한다. 조회는 기존 왼쪽 Working Set만 교체하며 오른쪽 상세·미저장 입력·선택 ID를 변경하거나 자동 저장하지 않는다.
+- 현재 상세가 조회 결과에 없으면 왼쪽 선택 행은 없다. 저장된 상세의 identity와 기본정보는 editor에서 유지하므로 복사/저장/삭제는 계속 가능하다.
+- 결과 행 선택 시 기존 dirty guard를 적용한다. 검색 열기/접기/조회는 편집 내용을 버리지 않는다.
+- Working Set은 마지막 실행 조회의 스냅샷이다. splitter/상세/목록 전환으로 재조회하거나 재필터링하지 않는다. 기존 항목 저장은 위치와 소속을 유지한다. 결과 밖 기존 상세 저장은 집합에 추가하지 않는다. 신규/복사 저장만 새 행을 추가한다. 삭제는 해당 행이 집합에 있으면 제거한다.
+- 초기화는 빈 조건으로 전체 조회한다. 조회 오류는 기존 결과와 편집을 보존하고 compact 오류를 표시한다.
+- SearchPanel의 조회/초기화는 Project 화면에서 label로 표시한다. Enter 조회와 기본 Tab 순서를 지원한다.
+
+### 3b. 필드 배치와 버튼 표시
+
+필드명은 왼쪽, 입력칸은 오른쪽으로 통일한다. 화면 폭에 따라 한 행의 필드 개수만 조절하며, 필드명과 입력칸의 좌우 관계는 유지한다.
+
+- Project 검색/상세의 label 너비는 76px로 동일하다. textarea label은 왼쪽 상단에 배치한다. 긴 label은 자기 영역 안에서 줄바꿈하며 입력칸 시작 위치는 유지한다.
+- 신규/복사/저장/삭제와 검색/목록/초기화/조회는 텍스트로 구분한다. 신규와 복사에 동일한 + 아이콘을 표시하지 않는다.
+- ActionButton의 선택적 `display="label"`, SearchPanel의 선택적 `actionDisplay`만 추가한다. 생략한 기존 호출은 기존 사용자 설정과 동작을 유지한다.
+- 이 폼 원칙은 공통 정책으로 문서화하지만 CSS 구현은 Project 화면에만 한정한다. 다른 업무 화면의 적용은 별도 범위다.
 
 ### 4. 신규, ID, Copy
 
