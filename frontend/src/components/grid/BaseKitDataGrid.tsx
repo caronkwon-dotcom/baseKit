@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { AllCommunityModule, themeQuartz, type ColDef, type EditableCallbackParams, type GridApi, type ICellRendererParams, type ValueGetterParams } from 'ag-grid-community';
 import ProgramDataGrid, { type ProgramDataGridProps } from '../common/ProgramDataGrid';
 import type { DataTableProps } from '../common/DataTable';
 import type { FieldDefinition } from '../metadata/fieldDefinition';
+import type { GridRowState } from './gridRowState';
 import { renderMetadataValue } from './gridColumnAdapter';
 import './basekitGrid.css';
 
@@ -25,31 +26,57 @@ export interface BaseKitDataGridProps<T> extends Omit<ProgramDataGridProps<T>, '
   editing?: GridEditing<T>;
   loading?: boolean;
   currentRowKey?: string;
+  getRowState?: (row: T) => GridRowState;
 }
 
-function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRowKeysChange, onRowClick, getRowClassName, emptyMessage, fields = [], getFieldValue, editing, loading, currentRowKey }: DataTableProps<T> & Pick<BaseKitDataGridProps<T>, 'fields' | 'getFieldValue' | 'editing' | 'loading' | 'currentRowKey'>) {
+function RowStateIcon({ state }: { state: Exclude<GridRowState, 'NORMAL'> }) {
+  const label = state === 'INSERTED' ? '신규 추가' : state === 'UPDATED' ? '수정됨' : '삭제 예정';
+  return <span className={`basekit-row-state-icon ${state.toLowerCase()}`} role="img" aria-label={label} title={label}>
+    {state === 'UPDATED'
+      ? <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 11.8-.5 2.2 2.2-.5 7.7-7.7-1.7-1.7zM9.9 4.9l1.7 1.7" /></svg>
+      : <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" /><path d={state === 'INSERTED' ? 'M8 5v6M5 8h6' : 'M5 8h6'} /></svg>}
+  </span>;
+}
+
+function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRowKeysChange, onRowClick, getRowClassName, emptyMessage, fields = [], getFieldValue, editing, loading, currentRowKey, getRowState }: DataTableProps<T> & Pick<BaseKitDataGridProps<T>, 'fields' | 'getFieldValue' | 'editing' | 'loading' | 'currentRowKey' | 'getRowState'>) {
   const apiRef = useRef<GridApi<T> | null>(null);
+  const isEditable = useCallback((row: T, key: string, policy: 'always' | 'insert-only' | 'read-only' = 'always') => {
+    if (!editing?.keys.includes(key) || policy === 'read-only') return false;
+    const state = getRowState?.(row) ?? 'NORMAL';
+    if (state === 'DELETED' || (policy === 'insert-only' && state !== 'INSERTED')) return false;
+    return editing.isEditable?.(row, key) ?? true;
+  }, [editing, getRowState]);
   const columnDefs = useMemo<ColDef<T>[]>(() => [
+    ...(getRowState ? [{
+      colId: '__GRID_ROW_STATE', headerName: '', width: 30, minWidth: 30, maxWidth: 30,
+      sortable: false, filter: false, resizable: false, suppressHeaderMenuButton: true, lockPosition: 'left' as const,
+      cellClass: 'basekit-row-state-cell',
+      cellRenderer: (params: ICellRendererParams<T>) => {
+        if (!params.data) return null;
+        const state = getRowState(params.data);
+        return state === 'NORMAL' ? null : <RowStateIcon state={state} />;
+      },
+    } satisfies ColDef<T>] : []),
     ...columns.map((column) => ({
       colId: column.key, headerName: column.header, initialWidth: column.width, minWidth: column.minWidth,
       flex: column.width ? undefined : column.flex ?? 1,
       valueGetter: (params: ValueGetterParams<T>) => params.data ? String((params.data as Record<string, unknown>)[column.key] ?? '') : '',
       cellRenderer: (params: ICellRendererParams<T>) => params.data ? column.render(params.data) : null,
-      headerClass: editing?.keys.includes(column.key) ? 'basekit-editable-header' : undefined,
-      cellClass: (params: EditableCallbackParams<T>) => params.data && editing?.keys.includes(column.key) && (editing.isEditable?.(params.data, column.key) ?? true) ? 'basekit-editable-cell' : '',
-      editable: (params: EditableCallbackParams<T>) => Boolean(params.data && editing?.keys.includes(column.key) && (editing.isEditable?.(params.data, column.key) ?? true)),
+      headerClass: rows.some((row) => isEditable(row, column.key, column.editPolicy)) ? 'basekit-editable-header' : undefined,
+      cellClass: (params: EditableCallbackParams<T>) => params.data && isEditable(params.data, column.key, column.editPolicy) ? 'basekit-editable-cell' : '',
+      editable: (params: EditableCallbackParams<T>) => Boolean(params.data && isEditable(params.data, column.key, column.editPolicy)),
     })),
     ...fields.map((field) => ({
       colId: `ATTRIBUTE_${field.key}`, headerName: field.label, flex: 1, minWidth: 100,
       valueGetter: (params: ValueGetterParams<T>) => params.data ? getFieldValue?.(params.data, field) ?? '' : '',
-      headerClass: editing?.keys.includes(`ATTRIBUTE_${field.key}`) ? 'basekit-editable-header' : undefined,
-      cellClass: (params: EditableCallbackParams<T>) => params.data && editing?.keys.includes(`ATTRIBUTE_${field.key}`) && (editing.isEditable?.(params.data, `ATTRIBUTE_${field.key}`) ?? true) ? `basekit-editable-cell basekit-grid-cell-${field.dataType === 'NUMBER' ? 'right' : field.dataType === 'BOOLEAN' ? 'center' : 'left'}` : `basekit-grid-cell-${field.dataType === 'NUMBER' ? 'right' : field.dataType === 'BOOLEAN' ? 'center' : 'left'}`,
+      headerClass: rows.some((row) => isEditable(row, `ATTRIBUTE_${field.key}`)) ? 'basekit-editable-header' : undefined,
+      cellClass: (params: EditableCallbackParams<T>) => params.data && isEditable(params.data, `ATTRIBUTE_${field.key}`) ? `basekit-editable-cell basekit-grid-cell-${field.dataType === 'NUMBER' ? 'right' : field.dataType === 'BOOLEAN' ? 'center' : 'left'}` : `basekit-grid-cell-${field.dataType === 'NUMBER' ? 'right' : field.dataType === 'BOOLEAN' ? 'center' : 'left'}`,
       cellRenderer: (params: ICellRendererParams<T>) => renderMetadataValue(params.value == null ? '' : String(params.value), field),
-      editable: (params: EditableCallbackParams<T>) => Boolean(params.data && editing?.keys.includes(`ATTRIBUTE_${field.key}`) && (editing.isEditable?.(params.data, `ATTRIBUTE_${field.key}`) ?? true)),
+      editable: (params: EditableCallbackParams<T>) => Boolean(params.data && isEditable(params.data, `ATTRIBUTE_${field.key}`)),
       cellEditor: field.controlType === 'SELECT' ? 'agSelectCellEditor' : field.dataType === 'NUMBER' ? 'agNumberCellEditor' : field.dataType === 'BOOLEAN' ? 'agCheckboxCellEditor' : field.dataType === 'DATE' ? 'agDateStringCellEditor' : 'agTextCellEditor',
       cellEditorParams: field.controlType === 'SELECT' ? { values: field.options?.map((option) => option.value) ?? [] } : undefined,
     })),
-  ], [columns, editing, fields, getFieldValue]);
+  ], [columns, fields, getFieldValue, getRowState, isEditable, rows]);
 
   useEffect(() => {
     apiRef.current?.forEachNode((node) => node.setSelected(Boolean(node.data && selectedRowKeys?.has(getRowKey(node.data)))));
@@ -77,6 +104,6 @@ function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRo
   /></div></div>;
 }
 
-export default function BaseKitDataGrid<T,>({ fields, getFieldValue, editing, loading, currentRowKey, ...props }: BaseKitDataGridProps<T>) {
-  return <ProgramDataGrid {...props} renderTable={(table) => <GridTable {...table} fields={fields} getFieldValue={getFieldValue} editing={editing} loading={loading} currentRowKey={currentRowKey} />} />;
+export default function BaseKitDataGrid<T,>({ fields, getFieldValue, editing, loading, currentRowKey, getRowState, ...props }: BaseKitDataGridProps<T>) {
+  return <ProgramDataGrid {...props} renderTable={(table) => <GridTable {...table} fields={fields} getFieldValue={getFieldValue} editing={editing} loading={loading} currentRowKey={currentRowKey} getRowState={getRowState} />} />;
 }
