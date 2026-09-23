@@ -57,7 +57,7 @@ export default function ProgramDataGrid<T>({
   metrics = [],
   actionHandlers = {},
   toolbarActions,
-  buttonDisplay = 'text',
+  buttonDisplay,
   columns,
   rows,
   getRowKey,
