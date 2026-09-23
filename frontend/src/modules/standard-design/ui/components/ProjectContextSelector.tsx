@@ -4,7 +4,7 @@ import FormModal from '../../../../components/common/FormModal';
 import SearchPanel, { type SearchFieldConfig } from '../../../../components/common/SearchPanel';
 import { designLifecycleRepository } from '../../design-lifecycle/designLifecycle.repository';
 import type { DesignProject, DesignStatus } from '../../design-lifecycle/designLifecycle.types';
-import { emptyProjectSearchCondition, filterProjects, type ProjectSearchCondition } from './projectReference';
+import { emptyProjectSearchCondition, filterProjects, type ProjectSearchCondition, type ProjectSearchResult } from './projectReference';
 import { useProjectContext } from './useProjectContext';
 
 const statuses: DesignStatus[] = ['DRAFT', 'IN_PROGRESS', 'REVIEW', 'APPROVED'];
@@ -20,17 +20,32 @@ const columns: DataTableColumn<DesignProject>[] = [
   { key: 'status', header: '상태', render: (row) => row.STATUS, width: 110 },
 ];
 
-export function ProjectContextDialog({ onClose, onSelected, onOpenProjectManagement }: { onClose: () => void; onSelected?: (project: DesignProject) => void; onOpenProjectManagement?: () => void }) {
-  const [condition, setCondition] = useState(emptyProjectSearchCondition);
-  const [applied, setApplied] = useState(emptyProjectSearchCondition);
+interface ProjectContextDialogProps {
+  onClose: () => void;
+  onSelected?: (project: DesignProject, result: ProjectSearchResult) => boolean | void;
+  onOpenProjectManagement?: () => void;
+  initialCondition?: ProjectSearchCondition;
+  title?: string;
+}
+
+export function ProjectContextDialog({
+  onClose,
+  onSelected,
+  onOpenProjectManagement,
+  initialCondition = emptyProjectSearchCondition,
+  title = '프로젝트 선택',
+}: ProjectContextDialogProps) {
+  const [condition, setCondition] = useState(() => ({ ...initialCondition }));
+  const [applied, setApplied] = useState(() => ({ ...initialCondition }));
   const rows = filterProjects(designLifecycleRepository.getData().projects, applied);
   const select = (next: DesignProject) => {
+    const accepted = onSelected?.(next, { condition: { ...applied }, rows: rows.map((row) => ({ ...row })) });
+    if (accepted === false) return;
     designLifecycleRepository.setSelectedProjectId(next.PROJECT_ID);
-    onSelected?.(next);
     onClose();
   };
   return <div className="sd-project-selector-modal">
-      <FormModal open title="프로젝트 선택" onClose={onClose}>
+      <FormModal open title={title} onClose={onClose}>
         <SearchPanel rows={1} fields={fields} value={condition} initialValue={emptyProjectSearchCondition} onValueChange={setCondition}
           onSearch={setApplied} onReset={(next) => { setCondition(next); setApplied(next); }} />
         <DataTable title={`검색 결과 (${rows.length}건)`} columns={columns} rows={rows} getRowKey={(row) => row.PROJECT_ID}

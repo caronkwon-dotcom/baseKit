@@ -2,11 +2,11 @@
 
 ## 상태
 
-Accepted / Working Set까지 dev-pm 통합 / Inline Search 후속 개선은 feature 검수 대기
+Accepted / Working Set까지 dev-pm 통합 / Foundation UI 정리는 feature 검수 대기
 
 ## 범위
 
-Standard Design Product Module의 **프로젝트 관리** 화면만 대상으로 한다. Project Member·데이터 권한, WBS, 요구사항, 화면 설계, DB 설계, 표준용어, LLM, Backend/DB Migration, 메뉴·버튼 권한 Framework, Template 관리와 Generator에는 적용하지 않는다.
+Standard Design Product Module의 **프로젝트 관리** 화면을 기준 UI로 삼고, WBS·요구사항·화면 설계·DB 설계에는 Page Header의 Project Context와 Action 정렬 규칙만 적용한다. 데이터 권한, 업무 기능 확장, 표준용어, LLM, Backend/DB Migration, 메뉴·버튼 권한 Framework, Template 관리와 Generator에는 적용하지 않는다.
 
 ## 배경
 
@@ -21,7 +21,7 @@ Standard Design Product Module의 **프로젝트 관리** 화면만 대상으로
 - List와 Detail 사이에는 pointer drag와 키보드 좌/우 화살표로 조절 가능한 세로 splitter를 둔다.
 - splitter는 유용한 목록·상세 최소 폭을 지키며, List 폭은 페이지가 유지되는 동안 기억한다.
 - splitter 내부 control은 Detail에서 `DETAIL_EXPANDED`로 목록을 접고, 확장 상태에서 `DETAIL`로 복원한다. 복원할 폭이 없으면 기본 30%를 사용한다.
-- `목록으로`는 `LIST`, 목록 접기는 `DETAIL_EXPANDED`, 목록 펼치기는 `DETAIL` 모드로만 전환한다.
+- 상세 진입 뒤 Master 영역은 현재 Working Set을 계속 표시한다. 목록 접기와 펼치기는 splitter에서만 제어하며 별도 `목록으로` toolbar를 두지 않는다.
 - Detail은 100% 확장 상태와 내부 scroll을 지원하며, List Grid도 자체 scroll을 유지한다.
 
 현재 작업 기준 commit과 최신 확인된 `origin/dev-pm`에는 `ListDetailWorkspace` 또는 resizable split-pane 공통 컴포넌트가 없다. 별도 미통합 branch `caronkwon-dotcom-feature-basekit-list-detail-layout`의 `4e8cf29`에는 고정 비율 공통 컴포넌트가 있으나 이번 범위에 병합하지 않는다. 따라서 `ProjectListDetailWorkspace`는 Standard Design Module 내부의 Project 전용 구성으로 두며, 다른 Program에서 같은 contract가 실제로 반복되기 전에는 Core 공통 컴포넌트로 승격하지 않는다.
@@ -29,7 +29,7 @@ Standard Design Product Module의 **프로젝트 관리** 화면만 대상으로
 ### 2. Header, Action, Message
 
 - Breadcrumb만 유지하고 중복 Project Context와 적용 조건 배너는 제거한다.
-- `LIST` action은 `신규`만 표시한다. 상세 왼쪽에는 `검색`, `목록으로`, 오른쪽에는 `신규`, `복사`, `저장`, `삭제`를 같은 높이와 간격으로 표시한다. 접힌 목록 제어는 splitter에서 복원한다.
+- `LIST` Page Header action은 `신규`만 표시한다. 상세 Page Header 오른쪽에는 `신규`, `복사`, `저장`, `삭제`를 같은 높이와 간격으로 표시한다. 상세 Master의 제목·건수 옆에는 `검색`만 표시하며 접힌 목록은 splitter에서 복원한다.
 - 검색은 기존 `SearchPanel`의 조회·초기화 action rail을 사용한다.
 - 메시지가 없으면 메시지 영역을 렌더링하지 않아 고정 빈 공간을 만들지 않는다.
 - 저장·삭제 성공, validation·조회·저장·삭제 오류처럼 업무적으로 의미 있는 결과만 INFO/WARN/ERROR/SUCCESS tone과 icon으로 표시한다. 단순 선택, 상세 열기, 목록 복귀 전환 문구는 표시하지 않는다.
@@ -44,12 +44,12 @@ Standard Design Product Module의 **프로젝트 관리** 화면만 대상으로
 
 ### 3a. Inline Search와 Working Set
 
-- 상세 왼쪽 `검색`은 버튼 아래 검색영역을 펼치거나 접는다. 중앙 Dialog/backdrop 및 중복 결과 Grid를 사용하지 않는다. 기존 SearchPanel과 목록 DataTable을 재사용한다.
-- 검색조건과 실행 조건을 분리한다. 조회는 기존 왼쪽 Working Set만 교체하며 오른쪽 상세·미저장 입력·선택 ID를 변경하거나 자동 저장하지 않는다.
+- LIST 화면과 상세 Master는 동일한 Inline Search와 목록 Grid를 사용한다. 상세 Master의 `검색`은 Grid 상단 검색영역만 펼치거나 접으며 별도 Dialog나 결과 Grid를 만들지 않는다.
+- 검색조건과 실행 조건을 분리한다. 조회는 왼쪽 Working Set만 교체하며 오른쪽 상세·미저장 입력·선택 ID를 변경하거나 자동 저장하지 않는다.
 - 현재 상세가 조회 결과에 없으면 왼쪽 선택 행은 없다. 저장된 상세의 identity와 기본정보는 editor에서 유지하므로 복사/저장/삭제는 계속 가능하다.
-- 결과 행 선택 시 기존 dirty guard를 적용한다. 검색 열기/접기/조회는 편집 내용을 버리지 않는다.
+- 검색영역 열기·접기·조회는 편집 내용을 버리지 않는다.
 - Working Set은 마지막 실행 조회의 스냅샷이다. splitter/상세/목록 전환으로 재조회하거나 재필터링하지 않는다. 기존 항목 저장은 위치와 소속을 유지한다. 결과 밖 기존 상세 저장은 집합에 추가하지 않는다. 신규/복사 저장만 새 행을 추가한다. 삭제는 해당 행이 집합에 있으면 제거한다.
-- 초기화는 빈 조건으로 전체 조회한다. 조회 오류는 기존 결과와 편집을 보존하고 compact 오류를 표시한다.
+- 초기화는 빈 조건으로 전체 조회한다.
 - SearchPanel의 조회/초기화는 Project 화면에서 label로 표시한다. Enter 조회와 기본 Tab 순서를 지원한다.
 
 ### 3b. 필드 배치와 버튼 표시
@@ -83,6 +83,8 @@ Standard Design Product Module의 **프로젝트 관리** 화면만 대상으로
 ## 결과
 
 Project Management는 BaseKit의 List-Detail reference UX로 사용하되, 이 문서의 좁은 범위 밖 화면에 자동 적용하지 않는다. 공통화는 반복 사용과 API 계약이 확인된 후 별도 ADR로 결정한다.
+
+Project Detail의 기본정보는 상단 compact form으로 한정하고 Project Member Grid가 남은 높이를 사용한다. Project ID는 header badge/text로 표시한다. WBS·요구사항·화면 설계·DB 설계의 Page Header는 설명문을 제거하고 `화면명 / Project Context / Action`만 한 줄로 구성한다.
 
 ## 인계 검증 보완
 
