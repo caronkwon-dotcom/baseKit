@@ -36,6 +36,13 @@
   --message-error-bg: #fef2f2;
   --message-error-border: #fca5a5;
   --message-error-text: #b91c1c;
+  --grid-state-inserted: #16a34a;
+  --grid-state-inserted-bg: color-mix(in srgb, var(--grid-state-inserted) 5%, var(--surface-panel));
+  --grid-state-updated: #f59e0b;
+  --grid-state-updated-bg: color-mix(in srgb, var(--grid-state-updated) 5%, var(--surface-panel));
+  --grid-state-deleted: #dc2626;
+  --grid-state-deleted-bg: color-mix(in srgb, var(--grid-state-deleted) 5%, var(--surface-panel));
+  --grid-editable-cell-bg: color-mix(in srgb, #dbeafe 38%, var(--surface-panel));
   --multi-grid-master-width: 40%;
   --multi-grid-master-min-width: 360px;
   --multi-grid-workspace-min-height: 520px;

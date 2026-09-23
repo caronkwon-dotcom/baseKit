@@ -2,14 +2,20 @@
 .master-detail-multi-grid .basekit-ag-grid { height: 100%; min-height: 180px; }
 .basekit-ag-grid .ag-row.basekit-current-row,
 .basekit-ag-grid .ag-row.active-master-row { background: var(--brand-soft); }
-.basekit-ag-grid .ag-row.grid-inserted-row { box-shadow: inset 3px 0 var(--brand-primary); background: color-mix(in srgb, var(--brand-soft) 55%, var(--surface-panel)); }
-.basekit-ag-grid .ag-row.grid-updated-row { box-shadow: inset 3px 0 #c28a2c; background: color-mix(in srgb, #fff7e6 72%, var(--surface-panel)); }
+.basekit-ag-grid .ag-row.grid-inserted-row { box-shadow: inset 4px 0 var(--grid-state-inserted); background: var(--grid-state-inserted-bg); }
+.basekit-ag-grid .ag-row.grid-updated-row { box-shadow: inset 4px 0 var(--grid-state-updated); background: var(--grid-state-updated-bg); }
 .basekit-ag-grid .ag-row.grid-dirty-row { box-shadow: inset 3px 0 #94a3b8; background: var(--surface-muted); }
-.basekit-ag-grid .ag-row.grid-deleted-row { opacity: .5; text-decoration: line-through; }
-.basekit-ag-grid .ag-row.grid-deleted-row .ag-cell:first-of-type::before { content: '삭제 예정'; margin-right: 5px; color: var(--action-danger-text); font-size: 10px; text-decoration: none; }
-.basekit-ag-grid .ag-header-cell.basekit-editable-header .ag-header-cell-text::after { content: ' ✎'; color: var(--brand-primary); font-size: 10px; }
-.basekit-ag-grid .ag-cell.basekit-editable-cell { background: color-mix(in srgb, var(--brand-soft) 38%, transparent); }
+.basekit-ag-grid .ag-row.grid-deleted-row { box-shadow: inset 4px 0 var(--grid-state-deleted); background: var(--grid-state-deleted-bg); }
+.basekit-ag-grid .ag-row.grid-deleted-row .ag-cell:not(.basekit-row-state-cell):not(.ag-selection-column) { opacity: .56; text-decoration: line-through; }
+.basekit-ag-grid .ag-header-cell.basekit-editable-header .ag-header-cell-text::after { content: ''; display: inline-block; width: 12px; height: 12px; margin-left: 5px; background: var(--text-muted); vertical-align: -2px; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='m3 11.8-.5 2.2 2.2-.5 7.7-7.7-1.7-1.7zM9.9 4.9l1.7 1.7'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='m3 11.8-.5 2.2 2.2-.5 7.7-7.7-1.7-1.7zM9.9 4.9l1.7 1.7'/%3E%3C/svg%3E") center / contain no-repeat; }
+.basekit-ag-grid .ag-cell.basekit-editable-cell { background: var(--grid-editable-cell-bg); }
 .basekit-ag-grid .ag-row.grid-deleted-row .ag-cell.basekit-editable-cell { background: transparent; }
+.basekit-ag-grid .ag-cell.basekit-row-state-cell { display: flex; align-items: center; justify-content: center; padding: 0; }
+.basekit-row-state-icon { display: inline-flex; width: 17px; height: 17px; align-items: center; justify-content: center; }
+.basekit-row-state-icon svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.basekit-row-state-icon.inserted { color: var(--grid-state-inserted); }
+.basekit-row-state-icon.updated { color: var(--grid-state-updated); }
+.basekit-row-state-icon.deleted { color: var(--grid-state-deleted); }
 .basekit-ag-grid .basekit-grid-cell-right { text-align: right; }
 .basekit-ag-grid .basekit-grid-cell-center { text-align: center; }
 .basekit-ag-grid .ag-header-cell-text { font-weight: 600; }

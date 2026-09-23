@@ -4,6 +4,8 @@ export interface DataTableColumn<T> {
   key: string;
   header: string;
   render: (row: T) => ReactNode;
+  /** Grid 편집 정책. 업무 Key는 저장 전 신규 행에서만 편집할 수 있다. */
+  editPolicy?: 'always' | 'insert-only' | 'read-only';
   /** 고정 폭(px). 식별자, 상태, 날짜처럼 예측 가능한 컬럼에 사용한다. */
   width?: number;
   /** 가변 컬럼의 최소 폭(px). */
