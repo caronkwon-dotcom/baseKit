@@ -14,7 +14,7 @@ import {
 } from '../components/projectReference';
 import ProjectListDetailWorkspace, { type ProjectWorkspaceMode } from '../components/ProjectListDetailWorkspace';
 import ProjectMemberDialog from '../components/ProjectMemberDialog';
-import ProjectContextSelector, { ProjectContextDialog } from '../components/ProjectContextSelector';
+import ProjectContextSelector from '../components/ProjectContextSelector';
 import { validateProjectDates } from '../components/projectContext';
 import { useProjectContext } from '../components/useProjectContext';
 
@@ -136,7 +136,7 @@ function ProjectManagementPage() {
   const [appliedCondition, setAppliedCondition] = useState<ProjectSearchCondition>(initialProjectSearchCondition);
   const [editor, setEditor] = useState<ProjectEditor | null>(null);
   const [message, setMessage] = useState<ProjectMessage | null>(null);
-  const [projectSearchDialogOpen, setProjectSearchDialogOpen] = useState(false);
+  const [projectSearchOpen, setProjectSearchOpen] = useState(false);
   const [memberDialogOpen, setMemberDialogOpen] = useState(false);
   const [editingProjectMember, setEditingProjectMember] = useState<ProjectMember | undefined>();
   const [selectedProjectMemberId, setSelectedProjectMemberId] = useState('');
@@ -349,7 +349,7 @@ function ProjectManagementPage() {
       mode={workspaceMode}
       onModeChange={setWorkspaceMode}
       list={<div className="project-list-detail-workspace__list-content" data-applied-search={getAppliedSearchDescription(appliedCondition)}>
-        {workspaceMode === 'LIST' ? (
+        {workspaceMode === 'LIST' || projectSearchOpen ? (
           <div id="project-inline-search" className="project-inline-search" onKeyDown={(event) => {
             if (event.key === 'Enter' && event.target instanceof HTMLInputElement && !event.nativeEvent.isComposing) {
               event.preventDefault();
@@ -370,7 +370,7 @@ function ProjectManagementPage() {
         ) : null}
         {workspaceMode !== 'LIST' ? <div className="project-master-heading">
           <h2>프로젝트 목록 <span>({workingSet.length}건)</span></h2>
-          <button type="button" className="secondary-button" onClick={() => setProjectSearchDialogOpen(true)}>검색</button>
+          <button type="button" className="secondary-button" aria-expanded={projectSearchOpen} aria-controls="project-inline-search" onClick={() => setProjectSearchOpen((open) => !open)}>검색</button>
         </div> : null}
         <DataTable
           title={workspaceMode === 'LIST' ? `프로젝트 목록 (${workingSet.length}건)` : undefined}
@@ -435,18 +435,6 @@ function ProjectManagementPage() {
       ) : null}
     />
     {message ? <ProjectMessageBanner message={message} /> : null}
-    {projectSearchDialogOpen ? <ProjectContextDialog
-      title="프로젝트 검색"
-      initialCondition={appliedCondition}
-      onClose={() => setProjectSearchDialogOpen(false)}
-      onSelected={(project, result) => {
-        if (!openProjectDetail(project)) return false;
-        setSearchCondition(result.condition);
-        setAppliedCondition(result.condition);
-        setWorkingSet(result.rows);
-        return true;
-      }}
-    /> : null}
     {memberDialogOpen && activeProject ? <ProjectMemberDialog project={activeProject}
       members={designLifecycleRepository.getData().members} assignments={projectMembers} editing={editingProjectMember}
       onClose={() => setMemberDialogOpen(false)} onSave={(member: DesignMember, assignment) => {

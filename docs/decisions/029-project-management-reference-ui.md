@@ -42,14 +42,14 @@ Standard Design Product Module의 **프로젝트 관리** 화면을 기준 UI로
 - 기본 30% List pane에서 불필요한 가로 scroll이 생기지 않도록 ID·상태는 compact fixed width로, 프로젝트명·고객명은 ellipsis와 tooltip을 제공하는 가변 폭으로 둔다. 우선순위는 프로젝트명, 고객명, ID, 상태 순서다.
 - 프로젝트명은 keyboard 접근 가능한 action link로 상세를 연다.
 
-### 3a. Search Dialog와 Working Set
+### 3a. Inline Search와 Working Set
 
-- LIST 화면은 기존 Inline Search와 목록 Grid를 사용한다. 상세 Master의 `검색`은 공통 Project Search Dialog를 열며 별도 navigation toolbar를 만들지 않는다.
-- Dialog는 LIST와 같은 검색 조건 및 필터 함수를 사용한다. 결과 행을 선택하면 해당 검색 스냅샷으로 왼쪽 Working Set을 교체하고 선택 프로젝트 상세로 전환한다. 전환에는 기존 dirty guard를 적용한다.
+- LIST 화면과 상세 Master는 동일한 Inline Search와 목록 Grid를 사용한다. 상세 Master의 `검색`은 Grid 상단 검색영역만 펼치거나 접으며 별도 Dialog나 결과 Grid를 만들지 않는다.
+- 검색조건과 실행 조건을 분리한다. 조회는 왼쪽 Working Set만 교체하며 오른쪽 상세·미저장 입력·선택 ID를 변경하거나 자동 저장하지 않는다.
 - 현재 상세가 조회 결과에 없으면 왼쪽 선택 행은 없다. 저장된 상세의 identity와 기본정보는 editor에서 유지하므로 복사/저장/삭제는 계속 가능하다.
-- Dialog 열기·검색·취소는 편집 내용을 버리지 않는다.
+- 검색영역 열기·접기·조회는 편집 내용을 버리지 않는다.
 - Working Set은 마지막 실행 조회의 스냅샷이다. splitter/상세/목록 전환으로 재조회하거나 재필터링하지 않는다. 기존 항목 저장은 위치와 소속을 유지한다. 결과 밖 기존 상세 저장은 집합에 추가하지 않는다. 신규/복사 저장만 새 행을 추가한다. 삭제는 해당 행이 집합에 있으면 제거한다.
-- 초기화는 빈 조건으로 전체 조회한다. Dialog 취소는 기존 Working Set과 편집을 보존한다.
+- 초기화는 빈 조건으로 전체 조회한다.
 - SearchPanel의 조회/초기화는 Project 화면에서 label로 표시한다. Enter 조회와 기본 Tab 순서를 지원한다.
 
 ### 3b. 필드 배치와 버튼 표시

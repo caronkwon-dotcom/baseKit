@@ -241,18 +241,19 @@
 
 /* Project reference only: labels stay beside controls at every pane width. */
 .standard-design-project-page { --project-label-width: 76px; }
-.standard-design-project-page .search-grid label { grid-template-columns: var(--project-label-width) minmax(0, 1fr); gap: 8px; }
-.standard-design-project-fields label > span, .standard-design-project-page .search-grid label > span { overflow-wrap: anywhere; }
+.project-inline-search .search-grid label { grid-template-columns: var(--project-label-width) minmax(0, 1fr); gap: 8px; }
+.standard-design-project-fields label > span, .project-inline-search .search-grid label > span { overflow-wrap: anywhere; }
 .standard-design-project-fields input, .standard-design-project-fields select, .standard-design-project-fields textarea { min-width: 0; }
 .standard-design-project-fields .standard-design-project-description { align-items: start; }
 .standard-design-project-description > span { padding-top: 8px; }
 .project-inline-search { flex: 0 0 auto; max-height: 55%; overflow: auto; }
-.standard-design-project-page .search-panel { padding: 8px; }
-.standard-design-project-page .search-panel-layout { grid-template-columns: minmax(0, 1fr); gap: 8px; }
-.standard-design-project-page .search-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
-.standard-design-project-page .search-action-rail { grid-column: 1; width: auto; justify-content: flex-start; }
-.project-list-detail-workspace--DETAIL .search-grid { grid-template-columns: minmax(0, 1fr); }
-.standard-design-project-page .search-panel input, .standard-design-project-page .search-panel select { min-width: 0; width: 100%; box-sizing: border-box; }
+.project-inline-search .search-panel { padding: 8px; }
+.project-inline-search .search-grid { grid-template-columns: repeat(3, minmax(150px, 1fr)); gap: 8px 14px; }
+.project-inline-search .search-panel input, .project-inline-search .search-panel select { min-width: 0; width: 100%; box-sizing: border-box; }
+.project-list-detail-workspace--DETAIL .project-inline-search .search-panel-layout,
+.project-list-detail-workspace--DETAIL .project-inline-search .search-panel-layout:has(.search-action-rail [data-display-mode="ICON_TEXT"]) { grid-template-columns: minmax(0, 1fr) 144px; align-items: stretch; gap: 8px; }
+.project-list-detail-workspace--DETAIL .project-inline-search .search-grid { grid-template-columns: minmax(0, 1fr); }
+.project-list-detail-workspace--DETAIL .project-inline-search .search-action-rail { display: flex; grid-column: 2; width: 144px; align-self: end; flex-direction: row-reverse; }
 .standard-design-header-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
 .standard-design-header-actions .standard-design-lifecycle-actions { flex: 0 0 auto; }
 .standard-design-header-actions .standard-design-lifecycle-actions button { min-height: 28px; padding: 3px 8px; }
