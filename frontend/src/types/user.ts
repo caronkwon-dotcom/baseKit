@@ -1,0 +1,19 @@
+import type { ManagedEntity, UseYn } from './common';
+
+export interface User extends ManagedEntity {
+  USER_ID: string;
+  LOGIN_ID: string;
+  USER_NAME: string;
+  EMAIL: string;
+  DEPARTMENT_NAME: string;
+  ROLE_NAME: string;
+  USER_TYPE_CODE: string;
+  LANGUAGE_CODE: string;
+  TIMEZONE_ID: string;
+  STATUS_CODE: string;
+  LAST_LOGIN_AT: string;
+  ACCOUNT_EXPIRED_AT: string;
+  PASSWORD_CHANGED_AT: string;
+  LOGIN_FAIL_COUNT: number;
+  LOCKED_YN: UseYn;
+}

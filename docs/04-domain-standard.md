@@ -41,8 +41,8 @@ BaseKit 도메인 표준은 다음 원칙을 따른다.
 * `USER_NAME`
 * `ROLE_CODE`
 * `USE_YN`
-* `CREATED_AT`
-* `UPDATED_AT`
+* `REG_DT`
+* `MOD_DT`
 
 이 명명은 화면 컬럼, Mock Data, 타입 정의, API 응답 구조까지 일관되게 유지하는 것을 목표로 한다.
 
@@ -116,8 +116,8 @@ Y/N 값
 
 예시:
 
-* `CREATED_AT`
-* `UPDATED_AT`
+* `REG_DT`
+* `MOD_DT`
 * `LAST_LOGIN_AT`
 
 ### 4.6 DATE
@@ -171,8 +171,8 @@ Y/N 값
 * `COMPANY_ID`
 * `COMPANY_NAME`
 * `USE_YN`
-* `CREATED_AT`
-* `UPDATED_AT`
+* `REG_DT`
+* `MOD_DT`
 
 조회 조건에서도 가능한 한 같은 의미 체계를 유지한다.
 
@@ -259,8 +259,8 @@ Y/N 값
 
 예:
 
-* `CREATED_AT`
-* `UPDATED_AT`
+* `REG_DT`
+* `MOD_DT`
 * `APPROVED_AT`
 * `LAST_LOGIN_AT`
 
@@ -281,7 +281,7 @@ Y/N 값
 | 사용자명   | `USER_NAME`                |
 | 역할     | `ROLE_CODE` 또는 `ROLE_NAME` |
 | 사용 여부  | `USE_YN`                   |
-| 등록일시   | `CREATED_AT`               |
+| 등록일시   | `REG_DT`               |
 
 이 구조를 유지하면 화면 표시 문구가 바뀌어도 데이터 구조는 안정적으로 유지할 수 있다.
 
@@ -332,7 +332,7 @@ type User = {
   USER_NAME: string;
   ROLE_CODE: string;
   USE_YN: 'Y' | 'N';
-  CREATED_AT: string;
+  REG_DT: string;
 };
 ```
 

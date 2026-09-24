@@ -1,0 +1,22 @@
+# BaseKit은 개발·검수용 업무 시스템입니다.
+# GitHub Project Pages에서는 /baseKit/robots.txt에 배포되므로 참고 정책이며,
+# 실제 적용에는 도메인 루트 /robots.txt 또는 커스텀 도메인이 필요합니다.
+# 검색 봇은 HTML의 noindex 메타를 읽을 수 있도록 허용하되 데이터 파일은 수집하지 않습니다.
+User-agent: *
+Disallow: /baseKit/data/
+
+# 대표적인 AI 학습·대량 수집 봇은 전체 경로를 차단합니다.
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /

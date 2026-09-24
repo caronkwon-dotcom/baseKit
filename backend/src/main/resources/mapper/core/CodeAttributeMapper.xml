@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caron.basekit.core.code.CodeAttributeMapper">
+    <sql id="definitionColumns">
+        ATTRIBUTE_DEF_ID, CODE_GROUP_ID, ATTRIBUTE_CODE, ATTRIBUTE_NAME,
+        DATA_TYPE, CONTROL_TYPE, DISPLAY_TYPE, REQUIRED_YN, DEFAULT_VALUE, OPTION_SOURCE,
+        SORT_ORDER, USE_YN, DEL_YN, REG_DT, REG_BY, MOD_DT, MOD_BY
+    </sql>
+
+    <select id="findDefinitions" resultType="com.caron.basekit.core.code.CodeAttributeDefinitionData">
+        SELECT <include refid="definitionColumns"/>
+          FROM BSYCADF CADF
+         WHERE CADF.CODE_GROUP_ID = #{CODE_GROUP_ID}
+           AND CADF.DEL_YN = 'N'
+         ORDER BY CADF.SORT_ORDER, CADF.ATTRIBUTE_CODE
+    </select>
+
+    <select id="findDefinition" resultType="com.caron.basekit.core.code.CodeAttributeDefinitionData">
+        SELECT <include refid="definitionColumns"/>
+          FROM BSYCADF CADF
+         WHERE CADF.ATTRIBUTE_DEF_ID = #{ATTRIBUTE_DEF_ID}
+           AND CADF.DEL_YN = 'N'
+    </select>
+
+    <select id="countDuplicateDefinition" resultType="int">
+        SELECT COUNT(*) FROM BSYCADF CADF
+         WHERE CADF.CODE_GROUP_ID = #{CODE_GROUP_ID}
+           AND CADF.ATTRIBUTE_CODE = #{ATTRIBUTE_CODE}
+           AND CADF.DEL_YN = 'N'
+        <if test="EXCLUDE_ATTRIBUTE_DEF_ID != null and EXCLUDE_ATTRIBUTE_DEF_ID != ''">
+           AND CADF.ATTRIBUTE_DEF_ID != #{EXCLUDE_ATTRIBUTE_DEF_ID}
+        </if>
+    </select>
+
+    <insert id="insertDefinition">
+        INSERT INTO BSYCADF
+          (ATTRIBUTE_DEF_ID, CODE_GROUP_ID, ATTRIBUTE_CODE, ATTRIBUTE_NAME, DATA_TYPE, CONTROL_TYPE,
+           DISPLAY_TYPE, REQUIRED_YN, DEFAULT_VALUE, OPTION_SOURCE, SORT_ORDER, USE_YN, DEL_YN,
+           REG_DT, REG_BY, MOD_DT, MOD_BY)
+        VALUES
+          (#{ATTRIBUTE_DEF_ID}, #{CODE_GROUP_ID}, #{ATTRIBUTE_CODE}, #{ATTRIBUTE_NAME}, #{DATA_TYPE}, #{CONTROL_TYPE},
+           #{DISPLAY_TYPE}, #{REQUIRED_YN}, #{DEFAULT_VALUE}, #{OPTION_SOURCE}, #{SORT_ORDER}, #{USE_YN}, #{DEL_YN},
+           #{REG_DT}, #{REG_BY}, #{MOD_DT}, #{MOD_BY})
+    </insert>
+
+    <update id="updateDefinition">
+        UPDATE BSYCADF CADF
+           SET ATTRIBUTE_CODE = #{ATTRIBUTE_CODE}, ATTRIBUTE_NAME = #{ATTRIBUTE_NAME},
+               DATA_TYPE = #{DATA_TYPE}, CONTROL_TYPE = #{CONTROL_TYPE}, DISPLAY_TYPE = #{DISPLAY_TYPE},
+               REQUIRED_YN = #{REQUIRED_YN}, DEFAULT_VALUE = #{DEFAULT_VALUE}, OPTION_SOURCE = #{OPTION_SOURCE},
+               SORT_ORDER = #{SORT_ORDER}, USE_YN = #{USE_YN}, MOD_DT = #{MOD_DT}, MOD_BY = #{MOD_BY}
+         WHERE CADF.ATTRIBUTE_DEF_ID = #{ATTRIBUTE_DEF_ID} AND CADF.DEL_YN = 'N'
+    </update>
+
+    <update id="logicalDeleteDefinition">
+        UPDATE BSYCADF CADF SET DEL_YN = 'Y', USE_YN = 'N', MOD_DT = CURRENT_TIMESTAMP, MOD_BY = #{MOD_BY}
+         WHERE CADF.ATTRIBUTE_DEF_ID = #{ATTRIBUTE_DEF_ID} AND CADF.DEL_YN = 'N'
+    </update>
+
+    <update id="logicalDeleteValuesByDefinition">
+        UPDATE BSYCAVL CAVL SET DEL_YN = 'Y', MOD_DT = CURRENT_TIMESTAMP, MOD_BY = #{MOD_BY}
+         WHERE CAVL.ATTRIBUTE_DEF_ID = #{ATTRIBUTE_DEF_ID} AND CAVL.DEL_YN = 'N'
+    </update>
+
+    <select id="countActiveValuesByDefinition" resultType="int">
+        SELECT COUNT(*) FROM BSYCAVL WHERE ATTRIBUTE_DEF_ID = #{ATTRIBUTE_DEF_ID} AND DEL_YN = 'N'
+    </select>
+
+    <select id="countActiveCodeOption" resultType="int">
+        SELECT COUNT(*) FROM BSYCMCD
+         WHERE CODE_GROUP_ID = #{CODE_GROUP_ID} AND CODE = #{CODE} AND USE_YN = 'Y' AND DEL_YN = 'N'
+    </select>
+
+    <select id="findValuesByGroup" resultType="com.caron.basekit.core.code.CodeAttributeValueData">
+        SELECT CAVL.CODE_ID, CAVL.ATTRIBUTE_DEF_ID, CADF.ATTRIBUTE_CODE, CAVL.ATTRIBUTE_VALUE
+          FROM BSYCAVL CAVL
+          JOIN BSYCADF CADF ON CADF.ATTRIBUTE_DEF_ID = CAVL.ATTRIBUTE_DEF_ID AND CADF.DEL_YN = 'N'
+          JOIN BSYCMCD CMCD ON CMCD.CODE_ID = CAVL.CODE_ID AND CMCD.DEL_YN = 'N'
+         WHERE CADF.CODE_GROUP_ID = #{CODE_GROUP_ID} AND CAVL.DEL_YN = 'N'
+    </select>
+
+    <select id="countValue" resultType="int">
+        SELECT COUNT(*) FROM BSYCAVL WHERE CODE_ID = #{CODE_ID} AND ATTRIBUTE_DEF_ID = #{ATTRIBUTE_DEF_ID}
+    </select>
+
+    <insert id="insertValue">
+        INSERT INTO BSYCAVL
+          (CODE_ID, ATTRIBUTE_DEF_ID, ATTRIBUTE_VALUE, DEL_YN, REG_DT, REG_BY, MOD_DT, MOD_BY)
+        VALUES
+          (#{CODE_ID}, #{ATTRIBUTE_DEF_ID}, #{ATTRIBUTE_VALUE}, 'N', CURRENT_TIMESTAMP, #{ACTOR}, CURRENT_TIMESTAMP, #{ACTOR})
+    </insert>
+
+    <update id="updateValue">
+        UPDATE BSYCAVL SET ATTRIBUTE_VALUE = #{ATTRIBUTE_VALUE}, DEL_YN = 'N',
+               MOD_DT = CURRENT_TIMESTAMP, MOD_BY = #{ACTOR}
+         WHERE CODE_ID = #{CODE_ID} AND ATTRIBUTE_DEF_ID = #{ATTRIBUTE_DEF_ID}
+    </update>
+
+    <update id="logicalDeleteValue">
+        UPDATE BSYCAVL CAVL SET DEL_YN = 'Y', MOD_DT = CURRENT_TIMESTAMP, MOD_BY = #{MOD_BY}
+         WHERE CAVL.CODE_ID = #{CODE_ID} AND CAVL.ATTRIBUTE_DEF_ID = #{ATTRIBUTE_DEF_ID} AND CAVL.DEL_YN = 'N'
+    </update>
+
+    <update id="logicalDeleteValuesByCode">
+        UPDATE BSYCAVL SET DEL_YN = 'Y', MOD_DT = CURRENT_TIMESTAMP, MOD_BY = #{MOD_BY}
+         WHERE CODE_ID = #{CODE_ID} AND DEL_YN = 'N'
+    </update>
+</mapper>

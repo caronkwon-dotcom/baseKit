@@ -1,0 +1,20 @@
+[
+  { "actionCode": "SEARCH", "actionName": "조회", "auditYn": "N" },
+  { "actionCode": "RESET", "actionName": "초기화", "auditYn": "N" },
+  { "actionCode": "CREATE", "actionName": "신규", "auditYn": "Y" },
+  { "actionCode": "ADD_ROW", "actionName": "행추가", "auditYn": "Y" },
+  { "actionCode": "REMOVE_ROW", "actionName": "행삭제", "auditYn": "Y" },
+  { "actionCode": "REVERT_CHANGES", "actionName": "변경취소", "auditYn": "N" },
+  { "actionCode": "SAVE", "actionName": "저장", "auditYn": "Y" },
+  { "actionCode": "UPDATE", "actionName": "수정", "auditYn": "Y" },
+  { "actionCode": "DELETE", "actionName": "삭제", "auditYn": "Y" },
+  { "actionCode": "EXCEL_DOWNLOAD", "actionName": "엑셀다운로드", "auditYn": "Y" },
+  { "actionCode": "EXCEL_UPLOAD", "actionName": "엑셀업로드", "auditYn": "Y" },
+  { "actionCode": "PRINT", "actionName": "인쇄", "auditYn": "Y" },
+  { "actionCode": "APPROVE", "actionName": "승인", "auditYn": "Y" },
+  { "actionCode": "REJECT", "actionName": "반려", "auditYn": "Y" },
+  { "actionCode": "MANUAL_VIEW", "actionName": "매뉴얼 보기", "auditYn": "N" },
+  { "actionCode": "MANUAL_GENERATE", "actionName": "매뉴얼 생성", "auditYn": "Y" },
+  { "actionCode": "MANUAL_EDIT", "actionName": "매뉴얼 수정", "auditYn": "Y" },
+  { "actionCode": "MANUAL_PUBLISH", "actionName": "매뉴얼 배포", "auditYn": "Y" }
+]

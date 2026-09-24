@@ -1,0 +1,134 @@
+[
+  {
+    "programKey": "HOME",
+    "programName": "홈",
+    "componentName": "HomePage",
+    "screenType": "HOME",
+    "routePath": "/",
+    "dataScope": "USER",
+    "modifyScope": "NONE",
+    "actionCodes": ["MANUAL_VIEW"],
+    "useYn": "Y"
+  },
+  {
+    "programKey": "USER_MGMT",
+    "programName": "사용자관리",
+    "componentName": "UserManagePage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/users",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "CREATE", "UPDATE", "DELETE", "MANUAL_VIEW", "MANUAL_GENERATE", "MANUAL_EDIT"],
+    "useYn": "Y"
+  },
+  {
+    "programKey": "COMMON_CODE_MGMT",
+    "programName": "공통코드관리",
+    "componentName": "CodeManagePage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/codes",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "CREATE", "UPDATE", "DELETE", "ADD_ROW", "REMOVE_ROW", "REVERT_CHANGES", "SAVE", "MANUAL_VIEW", "MANUAL_GENERATE"],
+    "useYn": "Y"
+  },
+  {
+    "programKey": "MENU_MGMT",
+    "programName": "메뉴관리",
+    "componentName": "MenuManagePage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/menus",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "MANUAL_VIEW", "MANUAL_GENERATE"],
+    "useYn": "Y"
+  },
+  {
+    "programKey": "PROGRAM_MGMT",
+    "programName": "프로그램관리",
+    "componentName": "ProgramManagePage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/programs",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "CREATE", "UPDATE", "DELETE", "MANUAL_VIEW"],
+    "useYn": "Y"
+  },
+  {
+    "programKey": "TABLE_MGMT",
+    "programName": "테이블관리",
+    "componentName": "TableManagePage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/tables",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "RESET", "MANUAL_VIEW"],
+    "useYn": "Y"
+  },
+  {
+    "programKey": "TERM_CURATION",
+    "programName": "표준용어관리",
+    "componentName": "TermCurationPage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/terms",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "RESET", "SAVE", "EXCEL_DOWNLOAD", "MANUAL_VIEW"],
+    "useYn": "Y"
+  },
+  {
+    "programKey": "WORD_MGMT",
+    "programName": "단어관리",
+    "componentName": "WordManagePage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/words",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "RESET", "CREATE", "SAVE", "MANUAL_VIEW"],
+    "useYn": "Y"
+  },
+  {
+    "programKey": "DOMAIN_MGMT",
+    "programName": "도메인관리",
+    "componentName": "DomainManagePage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/domains",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "RESET", "CREATE", "SAVE", "MANUAL_VIEW"],
+    "useYn": "Y"
+  },
+  {
+    "programKey": "DOCUMENT_CENTER",
+    "programName": "BaseKit 문서센터",
+    "componentName": "DocumentCenterPage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/dev-guide/documents",
+    "dataScope": "USER",
+    "modifyScope": "NONE",
+    "actionCodes": ["SEARCH"],
+    "useYn": "Y"
+  },
+  {
+    "programKey": "DEV_SEARCH_SAMPLE_TYPE_1",
+    "programName": "기본 검색 페이지 샘플 Type 1",
+    "componentName": "SearchSampleType1Page",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/dev-guide/search-sample-type-1",
+    "dataScope": "USER",
+    "modifyScope": "NONE",
+    "actionCodes": ["SEARCH", "RESET", "MANUAL_VIEW"],
+    "useYn": "Y"
+  },
+  {
+    "programKey": "DEV_SEARCH_SAMPLE_TYPE_2",
+    "programName": "고급 검색 페이지 샘플 Type 2",
+    "componentName": "SearchSampleType2Page",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/dev-guide/search-sample-type-2",
+    "dataScope": "USER",
+    "modifyScope": "NONE",
+    "actionCodes": ["SEARCH", "RESET", "CREATE", "DELETE", "EXCEL_DOWNLOAD", "MANUAL_VIEW"],
+    "useYn": "Y"
+  }
+]
