@@ -6,6 +6,7 @@ import DataTable, { type DataTableColumn, type DataTableProps } from './DataTabl
 import type { ReactNode } from 'react';
 import ActionButton, { type ActionButtonDisplay, type ActionButtonDisplayMode, type ActionButtonTone } from './ActionButton';
 import { useUiPreferences } from '../../preferences/useUiPreferences';
+import { canUseGridAction } from './gridActionPermission';
 
 const GRID_ACTION_CODES = [
   COMMON_ACTIONS.CREATE,
@@ -81,9 +82,10 @@ export default function ProgramDataGrid<T>({
   );
   const menuName = metadataRepository.getMenuNameByProgram(programKey);
   const resolvedTitle = title ?? `${menuName ?? program.programName} 목록`;
-  const visibleActions = GRID_ACTION_CODES.filter(
-    (actionCode) => program.actionCodes.includes(actionCode) && hasAction(roleCode, programKey, actionCode),
-  );
+  const canUseAction = (actionCode: ActionCode) =>
+    canUseGridAction(actionCode, program.actionCodes, (code) => hasAction(roleCode, programKey, code));
+  const visibleActions = GRID_ACTION_CODES.filter(canUseAction);
+  const visibleToolbarActions = toolbarActions?.filter((action) => canUseAction(action.actionCode));
   const selectedRows = rows.filter((row) => selectedRowKeys.has(getRowKey(row)));
   const resolvedButtonDisplay = buttonDisplay === 'icon' || buttonDisplay === 'ICON_ONLY'
     ? 'ICON_ONLY'
@@ -104,7 +106,7 @@ export default function ProgramDataGrid<T>({
           ))}
         </div>
         <div className="grid-actions" aria-label="목록 기능">
-          {toolbarActions ? toolbarActions.map((action) => <ActionButton key={action.actionCode} actionCode={action.actionCode} label={action.label} tone={action.tone} displayMode={resolvedButtonDisplay} disabled={action.disabled} onClick={() => action.onClick({ rows, selectedRows })} />) : visibleActions.map((actionCode) => {
+          {visibleToolbarActions ? visibleToolbarActions.map((action) => <ActionButton key={action.actionCode} actionCode={action.actionCode} label={action.label} tone={action.tone} displayMode={resolvedButtonDisplay} disabled={action.disabled} onClick={() => action.onClick({ rows, selectedRows })} />) : visibleActions.map((actionCode) => {
             const actionName = actionNames.get(actionCode) ?? actionCode;
             const iconOnly = actionCode === COMMON_ACTIONS.EXCEL_DOWNLOAD;
             return (
