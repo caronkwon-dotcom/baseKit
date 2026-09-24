@@ -8,6 +8,7 @@ import { useGridRowState, type TrackedGridRow } from '../components/grid/gridRow
 import type { FieldOption } from '../components/metadata';
 import { coreCodeApi } from '../services/coreCodeApi';
 import type { Code, CodeAttributeDefinition, CodeGroup, UseYn } from '../types';
+import { reloadSavedCodeDetail } from './codeManageDetailReload';
 
 interface Condition { groupKeyword: string; codeName: string; useYn: '' | UseYn }
 type CodeMessage = { type: BaseKitMessageType; text: string };
@@ -70,19 +71,28 @@ export default function CodeManagePage() {
   const fields = useMemo(() => toFieldDefinitions(attributes.rows, options), [attributes.rows, options]);
   const notify = (text: string, type: BaseKitMessageType = 'warn') => setMessage({ type, text });
 
-  const loadDetail = useCallback(async (id: string, search: Condition) => {
-    if (!id) { attributes.replace([]); codes.replace([]); return; }
-    const [codeRows, definitions, values] = await Promise.all([
+  const loadAttributes = useCallback(async (id: string) => {
+    if (!id) { attributes.replace([]); setOptions(new Map()); return; }
+    const definitions = await coreCodeApi.findAttributeDefinitions(id);
+    const resolvedOptions = await resolveCodeAttributeOptions(definitions);
+    attributes.replace(definitions);
+    setOptions(resolvedOptions);
+  }, [attributes]);
+
+  const loadCodes = useCallback(async (id: string, search: Condition) => {
+    if (!id) { codes.replace([]); return; }
+    const [codeRows, values] = await Promise.all([
       coreCodeApi.findCodes(id, search.codeName, search.useYn),
-      coreCodeApi.findAttributeDefinitions(id),
       coreCodeApi.findAttributeValues(id),
     ]);
     const valuesByCode = new Map<string, Record<string, string>>();
     values.forEach(value => valuesByCode.set(value.CODE_ID, { ...(valuesByCode.get(value.CODE_ID) ?? {}), [value.ATTRIBUTE_CODE]: value.ATTRIBUTE_VALUE }));
-    attributes.replace(definitions);
     codes.replace(codeRows.map(row => ({ ...row, ATTRIBUTE_VALUES: valuesByCode.get(row.CODE_ID) ?? {} })));
-    setOptions(await resolveCodeAttributeOptions(definitions));
-  }, [attributes, codes]);
+  }, [codes]);
+
+  const loadDetail = useCallback(async (id: string, search: Condition) => {
+    await Promise.all([loadAttributes(id), loadCodes(id, search)]);
+  }, [loadAttributes, loadCodes]);
 
   const loadGroups = useCallback(async (search: Condition, preferred = '', skipDirtyConfirm = false) => {
     if (!skipDirtyConfirm && (groups.dirty || attributes.dirty || codes.dirty) && !window.confirm('미저장 변경사항이 사라집니다. 계속하시겠습니까?')) return;
@@ -143,14 +153,14 @@ export default function CodeManagePage() {
   };
 
   const saveAttributes = async () => {
-    if (!selectedGroupId || codes.dirty) return notify('공통코드 변경사항을 먼저 저장해 주세요.');
+    if (!selectedGroupId) return notify('코드그룹을 선택해 주세요.');
     const invalid = findGridValidationIssue([...attributes.changeSet.INSERTED, ...attributes.changeSet.UPDATED], attributeColumns);
     if (invalid) return notify(`${invalid.field.label}: ${invalid.message}`);
     setSaving(true);
     try {
       const value = (row: CodeAttributeDefinition) => ({ ATTRIBUTE_CODE: clean(row.ATTRIBUTE_CODE).toUpperCase(), ATTRIBUTE_NAME: clean(row.ATTRIBUTE_NAME), DATA_TYPE: row.DATA_TYPE, CONTROL_TYPE: row.CONTROL_TYPE, DISPLAY_TYPE: row.DISPLAY_TYPE, REQUIRED_YN: row.REQUIRED_YN, DEFAULT_VALUE: row.DEFAULT_VALUE, OPTION_SOURCE: row.OPTION_SOURCE, SORT_ORDER: Number(row.SORT_ORDER), USE_YN: row.USE_YN });
       await coreCodeApi.saveAttributeBatch(selectedGroupId, { INSERTED: attributes.changeSet.INSERTED.map(value), UPDATED: attributes.changeSet.UPDATED.map(row => ({ ATTRIBUTE_DEF_ID: row.ATTRIBUTE_DEF_ID, VALUE: value(row) })), DELETED: attributes.changeSet.DELETED });
-      await loadDetail(selectedGroupId, condition);
+      await reloadSavedCodeDetail('attributes', selectedGroupId, condition, { attributes: loadAttributes, codes: loadCodes });
       notify('속성정의를 저장했습니다.', 'info');
     } catch (error) {
       notify(error instanceof Error ? error.message : '저장하지 못했습니다.', 'error');
@@ -165,7 +175,7 @@ export default function CodeManagePage() {
     try {
       const value = (row: Code) => ({ CODE_ID: clean(row.CODE_ID), CODE_GROUP_ID: selectedGroupId, CODE: clean(row.CODE), CODE_NAME: clean(row.CODE_NAME), SORT_ORDER: Number(row.SORT_ORDER), USE_YN: row.USE_YN, ATTRIBUTE_VALUES: row.ATTRIBUTE_VALUES ?? {} });
       await coreCodeApi.saveCodeBatch(selectedGroupId, { INSERTED: codes.changeSet.INSERTED.map(value), UPDATED: codes.changeSet.UPDATED.map(value), DELETED: codes.changeSet.DELETED });
-      await loadDetail(selectedGroupId, condition);
+      await reloadSavedCodeDetail('codes', selectedGroupId, condition, { attributes: loadAttributes, codes: loadCodes });
       notify('공통코드를 저장했습니다.', 'info');
     } catch (error) {
       notify(error instanceof Error ? error.message : '저장하지 못했습니다.', 'error');
