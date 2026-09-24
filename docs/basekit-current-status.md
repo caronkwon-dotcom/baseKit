@@ -321,3 +321,7 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 ## UI-03 HIGH 위험 보정 (2026-09-24, feature 검수 대기)
 
 `codex/ui03-high-risk`는 `origin/dev-pm` `ffa806a` 기준으로 공통 Grid의 기본/사용자 지정 Toolbar Action에 동일한 `ROLE × PROGRAM × ACTION_CODE` 필터를 적용하고, 공통코드관리의 행추가·행삭제·변경취소·저장 권한을 명시한다. 우측 속성정의·공통코드는 저장한 Dataset만 재조회하여 다른 Grid의 미저장 변경을 유지한다. UI-03 Catalog 승격 및 dev-pm 통합은 아직 하지 않았다. Frontend build/lint, 관련 테스트 18개, Backend 테스트 22개와 격리 Mock API 브라우저 저장·변경취소 검증을 통과했다.
+
+## Compact Business UI Density (2026-09-24, feature 검수 대기)
+
+`codex/compact-business-ui-density`는 `origin/dev-pm` `ffa806a`에서 시작한 독립 변경이다. 공통 PageHeader와 SearchPanel의 세로 여백, 검색 Control 높이(30px), Workspace 간격만 조정한다. 공통코드관리 1440×900 화면에서 PageHeader 24.8→26px, SearchPanel 55.6→41.6px, 첫 Grid 시작 위치 177.2→158.4px로 측정했다. Grid CRUD, 40:60/38:62 비율, Toolbar와 Message Area 높이는 변경하지 않았다. dev-pm에는 아직 통합되지 않았다.

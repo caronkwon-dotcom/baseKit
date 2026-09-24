@@ -27,6 +27,7 @@
   --action-disabled-bg: var(--surface-muted);
   --action-disabled-text: #94a3b8;
   --action-disabled-border: #cbd5e1;
+  --control-height-compact: 30px;
   --message-info-bg: color-mix(in srgb, var(--brand-primary) 9%, var(--surface-panel));
   --message-info-border: color-mix(in srgb, var(--brand-primary) 42%, var(--border-default));
   --message-info-text: var(--brand-hover);
@@ -601,7 +602,7 @@ button {
 }
 
 .page-header {
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .page-context-row,
@@ -611,11 +612,11 @@ button {
 }
 
 .page-context-row {
-  min-height: 24px;
+  min-height: 26px;
   justify-content: space-between;
   gap: 16px;
   border-bottom: 1px solid var(--border-default);
-  padding: 0 0 2px;
+  padding: 0;
 }
 
 .page-navigation-area {
@@ -712,7 +713,7 @@ button {
   font-weight: 700;
 }
 
-.action-button { display: inline-flex; min-width: 30px; min-height: 29px; align-items: center; justify-content: center; gap: 5px; border: 1px solid var(--action-neutral-border); border-radius: 5px; background: var(--action-neutral-bg); padding: 0 8px; color: var(--action-neutral-text); font-size: 13px; font-weight: 700; }
+.action-button { display: inline-flex; min-width: var(--control-height-compact); min-height: var(--control-height-compact); align-items: center; justify-content: center; gap: 5px; border: 1px solid var(--action-neutral-border); border-radius: 5px; background: var(--action-neutral-bg); padding: 0 8px; color: var(--action-neutral-text); font-size: 13px; font-weight: 700; }
 .action-button:hover:not(:disabled) { background: var(--action-neutral-hover-bg); }
 .action-button.primary { border-color: var(--action-neutral-border); background: var(--action-neutral-bg); color: var(--action-neutral-text); }
 .action-button[data-action-code="SEARCH"] { border-color: var(--action-search-border); background: var(--action-search-bg); color: var(--action-search-text); }
@@ -721,7 +722,7 @@ button {
 .action-button[data-action-code="SAVE"]:hover:not(:disabled) { border-color: var(--action-save-bg-hover); background: var(--action-save-bg-hover); }
 .action-button.danger { border-color: var(--action-danger-border); background: var(--action-neutral-bg); color: var(--action-danger-text); }
 .action-button.danger:hover:not(:disabled) { background: var(--action-danger-hover-bg); }
-.action-button.icon-only { width: 29px; padding: 0; }
+.action-button.icon-only { width: var(--control-height-compact); padding: 0; }
 .action-button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .action-button:disabled { border-color: var(--action-disabled-border); background: var(--action-disabled-bg); color: var(--action-disabled-text); cursor: not-allowed; }
 
@@ -760,8 +761,8 @@ button {
 }
 
 .search-panel {
-  margin-bottom: 8px;
-  padding: 12px 14px;
+  margin-bottom: 4px;
+  padding: 5px 12px;
 }
 
 .search-panel-layout {
@@ -849,8 +850,8 @@ button {
 
 .search-icon-button {
   display: grid;
-  min-width: 30px;
-  min-height: 30px;
+  min-width: var(--control-height-compact);
+  min-height: var(--control-height-compact);
   flex: 1;
   place-items: center;
   border: 1px solid var(--border-strong);
@@ -921,7 +922,7 @@ button {
 .search-grid input,
 .search-grid select {
   width: 100%;
-  min-height: 30px;
+  min-height: var(--control-height-compact);
   border: 1px solid var(--border-strong);
   border-radius: 6px;
   background: var(--surface-panel);
@@ -1545,7 +1546,7 @@ tbody tr.selected-row td {
 
 /* BaseKit 표준 Master/Detail Multi-Grid 화면 */
 .multi-grid-page { display: flex; min-height: 0; flex: 1; flex-direction: column; }
-.multi-grid-workspace { display: flex; min-height: var(--multi-grid-workspace-min-height); flex: 1; flex-direction: column; gap: 6px; }
+.multi-grid-workspace { display: flex; min-height: var(--multi-grid-workspace-min-height); flex: 1; flex-direction: column; gap: 4px; }
 .master-detail-multi-grid { display: grid; min-height: 0; flex: 1; grid-template-columns: minmax(var(--multi-grid-master-min-width), var(--multi-grid-master-width)) minmax(0, 1fr); gap: var(--multi-grid-gap); }
 .multi-grid-master,
 .multi-grid-detail,
