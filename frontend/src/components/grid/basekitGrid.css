@@ -16,11 +16,18 @@
 .basekit-ag-grid .ag-cell.basekit-editable-cell.ag-cell-inline-editing::after,
 .basekit-ag-grid .ag-cell.basekit-editable-cell:focus-within::after { border-color: var(--brand-primary); border-width: 2px; }
 .basekit-ag-grid .ag-cell.basekit-invalid-cell::after { border-color: var(--action-danger-text); border-width: 2px; }
-.basekit-grid-switch { position: relative; width: 28px; height: 16px; padding: 0; border: 1px solid var(--border-default); border-radius: 999px; background: var(--surface-muted); vertical-align: middle; cursor: pointer; }
+.basekit-ag-grid .ag-cell.basekit-grid-switch-cell { display: flex; align-items: center; justify-content: center; overflow: visible; text-overflow: clip; padding-left: 4px; padding-right: 4px; }
+.basekit-ag-grid .ag-cell.basekit-grid-switch-cell .ag-cell-value { display: flex; align-items: center; justify-content: center; overflow: visible; text-overflow: clip; width: 100%; }
+.basekit-grid-switch { position: relative; flex: 0 0 28px; width: 28px; height: 16px; padding: 0; border: 1px solid var(--border-default); border-radius: 999px; background: var(--surface-muted); vertical-align: middle; cursor: pointer; }
 .basekit-grid-switch span { position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; border-radius: 50%; background: var(--text-muted); transition: transform .12s ease; }
 .basekit-grid-switch.checked { border-color: var(--brand-primary); background: var(--brand-soft); }
 .basekit-grid-switch.checked span { background: var(--brand-primary); transform: translateX(12px); }
 .basekit-grid-switch:disabled { cursor: default; opacity: .72; }
+.basekit-text-length-editor { position: relative; width: 100%; height: 100%; }
+.basekit-text-length-editor input { width: 100%; height: 100%; border: 0; outline: 0; padding: 1px 46px 1px 6px; color: var(--text-primary); background: var(--surface-panel); font: inherit; }
+.basekit-text-length-counter { position: absolute; right: 5px; bottom: 1px; color: var(--text-muted); font-size: 9px; line-height: 11px; pointer-events: none; }
+.basekit-text-length-editor.at-limit input { box-shadow: inset 0 -2px var(--action-danger-text); }
+.basekit-text-length-editor.at-limit .basekit-text-length-counter { color: var(--action-danger-text); font-weight: 700; }
 .basekit-color-cell-editor { width: calc(100% - 8px); height: 24px; margin: 3px 4px; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .basekit-ag-grid .ag-cell.basekit-row-state-cell { display: flex; align-items: center; justify-content: center; padding: 0; }
 .basekit-row-state-icon { display: inline-flex; width: 17px; height: 17px; align-items: center; justify-content: center; }

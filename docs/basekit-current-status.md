@@ -263,6 +263,13 @@ gh pr list --repo caronkwon-dotcom/baseKit
 
 ## 8. 다음 추천 작업
 
+### 검수 대기: AG Grid 입력 길이·YN 표시 보정
+
+- Schema Catalog의 문자열 길이를 `FieldDefinition.maxLength`로 전달하고 Grid 편집 중 현재/최대 길이를 표시한다.
+- 최대 길이 초과 입력과 붙여넣기는 Cell Editor에서 차단하며 Backend 검증은 최종 방어선으로 유지한다.
+- 길이 검증 오류는 사용자용 필드명 메시지로 변환하고 YN Switch Cell의 말줄임과 최소 폭을 보정한다.
+- 이번 변경은 `feature/ag-grid-input-ux-length-switch`에서 검수 대기하며 dev-pm에는 통합하지 않는다.
+
 ### 검수 대기: AG Grid Community 1차 PoC
 
 - 코드관리 3개 Grid에만 AG Grid Community 36.2.0 Wrapper/Adapter 적용. FieldDefinition·MetadataForm·Backend/DB 계약과 기존 Grid 보존.

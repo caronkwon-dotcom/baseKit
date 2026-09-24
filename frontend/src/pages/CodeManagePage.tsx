@@ -3,7 +3,7 @@ import { resolveCodeAttributeOptions, toFieldDefinitions } from '../adapters/cod
 import { codeAttributeGridFields, codeGridFields, codeGroupGridFields } from '../adapters/codeGridFieldDefinitions';
 import { BaseKitMessage, MasterDetailMultiGrid, PageHeader, SearchPanel, type BaseKitMessageType, type DataTableColumn, type SearchFieldConfig } from '../components/common';
 import BaseKitDataGrid from '../components/grid/BaseKitDataGrid';
-import { findGridValidationIssue } from '../components/grid/gridFieldValidation';
+import { findGridValidationIssue, gridValidationIssueMessage, userGridErrorMessage } from '../components/grid/gridFieldValidation';
 import { useGridRowState, type TrackedGridRow } from '../components/grid/gridRowState';
 import type { FieldOption } from '../components/metadata';
 import { coreCodeApi } from '../services/coreCodeApi';
@@ -48,6 +48,9 @@ const attributeColumns: DataTableColumn<CodeAttributeDefinition>[] = [
   { key: 'SORT_ORDER', header: '정렬', width: 55, fieldDefinition: codeAttributeGridFields.SORT_ORDER, render: row => row.SORT_ORDER },
   { key: 'USE_YN', header: '사용', width: 52, fieldDefinition: codeAttributeGridFields.USE_YN, render: row => row.USE_YN },
 ];
+const groupFieldDefinitions = Object.values(codeGroupGridFields);
+const attributeFieldDefinitions = Object.values(codeAttributeGridFields);
+const codeFieldDefinitions = Object.values(codeGridFields);
 const clean = (value: unknown) => String(value ?? '').trim();
 const applyGridValue = <T,>(row: T, columns: DataTableColumn<T>[], key: string, value: string): T => {
   const field = columns.find((column) => column.key === key)?.fieldDefinition;
@@ -130,7 +133,7 @@ export default function CodeManagePage() {
   const saveGroups = async () => {
     if (attributes.dirty || codes.dirty) return notify('상세 Grid 변경사항을 먼저 저장해 주세요.');
     const invalid = findGridValidationIssue([...groups.changeSet.INSERTED, ...groups.changeSet.UPDATED], groupColumns);
-    if (invalid) return notify(`${invalid.field.label}: ${invalid.message}`);
+    if (invalid) return notify(gridValidationIssueMessage(invalid));
     setSaving(true);
     try {
       const value = (row: CodeGroup) => ({ CODE_GROUP_ID: clean(row.CODE_GROUP_ID), CODE_GROUP_NAME: clean(row.CODE_GROUP_NAME), DESCRIPTION: clean(row.DESCRIPTION), USE_YN: row.USE_YN });
@@ -138,14 +141,14 @@ export default function CodeManagePage() {
       await loadGroups(condition, selectedGroupId, true);
       notify('코드그룹을 저장했습니다.', 'info');
     } catch (error) {
-      notify(error instanceof Error ? error.message : '저장하지 못했습니다.', 'error');
+      notify(userGridErrorMessage(error, groupFieldDefinitions, '저장하지 못했습니다.'), 'error');
     } finally { setSaving(false); }
   };
 
   const saveAttributes = async () => {
     if (!selectedGroupId || codes.dirty) return notify('공통코드 변경사항을 먼저 저장해 주세요.');
     const invalid = findGridValidationIssue([...attributes.changeSet.INSERTED, ...attributes.changeSet.UPDATED], attributeColumns);
-    if (invalid) return notify(`${invalid.field.label}: ${invalid.message}`);
+    if (invalid) return notify(gridValidationIssueMessage(invalid));
     setSaving(true);
     try {
       const value = (row: CodeAttributeDefinition) => ({ ATTRIBUTE_CODE: clean(row.ATTRIBUTE_CODE).toUpperCase(), ATTRIBUTE_NAME: clean(row.ATTRIBUTE_NAME), DATA_TYPE: row.DATA_TYPE, CONTROL_TYPE: row.CONTROL_TYPE, DISPLAY_TYPE: row.DISPLAY_TYPE, REQUIRED_YN: row.REQUIRED_YN, DEFAULT_VALUE: row.DEFAULT_VALUE, OPTION_SOURCE: row.OPTION_SOURCE, SORT_ORDER: Number(row.SORT_ORDER), USE_YN: row.USE_YN });
@@ -153,14 +156,14 @@ export default function CodeManagePage() {
       await loadDetail(selectedGroupId, condition);
       notify('속성정의를 저장했습니다.', 'info');
     } catch (error) {
-      notify(error instanceof Error ? error.message : '저장하지 못했습니다.', 'error');
+      notify(userGridErrorMessage(error, attributeFieldDefinitions, '저장하지 못했습니다.'), 'error');
     } finally { setSaving(false); }
   };
 
   const saveCodes = async () => {
     if (!selectedGroupId) return notify('코드그룹을 선택해 주세요.');
     const invalid = findGridValidationIssue([...codes.changeSet.INSERTED, ...codes.changeSet.UPDATED], codeColumns, fields, (row, field) => row.ATTRIBUTE_VALUES?.[field.key]);
-    if (invalid) return notify(`${invalid.field.label}: ${invalid.message}`);
+    if (invalid) return notify(gridValidationIssueMessage(invalid));
     setSaving(true);
     try {
       const value = (row: Code) => ({ CODE_ID: clean(row.CODE_ID), CODE_GROUP_ID: selectedGroupId, CODE: clean(row.CODE), CODE_NAME: clean(row.CODE_NAME), SORT_ORDER: Number(row.SORT_ORDER), USE_YN: row.USE_YN, ATTRIBUTE_VALUES: row.ATTRIBUTE_VALUES ?? {} });
@@ -168,7 +171,7 @@ export default function CodeManagePage() {
       await loadDetail(selectedGroupId, condition);
       notify('공통코드를 저장했습니다.', 'info');
     } catch (error) {
-      notify(error instanceof Error ? error.message : '저장하지 못했습니다.', 'error');
+      notify(userGridErrorMessage(error, [...codeFieldDefinitions, ...fields], '저장하지 못했습니다.'), 'error');
     } finally { setSaving(false); }
   };
 

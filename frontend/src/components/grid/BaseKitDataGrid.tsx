@@ -46,6 +46,26 @@ function ColorCellEditor({ value, onValueChange }: ReactiveCellEditorProps) {
   return <input className="basekit-color-cell-editor" type="color" value={color} onChange={(event) => onValueChange(event.target.value.toUpperCase())} autoFocus />;
 }
 
+function TextLengthCellEditor({ value, onValueChange, maxLength }: ReactiveCellEditorProps & { maxLength: number }) {
+  const initialValue = String(value ?? '').slice(0, maxLength);
+  const [current, setCurrent] = useState(initialValue);
+  const atLimit = current.length === maxLength;
+  return <div className={`basekit-text-length-editor${atLimit ? ' at-limit' : ''}`}>
+    <input
+      value={current}
+      maxLength={maxLength}
+      aria-label={`${current.length}/${maxLength}`}
+      onChange={(event) => {
+        const next = event.target.value.slice(0, maxLength);
+        setCurrent(next);
+        onValueChange(next);
+      }}
+      autoFocus
+    />
+    <span className="basekit-text-length-counter" aria-live="polite">{current.length}/{maxLength}</span>
+  </div>;
+}
+
 function MetadataSwitch({ value, field, editable, onChange }: { value: unknown; field: FieldDefinition; editable: boolean; onChange: (value: string) => void }) {
   const values = field.options?.map((option) => option.value) ?? ['true', 'false'];
   const onValue = values[0] ?? 'true';
@@ -74,6 +94,17 @@ const displayValue = (value: unknown, field?: FieldDefinition) => {
   const numeric = typeof value === 'number' ? value : Number(normalized);
   return Number.isFinite(numeric) ? numeric : '';
 };
+
+const editorForField = (field?: FieldDefinition) =>
+  field?.controlType === 'SELECT' ? 'agSelectCellEditor'
+    : field?.controlType === 'COLOR_PICKER' ? ColorCellEditor
+      : field?.dataType === 'NUMBER' ? 'agNumberCellEditor'
+        : field?.dataType === 'DATE' ? 'agDateStringCellEditor'
+          : field?.maxLength ? TextLengthCellEditor : 'agTextCellEditor';
+
+const editorParamsForField = (field?: FieldDefinition) =>
+  field?.controlType === 'SELECT' ? { values: field.options?.map((option) => option.value) ?? [] }
+    : field?.maxLength ? { maxLength: field.maxLength } : undefined;
 
 function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRowKeysChange, onRowClick, getRowClassName, emptyMessage, fields = [], getFieldValue, editing, loading, currentRowKey, getRowState }: DataTableProps<T> & Pick<BaseKitDataGridProps<T>, 'fields' | 'getFieldValue' | 'editing' | 'loading' | 'currentRowKey' | 'getRowState'>) {
   const apiRef = useRef<GridApi<T> | null>(null);
@@ -114,7 +145,7 @@ function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRo
     ...columns.map((column) => {
       const field = column.fieldDefinition;
       return ({
-      colId: column.key, headerName: column.header, initialWidth: column.width, minWidth: column.minWidth,
+      colId: column.key, headerName: column.header, initialWidth: column.width, minWidth: field?.controlType === 'SWITCH' ? Math.max(column.minWidth ?? 0, 64) : column.minWidth,
       flex: column.width ? undefined : column.flex ?? 1,
       valueGetter: (params: ValueGetterParams<T>) => params.data ? displayValue((params.data as Record<string, unknown>)[column.key], field) : '',
       cellRenderer: (params: ICellRendererParams<T>) => {
@@ -125,26 +156,26 @@ function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRo
         if (field?.dataType === 'NUMBER') return params.value;
         return column.render(params.data);
       },
-      cellClass: (params: EditableCallbackParams<T>) => params.data ? [isEditable(params.data, column.key, column.editPolicy) ? 'basekit-editable-cell' : '', `basekit-grid-cell-${alignment(field, column.align)}`, validationClass(params.data, column.key, field)].filter(Boolean).join(' ') : '',
+      cellClass: (params: EditableCallbackParams<T>) => params.data ? [isEditable(params.data, column.key, column.editPolicy) ? 'basekit-editable-cell' : '', field?.controlType === 'SWITCH' ? 'basekit-grid-switch-cell' : '', `basekit-grid-cell-${alignment(field, column.align)}`, validationClass(params.data, column.key, field)].filter(Boolean).join(' ') : '',
       editable: (params: EditableCallbackParams<T>) => Boolean(params.data && field?.controlType !== 'SWITCH' && isEditable(params.data, column.key, column.editPolicy)),
-      cellEditor: field?.controlType === 'SELECT' ? 'agSelectCellEditor' : field?.controlType === 'COLOR_PICKER' ? ColorCellEditor : field?.dataType === 'NUMBER' ? 'agNumberCellEditor' : field?.dataType === 'DATE' ? 'agDateStringCellEditor' : 'agTextCellEditor',
-      cellEditorParams: field?.controlType === 'SELECT' ? { values: field.options?.map((option) => option.value) ?? [] } : undefined,
+      cellEditor: editorForField(field),
+      cellEditorParams: editorParamsForField(field),
       tooltipValueGetter: (params: ITooltipParams<T>) => field && validateGridField(params.value, field) ? `${field.label}: ${validateGridField(params.value, field)}` : String(params.value ?? ''),
     }); }),
     ...fields.map((field) => {
       const key = `ATTRIBUTE_${field.key}`;
       return ({
-      colId: key, headerName: field.label, flex: 1, minWidth: 100,
+      colId: key, headerName: field.label, flex: 1, minWidth: field.controlType === 'SWITCH' ? 64 : 100,
       valueGetter: (params: ValueGetterParams<T>) => params.data ? getFieldValue?.(params.data, field) ?? '' : '',
-      cellClass: (params: EditableCallbackParams<T>) => params.data ? [isEditable(params.data, key) ? 'basekit-editable-cell' : '', `basekit-grid-cell-${alignment(field)}`, validationClass(params.data, key, field)].filter(Boolean).join(' ') : '',
+      cellClass: (params: EditableCallbackParams<T>) => params.data ? [isEditable(params.data, key) ? 'basekit-editable-cell' : '', field.controlType === 'SWITCH' ? 'basekit-grid-switch-cell' : '', `basekit-grid-cell-${alignment(field)}`, validationClass(params.data, key, field)].filter(Boolean).join(' ') : '',
       cellRenderer: (params: ICellRendererParams<T>) => {
         if (!params.data) return null;
         if (field.controlType === 'SWITCH') return <MetadataSwitch value={getFieldValue?.(params.data, field)} field={field} editable={isEditable(params.data, key)} onChange={(value) => changeSwitch(params.data!, key, value, field)} />;
         return renderMetadataValue(params.value == null ? '' : String(displayValue(params.value, field)), field);
       },
       editable: (params: EditableCallbackParams<T>) => Boolean(params.data && field.controlType !== 'SWITCH' && isEditable(params.data, key)),
-      cellEditor: field.controlType === 'SELECT' ? 'agSelectCellEditor' : field.controlType === 'COLOR_PICKER' ? ColorCellEditor : field.dataType === 'NUMBER' ? 'agNumberCellEditor' : field.dataType === 'DATE' ? 'agDateStringCellEditor' : 'agTextCellEditor',
-      cellEditorParams: field.controlType === 'SELECT' ? { values: field.options?.map((option) => option.value) ?? [] } : undefined,
+      cellEditor: editorForField(field),
+      cellEditorParams: editorParamsForField(field),
       tooltipValueGetter: (params: ITooltipParams<T>) => validateGridField(params.value, field) ? `${field.label}: ${validateGridField(params.value, field)}` : String(params.value ?? ''),
     }); }),
   ], [changeSwitch, columns, fields, getFieldValue, getRowState, isEditable, validationClass]);
