@@ -310,3 +310,7 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 `feature/da-project-foundation-ui-fix`는 최신 `origin/dev-pm` `03179a2`에 미병합 상태였던 Project Foundation feature를 보존 병합한 뒤 UI 검수 누락만 보완했다. WBS, Requirements, Screen Design, DB Design의 compact Project Context selector와 조회/등록/저장/삭제 Action을 PageHeader 우측 한 영역으로 정렬하고 본문의 별도 Action 행을 제거했다. Project Search Dialog는 기존 Project 검색 조건과 filter 함수를 재사용한다. 브라우저에서 Project 날짜/Member Grid, Member 추가, 2개 프로젝트 context 전환, 4개 SD 화면 context 유지, context 없는 직접 진입 Guard와 취소 시 기존 화면 유지를 확인했다. 프로젝트 전환 뒤 이전 Member 선택 ID가 남는 회귀도 함께 수정했다.
 
 후속 UI 정리에서는 Project List의 `신규`, Detail의 `신규/복사/저장/삭제`를 PageHeader 우측으로 이동했다. Detail Master는 `프로젝트 목록 (N건) / 검색`과 Working Set Grid를 유지하고, 검색은 LIST와 동일한 Inline Search를 Grid 상단에서 펼치거나 접는다. Project Context 선택에만 공통 Project Search Dialog를 사용한다. Project 기본정보는 3열 compact form과 2행 설명으로 줄였고 Project Member Grid가 남은 높이를 사용한다. WBS, Requirements, Screen Design, DB Design Header의 상시 설명문도 제거했다. 모델, Repository, 저장 및 Context/Guard 로직은 변경하지 않았다.
+
+## Compact Business UI Density (2026-09-24, feature 검수 대기)
+
+`codex/compact-business-ui-density`는 `origin/dev-pm` `ffa806a`에서 시작한 독립 변경이다. 공통 PageHeader와 SearchPanel의 세로 여백, 검색 Control 높이(30px), Workspace 간격만 조정한다. 공통코드관리 1440×900 화면에서 PageHeader 24.8→26px, SearchPanel 55.6→41.6px, 첫 Grid 시작 위치 177.2→158.4px로 측정했다. Grid CRUD, 40:60/38:62 비율, Toolbar와 Message Area 높이는 변경하지 않았다. dev-pm에는 아직 통합되지 않았다.
