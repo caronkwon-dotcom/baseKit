@@ -6,10 +6,23 @@ export interface GridValidationIssue {
   message: string;
 }
 
+export const gridValidationIssueMessage = (issue: GridValidationIssue) =>
+  issue.message.startsWith(issue.field.label) ? issue.message : `${issue.field.label}: ${issue.message}`;
+
 const empty = (value: unknown) => value == null || String(value).trim() === '';
+
+const topicParticle = (label: string) => {
+  const code = label.charCodeAt(label.length - 1) - 0xac00;
+  return code >= 0 && code <= 11171 && code % 28 !== 0 ? '은' : '는';
+};
+
+export const maxLengthMessage = (field: FieldDefinition) =>
+  `${field.label}${topicParticle(field.label)} 최대 ${field.maxLength}자까지 입력할 수 있습니다.`;
 
 export function validateGridField(value: unknown, field: FieldDefinition): string | null {
   if (empty(value)) return field.required ? '필수 입력값입니다.' : null;
+
+  if (field.maxLength && String(value).length > field.maxLength) return maxLengthMessage(field);
 
   if (field.dataType === 'NUMBER') {
     const numberValue = typeof value === 'number' ? value : Number(String(value).trim());
@@ -31,6 +44,14 @@ export function validateGridField(value: unknown, field: FieldDefinition): strin
   }
 
   return null;
+}
+
+export function userGridErrorMessage(error: unknown, fields: FieldDefinition[], fallback: string): string {
+  if (!(error instanceof Error)) return fallback;
+  const raw = error.message;
+  const matched = fields.find((field) => new RegExp(`(?:^|\\.)${field.key}(?=:|\\b)`, 'i').test(raw));
+  if (matched?.maxLength && /(크기|길이|length|size|max)/i.test(raw)) return maxLengthMessage(matched);
+  return raw.replace(/(?:INSERTED|UPDATED)\[\d+\]\./gi, '');
 }
 
 export function normalizeGridFieldValue(value: unknown, field: FieldDefinition): string {

@@ -11,6 +11,7 @@ export interface FieldDefinition {
   controlType: FieldControlType;
   displayType: FieldDisplayType;
   required: boolean;
+  maxLength?: number;
   defaultValue?: string;
   optionSource?: string;
   options?: FieldOption[];
