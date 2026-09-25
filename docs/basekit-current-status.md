@@ -263,14 +263,14 @@ gh pr list --repo caronkwon-dotcom/baseKit
 
 ## 8. 다음 추천 작업
 
-### 검수 대기: AG Grid 입력 길이·YN 표시 보정
+### dev-pm 반영: AG Grid 입력 길이·YN 표시 보정
 
 - Schema Catalog의 문자열 길이를 `FieldDefinition.maxLength`로 전달하고 Grid 편집 중 현재/최대 길이를 표시한다.
 - 최대 길이 초과 입력과 붙여넣기는 Cell Editor에서 차단하며 Backend 검증은 최종 방어선으로 유지한다.
 - 길이 검증 오류는 사용자용 필드명 메시지로 변환하고 YN Switch Cell의 말줄임과 최소 폭을 보정한다.
-- 이번 변경은 `feature/ag-grid-input-ux-length-switch`에서 검수 대기하며 dev-pm에는 통합하지 않는다.
+- 이번 변경은 `feature/ag-grid-input-ux-length-switch`에서 검증한 뒤 dev-pm에 통합했다.
 
-### 검수 대기: AG Grid Community 1차 PoC
+### dev-pm 반영: AG Grid Community 1차 PoC
 
 - 코드관리 3개 Grid에만 AG Grid Community 36.2.0 Wrapper/Adapter 적용. FieldDefinition·MetadataForm·Backend/DB 계약과 기존 Grid 보존.
 - 20/500/2,000행 동적 컬럼·스크롤, 선택·정렬·Resize, 독립 Inline Editing Fixture 검수 완료.
@@ -326,6 +326,6 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 
 `codex/compact-business-ui-density`는 `origin/dev-pm` `ffa806a`에서 시작한 독립 변경이다. 공통 PageHeader와 SearchPanel의 세로 여백, 검색 Control 높이(30px), Workspace 간격만 조정한다. 공통코드관리 1440×900 화면에서 PageHeader 24.8→26px, SearchPanel 55.6→41.6px, 첫 Grid 시작 위치 177.2→158.4px로 측정했다. Grid CRUD, 40:60/38:62 비율, Toolbar와 Message Area 높이는 변경하지 않았다. dev-pm에 반영됐다.
 
-## Ultra Compact Density (2026-09-25, feature 검수 대기)
+## Ultra Compact Density (2026-09-25, dev-pm 반영)
 
-`codex/ultra-compact-density`는 `origin/dev-pm` `191f871`에서 시작했다. 공통 Top Navigation, PageHeader, SearchPanel과 문서센터 Toolbar의 상단 밀도만 조정한다. 1440×900 공통코드관리 기준 Top Navigation 46→42px, PageHeader 26→24px, SearchPanel 41.6→35.6px, 검색 Control 30→26px이며 첫 Grid 시작 위치는 158.4→145.4px이다. 문서센터 Toolbar는 38→36px, 본문 높이는 734→743px이다. Grid Row/Inline Editor와 Message Area는 유지한다. dev-pm에는 아직 통합되지 않았다.
+`codex/ultra-compact-density`는 `origin/dev-pm` `191f871`에서 시작했다. 공통 Top Navigation, PageHeader, SearchPanel과 문서센터 Toolbar의 상단 밀도만 조정한다. 1440×900 공통코드관리 기준 Top Navigation 46→42px, PageHeader 26→24px, SearchPanel 41.6→35.6px, 검색 Control 30→26px이며 첫 Grid 시작 위치는 158.4→145.4px이다. 문서센터 Toolbar는 38→36px, 본문 높이는 734→743px이다. Grid Row/Inline Editor와 Message Area는 유지한다. `d08718c`에서 dev-pm에 반영됐다.
