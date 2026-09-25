@@ -318,10 +318,14 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 
 후속 UI 정리에서는 Project List의 `신규`, Detail의 `신규/복사/저장/삭제`를 PageHeader 우측으로 이동했다. Detail Master는 `프로젝트 목록 (N건) / 검색`과 Working Set Grid를 유지하고, 검색은 LIST와 동일한 Inline Search를 Grid 상단에서 펼치거나 접는다. Project Context 선택에만 공통 Project Search Dialog를 사용한다. Project 기본정보는 3열 compact form과 2행 설명으로 줄였고 Project Member Grid가 남은 높이를 사용한다. WBS, Requirements, Screen Design, DB Design Header의 상시 설명문도 제거했다. 모델, Repository, 저장 및 Context/Guard 로직은 변경하지 않았다.
 
-## UI-03 HIGH 위험 보정 (2026-09-24, feature 검수 대기)
+## UI-03 HIGH 위험 보정 (2026-09-24, dev-pm 반영)
 
-`codex/ui03-high-risk`는 `origin/dev-pm` `ffa806a` 기준으로 공통 Grid의 기본/사용자 지정 Toolbar Action에 동일한 `ROLE × PROGRAM × ACTION_CODE` 필터를 적용하고, 공통코드관리의 행추가·행삭제·변경취소·저장 권한을 명시한다. 우측 속성정의·공통코드는 저장한 Dataset만 재조회하여 다른 Grid의 미저장 변경을 유지한다. UI-03 Catalog 승격 및 dev-pm 통합은 아직 하지 않았다. Frontend build/lint, 관련 테스트 18개, Backend 테스트 22개와 격리 Mock API 브라우저 저장·변경취소 검증을 통과했다.
+`codex/ui03-high-risk`는 `origin/dev-pm` `ffa806a` 기준으로 공통 Grid의 기본/사용자 지정 Toolbar Action에 동일한 `ROLE × PROGRAM × ACTION_CODE` 필터를 적용하고, 공통코드관리의 행추가·행삭제·변경취소·저장 권한을 명시한다. 우측 속성정의·공통코드는 저장한 Dataset만 재조회하여 다른 Grid의 미저장 변경을 유지한다. dev-pm에 반영됐으며 UI-03 Catalog 승격은 아직 하지 않았다. Frontend build/lint, 관련 테스트 18개, Backend 테스트 22개와 격리 Mock API 브라우저 저장·변경취소 검증을 통과했다.
 
-## Compact Business UI Density (2026-09-24, feature 검수 대기)
+## Compact Business UI Density (2026-09-24, dev-pm 반영)
 
-`codex/compact-business-ui-density`는 `origin/dev-pm` `ffa806a`에서 시작한 독립 변경이다. 공통 PageHeader와 SearchPanel의 세로 여백, 검색 Control 높이(30px), Workspace 간격만 조정한다. 공통코드관리 1440×900 화면에서 PageHeader 24.8→26px, SearchPanel 55.6→41.6px, 첫 Grid 시작 위치 177.2→158.4px로 측정했다. Grid CRUD, 40:60/38:62 비율, Toolbar와 Message Area 높이는 변경하지 않았다. dev-pm에는 아직 통합되지 않았다.
+`codex/compact-business-ui-density`는 `origin/dev-pm` `ffa806a`에서 시작한 독립 변경이다. 공통 PageHeader와 SearchPanel의 세로 여백, 검색 Control 높이(30px), Workspace 간격만 조정한다. 공통코드관리 1440×900 화면에서 PageHeader 24.8→26px, SearchPanel 55.6→41.6px, 첫 Grid 시작 위치 177.2→158.4px로 측정했다. Grid CRUD, 40:60/38:62 비율, Toolbar와 Message Area 높이는 변경하지 않았다. dev-pm에 반영됐다.
+
+## Ultra Compact Density (2026-09-25, feature 검수 대기)
+
+`codex/ultra-compact-density`는 `origin/dev-pm` `191f871`에서 시작했다. 공통 Top Navigation, PageHeader, SearchPanel과 문서센터 Toolbar의 상단 밀도만 조정한다. 1440×900 공통코드관리 기준 Top Navigation 46→42px, PageHeader 26→24px, SearchPanel 41.6→35.6px, 검색 Control 30→26px이며 첫 Grid 시작 위치는 158.4→145.4px이다. 문서센터 Toolbar는 38→36px, 본문 높이는 734→743px이다. Grid Row/Inline Editor와 Message Area는 유지한다. dev-pm에는 아직 통합되지 않았다.
