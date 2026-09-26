@@ -7,6 +7,14 @@ export interface RequirementAttachment {
   UPLOAD_DT: string;
   ANALYSIS_STATUS: string;
 }
+export interface RequirementUploadPolicy {
+  MAX_FILE_SIZE: number;
+  MAX_REQUEST_SIZE: number;
+  MAX_FILES: number;
+  ALLOWED_EXTENSIONS: string[];
+  ALLOWED_MIME_TYPES: string[];
+  MIME_BY_EXTENSION: Record<string, string>;
+}
 export interface Requirement {
   REQUIREMENT_ID: string;
   PROJECT_ID: string;
@@ -41,7 +49,7 @@ export const requirementApi = {
   create: (body: RequirementInput) => request<Requirement>('', json('POST', body)),
   update: (id: string, body: RequirementInput) => request<Requirement>(`/${encodeURIComponent(id)}`, json('PUT', body)),
   delete: (id: string) => request<void>(`/${encodeURIComponent(id)}`, { method: 'DELETE' }),
-  upload: (id: string, file: File) => { const body = new FormData(); body.set('file', file); return request<RequirementAttachment>(`/${encodeURIComponent(id)}/attachments`, { method: 'POST', body }); },
+  uploadPolicy: () => request<RequirementUploadPolicy>('/attachments/policy'),
   fileUrl: (id: string, attachmentId: string) => `${base}/${encodeURIComponent(id)}/attachments/${encodeURIComponent(attachmentId)}/file`,
   deleteFile: (id: string, attachmentId: string) => request<void>(`/${encodeURIComponent(id)}/attachments/${encodeURIComponent(attachmentId)}`, { method: 'DELETE' }),
 };

@@ -11,11 +11,14 @@ import java.util.*;
 @Service
 public class RequirementService {
     private final RequirementMapper mapper;
+    private final AttachmentUploadPolicy uploadPolicy;
     private final Path storageRoot;
-    RequirementService(RequirementMapper mapper, @Value("${standard-design.requirements.storage-path:./data/requirement-attachments}") String storagePath) {
+    RequirementService(RequirementMapper mapper, AttachmentUploadPolicy uploadPolicy, @Value("${standard-design.requirements.storage-path:./data/requirement-attachments}") String storagePath) {
         this.mapper = mapper;
+        this.uploadPolicy = uploadPolicy;
         this.storageRoot = Path.of(storagePath).toAbsolutePath().normalize();
     }
+    AttachmentPolicyData uploadPolicy() { return uploadPolicy.describe(); }
     @Transactional(readOnly=true)
     public List<RequirementData> list(String projectId) {
         if (projectId == null || projectId.isBlank()) throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");
@@ -78,19 +81,24 @@ public class RequirementService {
     @Transactional
     public AttachmentData upload(String requirementId, MultipartFile file) throws IOException {
         one(requirementId);
-        if (file.isEmpty()) throw new IllegalArgumentException("빈 파일은 업로드할 수 없습니다.");
-        String original = Optional.ofNullable(file.getOriginalFilename()).orElse("file").replace('\\','/');
-        original = original.substring(original.lastIndexOf('/')+1);
+        String suppliedName = Optional.ofNullable(file.getOriginalFilename()).orElse("file").replace('\\','/');
+        String original = suppliedName.substring(suppliedName.lastIndexOf('/')+1);
         if (original.isBlank() || original.length() > 255) throw new IllegalArgumentException("파일 이름을 확인해 주세요.");
         String key = UUID.randomUUID().toString();
-        String mime = Optional.ofNullable(file.getContentType()).orElse("application/octet-stream");
         String ext = original.contains(".") ? original.substring(original.lastIndexOf('.')+1).toLowerCase(Locale.ROOT) : "";
+        List<AttachmentData> existing = mapper.attachments(requirementId);
+        String mime = uploadPolicy.validateMetadata(file, ext, existing.size());
+        if (existing.stream().anyMatch(row -> row.ORIGINAL_FILE_NAME().equalsIgnoreCase(original) && row.FILE_SIZE() == file.getSize()))
+            throw new IllegalArgumentException("같은 이름과 크기의 파일이 이미 첨부되어 있습니다.");
         Files.createDirectories(storageRoot);
         Path target = storageRoot.resolve(key);
-        file.transferTo(target);
-        AttachmentData row = new AttachmentData("ATT-"+UUID.randomUUID().toString(),requirementId,original,key,ext,mime,file.getSize(),null,"NOT_ANALYZED");
-        try { mapper.insertAttachment(row); } catch (RuntimeException e) { Files.deleteIfExists(target); throw e; }
-        return mapper.attachment(row.ATTACHMENT_ID());
+        try {
+            file.transferTo(target);
+            uploadPolicy.validateContent(target, ext);
+            AttachmentData row = new AttachmentData("ATT-"+UUID.randomUUID().toString(),requirementId,original,key,ext,mime,file.getSize(),null,"NOT_ANALYZED");
+            mapper.insertAttachment(row);
+            return mapper.attachment(row.ATTACHMENT_ID());
+        } catch (IOException | RuntimeException e) { Files.deleteIfExists(target); throw e; }
     }
     @Transactional(readOnly=true)
     public AttachmentData attachment(String requirementId,String id) {

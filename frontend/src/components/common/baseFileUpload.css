@@ -1,0 +1,17 @@
+.base-file-upload { display: grid; gap: 8px; min-width: 0; }
+.base-file-upload__drop { display: grid; justify-items: center; gap: 3px; min-height: 88px; border: 1px dashed var(--border-strong); border-radius: 6px; background: var(--surface-muted); padding: 12px; color: var(--text-secondary); cursor: pointer; text-align: center; font-size: 12px; }
+.base-file-upload__drop strong { color: var(--text-primary); font-size: 12px; }
+.base-file-upload__drop small { color: var(--text-muted); font-size: 11px; }
+.base-file-upload__drop.drag-over,.base-file-upload__drop:focus-visible { border-color: var(--brand-primary); background: var(--brand-soft); outline: 2px solid var(--brand-primary); outline-offset: 1px; }
+.base-file-upload__drop.disabled { opacity: .55; cursor: not-allowed; }
+.base-file-upload__list { display: grid; gap: 3px; max-height: 230px; overflow: auto; }
+.base-file-upload__row { display: grid; grid-template-columns: minmax(110px, 1fr) 90px 70px minmax(125px, 160px) 60px; align-items: center; gap: 6px; min-height: 30px; border-bottom: 1px solid var(--border-default); color: var(--text-secondary); font-size: 11px; }
+.base-file-upload__row > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.base-file-upload__name { overflow: hidden; border: 0; background: none; color: var(--text-primary); cursor: pointer; font: inherit; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.base-file-upload__row .secondary-button { min-height: 26px; padding: 2px 5px; font-size: 11px; }
+.base-file-upload__progress { display: grid; gap: 2px; min-width: 0; }
+.base-file-upload__progress progress { width: 100%; height: 5px; accent-color: var(--brand-primary); }
+.base-file-upload__error { grid-column: 1 / -1; color: var(--danger, #b42318); }
+.base-image-preview { display: grid; place-items: center; width: 100%; min-height: 120px; color: var(--text-muted); font-size: 11px; }
+.base-image-preview img { display: block; max-width: 100%; max-height: 420px; object-fit: contain; }
+@media (max-width: 800px) { .base-file-upload__row { grid-template-columns: minmax(100px, 1fr) 65px minmax(90px, 130px) 55px; }.base-file-upload__row > span:nth-child(2) { display: none; } }

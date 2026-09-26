@@ -12,6 +12,7 @@ import java.util.List;
 public class RequirementController {
     private final RequirementService service;
     RequirementController(RequirementService service) { this.service=service; }
+    @GetMapping("/attachments/policy") ApiResponse<AttachmentPolicyData> uploadPolicy() { return ApiResponse.success(service.uploadPolicy()); }
     @GetMapping ApiResponse<List<RequirementData>> list(@RequestParam("PROJECT_ID") String projectId) { return ApiResponse.success(service.list(projectId)); }
     @GetMapping("/{id}") ApiResponse<RequirementData> one(@PathVariable String id) { return ApiResponse.success(service.one(id)); }
     @PostMapping @ResponseStatus(HttpStatus.CREATED) ApiResponse<RequirementData> create(@Valid @RequestBody RequirementSaveRequest request) { return ApiResponse.success(service.create(request)); }
