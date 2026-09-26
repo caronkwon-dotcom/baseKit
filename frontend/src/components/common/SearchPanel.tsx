@@ -25,6 +25,7 @@ interface SearchPanelProps<T extends object> {
   onSearch: (condition: T) => void;
   onReset?: (initialValue: T) => void;
   rows?: SearchPanelRows;
+  collapsedFieldCount?: number;
   actionDisplay?: ActionButtonDisplay;
 }
 
@@ -42,6 +43,7 @@ export default function SearchPanel<T extends object>({
   onSearch,
   onReset,
   rows = 1,
+  collapsedFieldCount = SEARCH_COLUMN_COUNT,
   actionDisplay,
 }: SearchPanelProps<T>) {
   const [collapsed, setCollapsed] = useState(false);
@@ -54,7 +56,7 @@ export default function SearchPanel<T extends object>({
   }
 
   const collapsible = rows > 1;
-  const visibleFields = collapsed ? fields.slice(0, SEARCH_COLUMN_COUNT) : fields;
+  const visibleFields = collapsed ? fields.slice(0, Math.max(1, Math.min(collapsedFieldCount, fields.length))) : fields;
   const hiddenCount = fields.length - visibleFields.length;
 
   const updateValue = (key: Extract<keyof T, string>, nextFieldValue: string) => {

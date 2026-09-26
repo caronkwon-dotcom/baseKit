@@ -141,26 +141,44 @@
 .standard-design-lifecycle-guide p { margin: 0; color: var(--text-muted); line-height: 1.5; }
 .standard-design-lifecycle-guide .standard-design-llm-test { margin-top: 0; }
 .standard-design-project-page { display: flex; min-height: 0; flex: 1; flex-direction: column; }
-.sd-requirement-page .standard-design-project-workspace { min-height: 380px; }
+.sd-requirement-page .standard-design-project-workspace { min-height: 0; }
+.sd-requirement-workspace-shell { display: flex; min-height: 0; flex: 1; flex-direction: column; }
+.sd-requirement-workspace-shell > .standard-design-project-workspace { min-height: 0; flex: 1; }
+.sd-requirement-message-area { box-sizing: border-box; min-height: calc(var(--multi-grid-message-height) + 4px); flex: 0 0 calc(var(--multi-grid-message-height) + 4px); padding-top: 4px; }
+.sd-requirement-message-area .basekit-message { min-height: var(--multi-grid-message-height); box-sizing: border-box; }
 .sd-requirement-page .project-list-detail-workspace__detail { padding-top: 2px; }
+.sd-requirement-page .project-list-detail-workspace__list-content { overflow: hidden; }
+.sd-requirement-page .project-list-detail-workspace__detail { overflow: hidden; }
 .sd-requirement-search { display: flex; gap: 6px; margin: 4px 0 6px; }
 .sd-requirement-search input { min-width: 0; flex: 1; border: 1px solid var(--border-default); border-radius: 5px; background: var(--surface-panel); color: var(--text-primary); padding: 4px 8px; }
 .sd-requirement-migration { display: flex; align-items: center; gap: 8px; padding: 6px; font-size: 12px; color: var(--text-secondary); }
-.sd-requirement-detail { display: grid; align-content: start; gap: 8px; min-width: 0; }
-.sd-requirement-menu { grid-column: 1 / -1; }
-.sd-requirement-menu select { min-height: 100px; }
+.sd-requirement-detail { display: flex; min-width: 0; min-height: 0; height: 100%; flex-direction: column; gap: 8px; }
+.sd-requirement-detail > form { display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; height: 100%; flex: 1; overflow: hidden; }
+.sd-requirement-detail .base-tabs { min-height: 0; overflow: hidden; }
+.sd-requirement-detail .base-tabs__panel { min-height: 0; height: 100%; overflow: auto; }
+.sd-requirement-menu-editor { grid-column: 1 / -1; align-items: start; min-height: 0; }
+.sd-requirement-menu-editor__body { display: grid; min-width: 0; min-height: 0; grid-template-rows: auto minmax(0, 1fr); gap: 6px; }
+.sd-requirement-menu-editor__picker { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, 1fr) auto; gap: 6px; }
+.sd-requirement-menu-editor__picker button { min-height: 30px; padding: 4px 10px; }
+.sd-requirement-menu-editor .data-section { min-height: 0; }
+.sd-requirement-menu-editor .data-section > h2 { margin: 0 0 4px; color: var(--text-muted); font-size: 11px; }
+.sd-requirement-menu-editor .standard-table-wrap { min-height: 0; max-height: none; overflow: auto; }
 .sd-requirement-attachments,.sd-requirement-ai-slot { border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-panel); padding: 10px; }
+.sd-requirement-attachments { display: flex; min-height: 0; height: 100%; flex-direction: column; }
 .sd-requirement-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .sd-requirement-section-heading h2,.sd-requirement-ai-slot h2 { margin: 0; font-size: 14px; }
 .sd-requirement-section-heading span,.sd-requirement-ai-slot p { color: var(--text-muted); font-size: 11px; }
-.sd-requirement-file-layout { display: grid; grid-template-columns: minmax(160px, 35%) minmax(0, 1fr); gap: 8px; min-height: 160px; margin-top: 8px; }
-.sd-requirement-file-list,.sd-requirement-preview { overflow: auto; border: 1px solid var(--border-default); border-radius: 5px; padding: 6px; }
+.sd-requirement-file-layout { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(160px, 40%) minmax(220px, 1fr); gap: 8px; min-height: 0; flex: 1; margin-top: 8px; }
+.sd-requirement-file-list,.sd-requirement-preview { min-height: 0; overflow: hidden; border: 1px solid var(--border-default); border-radius: 5px; padding: 6px; }
+.sd-requirement-file-list .base-file-upload { display: grid; height: 100%; min-height: 0; grid-template-rows: auto minmax(0, 1fr); }
+.sd-requirement-file-list .base-file-upload__list { max-height: none; min-height: 0; overflow: auto; }
 .sd-requirement-file-list > div { display: flex; align-items: center; gap: 4px; }
 .sd-requirement-file-list > div.selected { background: var(--brand-soft); }
 .sd-requirement-file-list button { border: 0; background: transparent; color: var(--text-primary); cursor: pointer; font: inherit; font-size: 11px; }
 .sd-requirement-file-list button:first-child { flex: 1; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
 .sd-requirement-preview { display: grid; place-items: center; color: var(--text-muted); font-size: 11px; }
-.sd-requirement-preview img { display: block; max-width: 100%; max-height: 420px; object-fit: contain; }
+.sd-requirement-preview .base-image-preview { height: 100%; min-height: 0; }
+.sd-requirement-preview img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; }
 .standard-design-project-page .standard-design-lifecycle-toolbar { align-items: center; margin: 4px 0 6px; }
 .standard-design-project-page .search-panel { margin: 0 0 6px; }
 .standard-design-project-workspace { display: grid; min-height: 0; flex: 1; grid-template-columns: minmax(0, var(--project-list-width, 30%)) 12px minmax(0, 1fr); }
@@ -265,8 +283,9 @@
 .standard-design-project-fields label > span, .project-inline-search .search-grid label > span { overflow-wrap: anywhere; }
 .standard-design-project-fields input, .standard-design-project-fields select, .standard-design-project-fields textarea { min-width: 0; }
 .standard-design-project-fields .standard-design-project-description { align-items: start; }
+.standard-design-project-fields--long-text .standard-design-project-description textarea { min-height: clamp(150px, 22vh, 280px); resize: vertical; }
 .standard-design-project-description > span { padding-top: 8px; }
-.project-inline-search { flex: 0 0 auto; max-height: 55%; overflow: auto; }
+.project-inline-search { flex: 0 0 auto; max-height: none; overflow: visible; }
 .project-inline-search .search-panel { padding: 8px; }
 .project-inline-search .search-grid { grid-template-columns: repeat(3, minmax(150px, 1fr)); gap: 8px 14px; }
 .project-inline-search .search-panel input, .project-inline-search .search-panel select { min-width: 0; width: 100%; box-sizing: border-box; }
@@ -304,3 +323,18 @@
 @media (max-width: 620px) { .sd-member-assignment-form { grid-template-columns: minmax(0, 1fr); }.sd-member-assignment-form .sd-member-note { grid-column: 1; }.sd-member-assignment-form label { grid-template-columns: 82px minmax(0, 1fr); } }
 @media (max-width: 980px) { .standard-design-header-actions { min-width: 0; }.standard-design-header-actions .standard-design-lifecycle-actions button { min-width: 42px; }.sd-project-context-selector { max-width: 220px; } }
 @media (max-width: 1180px) { .standard-design-project-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.sd-requirement-page .program-data-grid { display: flex; min-height: 0; flex: 1; flex-direction: column; }
+.sd-requirement-page .program-data-grid .data-section { min-height: 0; flex: 1; }
+.sd-requirement-page .basekit-ag-grid { height: auto; min-height: 0; flex: 1; }
+.sd-requirement-page .standard-design-project-fields--long-text { grid-template-rows: auto auto minmax(0, 1fr) minmax(0, 1fr); min-height: 0; height: 100%; }
+.sd-requirement-page .project-master-heading + .program-data-grid .grid-toolbar { display: none; }
+.sd-requirement-menu-tab { display: flex; min-height: 0; height: 100%; flex-direction: column; gap: 8px; }
+.sd-requirement-menu-tab .program-data-grid { display: flex; min-height: 0; flex: 1; flex-direction: column; }
+.sd-requirement-menu-tab .program-data-grid .data-section { min-height: 0; flex: 1; }
+.sd-requirement-menu-tab .basekit-ag-grid { height: auto; min-height: 0; flex: 1; }
+.sd-max-length-field { position: relative; display: block; min-width: 0; width: 100%; }
+.sd-max-length-field > input, .sd-max-length-field > textarea { width: 100%; min-width: 0; box-sizing: border-box; padding-right: 48px; }
+.sd-max-length-field--multiline > textarea { padding-bottom: 18px; }
+.sd-max-length-field > small { position: absolute; right: 6px; bottom: 4px; color: var(--text-muted); font-size: 9px; line-height: 11px; pointer-events: none; }
+.sd-max-length-field > input:focus + small, .sd-max-length-field > textarea:focus + small { color: var(--brand-primary); }
+@media (max-width: 760px) { .sd-requirement-menu-editor__picker { grid-template-columns: minmax(0, 1fr); } }

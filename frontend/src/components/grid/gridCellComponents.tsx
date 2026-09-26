@@ -56,3 +56,10 @@ export function MetadataSwitch({ value, field, editable, onChange }: { value: un
     onClick={(event) => { event.stopPropagation(); onChange(checked ? offValue : onValue); }}
   ><span /></button>;
 }
+
+export function StatusColorIndicator({ label, color }: { label: string; color: string }) {
+  return <span className="basekit-status-indicator">
+    <i className="basekit-status-indicator__dot" style={{ backgroundColor: color }} aria-hidden="true" />
+    <span>{label}</span>
+  </span>;
+}

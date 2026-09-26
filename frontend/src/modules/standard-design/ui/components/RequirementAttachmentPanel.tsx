@@ -37,14 +37,18 @@ export default function RequirementAttachmentPanel({ requirementId, attachments,
   };
   return <section className="sd-requirement-attachments" aria-label="첨부자료">
     <div className="sd-requirement-section-heading"><h2>첨부자료 ({attachments.length}건)</h2>{!requirementId ? <span>요구사항 저장 후 첨부할 수 있습니다.</span> : null}</div>
-    <BaseFileUpload key={requirementId} files={attachments.map((file) => ({ id: file.ATTACHMENT_ID, name: file.ORIGINAL_FILE_NAME, size: file.FILE_SIZE, mimeType: file.MIME_TYPE }))}
-      policy={policy} disabled={!requirementId} concurrency={2}
-      onUpload={(file, progress) => uploadRequirementAttachment(requirementId, file, progress)}
-      onUploaded={onUploaded} onDelete={(id) => requirementApi.deleteFile(requirementId, id)}
-      onDeleted={(id) => { if (preview?.url === requirementApi.fileUrl(requirementId, id)) setPreview(null); onDeleted(id); }}
-      onPreview={showSaved} onPreviewLocal={showLocal} onError={onError} />
-    <div className="sd-requirement-preview">{preview?.download
-      ? <a href={preview.url}>파일 다운로드: {preview.name}</a>
-      : <BaseImagePreview url={preview?.url} name={preview?.name} />}</div>
+    <div className="sd-requirement-file-layout">
+      <div className="sd-requirement-file-list">
+        <BaseFileUpload key={requirementId} files={attachments.map((file) => ({ id: file.ATTACHMENT_ID, name: file.ORIGINAL_FILE_NAME, size: file.FILE_SIZE, mimeType: file.MIME_TYPE }))}
+          policy={policy} disabled={!requirementId} concurrency={2}
+          onUpload={(file, progress) => uploadRequirementAttachment(requirementId, file, progress)}
+          onUploaded={onUploaded} onDelete={(id) => requirementApi.deleteFile(requirementId, id)}
+          onDeleted={(id) => { if (preview?.url === requirementApi.fileUrl(requirementId, id)) setPreview(null); onDeleted(id); }}
+          onPreview={showSaved} onPreviewLocal={showLocal} onError={onError} />
+      </div>
+      <div className="sd-requirement-preview">{preview?.download
+        ? <a href={preview.url}>파일 다운로드: {preview.name}</a>
+        : <BaseImagePreview url={preview?.url} name={preview?.name} />}</div>
+    </div>
   </section>;
 }

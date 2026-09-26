@@ -8,6 +8,8 @@ export type ActionButtonTone = 'default' | 'primary' | 'danger';
 interface ActionButtonProps {
   actionCode: ActionCode;
   label: string;
+  htmlType?: 'button' | 'submit';
+  form?: string;
   display?: ActionButtonDisplay;
   displayMode?: ActionButtonDisplayMode;
   tone?: ActionButtonTone;
@@ -26,11 +28,11 @@ function ActionIcon({ actionCode }: { actionCode: ActionCode }) {
 }
 
 /** One semantic action, rendered as compact Icon + Text or Icon Only. */
-export default function ActionButton({ actionCode, label, display, displayMode, tone = 'default', disabled = false, onClick }: ActionButtonProps) {
+export default function ActionButton({ actionCode, label, htmlType = 'button', form, display, displayMode, tone = 'default', disabled = false, onClick }: ActionButtonProps) {
   const { preferences } = useUiPreferences();
   const resolvedDisplayMode = displayMode ?? (display === 'icon' ? 'ICON_ONLY' : display === 'text' || display === 'label' ? 'ICON_TEXT' : preferences.buttonDisplayMode);
   const iconOnly = resolvedDisplayMode === 'ICON_ONLY';
-  return <button type="button" className={`action-button ${iconOnly ? 'icon-only' : ''} ${tone}`} data-action-code={actionCode} data-display-mode={resolvedDisplayMode} aria-label={label} title={label} disabled={disabled} onClick={onClick}>
+  return <button type={htmlType} form={form} className={`action-button ${iconOnly ? 'icon-only' : ''} ${tone}`} data-action-code={actionCode} data-display-mode={resolvedDisplayMode} aria-label={label} title={label} disabled={disabled} onClick={onClick}>
     {display !== 'label' ? <ActionIcon actionCode={actionCode} /> : null}
     {!iconOnly ? <span>{label}</span> : null}
   </button>;
