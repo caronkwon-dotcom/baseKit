@@ -2,6 +2,7 @@ import { COMMON_ACTIONS } from '../../constants/actionCodes';
 import type { ApplicationModule } from '../../types/applicationModule';
 import StandardDesignSkeletonPage from './ui/pages/StandardDesignSkeletonPage';
 import DesignLifecyclePage from './ui/pages/DesignLifecyclePage';
+import RequirementIntakePage from './ui/pages/RequirementIntakePage';
 import ScreenDesignPage from './ui/pages/ScreenDesignPage';
 import TermGlossaryPage from './ui/pages/TermGlossaryPage';
 import './standardDesign.css';
@@ -206,7 +207,7 @@ const standardDesignModule: ApplicationModule = {
   components: {
     SD_PROJECT_MGMT: () => <DesignLifecyclePage view="overview" />,
     SD_WBS_DESIGN: () => <DesignLifecyclePage view="wbs" />,
-    SD_REQUIREMENT_DESIGN: () => <DesignLifecyclePage view="requirements" />,
+    SD_REQUIREMENT_DESIGN: () => <RequirementIntakePage />,
     SD_CUSTOMER_STANDARD: () => (
       <StandardDesignSkeletonPage
         title="고객 표준 관리"

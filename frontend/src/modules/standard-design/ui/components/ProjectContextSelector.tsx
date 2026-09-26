@@ -55,7 +55,7 @@ export function ProjectContextDialog({
     </div>;
 }
 
-export default function ProjectContextSelector() {
+export default function ProjectContextSelector({ onSelected }: { onSelected?: (project: DesignProject) => boolean | void }) {
   const { project } = useProjectContext();
   const [open, setOpen] = useState(false);
   return <>
@@ -64,6 +64,6 @@ export default function ProjectContextSelector() {
       <strong>{project ? `${project.PROJECT_ID} | ${project.PROJECT_NAME}` : '프로젝트 선택'}</strong>
       <span aria-hidden="true">▾</span>
     </button>
-    {open ? <ProjectContextDialog onClose={() => setOpen(false)} /> : null}
+    {open ? <ProjectContextDialog onClose={() => setOpen(false)} onSelected={onSelected} /> : null}
   </>;
 }

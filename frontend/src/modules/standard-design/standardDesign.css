@@ -141,6 +141,26 @@
 .standard-design-lifecycle-guide p { margin: 0; color: var(--text-muted); line-height: 1.5; }
 .standard-design-lifecycle-guide .standard-design-llm-test { margin-top: 0; }
 .standard-design-project-page { display: flex; min-height: 0; flex: 1; flex-direction: column; }
+.sd-requirement-page .standard-design-project-workspace { min-height: 380px; }
+.sd-requirement-page .project-list-detail-workspace__detail { padding-top: 2px; }
+.sd-requirement-search { display: flex; gap: 6px; margin: 4px 0 6px; }
+.sd-requirement-search input { min-width: 0; flex: 1; border: 1px solid var(--border-default); border-radius: 5px; background: var(--surface-panel); color: var(--text-primary); padding: 4px 8px; }
+.sd-requirement-migration { display: flex; align-items: center; gap: 8px; padding: 6px; font-size: 12px; color: var(--text-secondary); }
+.sd-requirement-detail { display: grid; align-content: start; gap: 8px; min-width: 0; }
+.sd-requirement-menu { grid-column: 1 / -1; }
+.sd-requirement-menu select { min-height: 100px; }
+.sd-requirement-attachments,.sd-requirement-ai-slot { border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-panel); padding: 10px; }
+.sd-requirement-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.sd-requirement-section-heading h2,.sd-requirement-ai-slot h2 { margin: 0; font-size: 14px; }
+.sd-requirement-section-heading span,.sd-requirement-ai-slot p { color: var(--text-muted); font-size: 11px; }
+.sd-requirement-file-layout { display: grid; grid-template-columns: minmax(160px, 35%) minmax(0, 1fr); gap: 8px; min-height: 160px; margin-top: 8px; }
+.sd-requirement-file-list,.sd-requirement-preview { overflow: auto; border: 1px solid var(--border-default); border-radius: 5px; padding: 6px; }
+.sd-requirement-file-list > div { display: flex; align-items: center; gap: 4px; }
+.sd-requirement-file-list > div.selected { background: var(--brand-soft); }
+.sd-requirement-file-list button { border: 0; background: transparent; color: var(--text-primary); cursor: pointer; font: inherit; font-size: 11px; }
+.sd-requirement-file-list button:first-child { flex: 1; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.sd-requirement-preview { display: grid; place-items: center; color: var(--text-muted); font-size: 11px; }
+.sd-requirement-preview img { display: block; max-width: 100%; max-height: 420px; object-fit: contain; }
 .standard-design-project-page .standard-design-lifecycle-toolbar { align-items: center; margin: 4px 0 6px; }
 .standard-design-project-page .search-panel { margin: 0 0 6px; }
 .standard-design-project-workspace { display: grid; min-height: 0; flex: 1; grid-template-columns: minmax(0, var(--project-list-width, 30%)) 12px minmax(0, 1fr); }
