@@ -1,6 +1,6 @@
-import BaseKitDataGrid, { type BaseKitDataGridProps } from './BaseKitDataGrid';
-import type { DataTableColumn } from '../common/DataTable';
-import type { FieldDefinition } from '../metadata/fieldDefinition';
+import BaseKitDataGrid, { type BaseKitDataGridProps } from '../components/grid/BaseKitDataGrid';
+import type { DataTableColumn } from '../components/common/DataTable';
+import type { FieldDefinition } from '../components/metadata/fieldDefinition';
 
 interface MetadataAgGridProps<T> extends Omit<BaseKitDataGridProps<T>, 'columns' | 'fields' | 'getFieldValue'> {
   baseColumns: DataTableColumn<T>[];

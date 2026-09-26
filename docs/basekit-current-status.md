@@ -329,3 +329,7 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 ## Ultra Compact Density (2026-09-25, dev-pm 반영)
 
 `codex/ultra-compact-density`는 `origin/dev-pm` `191f871`에서 시작했다. 공통 Top Navigation, PageHeader, SearchPanel과 문서센터 Toolbar의 상단 밀도만 조정한다. 1440×900 공통코드관리 기준 Top Navigation 46→42px, PageHeader 26→24px, SearchPanel 41.6→35.6px, 검색 Control 30→26px이며 첫 Grid 시작 위치는 158.4→145.4px이다. 문서센터 Toolbar는 38→36px, 본문 높이는 734→743px이다. Grid Row/Inline Editor와 Message Area는 유지한다. `d08718c`에서 dev-pm에 반영됐다.
+
+## UI-03 Reference Source 정리 (2026-09-26, feature 검수 대기)
+
+`feature/ui03-reference-source-standardization`은 `origin/dev-pm` `bc7b7b6` 기준이다. 공통코드관리 AG Grid의 ColDef 생성 경로를 Production `BaseKitDataGrid → gridColumnAdapter.toGridColumns`로 단일화하고 `GridEditing<T>`와 동적 Metadata 컬럼 Key 계약을 공유한다. 저장 Payload Mapper와 JSX 명명을 정리했으며, 운영 화면에서 사용하지 않는 `MetadataAgGrid`는 PoC 영역으로 격리했다. Production Adapter 회귀 테스트와 기존 Grid 테스트를 통과했지만, UI-03 Catalog 최종 승격은 PM 승인 전이다. 동적 속성별 `maxLength`는 현재 정의 Type·DTO·DB Schema에 없으므로 임의 길이 규칙을 추가하지 않았다.

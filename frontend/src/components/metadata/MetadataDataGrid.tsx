@@ -3,6 +3,7 @@ import ProgramDataGrid, { type ProgramDataGridProps } from '../common/ProgramDat
 import type { DataTableColumn } from '../common/DataTable';
 import type { FieldDefinition } from './fieldDefinition';
 import { renderMetadataValue } from '../grid/gridColumnAdapter';
+import { toMetadataColumnKey } from '../grid/metadataColumnKey';
 
 interface MetadataDataGridProps<T> extends Omit<ProgramDataGridProps<T>, 'columns'> {
   baseColumns: DataTableColumn<T>[];
@@ -14,7 +15,7 @@ export default function MetadataDataGrid<T>({ baseColumns, fields, getFieldValue
   const columns = useMemo<DataTableColumn<T>[]>(() => [
     ...baseColumns,
     ...fields.map((field): DataTableColumn<T> => ({
-      key: `ATTRIBUTE_${field.key}`,
+      key: toMetadataColumnKey(field.key),
       header: field.label,
       width: field.displayType === 'COLOR' ? 112 : field.dataType === 'BOOLEAN' ? 76 : undefined,
       minWidth: field.displayType === 'COLOR' || field.dataType === 'BOOLEAN' ? undefined : 100,
