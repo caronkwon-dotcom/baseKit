@@ -12,6 +12,7 @@ import {
 export type ProjectWorkspaceMode = 'LIST' | 'DETAIL' | 'DETAIL_EXPANDED';
 
 interface ProjectListDetailWorkspaceProps {
+  subject?: string;
   mode: ProjectWorkspaceMode;
   onModeChange: (mode: ProjectWorkspaceMode) => void;
   list: ReactNode;
@@ -19,6 +20,7 @@ interface ProjectListDetailWorkspaceProps {
 }
 
 export default function ProjectListDetailWorkspace({
+  subject = '프로젝트',
   mode,
   onModeChange,
   list,
@@ -112,7 +114,7 @@ export default function ProjectListDetailWorkspace({
       ref={workspaceRef}
       className={`standard-design-project-workspace project-list-detail-workspace project-list-detail-workspace--${mode}`}
       style={style}
-      aria-label="프로젝트 목록 및 상세"
+      aria-label={`${subject} 목록 및 상세`}
     >
       {mode !== 'DETAIL_EXPANDED' ? <section className="project-list-detail-workspace__list">{list}</section> : null}
       {mode !== 'LIST' ? (

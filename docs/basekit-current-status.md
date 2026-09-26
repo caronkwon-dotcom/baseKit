@@ -17,6 +17,10 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 
 ## 2. 코드까지 구현 완료
 
+- Standard Design Requirement Intake V1: Backend canonical Requirement·Menu 관계·Attachment (Flyway V5), 명시적 LocalStorage 이관, Project List-Detail 재사용, 복수 메뉴·파일·이미지 Preview. 프로젝트/메뉴 원본은 기존 구조와 논리 참조하며 OCR/LLM은 미구현. [ADR-031](decisions/031-requirement-intake-backend-boundary.md)
+
+Requirement Intake 검증: 신규 H2 API 통합 테스트와 Frontend build/lint 통과. 기존 전체 Backend 테스트 22건은 신규 통합 테스트 추가 전에 통과했으며 이 실행에서 연결된 Supabase PostgreSQL에 Flyway V5가 적용되었다. 추가 변경 후 전체 Backend 재실행은 외부 DB 변경 위험으로 자동 승인 검토가 거부되어 보류했고, 신규 대상 테스트만 H2로 재검증했다. 화면은 프로젝트 Context 선택 후 `요구사항 관리` 메뉴에서 확인한다.
+
 - `frontend/`, `backend/`, `database/` Full Stack Repository 구조
 - Java 21 + Spring Boot 3.5 기반 Backend Foundation
 - JPA/Hibernate + MyBatis 혼용 기반과 Flyway Migration 경로

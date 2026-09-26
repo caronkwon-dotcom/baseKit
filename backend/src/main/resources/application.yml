@@ -1,4 +1,8 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
   application:
     name: basekit-backend
   datasource:
@@ -39,6 +43,8 @@ server:
   shutdown: graceful
 
 standard-design:
+  requirements:
+    storage-path: ${STANDARD_DESIGN_ATTACHMENT_PATH:./data/requirement-attachments}
   terms:
     csv-path: ${STANDARD_DESIGN_TERMS_CSV_PATH:../frontend/public/data/common-standard-terms-20251101.csv}
   llm:
