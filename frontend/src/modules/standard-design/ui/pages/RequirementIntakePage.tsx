@@ -16,7 +16,6 @@ interface LegacyRequirement { REQUIREMENT_ID: string; PROJECT_ID: string; REQUIR
 function legacyRequirements(): LegacyRequirement[] {
   try { return (JSON.parse(localStorage.getItem(legacyKey) ?? '{}') as { requirements?: LegacyRequirement[] }).requirements ?? []; } catch { return []; }
 }
-const menuOptions = metadataRepository.getMenus().filter((menu) => menu.menuType === 'SCREEN');
 const columns: DataTableColumn<Requirement>[] = [
   { key: 'id', header: 'ID', render: (row) => row.REQUIREMENT_ID, width: 155 },
   { key: 'name', header: '요구사항명', render: (row) => row.REQUIREMENT_NAME, flex: 1 },
@@ -25,6 +24,7 @@ const columns: DataTableColumn<Requirement>[] = [
 
 export default function RequirementIntakePage() {
   const { projectId } = useProjectContext();
+  const menuOptions = useMemo(() => metadataRepository.getMenus().filter((menu) => menu.menuType === 'SCREEN'), []);
   const [rows, setRows] = useState<Requirement[]>([]);
   const [selectedId, setSelectedId] = useState('');
   const [draft, setDraft] = useState<RequirementInput>(() => emptyDraft(projectId));
