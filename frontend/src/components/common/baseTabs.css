@@ -1,0 +1,19 @@
+.base-tabs { display: flex; min-height: 0; flex-direction: column; }
+.base-tabs__list { display: flex; flex: 0 0 auto; gap: 3px; border-bottom: 1px solid var(--border-default); }
+.base-tabs__tab { min-height: 32px; border: 1px solid transparent; border-bottom: 0; border-radius: 5px 5px 0 0; background: transparent; padding: 5px 12px; color: var(--text-secondary); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.base-tabs__tab:hover:not(:disabled) { background: var(--surface-muted); color: var(--text-primary); }
+.base-tabs__tab.is-active { border-color: var(--border-default); background: var(--surface-panel); color: var(--brand-hover); }
+.base-tabs__tab:disabled { color: var(--text-muted); cursor: not-allowed; }
+.base-tabs__panel { min-height: 0; padding-top: 10px; }
+.base-tab-placeholder { display: grid; align-content: start; gap: 8px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-panel); padding: 12px; color: var(--text-secondary); font-size: 12px; }
+.base-tab-placeholder h3, .base-tab-placeholder p { margin: 0; }
+.base-tab-placeholder h3 { color: var(--text-primary); font-size: 13px; }
+.base-tab-placeholder p { color: var(--text-muted); line-height: 1.5; }
+.base-tab-placeholder__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.base-tab-placeholder__field { display: grid; gap: 4px; }
+.base-tab-placeholder__field > span { color: var(--text-muted); font-size: 11px; font-weight: 700; }
+.base-tab-placeholder__field input, .base-tab-placeholder__field select, .base-tab-placeholder__field textarea { box-sizing: border-box; width: 100%; min-height: 30px; border: 1px solid var(--border-default); border-radius: 5px; background: var(--surface-panel); color: var(--text-primary); padding: 5px 8px; font: inherit; font-size: 12px; }
+.base-tab-placeholder__field textarea { resize: vertical; }
+.base-tab-placeholder__field--wide { grid-column: 1 / -1; }
+.base-tab-placeholder__actions { display: flex; justify-content: flex-end; gap: 6px; }
+@media (max-width: 620px) { .base-tab-placeholder__grid { grid-template-columns: minmax(0, 1fr); } .base-tab-placeholder__field--wide { grid-column: 1; } }

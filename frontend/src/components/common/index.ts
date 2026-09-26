@@ -17,5 +17,7 @@ export { default as SummaryCard } from './SummaryCard';
 export { default as BaseKitMessage } from './BaseKitMessage';
 export { default as BaseFileUpload } from './BaseFileUpload';
 export { default as BaseImagePreview } from './BaseImagePreview';
+export { default as BaseTabs } from './BaseTabs';
+export type { BaseTabDefinition } from './BaseTabs';
 export type { BaseUploadFile, BaseUploadPolicy, BaseFileUploadProps, UploadStatus } from './BaseFileUpload';
 export type { BaseKitMessageType } from './BaseKitMessage';
