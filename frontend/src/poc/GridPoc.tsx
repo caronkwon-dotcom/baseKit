@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { HashRouter } from 'react-router-dom';
 import AppLayout from '../layouts/AppLayout';
-import MetadataAgGrid from '../components/grid/MetadataAgGrid';
+import MetadataAgGrid from './MetadataAgGrid';
+import { fromMetadataColumnKey, toMetadataColumnKey } from '../components/grid/metadataColumnKey';
 import { toFieldDefinitions } from '../adapters/codeAttributeFieldAdapter';
 import { coreCodeApi } from '../services/coreCodeApi';
 import type { Code, CodeAttributeDefinition, CodeGroup } from '../types';
@@ -62,10 +63,11 @@ function EditingPoc() {
     <MetadataAgGrid programKey="COMMON_CODE_MGMT" roleCode="POC_VIEWER" title="편집 검증" selectable={false}
       baseColumns={columns} fields={fields} rows={draft} getRowKey={row => row.CODE_ID} getFieldValue={(row, field) => row.ATTRIBUTE_VALUES?.[field.key]}
       getRowClassName={row => dirty.has(row.CODE_ID) ? 'grid-updated-row' : ''}
-      editing={{ mode, keys: ['CODE_NAME', 'SORT_ORDER', ...fields.map(field => `ATTRIBUTE_${field.key}`)], onChange: (row, key, value) => {
+      editing={{ mode, keys: ['CODE_NAME', 'SORT_ORDER', ...fields.map(field => toMetadataColumnKey(field.key))], onChange: (row, key, value) => {
         if (key === 'CODE_NAME' && !value.trim()) { setMessage('검증 실패: 코드명은 필수입니다.'); return; }
         if (key === 'SORT_ORDER' && (!value.trim() || !Number.isFinite(Number(value)))) { setMessage('검증 실패: 정렬은 숫자입니다.'); return; }
-        const field = fields.find(item => `ATTRIBUTE_${item.key}` === key);
+        const metadataKey = fromMetadataColumnKey(key);
+        const field = fields.find(item => item.key === metadataKey);
         if (field?.required && !value.trim()) { setMessage(`검증 실패: ${field.label} 필수`); return; }
         setDraft(current => current.map(item => item.CODE_ID !== row.CODE_ID ? item : field ? { ...item, ATTRIBUTE_VALUES: { ...item.ATTRIBUTE_VALUES, [field.key]: value } } : { ...item, [key]: key === 'SORT_ORDER' ? Number(value) : value }));
         setMessage('변경됨: 저장 또는 취소하세요.');
