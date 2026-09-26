@@ -1,3 +1,5 @@
+
+
 import CodeManagePage from '../pages/CodeManagePage';
 import HomePage from '../pages/HomePage';
 import ProgramManagePage from '../pages/ProgramManagePage';
@@ -11,6 +13,7 @@ import { WordManagePage } from '../features/system/wordManage';
 import { TableManagePage } from '../features/system/tableManage';
 import { DocumentCenterPage } from '../features/devGuide/documentCenter';
 import { applicationModules } from './moduleRegistry';
+import { discoveredPrograms } from './programDiscovery';
 import type { ProgramComponentMap } from '../types/adminShell';
 
 /** BaseKit Core PROGRAM_KEY와 실제 React 화면 구현의 연결이다. */
@@ -38,8 +41,28 @@ const moduleProgramComponents = applicationModules.reduce<ProgramComponentMap>((
   return { ...components, ...module.components };
 }, {});
 
+const discoveredProgramComponents = discoveredPrograms.reduce<ProgramComponentMap>(
+    (components, program) => {
+
+      if (
+          coreProgramComponents[program.programKey] ||
+          moduleProgramComponents[program.programKey] ||
+          components[program.programKey]
+      ) {
+        throw new Error(`Discovered PROGRAM_KEY 중복: ${program.programKey}`);
+      }
+
+      components[program.programKey] = () => <program.component />;
+
+      return components;
+    },
+    {},
+);
+
 /** Host가 Core와 Product Module Component를 최종 조립한다. */
 export const programComponents: ProgramComponentMap = {
   ...coreProgramComponents,
   ...moduleProgramComponents,
+  ...discoveredProgramComponents,
 };
+

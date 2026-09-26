@@ -148,5 +148,15 @@
     "programKey": "DEV_SEARCH_SAMPLE_TYPE_2",
     "sortOrder": 2,
     "useYn": "Y"
+  },
+  {
+    "menuKey": "DEV_GUIDE.LAYOUT_L1R2",
+    "parentMenuKey": "DEV_GUIDE.SAMPLES",
+    "menuName": "Layout L1R2",
+    "menuLevel": 3,
+    "menuType": "SCREEN",
+    "programKey": "LYT_L1R2",
+    "sortOrder": 3,
+    "useYn": "Y"
   }
 ]

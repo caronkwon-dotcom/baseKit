@@ -5,6 +5,8 @@ import roleProgramActionsJson from '../../meta/role-program-actions.json';
 import { applicationModules } from '../config/moduleRegistry';
 import { COMMON_ACTIONS, type ActionCode } from '../constants/actionCodes';
 import { CORE_PROGRAM_KEYS } from '../types/adminShell';
+import { discoveredPrograms } from '../config/programDiscovery';
+
 import type {
   ActionMeta,
   MenuMeta,
@@ -17,6 +19,18 @@ import type {
 const programs = [
   ...(programsJson as ProgramMeta[]),
   ...applicationModules.flatMap((module) => module.programs),
+
+  ...discoveredPrograms.map((program) => ({
+    programKey: program.programKey,
+    programName: program.programName,
+    componentName: program.component.name,
+    screenType: 'PAGE',
+    routePath: '',
+    dataScope: 'COMPANY',
+    modifyScope: 'NONE',
+    actionCodes: program.actionCodes,
+    useYn: 'Y' as const,
+  })),
 ];
 const menus = [
   ...(menusJson as MenuMeta[]),

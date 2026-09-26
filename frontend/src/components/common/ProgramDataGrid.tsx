@@ -49,6 +49,7 @@ export interface ProgramDataGridProps<T> {
   onSelectedRowKeysChange?: (keys: Set<string>) => void;
   onRowClick?: (row: T) => void;
   getRowClassName?: (row: T) => string;
+  enabledActions?: ActionCode[];
 }
 
 export default function ProgramDataGrid<T>({
@@ -65,6 +66,7 @@ export default function ProgramDataGrid<T>({
   emptyMessage,
   selectable = true,
   scrollSample = false,
+  enabledActions,
   selectedRowKeys: controlledSelectedRowKeys,
   onSelectedRowKeysChange,
   onRowClick,
@@ -84,7 +86,9 @@ export default function ProgramDataGrid<T>({
   const resolvedTitle = title ?? `${menuName ?? program.programName} 목록`;
   const canUseAction = (actionCode: ActionCode) =>
     canUseGridAction(actionCode, program.actionCodes, (code) => hasAction(roleCode, programKey, code));
-  const visibleActions = GRID_ACTION_CODES.filter(canUseAction);
+  const visibleActions = GRID_ACTION_CODES
+      .filter((actionCode) => !enabledActions || enabledActions.includes(actionCode))
+      .filter(canUseAction);
   const visibleToolbarActions = toolbarActions?.filter((action) => canUseAction(action.actionCode));
   const selectedRows = rows.filter((row) => selectedRowKeys.has(getRowKey(row)));
   const resolvedButtonDisplay = buttonDisplay === 'icon' || buttonDisplay === 'ICON_ONLY'

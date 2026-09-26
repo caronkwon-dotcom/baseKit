@@ -1,11 +1,18 @@
+import { useState } from 'react';
 import DataTable, {
   type DataTableColumn,
 } from '../components/common/DataTable';
 import PageHeader from '../components/common/PageHeader';
 import { metadataRepository } from '../repositories/metadataRepository';
 import type { MenuMeta } from '../types/adminShell';
+import { discoveredPrograms } from '../config/programDiscovery';
 
 const menus = metadataRepository.getMenus();
+
+/*const programOptions = discoveredPrograms.map(program => ({
+  value: program.programKey,
+  label: `${program.programName} (${program.programKey})`,
+}));*/
 
 const menuColumns: DataTableColumn<MenuMeta>[] = [
   {
@@ -36,6 +43,8 @@ const menuColumns: DataTableColumn<MenuMeta>[] = [
 ];
 
 export default function MenuManagePage() {
+  const [selectedMenu, setSelectedMenu] = useState<MenuMeta | null>(null);
+
   return (
     <section className="page">
       <PageHeader
@@ -48,13 +57,42 @@ export default function MenuManagePage() {
         columns={menuColumns}
         rows={menus}
         getRowKey={(menu) => menu.menuKey}
+        onRowClick={setSelectedMenu}
       />
 
       <div className="detail-section">
         <h2>메뉴 상세</h2>
-        <div className="empty-detail">
-          메뉴 상세 편집은 저장 API 연동 단계에서 구현합니다.
-        </div>
+
+        {selectedMenu ? (
+            <div>
+              <div>메뉴 키: {selectedMenu.menuKey}</div>
+              <div>메뉴명: {selectedMenu.menuName}</div>
+              <div>
+                <label htmlFor="programKey">프로그램</label>
+
+                <select
+                    id="programKey"
+                    value={selectedMenu.programKey ?? ''}
+                    onChange={() => {}}
+                >
+                  <option value="">프로그램 선택</option>
+
+                  {discoveredPrograms.map(program => (
+                      <option
+                          key={program.programKey}
+                          value={program.programKey}
+                      >
+                        {program.programName} ({program.programKey})
+                      </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+        ) : (
+            <div className="empty-detail">
+              메뉴를 선택하세요.
+            </div>
+        )}
       </div>
     </section>
   );
