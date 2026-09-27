@@ -303,9 +303,9 @@ Standard Design의 `Screen Design Schema v0.1`을 정의하되 상세 UI 구현 
 - 아이디어가 승인되면 관련 ADR, Architecture 문서와 WBS로 이동한다.
 - 주간 작업 종료 시 완료 내용, 남은 문제, 다음 주 목표를 갱신한다.
 
-## Grid 공통화 2차 작업 (2026-09-27, feature 검수 중)
+## Grid 공통화 2차 작업 (2026-09-27, dev-pm 반영)
 
-`codex/grid-commonization-phase-2`는 `dev-pm` `24db386`에서 시작했다. `BaseKitDataGrid`가 행 상태 저장소의 추가·선택 행 삭제를 권한 적용되는 Grid Toolbar Action으로 연결하는 `batchActions` 계약을 제공하고, 선택 행이 없을 때 삭제 Action을 비활성화한다. L1R2 Master Grid 샘플은 이 계약을 사용한다. Frontend build/lint와 `git diff --check`를 통과했다. Backend 테스트는 Backend 변경이 없고 이 환경에서 외부 DB 연결 가능성이 있어 실행하지 않았다. 실제 UI 검수는 수행하지 않았다. 작업 시작 당시 있던 검색 가이드 변경, 첨부 데이터, 별도 미추적 파일은 이 기능과 무관하여 별도로 보존한다.
+`codex/grid-commonization-phase-2`는 `dev-pm` `24db386`에서 시작해 `0d4367f`에 통합했다. `BaseKitDataGrid`가 행 상태 저장소의 추가·선택 행 삭제를 권한 적용되는 Grid Toolbar Action으로 연결하는 `batchActions` 계약을 제공하고, 선택 행이 없을 때 삭제 Action을 비활성화한다. L1R2 Master Grid 샘플은 이 계약을 사용한다. Frontend build/lint와 `git diff --check`를 통과했다. Backend 테스트는 Backend 변경이 없고 이 환경에서 외부 DB 연결 가능성이 있어 실행하지 않았다. 실제 UI 검수는 수행하지 않았다. 작업 시작 당시 있던 검색 가이드 변경, 첨부 데이터, 별도 미추적 파일은 이 기능과 무관하여 별도로 보존한다.
 
 ## Project Working Set 후속 검수 (2026-09-20)
 
