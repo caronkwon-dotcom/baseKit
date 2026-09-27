@@ -226,6 +226,7 @@
 .project-master-heading h2 { margin: 0; color: var(--text-primary); font-size: 13px; }
 .project-master-heading h2 span { color: var(--text-muted); font-weight: 500; }
 .project-master-heading button { min-height: 28px; padding: 3px 8px; }
+.project-master-heading--search-toggle { justify-content: flex-end; min-height: 28px; margin-bottom: 4px; }
 .standard-design-project-link {
   display: block;
   width: 100%;
@@ -327,7 +328,6 @@
 .sd-requirement-page .program-data-grid .data-section { min-height: 0; flex: 1; }
 .sd-requirement-page .basekit-ag-grid { height: auto; min-height: 0; flex: 1; }
 .sd-requirement-page .standard-design-project-fields--long-text { grid-template-rows: auto auto minmax(0, 1fr) minmax(0, 1fr); min-height: 0; height: 100%; }
-.sd-requirement-page .project-master-heading + .program-data-grid .grid-toolbar { display: none; }
 .sd-requirement-menu-tab { display: flex; min-height: 0; height: 100%; flex-direction: column; gap: 8px; }
 .sd-requirement-menu-tab .program-data-grid { display: flex; min-height: 0; flex: 1; flex-direction: column; }
 .sd-requirement-menu-tab .program-data-grid .data-section { min-height: 0; flex: 1; }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { ActionButton, BaseKitMessage, BaseTabs, PageHeader, SearchPanel, type BaseTabDefinition, type DataTableColumn, type SearchFieldConfig } from '../../../../components/common';
+import { COMMON_ACTIONS } from '../../../../constants/actionCodes';
 import BaseKitDataGrid from '../../../../components/grid/BaseKitDataGrid';
 import { StatusColorIndicator } from '../../../../components/grid/gridCellComponents';
 import { useGridRowState, type TrackedGridRow } from '../../../../components/grid/gridRowState';
@@ -27,6 +28,12 @@ const defaultRequirementStatuses = [
   { CODE: 'REVIEW', CODE_NAME: '검토', CODE_ID: 'REQUIREMENT_STATUS_REVIEW' },
   { CODE: 'APPROVED', CODE_NAME: '승인', CODE_ID: 'REQUIREMENT_STATUS_APPROVED' },
 ];
+const formatRequirementDate = (value?: string) => {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+};
 
 interface MaxLengthFieldProps {
   value: string;
@@ -129,6 +136,7 @@ export default function RequirementIntakePage() {
     event.preventDefault();
     if (draft.PROJECT_ID !== projectId) { setMessage({ type: 'warn', text: '프로젝트 변경이 완료된 후 다시 저장하세요.' }); return; }
     if (!draft.REQUIREMENT_NAME.trim()) { setMessage({ type: 'warn', text: '요구사항명을 입력하세요.' }); return; }
+    if (!draft.DESCRIPTION.trim()) { setMessage({ type: 'warn', text: '요구사항 내용을 입력하세요.' }); return; }
     void run(async () => { const payload = { ...draft, MENU_KEYS: menuKeys }; const saved = selectedId ? await requirementApi.update(selectedId, payload) : await requirementApi.create(payload); await load(saved.REQUIREMENT_ID); setMessage({ type: 'success', text: '요구사항을 저장했습니다.' }); });
   };
   const migrate = () => void run(async () => {
@@ -149,9 +157,13 @@ export default function RequirementIntakePage() {
   const statusLabels = useMemo(() => new Map(statuses.map((status) => [status.CODE, status.CODE_NAME])), [statuses]);
   const requirementColumns = useMemo<DataTableColumn<Requirement>[]>(() => [
     { key: 'REQUIREMENT_NAME', header: '요구사항명', flex: 1, minWidth: 180, render: (row) => row.REQUIREMENT_NAME },
+    { key: 'DESCRIPTION', header: '요구사항 내용', flex: 1, minWidth: 220, render: (row) => row.DESCRIPTION || '-' },
     { key: 'STATUS', header: '상태', width: 120, render: (row) => <StatusColorIndicator label={statusLabels.get(row.STATUS) ?? row.STATUS} color={statusColors.get(row.STATUS) ?? '#64748B'} /> },
+    { key: 'REQUIREMENT_TYPE_CODE', header: '요구 유형', width: 120, render: (row) => types.find((type) => type.CODE === row.REQUIREMENT_TYPE_CODE)?.CODE_NAME ?? row.REQUIREMENT_TYPE_CODE },
+    { key: 'MENU_KEYS', header: '관련 메뉴', flex: 1, minWidth: 180, render: (row) => row.MENU_KEYS.length ? row.MENU_KEYS.join(', ') : '-' },
+    { key: 'MOD_DT', header: '수정일', width: 110, render: (row) => formatRequirementDate(row.MOD_DT) },
     { key: 'REQUIREMENT_ID', header: '요구사항 ID', width: 155, render: (row) => row.REQUIREMENT_ID },
-  ], [statusColors, statusLabels]);
+  ], [statusColors, statusLabels, types]);
   const updateMenuRow = useCallback((row: TrackedGridRow<MenuRelationRow>, field: keyof MenuRelationRow, value: string) => {
     const normalized = value.trim();
     const duplicate = field === 'MENU_KEY' && normalized !== '' && menuRelationRows.some((item) => item.__GRID_ROW_ID !== row.__GRID_ROW_ID && item.MENU_KEY === normalized);
@@ -169,7 +181,7 @@ export default function RequirementIntakePage() {
     <label><span>요구사항명</span><MaxLengthField required maxLength={200} value={draft.REQUIREMENT_NAME} onChange={(value) => update('REQUIREMENT_NAME', value)} /></label>
     <label><span>요구 유형</span><select value={draft.REQUIREMENT_TYPE_CODE} onChange={(e) => update('REQUIREMENT_TYPE_CODE', e.target.value)}>{types.map((code) => <option key={code.CODE} value={code.CODE}>{code.CODE_NAME}</option>)}</select></label>
     <label><span>상태</span><select value={draft.STATUS} onChange={(e) => update('STATUS', e.target.value)}>{statuses.map((status) => <option key={status.CODE} value={status.CODE}>{status.CODE_NAME}</option>)}</select></label>
-    <label className="standard-design-project-description"><span>요구사항 설명</span><MaxLengthField multiline rows={8} maxLength={4000} value={draft.DESCRIPTION} onChange={(value) => update('DESCRIPTION', value)} /></label>
+    <label className="standard-design-project-description"><span>요구사항 내용 *</span><MaxLengthField required multiline rows={8} maxLength={4000} value={draft.DESCRIPTION} onChange={(value) => update('DESCRIPTION', value)} /></label>
     <label className="standard-design-project-description"><span>프로세스 설명</span><MaxLengthField multiline rows={8} maxLength={4000} value={draft.PROCESS_DESCRIPTION} onChange={(value) => update('PROCESS_DESCRIPTION', value)} /></label>
   </div>;
   const attachmentTab: ReactNode = <RequirementAttachmentPanel requirementId={selectedId} attachments={selected?.ATTACHMENTS ?? []} onUploaded={(file) => { void load(selectedId); setMessage({ type: 'success', text: `${file.ORIGINAL_FILE_NAME}을(를) 업로드했습니다.` }); }} onDeleted={() => { void load(selectedId); setMessage({ type: 'success', text: '첨부파일을 삭제했습니다.' }); }} onError={reportAttachmentError} />;
@@ -203,8 +215,13 @@ export default function RequirementIntakePage() {
     <p>요구사항 관계와 설계 Traceability를 표시할 준비 영역입니다. 현재는 별도 관계 데이터를 저장하지 않습니다.</p>
     <div className="base-tab-placeholder__grid"><div className="base-tab-placeholder"><h3>Requirement 관계</h3><p>{selectedId ? '저장된 관계 데이터가 없습니다.' : '요구사항을 저장하면 관계를 확인할 수 있습니다.'}</p></div><div className="base-tab-placeholder"><h3>설계 Traceability</h3><p>Requirement → WBS → Screen → Table 연결은 후속 설계 단계에서 관리됩니다.</p></div></div>
   </section>;
+  const historyTab: ReactNode = <section className="base-tab-placeholder" aria-label="변경이력 준비 영역">
+    <h3>변경이력</h3>
+    <p>회의·협의·결정에 따른 변경 기록은 별도 History 기능으로 연결할 예정입니다.</p>
+  </section>;
   const tabs: BaseTabDefinition[] = [
     { id: 'basic', label: '기본정보', content: basicInfo },
+    { id: 'history', label: '변경이력', content: historyTab },
     { id: 'attachments', label: '첨부/미리보기', content: attachmentTab },
     { id: 'menus', label: '관련 메뉴', content: menuTab },
     { id: 'analysis', label: 'AI 분석', content: aiTab },
@@ -217,11 +234,11 @@ export default function RequirementIntakePage() {
       <ActionButton display="text" actionCode="DELETE" label="삭제" tone="danger" disabled={busy || !selectedId} onClick={() => { if (selectedId && window.confirm('선택한 요구사항과 첨부파일을 삭제하시겠습니까?')) void run(async () => { await requirementApi.delete(selectedId); resetDraft(); await load(); setMessage({ type: 'success', text: '요구사항을 삭제했습니다.' }); }); }} />
     </div></div>} />
     {!projectId ? <p className="sd-project-empty-help">프로젝트 Context를 선택하세요.</p> : <div className="sd-requirement-workspace-shell">
-      <ProjectListDetailWorkspace subject="요구사항" mode={mode} onModeChange={setMode}
+      <ProjectListDetailWorkspace subject="요구사항" initialListWidthPercent={55} mode={mode} onModeChange={setMode}
         list={<div className="project-list-detail-workspace__list-content">
       {mode === 'LIST' || searchOpen ? <div id="requirement-inline-search" className="project-inline-search"><SearchPanel rows={1} actionDisplay="label" fields={searchFields} value={searchCondition} initialValue={initialSearchCondition} onValueChange={setSearchCondition} onSearch={setAppliedSearch} onReset={(value) => { setSearchCondition(value); setAppliedSearch(value); }} /></div> : null}
-          {mode !== 'LIST' ? <div className="project-master-heading"><h2>요구사항 목록 <span>({visibleRows.length}건)</span></h2><button type="button" className="secondary-button" aria-expanded={searchOpen} aria-controls="requirement-inline-search" onClick={() => setSearchOpen((open) => !open)}>검색</button></div> : null}
-          <BaseKitDataGrid programKey="SD_REQUIREMENT_DESIGN" roleCode="ADMIN" title={mode === 'LIST' ? '요구사항 목록' : undefined} columns={requirementColumns} rows={visibleRows} getRowKey={(row) => row.REQUIREMENT_ID} selectedRowKeys={selectedRowKeys} onSelectedRowKeysChange={setSelectedRowKeys} currentRowKey={selectedId} onRowClick={(row) => { if (confirmDiscard()) select(row); }} emptyMessage="조회 조건에 맞는 요구사항이 없습니다." loading={busy} enabledActions={[]} />
+          {mode !== 'LIST' ? <div className="project-master-heading project-master-heading--search-toggle"><span /><button type="button" className="secondary-button" aria-expanded={searchOpen} aria-controls="requirement-inline-search" onClick={() => setSearchOpen((open) => !open)}>검색</button></div> : null}
+          <BaseKitDataGrid programKey="SD_REQUIREMENT_DESIGN" roleCode="ADMIN" title="요구사항 목록" columns={requirementColumns} rows={visibleRows} getRowKey={(row) => row.REQUIREMENT_ID} selectedRowKeys={selectedRowKeys} onSelectedRowKeysChange={setSelectedRowKeys} currentRowKey={selectedId} onRowClick={(row) => { if (confirmDiscard()) select(row); }} emptyMessage="조회 조건에 맞는 요구사항이 없습니다." loading={busy} enabledActions={[]} toolbarActions={[{ actionCode: COMMON_ACTIONS.EXCEL_UPLOAD, label: 'Excel 가져오기', onClick: () => setMessage({ type: 'info', text: 'Excel 가져오기는 다음 단계에서 구현합니다.' }) }]} />
         </div>}
         detail={<div className="sd-requirement-detail"><form id="requirement-detail-form" className="standard-design-lifecycle-form standard-design-project-form" onSubmit={save}><div className="standard-design-project-detail-heading"><h2>{selectedId ? '요구사항 상세' : '신규 요구사항'}</h2><dl className="standard-design-project-id"><div><dt>ID</dt><dd>{selectedId || '신규 저장 시 생성'}</dd></div></dl></div><BaseTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} ariaLabel="요구사항 상세" /></form></div>}
       />
