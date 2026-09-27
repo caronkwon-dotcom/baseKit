@@ -20,6 +20,13 @@ const theme = themeQuartz.withParams({
 
 export type { GridEditing } from './gridColumnAdapter';
 
+const ROW_STATE_CLASS: Record<GridRowState, string> = {
+  NORMAL: '',
+  INSERTED: 'grid-inserted-row',
+  UPDATED: 'grid-updated-row',
+  DELETED: 'grid-deleted-row',
+};
+
 export interface GridBatchActions {
   onAddRow: () => void;
   rowState: GridBatchRowState;
@@ -81,7 +88,15 @@ function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRo
     rowSelection={{ mode: 'multiRow', enableClickSelection: false, headerCheckbox: true }}
     onSelectionChanged={(event) => onSelectedRowKeysChange?.(new Set(event.api.getSelectedRows().map(getRowKey)))}
     onRowClicked={(event) => event.data && onRowClick?.(event.data)}
-    getRowClass={(params) => params.data ? [getRowClassName?.(params.data), getRowKey(params.data) === currentRowKey ? 'basekit-current-row' : ''].filter(Boolean).join(' ') : ''}
+    getRowClass={(params) => {
+      if (!params.data) return '';
+      const rowState = getRowState?.(params.data);
+      return [
+        rowState ? ROW_STATE_CLASS[rowState] : '',
+        getRowClassName?.(params.data),
+        getRowKey(params.data) === currentRowKey ? 'basekit-current-row' : '',
+      ].filter(Boolean).join(' ');
+    }}
     readOnlyEdit={Boolean(editing)}
     editType={editing?.mode === 'row' ? 'fullRow' : undefined}
     stopEditingWhenCellsLoseFocus
