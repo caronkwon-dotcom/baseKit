@@ -307,6 +307,10 @@ Standard Design의 `Screen Design Schema v0.1`을 정의하되 상세 UI 구현 
 
 `codex/grid-commonization-phase-2`는 `dev-pm` `24db386`에서 시작해 `0d4367f`에 통합했다. `BaseKitDataGrid`가 행 상태 저장소의 추가·선택 행 삭제를 권한 적용되는 Grid Toolbar Action으로 연결하는 `batchActions` 계약을 제공하고, 선택 행이 없을 때 삭제 Action을 비활성화한다. L1R2 Master Grid 샘플은 이 계약을 사용한다. Frontend build/lint와 `git diff --check`를 통과했다. Backend 테스트는 Backend 변경이 없고 이 환경에서 외부 DB 연결 가능성이 있어 실행하지 않았다. 실제 UI 검수는 수행하지 않았다. 작업 시작 당시 있던 검색 가이드 변경, 첨부 데이터, 별도 미추적 파일은 이 기능과 무관하여 별도로 보존한다.
 
+## Grid Row State CSS 공통화 보완 (2026-09-27)
+
+`BaseKitDataGrid`는 `GridRowState`를 `NORMAL / INSERTED / UPDATED / DELETED` 표준 행 class로 변환하고 사용자 class 및 `currentRowKey` class와 함께 적용한다. `CodeManagePage`의 중복 상태 class 매핑은 제거했으며 기존 `basekitGrid.css` 디자인은 변경하지 않았다. Frontend 테스트 38건, build, lint, `git diff --check`를 통과했다. L1R2 브라우저 확인에서 선택 상태가 INSERTED/DELETED 배경을 덮지 않았고 DELETED 취소선·아이콘, 현재행과 상태 class 공존, 신규 행 삭제 정책을 확인했다. CodeManagePage는 공통 경로 및 회귀 테스트로 확인했으며 실제 Backend 데이터가 필요한 화면 조작은 수행하지 않았다.
+
 ## Project Working Set 후속 검수 (2026-09-20)
 
 `feature/project-working-set-search`에서 `fe55992` 기반 후속 초안 `5bef92f`를 보존하고 Mini Search/Working Set 개선을 마무리했다. 이번 변경은 dev-pm 미통합이다. 중복 context 제거, 좌우 action 분리, 조회 스냅샷 유지, FormModal 재사용, 상세 저장 후 작업 집합 유지가 구현됐다. build/lint, Project 회귀 9개, grid assertion 18개, backend 22개 통과. 실제 UI 주요 흐름 확인; 삭제 확인창 이후 브라우저 제어 제한과 미검증 오류 주입 범위는 [인계 보고서](project-reference-handoff.md)에 기록했다.

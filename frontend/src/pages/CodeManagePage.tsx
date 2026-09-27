@@ -145,10 +145,6 @@ export default function CodeManagePage() {
     return () => window.removeEventListener('beforeunload', guard);
   }, [attributes.dirty, codes.dirty, groups.dirty]);
 
-  const rowClass = <T,>(state: (row: TrackedGridRow<T>) => string) => (row: TrackedGridRow<T>) => {
-    const rowState = state(row);
-    return rowState === 'INSERTED' ? 'grid-inserted-row' : rowState === 'UPDATED' ? 'grid-updated-row' : rowState === 'DELETED' ? 'grid-deleted-row' : '';
-  };
   const selectGroup = (row: TrackedGridRow<CodeGroup>) => {
     if (!row.CODE_GROUP_ID || row.CODE_GROUP_ID === selectedGroupId) return;
     if ((attributes.dirty || codes.dirty) && !window.confirm('미저장 변경사항이 사라집니다. 계속하시겠습니까?')) return;
@@ -244,7 +240,6 @@ export default function CodeManagePage() {
         getRowKey={row => row.__GRID_ROW_ID} getRowState={groups.getState}
         currentRowKey={groups.rows.find(row => row.CODE_GROUP_ID === selectedGroupId)?.__GRID_ROW_ID}
         selectedRowKeys={groupSelected} onSelectedRowKeysChange={setGroupSelected} onRowClick={selectGroup}
-        getRowClassName={rowClass(groups.getState)}
         editing={{ keys: groupColumns.map(column => column.key), onChange: (row, key, value) => groups.update(row.__GRID_ROW_ID, current => applyGridValue(current, groupColumns, key, value)) }}
         toolbarActions={toolbar(
           () => groups.add({ ...newRowDefaults, CODE_GROUP_ID: '', CODE_GROUP_NAME: '', DESCRIPTION: '' }),
@@ -256,7 +251,6 @@ export default function CodeManagePage() {
         columns={attributeColumns} rows={attributes.rows}
         getRowKey={row => row.__GRID_ROW_ID} getRowState={attributes.getState}
         selectedRowKeys={attributeSelected} onSelectedRowKeysChange={setAttributeSelected}
-        getRowClassName={rowClass(attributes.getState)}
         editing={{ keys: attributeColumns.map(column => column.key), onChange: (row, key, value) => attributes.update(row.__GRID_ROW_ID, current => applyGridValue(current, attributeColumns, key, value)) }}
         toolbarActions={toolbar(
           addAttribute, removeAttributes, revertAttributes, () => void saveAttributes(),
@@ -269,7 +263,6 @@ export default function CodeManagePage() {
         getRowKey={row => row.__GRID_ROW_ID} getRowState={codes.getState}
         getFieldValue={(row, field) => row.ATTRIBUTE_VALUES?.[field.key]}
         selectedRowKeys={codeSelected} onSelectedRowKeysChange={setCodeSelected}
-        getRowClassName={rowClass(codes.getState)}
         editing={{ keys: [...codeColumns.map(column => column.key), ...fields.map(field => toMetadataColumnKey(field.key))], onChange: updateCodeCell }}
         toolbarActions={toolbar(
           addCode, removeCodes, revertCodes, () => void saveCodes(),
