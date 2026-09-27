@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { AllCommunityModule, themeQuartz, type GridApi } from 'ag-grid-community';
 import ProgramDataGrid, { type ProgramDataGridProps } from '../common/ProgramDataGrid';
+import { COMMON_ACTIONS } from '../../constants/actionCodes';
+import type { GridToolbarAction } from '../common/ProgramDataGrid';
 import type { DataTableProps } from '../common/DataTable';
 import type { FieldDefinition } from '../metadata/fieldDefinition';
 import { toGridColumns, type GridEditing } from './gridColumnAdapter';
@@ -18,6 +20,15 @@ const theme = themeQuartz.withParams({
 
 export type { GridEditing } from './gridColumnAdapter';
 
+export interface GridBatchActions {
+  onAddRow: () => void;
+  rowState: GridBatchRowState;
+}
+
+interface GridBatchRowState {
+  remove: (rowIds: Iterable<string>) => void;
+}
+
 export interface BaseKitDataGridProps<T> extends Omit<ProgramDataGridProps<T>, 'renderTable'> {
   fields?: FieldDefinition[];
   getFieldValue?: (row: T, field: FieldDefinition) => string | undefined;
@@ -25,6 +36,7 @@ export interface BaseKitDataGridProps<T> extends Omit<ProgramDataGridProps<T>, '
   loading?: boolean;
   currentRowKey?: string;
   getRowState?: (row: T) => GridRowState;
+  batchActions?: GridBatchActions;
 }
 
 function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRowKeysChange, onRowClick, getRowClassName, emptyMessage, fields = [], getFieldValue, editing, loading, currentRowKey, getRowState }: DataTableProps<T> & Pick<BaseKitDataGridProps<T>, 'fields' | 'getFieldValue' | 'editing' | 'loading' | 'currentRowKey' | 'getRowState'>) {
@@ -91,6 +103,20 @@ function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRo
   /></div></div>;
 }
 
-export default function BaseKitDataGrid<T,>({ fields, getFieldValue, editing, loading, currentRowKey, getRowState, ...props }: BaseKitDataGridProps<T>) {
-  return <ProgramDataGrid {...props} renderTable={(table) => <GridTable {...table} fields={fields} getFieldValue={getFieldValue} editing={editing} loading={loading} currentRowKey={currentRowKey} getRowState={getRowState} />} />;
+export default function BaseKitDataGrid<T,>({ fields, getFieldValue, editing, loading, currentRowKey, getRowState, batchActions, toolbarActions, getRowKey, ...props }: BaseKitDataGridProps<T>) {
+  const resolvedBatchActions: GridToolbarAction<T>[] = batchActions ? [
+    { actionCode: COMMON_ACTIONS.CREATE, label: '행추가', onClick: batchActions.onAddRow },
+    {
+      actionCode: COMMON_ACTIONS.DELETE,
+      label: '행삭제',
+      tone: 'danger',
+      disabled: ({ selectedRows }) => selectedRows.length === 0,
+      onClick: ({ selectedRows }) => batchActions.rowState.remove(selectedRows.map((row) => getRowKey(row))),
+    },
+  ] : [];
+  const resolvedToolbarActions = toolbarActions || batchActions
+    ? [...(toolbarActions ?? []), ...resolvedBatchActions]
+    : undefined;
+
+  return <ProgramDataGrid {...props} getRowKey={getRowKey} toolbarActions={resolvedToolbarActions} renderTable={(table) => <GridTable {...table} fields={fields} getFieldValue={getFieldValue} editing={editing} loading={loading} currentRowKey={currentRowKey} getRowState={getRowState} />} />;
 }

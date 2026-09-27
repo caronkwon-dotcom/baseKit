@@ -21,7 +21,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import {MasterDetailMultiGrid, PageHeader, SearchPanel, type DataTableColumn, type SearchFieldConfig,} from '../../../components/common';
-import { COMMON_ACTIONS } from '../../../constants/actionCodes';
 import BaseKitDataGrid from '../../../components/grid/BaseKitDataGrid';
 import { useGridRowState } from '../../../components/grid/gridRowState';
 
@@ -158,7 +157,6 @@ export default function LayoutTypeL1R2() {
     // Right Top / Bottom Grid는 이 Key를 기준으로 Detail 데이터를 조회하거나 필터링한다.
     const [selectedMasterId, setSelectedMasterId] =
         useState(leftGridRows[0]?.MASTER_ID ?? '');
-    const [selectedLeftRowKeys, setSelectedLeftRowKeys] = useState<Set<string>>(new Set());
 
     // [SAMPLE] Left Grid Mock Data를 행추가/행삭제 테스트용 상태로 관리한다.
     //const [leftRows, setLeftRows] = useState<LeftGridRow[]>(leftGridRows);
@@ -242,25 +240,15 @@ export default function LayoutTypeL1R2() {
                         columns={leftGridColumns}
                         rows={leftGrid.rows}
                         getRowKey={(row) => row.__GRID_ROW_ID}
-                        selectedRowKeys={selectedLeftRowKeys}
-                        onSelectedRowKeysChange={setSelectedLeftRowKeys}
                         getRowState={leftGrid.getState}
                         currentRowKey={
                             leftGrid.rows.find((row) => row.MASTER_ID === selectedMasterId)?.__GRID_ROW_ID
                         }
                         onRowClick={handleLeftRowClick}
-                        toolbarActions={[
-                            { actionCode: COMMON_ACTIONS.CREATE, label: '추가', onClick: handleLeftAdd },
-                            {
-                                actionCode: COMMON_ACTIONS.DELETE,
-                                label: '삭제',
-                                disabled: selectedLeftRowKeys.size === 0,
-                                onClick: () => {
-                                    leftGrid.remove(selectedLeftRowKeys);
-                                    setSelectedLeftRowKeys(new Set());
-                                },
-                            },
-                        ]}
+                        batchActions={{
+                            onAddRow: handleLeftAdd,
+                            rowState: leftGrid,
+                        }}
                     />
                 }
 
