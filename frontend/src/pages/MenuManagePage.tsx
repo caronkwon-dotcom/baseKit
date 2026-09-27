@@ -5,14 +5,9 @@ import DataTable, {
 import PageHeader from '../components/common/PageHeader';
 import { metadataRepository } from '../repositories/metadataRepository';
 import type { MenuMeta } from '../types/adminShell';
-import { discoveredPrograms } from '../config/programDiscovery';
 
 const menus = metadataRepository.getMenus();
-
-/*const programOptions = discoveredPrograms.map(program => ({
-  value: program.programKey,
-  label: `${program.programName} (${program.programKey})`,
-}));*/
+const programs = metadataRepository.getPrograms();
 
 const menuColumns: DataTableColumn<MenuMeta>[] = [
   {
@@ -77,7 +72,7 @@ export default function MenuManagePage() {
                 >
                   <option value="">프로그램 선택</option>
 
-                  {discoveredPrograms.map(program => (
+                  {programs.map(program => (
                       <option
                           key={program.programKey}
                           value={program.programKey}
