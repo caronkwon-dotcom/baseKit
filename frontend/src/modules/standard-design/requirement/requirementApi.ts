@@ -23,6 +23,7 @@ export interface Requirement {
   DESCRIPTION: string;
   PROCESS_DESCRIPTION: string;
   STATUS: string;
+  MOD_DT: string;
   MENU_KEYS: string[];
   ATTACHMENTS: RequirementAttachment[];
   LEGACY_SOURCE_ID?: string;
