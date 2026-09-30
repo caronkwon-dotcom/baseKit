@@ -20,6 +20,8 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - Standard Design Requirement Intake V1: Backend canonical Requirement·Menu 관계·Attachment (Flyway V5), 명시적 LocalStorage 이관, Project List-Detail 재사용, 복수 메뉴·파일·이미지 Preview. 프로젝트/메뉴 원본은 기존 구조와 논리 참조하며 OCR/LLM은 미구현. [ADR-031](decisions/031-requirement-intake-backend-boundary.md)
 - 공통 `BaseFileUpload` V1: native input/drag & drop, 다중 파일, 정책 기반 사전검증, 파일별 진행률·취소·재시도·삭제, bounded concurrency와 XHR multipart transport. Requirement Attachment에 첫 적용. [ADR-032](decisions/032-base-file-upload-component.md) · [인계 보고서](base-file-upload-v1-handoff.md)
 - Standard Design Project Menu V1: 프로젝트별 LEVEL/SINGLE 분류 방식, Project Menu CRUD REST/Flyway V7, Requirement의 별도 Project Menu 관계(BSDRRPML), 기존 시스템 MENU_KEYS 보존, Excel 진입점만 제공. 재귀 트리·Parser·AI 기능은 미구현.
+- Standard Design Requirement Excel Import 연결 완료: Requirement 전용 Column 정의, Validation/Mapping, Project Menu Path → `PROJECT_MENU_IDS` 변환, 기존 Requirement create/update API 재사용, Template/Upload UI 연결을 구현했다. Project Context 선택 순서 결함도 수정했다. frontend build/lint와 backend test를 통과했다.
+- Standard Design Requirement Excel Import 실 E2E 보류: 실제 Excel 다운로드 파일 확인, 브라우저 Upload → Preview, Backend 저장, 새로고침 후 데이터 유지, 단일/복수 `PROJECT_MENU_IDS` 실저장 검증은 local H2 backend의 Tomcat loopback 초기화 오류로 보류했다. 코드 검증과 실 E2E 검증을 구분하며 전체 완료로 표시하지 않는다. Backend 실행 환경 정상화 후 E2E를 재개한다.
 
 Requirement Intake 검증: 신규 H2 API 통합 테스트와 Frontend build/lint 통과. 기존 전체 Backend 테스트 22건은 신규 통합 테스트 추가 전에 통과했으며 이 실행에서 연결된 Supabase PostgreSQL에 Flyway V5가 적용되었다. 추가 변경 후 전체 Backend 재실행은 외부 DB 변경 위험으로 자동 승인 검토가 거부되어 보류했고, 신규 대상 테스트만 H2로 재검증했다. 화면은 프로젝트 Context 선택 후 `요구사항 관리` 메뉴에서 확인한다.
 

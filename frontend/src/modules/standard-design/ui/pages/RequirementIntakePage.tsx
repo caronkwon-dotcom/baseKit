@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
-import { ActionButton, BaseKitMessage, BaseTabs, PageHeader, SearchPanel, type BaseTabDefinition, type DataTableColumn, type SearchFieldConfig } from '../../../../components/common';
-import { COMMON_ACTIONS } from '../../../../constants/actionCodes';
+import { ActionButton, BaseKitMessage, BaseTabs, ExcelImport, PageHeader, SearchPanel, type BaseTabDefinition, type DataTableColumn, type SearchFieldConfig } from '../../../../components/common';
 import BaseKitDataGrid from '../../../../components/grid/BaseKitDataGrid';
 import { StatusColorIndicator } from '../../../../components/grid/gridCellComponents';
 import { useGridRowState } from '../../../../components/grid/gridRowState';
@@ -11,6 +10,7 @@ import RequirementAttachmentPanel from '../components/RequirementAttachmentPanel
 import { useProjectContext } from '../components/useProjectContext';
 import { requirementApi, type Requirement, type RequirementInput } from '../../requirement/requirementApi';
 import { projectMenuApi, type ProjectMenu } from '../../projectmenu/projectMenuApi';
+import { createRequirementExcelMapper, createRequirementExcelValidator, requirementExcelColumns, type RequirementExcelMappedRow } from '../../requirement/requirementExcel';
 
 const emptyDraft = (projectId: string): RequirementInput => ({ PROJECT_ID: projectId, REQUIREMENT_NAME: '', REQUIREMENT_TYPE_CODE: 'NEW', DESCRIPTION: '', PROCESS_DESCRIPTION: '', STATUS: 'DRAFT', MENU_KEYS: [], PROJECT_MENU_IDS: [] });
 const legacyKey = 'basekit.standard-design.lifecycle.v1';
@@ -86,6 +86,8 @@ export default function RequirementIntakePage() {
   const selected = rows.find((row) => row.PROJECT_ID === projectId && row.REQUIREMENT_ID === selectedId);
   const connectedRequirements = rows.filter((row) => row.PROJECT_ID === projectId && row.REQUIREMENT_ID !== selectedId);
   const projectMenuIds = menuRelationRows.filter((row) => menuRelations.getState(row) !== 'DELETED').map((row) => row.PROJECT_MENU_ID).filter((id) => !id.startsWith('NEW_'));
+  const requirementExcelValidator = useMemo(() => createRequirementExcelValidator({ projectId, existingRequirements: rows, projectMenus, requirementTypes: types.map((type) => type.CODE), statuses: statuses.map((status) => status.CODE) }), [projectId, projectMenus, rows, statuses, types]);
+  const requirementExcelMapper = useMemo(() => createRequirementExcelMapper(projectId, projectMenus), [projectId, projectMenus]);
   const draftWithMenuKeys = { ...draft, MENU_KEYS: legacyMenuKeys, PROJECT_MENU_IDS: projectMenuIds };
   const dirty = baseline !== '' && JSON.stringify(draftWithMenuKeys) !== baseline;
   const pendingLegacy = useMemo(() => legacyRequirements().filter((row) => row.PROJECT_ID === projectId && !rows.some((item) => item.LEGACY_SOURCE_ID === row.REQUIREMENT_ID)), [projectId, rows]);
@@ -142,6 +144,21 @@ export default function RequirementIntakePage() {
     if (!draft.REQUIREMENT_NAME.trim()) { setMessage({ type: 'warn', text: '요구사항명을 입력하세요.' }); return; }
     if (!draft.DESCRIPTION.trim()) { setMessage({ type: 'warn', text: '요구사항 내용을 입력하세요.' }); return; }
     void run(async () => { const payload = { ...draft, MENU_KEYS: legacyMenuKeys, PROJECT_MENU_IDS: projectMenuIds }; const saved = selectedId ? await requirementApi.update(selectedId, payload) : await requirementApi.create(payload); await load(saved.REQUIREMENT_ID); setMessage({ type: 'success', text: '요구사항을 저장했습니다.' }); });
+  };
+  const importRequirements = async (mappedRows: RequirementExcelMappedRow[]) => {
+    const failures: string[] = [];
+    let successCount = 0;
+    for (const row of mappedRows) {
+      try {
+        if (row.requirementId) await requirementApi.update(row.requirementId, row.input);
+        else await requirementApi.create(row.input);
+        successCount += 1;
+      } catch (error) {
+        failures.push(`Row ${row.rowNumber}: ${error instanceof Error ? error.message : '저장 실패'}`);
+      }
+    }
+    await load();
+    setMessage({ type: failures.length ? 'error' : 'success', text: `Import 완료: 성공 ${successCount}건, 실패 ${failures.length}건${failures.length ? ` (${failures.join(' / ')})` : ''}` });
   };
   const migrate = () => void run(async () => {
     let count = 0;
@@ -237,13 +254,13 @@ export default function RequirementIntakePage() {
       <ActionButton display="text" actionCode="CREATE" label="등록" tone="primary" disabled={busy || !projectId} onClick={() => { if (confirmDiscard()) resetDraft(); }} />
       <ActionButton display="text" actionCode="SAVE" label="저장" tone="primary" htmlType="submit" form="requirement-detail-form" disabled={busy || !projectId} onClick={() => undefined} />
       <ActionButton display="text" actionCode="DELETE" label="삭제" tone="danger" disabled={busy || !selectedId} onClick={() => { if (selectedId && window.confirm('선택한 요구사항과 첨부파일을 삭제하시겠습니까?')) void run(async () => { await requirementApi.delete(selectedId); resetDraft(); await load(); setMessage({ type: 'success', text: '요구사항을 삭제했습니다.' }); }); }} />
-    </div></div>} />
+    </div><ExcelImport columns={requirementExcelColumns} validateRow={requirementExcelValidator} mapRow={requirementExcelMapper} onImport={importRequirements} templateFileName="requirement-import-template.xlsx" /></div>} />
     {!projectId ? <p className="sd-project-empty-help">프로젝트 Context를 선택하세요.</p> : <div className="sd-requirement-workspace-shell">
       <ProjectListDetailWorkspace subject="요구사항" initialListWidthPercent={55} mode={mode} onModeChange={setMode}
         list={<div className="project-list-detail-workspace__list-content">
       {mode === 'LIST' || searchOpen ? <div id="requirement-inline-search" className="project-inline-search"><SearchPanel rows={1} actionDisplay="label" fields={searchFields} value={searchCondition} initialValue={initialSearchCondition} onValueChange={setSearchCondition} onSearch={setAppliedSearch} onReset={(value) => { setSearchCondition(value); setAppliedSearch(value); }} /></div> : null}
           {mode !== 'LIST' ? <div className="project-master-heading project-master-heading--search-toggle"><span /><button type="button" className="secondary-button" aria-expanded={searchOpen} aria-controls="requirement-inline-search" onClick={() => setSearchOpen((open) => !open)}>검색</button></div> : null}
-          <BaseKitDataGrid programKey="SD_REQUIREMENT_DESIGN" roleCode="ADMIN" title="요구사항 목록" columns={requirementColumns} rows={visibleRows} getRowKey={(row) => row.REQUIREMENT_ID} selectedRowKeys={selectedRowKeys} onSelectedRowKeysChange={setSelectedRowKeys} currentRowKey={selectedId} onRowClick={(row) => { if (confirmDiscard()) select(row); }} emptyMessage="조회 조건에 맞는 요구사항이 없습니다." loading={busy} enabledActions={[]} toolbarActions={[{ actionCode: COMMON_ACTIONS.EXCEL_UPLOAD, label: 'Excel 가져오기', onClick: () => setMessage({ type: 'info', text: 'Excel 가져오기는 다음 단계에서 구현합니다.' }) }]} />
+          <BaseKitDataGrid programKey="SD_REQUIREMENT_DESIGN" roleCode="ADMIN" title="요구사항 목록" columns={requirementColumns} rows={visibleRows} getRowKey={(row) => row.REQUIREMENT_ID} selectedRowKeys={selectedRowKeys} onSelectedRowKeysChange={setSelectedRowKeys} currentRowKey={selectedId} onRowClick={(row) => { if (confirmDiscard()) select(row); }} emptyMessage="조회 조건에 맞는 요구사항이 없습니다." loading={busy} enabledActions={[]} />
         </div>}
         detail={<div className="sd-requirement-detail"><form id="requirement-detail-form" className="standard-design-lifecycle-form standard-design-project-form" onSubmit={save}><div className="standard-design-project-detail-heading"><h2>{selectedId ? '요구사항 상세' : '신규 요구사항'}</h2><dl className="standard-design-project-id"><div><dt>ID</dt><dd>{selectedId || '신규 저장 시 생성'}</dd></div></dl></div><BaseTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} ariaLabel="요구사항 상세" /></form></div>}
       />

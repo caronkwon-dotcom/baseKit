@@ -169,7 +169,8 @@ export default function AppLayout() {
           setPendingProjectProgramKey(null);
           openProgram('SD_PROJECT_MGMT');
         }}
-        onSelected={() => {
+        onSelected={(project) => {
+          designLifecycleRepository.setSelectedProjectId(project.PROJECT_ID);
           const pending = pendingProjectProgramKey;
           setProjectContextDialogOpen(false);
           setPendingProjectProgramKey(null);
