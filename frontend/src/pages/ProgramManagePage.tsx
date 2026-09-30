@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { COMMON_ACTIONS, type ActionCode } from '../constants/actionCodes';
 import BaseKitDataGrid from '../components/grid/BaseKitDataGrid';
+import { MetadataSwitch } from '../components/grid/gridCellComponents';
 import { BaseKitMessage, MasterDetailMultiGrid, PageHeader, ProgramDataGrid, SearchPanel, type DataTableColumn, type SearchFieldConfig } from '../components/common';
 import { getProgramFieldDefinitions } from '../adapters/programFieldAdapter';
 import type { FieldDefinition } from '../components/metadata';
@@ -61,14 +62,21 @@ const actionColumns: DataTableColumn<RegistryAction>[] = [
   { key: 'SOURCE_STATUS', header: 'Source', width: 100, align: 'center', render: (row) => row.SOURCE_STATUS },
 ];
 
-type DetailItem = { key: string; label: string; badge?: boolean };
+type DetailItem = { key: string; label: string; owner: 'SOURCE' | 'REGISTRY'; editor: 'TEXT' | 'SELECT' | 'SWITCH' | 'BADGE'; options?: Array<{ value: string; label: string }> };
 
-function DetailPanel({ title, fields, values }: { title: string; fields: DetailItem[]; values: Record<string, string> }) {
+function DetailPanel({ title, fields, values, onChange }: { title: string; fields: DetailItem[]; values: Record<string, string>; onChange: (key: string, value: string) => void }) {
   return <section className="detail-section">
     <h2>{title}</h2>
-    <dl className="detail-grid">
-      {fields.map((field) => <div className="readonly-field" key={field.key}><dt>{field.label}</dt><dd>{field.badge ? <span className="metadata-badge">{values[field.key] || '-'}</span> : values[field.key] || '-'}</dd></div>)}
-    </dl>
+    <div className="standard-form-grid detail-grid">
+      {fields.map((field) => <label key={field.key}>
+        <span>{field.label}</span>
+        {field.editor === 'SWITCH' ? <MetadataSwitch value={values[field.key] ?? 'Y'} field={{ key: field.key, label: field.label, dataType: 'STRING', controlType: 'SWITCH', displayType: 'BOOLEAN', required: false, options: field.options }} editable={field.owner === 'REGISTRY'} onChange={(value) => onChange(field.key, value)} />
+          : field.owner === 'SOURCE' ? <span className="readonly-field">{values[field.key] || '-'}</span>
+            : field.editor === 'SELECT' ? <select value={values[field.key] ?? ''} onChange={(event) => onChange(field.key, event.target.value)}>{field.options?.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select>
+              : field.editor === 'BADGE' ? <span className="metadata-badge">{values[field.key] || '-'}</span>
+                : <input value={values[field.key] ?? ''} onChange={(event) => onChange(field.key, event.target.value)} />}
+      </label>)}
+    </div>
   </section>;
 }
 
@@ -78,6 +86,7 @@ export default function ProgramManagePage() {
   const [fields, setFields] = useState<FieldDefinition[]>([]);
   const [selectedKey, setSelectedKey] = useState('');
   const [selectedActionKey, setSelectedActionKey] = useState('');
+  const [actionUseByKey, setActionUseByKey] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<{ type: 'info' | 'warn' | 'error' | 'success'; text: string }>({ type: 'info', text: 'Source Registry를 조회했습니다.' });
   const load = useCallback(async (next: Condition) => {
     try {
@@ -95,6 +104,8 @@ export default function ProgramManagePage() {
   const selectedProgram = rows.find((row) => row.PROGRAM_KEY === selectedKey);
   const actions = useMemo(() => getActions(selectedKey), [selectedKey]);
   const selectedAction = actions.find((row) => row.ACTION_KEY === selectedActionKey) ?? actions[0];
+  const updateProgram = (key: string, value: string) => setRows((current) => current.map((row) => row.PROGRAM_KEY === selectedKey ? { ...row, [key]: value } : row));
+  const updateAction = (key: string, value: string) => { if (key === 'USE_YN' && selectedAction) setActionUseByKey((current) => ({ ...current, [`${selectedKey}:${selectedAction.ACTION_KEY}`]: value })); };
   const searchFields = useMemo<SearchFieldConfig<Condition>[]>(() => [
     { key: 'KEYWORD', label: '프로그램', placeholder: 'KEY / 프로그램명' },
     { key: 'MODULE_CODE', label: 'Module', controlType: 'select', options: [{ value: '', label: '전체' }, ...(fields.find((field) => field.key === 'MODULE_CODE')?.options ?? [])] },
@@ -102,19 +113,20 @@ export default function ProgramManagePage() {
     { key: 'USE_YN', label: '사용 여부', controlType: 'select', options: [{ value: '', label: '전체' }, { value: 'Y', label: '사용' }, { value: 'N', label: '미사용' }] },
   ], [fields]);
   const programDetailFields: DetailItem[] = [
-    { key: 'PROGRAM_KEY', label: 'Program Key' }, { key: 'PROGRAM_NAME', label: '프로그램명' }, { key: 'DESCRIPTION', label: '설명' }, { key: 'MODULE_CODE', label: 'Module' }, { key: 'PROGRAM_TYPE_CODE', label: '유형' }, { key: 'SOURCE_STATUS', label: 'Source 상태', badge: true }, { key: 'USE_YN', label: '사용여부', badge: true }, { key: 'ACTION_COUNT', label: 'Action 수' },
+    { key: 'PROGRAM_KEY', label: 'Program Key', owner: 'SOURCE', editor: 'TEXT' }, { key: 'PROGRAM_NAME', label: '프로그램명', owner: 'REGISTRY', editor: 'TEXT' }, { key: 'DESCRIPTION', label: '설명', owner: 'REGISTRY', editor: 'TEXT' }, { key: 'MODULE_CODE', label: 'Module', owner: 'REGISTRY', editor: 'SELECT', options: [{ value: 'SYSTEM', label: '시스템관리' }, { value: 'DEV_GUIDE', label: '개발자가이드' }, { value: 'STANDARD_DESIGN', label: 'Standard Design' }] }, { key: 'PROGRAM_TYPE_CODE', label: '유형', owner: 'REGISTRY', editor: 'SELECT', options: [{ value: 'HOME', label: '홈' }, { value: 'GRID', label: '목록' }, { value: 'GRID_DETAIL', label: '목록/상세' }, { value: 'POPUP', label: '팝업' }] }, { key: 'SOURCE_STATUS', label: 'Source 상태', owner: 'SOURCE', editor: 'BADGE' }, { key: 'USE_YN', label: '사용여부', owner: 'REGISTRY', editor: 'SWITCH', options: [{ value: 'Y', label: '사용' }, { value: 'N', label: '미사용' }] }, { key: 'ACTION_COUNT', label: 'Action 수', owner: 'SOURCE', editor: 'TEXT' },
   ];
   const actionDetailFields: DetailItem[] = [
-    { key: 'ACTION_KEY', label: 'Action Key' }, { key: 'ACTION_NAME', label: 'Action명' }, { key: 'ACTION_TYPE', label: 'Type', badge: true }, { key: 'DESCRIPTION', label: '설명' }, { key: 'SOURCE_STATUS', label: 'Source 상태', badge: true }, { key: 'USE_YN', label: '사용여부', badge: true },
+    { key: 'ACTION_KEY', label: 'Action Key', owner: 'SOURCE', editor: 'TEXT' }, { key: 'ACTION_NAME', label: 'Action명', owner: 'SOURCE', editor: 'TEXT' }, { key: 'ACTION_TYPE', label: 'Type', owner: 'SOURCE', editor: 'BADGE' }, { key: 'DESCRIPTION', label: '설명', owner: 'SOURCE', editor: 'TEXT' }, { key: 'SOURCE_STATUS', label: 'Source 상태', owner: 'SOURCE', editor: 'BADGE' }, { key: 'USE_YN', label: '사용여부', owner: 'REGISTRY', editor: 'SWITCH', options: [{ value: 'Y', label: '사용' }, { value: 'N', label: '미사용' }] },
   ];
   const asValues = (value: object | undefined) => Object.fromEntries(Object.entries(value ?? {}).map(([key, item]) => [key, String(item ?? '')]));
+  const selectedActionValues = selectedAction ? { ...asValues(selectedAction), USE_YN: actionUseByKey[`${selectedKey}:${selectedAction.ACTION_KEY}`] ?? selectedAction.USE_YN } : {};
   return <section className="page multi-grid-page program-registry-page">
     <PageHeader breadcrumbs={['시스템관리', '프로그램관리']} description="Source Discovery와 운영 Registry의 상태 및 Action Metadata를 조회합니다." />
     <SearchPanel rows={1} fields={searchFields} value={condition} initialValue={initial} onValueChange={setCondition} onSearch={load} onReset={load} />
-    <MasterDetailMultiGrid equalRows
+    <MasterDetailMultiGrid equalRows masterWidth="60%"
       master={<div className="multi-grid-detail equal-detail-rows"><div className="multi-grid-detail-top"><ProgramDataGrid programKey="PROGRAM_MGMT" roleCode="ADMIN" title="프로그램 목록" columns={programColumns} rows={rows} getRowKey={(row) => row.PROGRAM_KEY} selectable={false} enabledActions={[]} onRowClick={(row) => setSelectedKey(row.PROGRAM_KEY)} getRowClassName={(row) => row.PROGRAM_KEY === selectedKey ? 'active-master-row' : ''} /></div><div className="multi-grid-detail-bottom"><BaseKitDataGrid programKey="PROGRAM_MGMT" roleCode="ADMIN" title={`${selectedProgram?.PROGRAM_KEY ?? '프로그램'} Action 목록`} columns={actionColumns} rows={actions} getRowKey={(row) => row.ACTION_KEY} selectable={false} enabledActions={[]} onRowClick={(row) => setSelectedActionKey(row.ACTION_KEY)} getRowClassName={(row) => row.ACTION_KEY === selectedAction?.ACTION_KEY ? 'active-master-row' : ''} /></div></div>}
-      detailTop={<DetailPanel title="프로그램 상세정보" fields={programDetailFields} values={asValues(selectedProgram)} />}
-      detailBottom={<DetailPanel title="Action 상세정보" fields={actionDetailFields} values={asValues(selectedAction)} />}
+      detailTop={<DetailPanel title="프로그램 상세정보" fields={programDetailFields} values={asValues(selectedProgram)} onChange={updateProgram} />}
+      detailBottom={<DetailPanel title="Action 상세정보" fields={actionDetailFields} values={selectedActionValues} onChange={updateAction} />}
       message={<BaseKitMessage type={message.type} message={message.text} />}
     />
   </section>;

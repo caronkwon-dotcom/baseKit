@@ -1558,7 +1558,7 @@ tbody tr.selected-row td {
 .multi-grid-master,
 .multi-grid-detail,
 .multi-grid-detail-top,
-.multi-grid-detail-bottom { min-width: 0; min-height: 0; }
+.multi-grid-detail-bottom { min-width: 0; min-height: 0; overflow: auto; }
 .multi-grid-detail { display: grid; height: 100%; grid-template-rows: minmax(var(--multi-grid-detail-top-min-height), var(--multi-grid-detail-top-ratio)) minmax(var(--multi-grid-detail-bottom-min-height), var(--multi-grid-detail-bottom-ratio)); gap: var(--multi-grid-gap); }
 .multi-grid-workspace.equal-detail-rows .multi-grid-detail,
 .multi-grid-detail.equal-detail-rows { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }

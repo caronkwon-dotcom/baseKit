@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 interface MasterDetailMultiGridProps {
   master: ReactNode;
@@ -6,10 +6,12 @@ interface MasterDetailMultiGridProps {
   detailBottom: ReactNode;
   message?: ReactNode;
   equalRows?: boolean;
+  masterWidth?: string;
 }
 
-export default function MasterDetailMultiGrid({ master, detailTop, detailBottom, message, equalRows = false }: MasterDetailMultiGridProps) {
-  return <div className={`multi-grid-workspace${equalRows ? ' equal-detail-rows' : ''}`}>
+export default function MasterDetailMultiGrid({ master, detailTop, detailBottom, message, equalRows = false, masterWidth }: MasterDetailMultiGridProps) {
+  const style = masterWidth ? { '--multi-grid-master-width': masterWidth } as CSSProperties : undefined;
+  return <div className={`multi-grid-workspace${equalRows ? ' equal-detail-rows' : ''}`} style={style}>
     <div className="master-detail-multi-grid">
       <div className="multi-grid-master">{master}</div>
       <div className="multi-grid-detail">
