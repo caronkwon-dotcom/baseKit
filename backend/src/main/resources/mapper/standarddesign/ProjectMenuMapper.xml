@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caron.basekit.standarddesign.projectmenu.ProjectMenuMapper">
+  <sql id="projectMenuColumns">PROJECT_MENU_ID,PROJECT_ID,MENU_ID,MENU_NAME,MENU_LEVEL,LEVEL1_MENU_ID,SORT_ORDER,REG_DT,MOD_DT</sql>
+  <select id="findMode" resultType="string">SELECT MENU_MANAGEMENT_MODE FROM BSDPMSET WHERE PROJECT_ID=#{PROJECT_ID}</select>
+  <insert id="insertMode">INSERT INTO BSDPMSET(PROJECT_ID,MENU_MANAGEMENT_MODE) VALUES(#{PROJECT_ID},#{MENU_MANAGEMENT_MODE})</insert>
+  <update id="updateMode">UPDATE BSDPMSET SET MENU_MANAGEMENT_MODE=#{MENU_MANAGEMENT_MODE}, MOD_DT=CURRENT_TIMESTAMP WHERE PROJECT_ID=#{PROJECT_ID}</update>
+  <select id="findAll" resultType="com.caron.basekit.standarddesign.projectmenu.ProjectMenuData">SELECT <include refid="projectMenuColumns"/> FROM BSDPMENU WHERE PROJECT_ID=#{PROJECT_ID} ORDER BY SORT_ORDER,MENU_ID</select>
+  <select id="findOne" resultType="com.caron.basekit.standarddesign.projectmenu.ProjectMenuData">SELECT <include refid="projectMenuColumns"/> FROM BSDPMENU WHERE PROJECT_MENU_ID=#{PROJECT_MENU_ID}</select>
+  <select id="countByMenuId" resultType="int">SELECT COUNT(*) FROM BSDPMENU WHERE PROJECT_ID=#{PROJECT_ID} AND MENU_ID=#{MENU_ID} <if test="PROJECT_MENU_ID != null">AND PROJECT_MENU_ID &lt;&gt; #{PROJECT_MENU_ID}</if></select>
+  <select id="countLevel1" resultType="int">SELECT COUNT(*) FROM BSDPMENU WHERE PROJECT_ID=#{PROJECT_ID} AND MENU_ID=#{MENU_ID} AND MENU_LEVEL=1</select>
+  <insert id="insert">INSERT INTO BSDPMENU(PROJECT_MENU_ID,PROJECT_ID,MENU_ID,MENU_NAME,MENU_LEVEL,LEVEL1_MENU_ID,SORT_ORDER) VALUES(#{PROJECT_MENU_ID},#{PROJECT_ID},#{MENU_ID},#{MENU_NAME},#{MENU_LEVEL},#{LEVEL1_MENU_ID},#{SORT_ORDER})</insert>
+  <update id="update">UPDATE BSDPMENU SET MENU_ID=#{MENU_ID},MENU_NAME=#{MENU_NAME},MENU_LEVEL=#{MENU_LEVEL},LEVEL1_MENU_ID=#{LEVEL1_MENU_ID},SORT_ORDER=#{SORT_ORDER},MOD_DT=CURRENT_TIMESTAMP WHERE PROJECT_MENU_ID=#{PROJECT_MENU_ID}</update>
+  <delete id="delete">DELETE FROM BSDPMENU WHERE PROJECT_MENU_ID=#{PROJECT_MENU_ID}</delete>
+  <select id="countRequirementReferences" resultType="int">SELECT COUNT(*) FROM BSDRRPML WHERE PROJECT_MENU_ID=#{PROJECT_MENU_ID}</select>
+  <insert id="insertRequirementRelation">INSERT INTO BSDRRPML(REQUIREMENT_ID,PROJECT_MENU_ID) VALUES(#{REQUIREMENT_ID},#{PROJECT_MENU_ID})</insert>
+  <delete id="deleteRequirementRelations">DELETE FROM BSDRRPML WHERE REQUIREMENT_ID=#{REQUIREMENT_ID}</delete>
+</mapper>

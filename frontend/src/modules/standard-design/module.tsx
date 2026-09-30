@@ -5,6 +5,7 @@ import DesignLifecyclePage from './ui/pages/DesignLifecyclePage';
 import RequirementIntakePage from './ui/pages/RequirementIntakePage';
 import ScreenDesignPage from './ui/pages/ScreenDesignPage';
 import TermGlossaryPage from './ui/pages/TermGlossaryPage';
+import ProjectMenuPage from './ui/pages/ProjectMenuPage';
 import './standardDesign.css';
 
 const MODULE_ID = 'standard-design';
@@ -36,6 +37,18 @@ const standardDesignModule: ApplicationModule = {
       dataScope: 'COMPANY',
       modifyScope: 'ROLE',
       actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE],
+      useYn: 'Y',
+    },
+    {
+      programKey: 'SD_PROJECT_MENU',
+      programName: 'Project Menu',
+      componentName: 'StandardDesignProjectMenuPage',
+      screenType: 'GRID_DETAIL',
+      routePath: '/standard-design/project-menus',
+      requiresProjectContext: true,
+      dataScope: 'COMPANY',
+      modifyScope: 'ROLE',
+      actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE, COMMON_ACTIONS.EXCEL_UPLOAD, COMMON_ACTIONS.REVERT_CHANGES],
       useYn: 'Y',
     },
     {
@@ -129,13 +142,23 @@ const standardDesignModule: ApplicationModule = {
       useYn: 'Y',
     },
     {
+      menuKey: 'STANDARD_DESIGN.PROJECT_MENU',
+      parentMenuKey: 'STANDARD_DESIGN',
+      menuName: 'Project Menu',
+      menuLevel: 2,
+      menuType: 'SCREEN',
+      programKey: 'SD_PROJECT_MENU',
+      sortOrder: 3,
+      useYn: 'Y',
+    },
+    {
       menuKey: 'STANDARD_DESIGN.REQUIREMENT',
       parentMenuKey: 'STANDARD_DESIGN',
       menuName: '요구사항 관리',
       menuLevel: 2,
       menuType: 'SCREEN',
       programKey: 'SD_REQUIREMENT_DESIGN',
-      sortOrder: 3,
+      sortOrder: 4,
       useYn: 'Y',
     },
     {
@@ -145,7 +168,7 @@ const standardDesignModule: ApplicationModule = {
       menuLevel: 2,
       menuType: 'SCREEN',
       programKey: 'SD_CUSTOMER_STANDARD',
-      sortOrder: 4,
+      sortOrder: 5,
       useYn: 'Y',
     },
     {
@@ -155,7 +178,7 @@ const standardDesignModule: ApplicationModule = {
       menuLevel: 2,
       menuType: 'SCREEN',
       programKey: 'SD_SCREEN_DESIGN',
-      sortOrder: 5,
+      sortOrder: 6,
       useYn: 'Y',
     },
     {
@@ -165,7 +188,7 @@ const standardDesignModule: ApplicationModule = {
       menuLevel: 2,
       menuType: 'SCREEN',
       programKey: 'SD_DATABASE_DESIGN',
-      sortOrder: 6,
+      sortOrder: 7,
       useYn: 'Y',
     },
     {
@@ -175,7 +198,7 @@ const standardDesignModule: ApplicationModule = {
       menuLevel: 2,
       menuType: 'SCREEN',
       programKey: 'SD_TERM_GLOSSARY',
-      sortOrder: 7,
+      sortOrder: 8,
       useYn: 'Y',
     },
   ],
@@ -187,6 +210,14 @@ const standardDesignModule: ApplicationModule = {
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_PROJECT_MGMT', ACTION_CODE: COMMON_ACTIONS.CREATE, ALLOW_YN: 'Y' },
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_PROJECT_MGMT', ACTION_CODE: COMMON_ACTIONS.UPDATE, ALLOW_YN: 'Y' },
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_PROJECT_MGMT', ACTION_CODE: COMMON_ACTIONS.DELETE, ALLOW_YN: 'Y' },
+    ...(['SD_PROJECT_MENU'] as const).flatMap((programKey) => [
+      { ROLE_CODE: 'ADMIN', PROGRAM_KEY: programKey, ACTION_CODE: COMMON_ACTIONS.SEARCH, ALLOW_YN: 'Y' as const },
+      { ROLE_CODE: 'ADMIN', PROGRAM_KEY: programKey, ACTION_CODE: COMMON_ACTIONS.CREATE, ALLOW_YN: 'Y' as const },
+      { ROLE_CODE: 'ADMIN', PROGRAM_KEY: programKey, ACTION_CODE: COMMON_ACTIONS.UPDATE, ALLOW_YN: 'Y' as const },
+      { ROLE_CODE: 'ADMIN', PROGRAM_KEY: programKey, ACTION_CODE: COMMON_ACTIONS.DELETE, ALLOW_YN: 'Y' as const },
+      { ROLE_CODE: 'ADMIN', PROGRAM_KEY: programKey, ACTION_CODE: COMMON_ACTIONS.EXCEL_UPLOAD, ALLOW_YN: 'Y' as const },
+      { ROLE_CODE: 'ADMIN', PROGRAM_KEY: programKey, ACTION_CODE: COMMON_ACTIONS.REVERT_CHANGES, ALLOW_YN: 'Y' as const },
+    ]),
     ...(['SD_WBS_DESIGN', 'SD_REQUIREMENT_DESIGN', 'SD_DATABASE_DESIGN'] as const).flatMap((programKey) => [
       { ROLE_CODE: 'ADMIN', PROGRAM_KEY: programKey, ACTION_CODE: COMMON_ACTIONS.SEARCH, ALLOW_YN: 'Y' as const },
       { ROLE_CODE: 'ADMIN', PROGRAM_KEY: programKey, ACTION_CODE: COMMON_ACTIONS.CREATE, ALLOW_YN: 'Y' as const },
@@ -207,6 +238,7 @@ const standardDesignModule: ApplicationModule = {
   ],
   components: {
     SD_PROJECT_MGMT: () => <DesignLifecyclePage view="overview" />,
+    SD_PROJECT_MENU: ProjectMenuPage,
     SD_WBS_DESIGN: () => <DesignLifecyclePage view="wbs" />,
     SD_REQUIREMENT_DESIGN: () => <RequirementIntakePage />,
     SD_CUSTOMER_STANDARD: () => (

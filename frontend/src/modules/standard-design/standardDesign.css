@@ -338,3 +338,23 @@
 .sd-max-length-field > small { position: absolute; right: 6px; bottom: 4px; color: var(--text-muted); font-size: 9px; line-height: 11px; pointer-events: none; }
 .sd-max-length-field > input:focus + small, .sd-max-length-field > textarea:focus + small { color: var(--brand-primary); }
 @media (max-width: 760px) { .sd-requirement-menu-editor__picker { grid-template-columns: minmax(0, 1fr); } }
+.sd-project-menu-page .sd-project-menu-controls {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--surface-panel);
+}
+.sd-project-menu-controls label { display: inline-flex; align-items: center; gap: 5px; margin-left: 14px; }
+.sd-project-menu-help { color: var(--text-secondary); font-size: 12px; margin-left: 14px; }
+.sd-project-menu-input { width: 100%; min-width: 0; box-sizing: border-box; }
+.sd-project-menu-input--number { max-width: 64px; text-align: right; }
+.sd-project-menu-level-root { color: var(--text-secondary); }
+.sd-project-menu-message-area { margin-top: 10px; }
+.sd-requirement-menu-picker { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(240px, 1.6fr) auto; gap: 8px; align-items: center; margin: 8px 0 10px; }
+.sd-requirement-menu-picker input, .sd-requirement-menu-picker select { width: 100%; min-width: 0; box-sizing: border-box; }
+.sd-requirement-menu-picker span { color: var(--text-secondary); font-size: 12px; white-space: nowrap; }
+.sd-requirement-legacy-menu-note { margin-bottom: 8px; color: var(--text-secondary); font-size: 12px; }

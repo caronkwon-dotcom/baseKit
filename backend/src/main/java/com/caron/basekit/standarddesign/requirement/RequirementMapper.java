@@ -15,6 +15,8 @@ interface RequirementMapper {
     List<String> menuKeys(@Param("REQUIREMENT_ID") String id);
     int insertMenu(@Param("REQUIREMENT_ID") String id, @Param("MENU_KEY") String menuKey);
     int deleteMenus(@Param("REQUIREMENT_ID") String id);
+    List<String> projectMenuIds(@Param("REQUIREMENT_ID") String id);
+    int deleteProjectMenuRelations(@Param("REQUIREMENT_ID") String id);
     List<AttachmentData> attachments(@Param("REQUIREMENT_ID") String id);
     AttachmentData attachment(@Param("ATTACHMENT_ID") String id);
     int insertAttachment(AttachmentData row);
