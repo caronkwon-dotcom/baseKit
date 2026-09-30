@@ -11,7 +11,7 @@ public record RequirementSaveRequest(
         @Size(max = 10000) String DESCRIPTION,
         @Size(max = 10000) String PROCESS_DESCRIPTION,
         @NotBlank @Size(max = 30) String STATUS,
-        List<@NotBlank String> MENU_KEYS,
+        List<@NotBlank String> MENU_KEYS, List<@NotBlank String> PROJECT_MENU_IDS,
         @Size(max = 2000) String LEGACY_WBS_IDS, @Size(max = 2000) String LEGACY_SCREEN_IDS,
         @Size(max = 2000) String LEGACY_TABLE_IDS,
         @Size(max = 100) String LEGACY_SOURCE_ID) { }

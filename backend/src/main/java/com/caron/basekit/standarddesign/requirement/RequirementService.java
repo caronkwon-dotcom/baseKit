@@ -1,5 +1,6 @@
 package com.caron.basekit.standarddesign.requirement;
 
+import com.caron.basekit.standarddesign.projectmenu.ProjectMenuService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,10 +12,11 @@ import java.util.*;
 @Service
 public class RequirementService {
     private final RequirementMapper mapper;
+    private final ProjectMenuService projectMenuService;
     private final AttachmentUploadPolicy uploadPolicy;
     private final Path storageRoot;
-    RequirementService(RequirementMapper mapper, AttachmentUploadPolicy uploadPolicy, @Value("${standard-design.requirements.storage-path:./data/requirement-attachments}") String storagePath) {
-        this.mapper = mapper;
+    RequirementService(RequirementMapper mapper, ProjectMenuService projectMenuService, AttachmentUploadPolicy uploadPolicy, @Value("${standard-design.requirements.storage-path:./data/requirement-attachments}") String storagePath) {
+        this.mapper = mapper; this.projectMenuService = projectMenuService;
         this.uploadPolicy = uploadPolicy;
         this.storageRoot = Path.of(storagePath).toAbsolutePath().normalize();
     }
@@ -33,11 +35,12 @@ public class RequirementService {
     private RequirementData expand(RequirementRow row) {
         return new RequirementData(row.REQUIREMENT_ID(),row.PROJECT_ID(),row.REQUIREMENT_NAME(),row.REQUIREMENT_TYPE_CODE(),
                 row.DESCRIPTION(),row.PROCESS_DESCRIPTION(),row.STATUS(),row.LEGACY_WBS_IDS(),row.LEGACY_SCREEN_IDS(),
-                row.LEGACY_TABLE_IDS(),row.LEGACY_SOURCE_ID(),row.REG_DT(),mapper.menuKeys(row.REQUIREMENT_ID()),mapper.attachments(row.REQUIREMENT_ID()));
+                row.LEGACY_TABLE_IDS(),row.LEGACY_SOURCE_ID(),row.REG_DT(),row.MOD_DT(),mapper.menuKeys(row.REQUIREMENT_ID()),mapper.projectMenuIds(row.REQUIREMENT_ID()),mapper.attachments(row.REQUIREMENT_ID()));
     }
     @Transactional
     public RequirementData create(RequirementSaveRequest request) {
         validate(request);
+        projectMenuService.validateForProject(request.PROJECT_ID(), request.PROJECT_MENU_IDS());
         if (request.LEGACY_SOURCE_ID() != null && !request.LEGACY_SOURCE_ID().isBlank()) {
             RequirementRow existing = mapper.findLegacy(request.PROJECT_ID(), request.LEGACY_SOURCE_ID());
             if (existing != null) return expand(existing);
@@ -45,21 +48,24 @@ public class RequirementService {
         String id = "REQ-" + UUID.randomUUID().toString().substring(0, 12).toUpperCase(Locale.ROOT);
         RequirementRow row = new RequirementRow(id,request.PROJECT_ID(),request.REQUIREMENT_NAME().trim(),request.REQUIREMENT_TYPE_CODE(),
                 nonnull(request.DESCRIPTION()),nonnull(request.PROCESS_DESCRIPTION()),request.STATUS(),request.LEGACY_WBS_IDS(),
-                request.LEGACY_SCREEN_IDS(),request.LEGACY_TABLE_IDS(),request.LEGACY_SOURCE_ID(),null);
+                request.LEGACY_SCREEN_IDS(),request.LEGACY_TABLE_IDS(),request.LEGACY_SOURCE_ID(),null,null);
         mapper.insert(row);
         replaceMenus(id, request.MENU_KEYS());
+        if (request.PROJECT_MENU_IDS() != null) projectMenuService.replaceRequirementRelations(id, request.PROJECT_MENU_IDS());
         return one(id);
     }
     @Transactional
     public RequirementData update(String id, RequirementSaveRequest request) {
         validate(request);
+        projectMenuService.validateForProject(request.PROJECT_ID(), request.PROJECT_MENU_IDS());
         RequirementData current = one(id);
         if (!current.PROJECT_ID().equals(request.PROJECT_ID())) throw new IllegalArgumentException("프로젝트 ID는 변경할 수 없습니다.");
         RequirementRow row = new RequirementRow(id,current.PROJECT_ID(),request.REQUIREMENT_NAME().trim(),request.REQUIREMENT_TYPE_CODE(),
                 nonnull(request.DESCRIPTION()),nonnull(request.PROCESS_DESCRIPTION()),request.STATUS(),current.LEGACY_WBS_IDS(),
-                current.LEGACY_SCREEN_IDS(),current.LEGACY_TABLE_IDS(),current.LEGACY_SOURCE_ID(),current.REG_DT());
+                current.LEGACY_SCREEN_IDS(),current.LEGACY_TABLE_IDS(),current.LEGACY_SOURCE_ID(),current.REG_DT(),current.MOD_DT());
         mapper.update(row);
         replaceMenus(id, request.MENU_KEYS());
+        if (request.PROJECT_MENU_IDS() != null) projectMenuService.replaceRequirementRelations(id, request.PROJECT_MENU_IDS());
         return one(id);
     }
     private void validate(RequirementSaveRequest request) {
@@ -76,6 +82,7 @@ public class RequirementService {
         RequirementData current = one(id);
         for (AttachmentData attachment : current.ATTACHMENTS()) deleteAttachment(id,attachment.ATTACHMENT_ID());
         mapper.deleteMenus(id);
+        mapper.deleteProjectMenuRelations(id);
         mapper.delete(id);
     }
     @Transactional

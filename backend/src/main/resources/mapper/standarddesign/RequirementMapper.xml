@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.caron.basekit.standarddesign.requirement.RequirementMapper">
-  <sql id="requirementColumns">REQUIREMENT_ID,PROJECT_ID,REQUIREMENT_NAME,REQUIREMENT_TYPE_CODE,DESCRIPTION,PROCESS_DESCRIPTION,STATUS,LEGACY_WBS_IDS,LEGACY_SCREEN_IDS,LEGACY_TABLE_IDS,LEGACY_SOURCE_ID,REG_DT</sql>
+  <sql id="requirementColumns">REQUIREMENT_ID,PROJECT_ID,REQUIREMENT_NAME,REQUIREMENT_TYPE_CODE,DESCRIPTION,PROCESS_DESCRIPTION,STATUS,LEGACY_WBS_IDS,LEGACY_SCREEN_IDS,LEGACY_TABLE_IDS,LEGACY_SOURCE_ID,REG_DT,MOD_DT</sql>
   <sql id="attachmentColumns">ATTACHMENT_ID,REQUIREMENT_ID,ORIGINAL_FILE_NAME,STORAGE_KEY,FILE_TYPE,MIME_TYPE,FILE_SIZE,UPLOAD_DT,ANALYSIS_STATUS</sql>
   <select id="findAll" resultType="com.caron.basekit.standarddesign.requirement.RequirementRow">SELECT <include refid="requirementColumns"/> FROM BSDRREQ WHERE PROJECT_ID = #{PROJECT_ID} ORDER BY REG_DT DESC, REQUIREMENT_ID DESC</select>
   <select id="findOne" resultType="com.caron.basekit.standarddesign.requirement.RequirementRow">SELECT <include refid="requirementColumns"/> FROM BSDRREQ WHERE REQUIREMENT_ID = #{REQUIREMENT_ID}</select>
@@ -12,6 +12,8 @@
   <select id="menuKeys" resultType="string">SELECT MENU_KEY FROM BSDRRMNU WHERE REQUIREMENT_ID=#{REQUIREMENT_ID} ORDER BY MENU_KEY</select>
   <insert id="insertMenu">INSERT INTO BSDRRMNU(REQUIREMENT_ID,MENU_KEY) VALUES(#{REQUIREMENT_ID},#{MENU_KEY})</insert>
   <delete id="deleteMenus">DELETE FROM BSDRRMNU WHERE REQUIREMENT_ID=#{REQUIREMENT_ID}</delete>
+  <select id="projectMenuIds" resultType="string">SELECT PROJECT_MENU_ID FROM BSDRRPML WHERE REQUIREMENT_ID=#{REQUIREMENT_ID} ORDER BY PROJECT_MENU_ID</select>
+  <delete id="deleteProjectMenuRelations">DELETE FROM BSDRRPML WHERE REQUIREMENT_ID=#{REQUIREMENT_ID}</delete>
   <select id="attachments" resultType="com.caron.basekit.standarddesign.requirement.AttachmentData">SELECT <include refid="attachmentColumns"/> FROM BSDRATCH WHERE REQUIREMENT_ID=#{REQUIREMENT_ID} ORDER BY UPLOAD_DT,ATTACHMENT_ID</select>
   <select id="attachment" resultType="com.caron.basekit.standarddesign.requirement.AttachmentData">SELECT <include refid="attachmentColumns"/> FROM BSDRATCH WHERE ATTACHMENT_ID=#{ATTACHMENT_ID}</select>
   <insert id="insertAttachment">INSERT INTO BSDRATCH(ATTACHMENT_ID,REQUIREMENT_ID,ORIGINAL_FILE_NAME,STORAGE_KEY,FILE_TYPE,MIME_TYPE,FILE_SIZE,ANALYSIS_STATUS) VALUES(#{ATTACHMENT_ID},#{REQUIREMENT_ID},#{ORIGINAL_FILE_NAME},#{STORAGE_KEY},#{FILE_TYPE},#{MIME_TYPE},#{FILE_SIZE},#{ANALYSIS_STATUS})</insert>

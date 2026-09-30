@@ -13,6 +13,7 @@ export type ProjectWorkspaceMode = 'LIST' | 'DETAIL' | 'DETAIL_EXPANDED';
 
 interface ProjectListDetailWorkspaceProps {
   subject?: string;
+  initialListWidthPercent?: number;
   mode: ProjectWorkspaceMode;
   onModeChange: (mode: ProjectWorkspaceMode) => void;
   list: ReactNode;
@@ -21,6 +22,7 @@ interface ProjectListDetailWorkspaceProps {
 
 export default function ProjectListDetailWorkspace({
   subject = '프로젝트',
+  initialListWidthPercent = DEFAULT_LIST_WIDTH_PERCENT,
   mode,
   onModeChange,
   list,
@@ -28,7 +30,7 @@ export default function ProjectListDetailWorkspace({
 }: ProjectListDetailWorkspaceProps) {
   const workspaceRef = useRef<HTMLElement>(null);
   const resizeCleanupRef = useRef<(() => void) | null>(null);
-  const [listWidthPercent, setListWidthPercent] = useState(DEFAULT_LIST_WIDTH_PERCENT);
+  const [listWidthPercent, setListWidthPercent] = useState(initialListWidthPercent);
 
   const updateListWidth = (nextWidthPercent: number) => {
     setListWidthPercent((currentWidthPercent) => getBoundedListWidth(nextWidthPercent, workspaceRef.current?.getBoundingClientRect().width ?? 0) || currentWidthPercent);
@@ -97,7 +99,7 @@ export default function ProjectListDetailWorkspace({
     }
     if (event.key === 'Home') {
       event.preventDefault();
-      updateListWidth(DEFAULT_LIST_WIDTH_PERCENT);
+      updateListWidth(initialListWidthPercent);
     }
   };
 
