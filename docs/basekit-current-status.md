@@ -352,3 +352,6 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 `frontend/src/components/common/excel`에 업무 독립적인 Excel Template 생성, `.xlsx/.xls` 첫 Sheet 파싱, Header/필수값/빈 Row 검증, 업무별 Row Validation·Mapping callback, Preview Grid, 정상/오류 건수 표시를 구현했다. UI는 기존 `FormModal`과 `DataTable`을 재사용하며 Import 전에는 저장 callback을 호출하지 않는다. Header 오류 또는 Row 오류가 있으면 Import를 막고, 오류가 없는 유효 Row만 `mapRow → onImport`로 전달한다. 업무 화면에서는 `ExcelImport`에 `columns`, `validateRow`, `mapRow`, `onImport`만 연결한다.
 
 추가 dependency는 `xlsx`이며, Template은 정적 `/public` 파일이 아니라 Column Definition으로 동적 생성한다. Requirement 화면/API/DTO는 연결하지 않았다.
+## Program Discovery 기반 프로그램 관리 V1 (2026-09-30, codex-work 검수 대기)
+
+기존 `programDiscovery`, Module Manifest, Core Registry와 읽기 전용 `BSYPROG` 조회를 병합해 Source/DB 상태(`AVAILABLE`, `NEW`, `MISSING_SOURCE`)를 표시하는 프로그램 관리 2×2 화면을 구현했다. Program과 Action은 Source 기준으로 목록화하며 COMMON/CUSTOM Action을 동일한 `ACTION_KEY` 계약으로 표시한다. 이번 화면에서는 Program CRUD를 노출하지 않고, 공통 `MasterDetailMultiGrid`, `ProgramDataGrid`, `BaseKitDataGrid`, `MetadataForm`, `BaseKitMessage`를 재사용한다. DB에만 존재하는 Program은 삭제하지 않고 `MISSING_SOURCE`로 유지한다. Role 권한 UI와 Endpoint Enforcement는 범위에 포함하지 않았다.

@@ -5,10 +5,11 @@ interface MasterDetailMultiGridProps {
   detailTop: ReactNode;
   detailBottom: ReactNode;
   message?: ReactNode;
+  equalRows?: boolean;
 }
 
-export default function MasterDetailMultiGrid({ master, detailTop, detailBottom, message }: MasterDetailMultiGridProps) {
-  return <div className="multi-grid-workspace">
+export default function MasterDetailMultiGrid({ master, detailTop, detailBottom, message, equalRows = false }: MasterDetailMultiGridProps) {
+  return <div className={`multi-grid-workspace${equalRows ? ' equal-detail-rows' : ''}`}>
     <div className="master-detail-multi-grid">
       <div className="multi-grid-master">{master}</div>
       <div className="multi-grid-detail">
