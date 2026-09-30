@@ -64,7 +64,7 @@ const SEARCH_SAMPLE_TYPE_1_PAGE = {
     '검색조건 1단 + 데이터 목록으로 구성된 가장 기본적인 Search Page 샘플입니다.',
   searchRows: 1,
 } as const;
-```
+```Get-Item .git -Force | Format-List FullName,Attributes
 
 `programKey`는 메뉴, 권한, 로그, 라이선스와 연결될 기준 키이다.
 

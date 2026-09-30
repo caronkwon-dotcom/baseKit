@@ -304,6 +304,14 @@ Standard Design의 `Screen Design Schema v0.1`을 정의하되 상세 UI 구현 
 - 아이디어가 승인되면 관련 ADR, Architecture 문서와 WBS로 이동한다.
 - 주간 작업 종료 시 완료 내용, 남은 문제, 다음 주 목표를 갱신한다.
 
+## Grid 공통화 2차 작업 (2026-09-27, dev-pm 반영)
+
+`codex/grid-commonization-phase-2`는 `dev-pm` `24db386`에서 시작해 `0d4367f`에 통합했다. `BaseKitDataGrid`가 행 상태 저장소의 추가·선택 행 삭제를 권한 적용되는 Grid Toolbar Action으로 연결하는 `batchActions` 계약을 제공하고, 선택 행이 없을 때 삭제 Action을 비활성화한다. L1R2 Master Grid 샘플은 이 계약을 사용한다. Frontend build/lint와 `git diff --check`를 통과했다. Backend 테스트는 Backend 변경이 없고 이 환경에서 외부 DB 연결 가능성이 있어 실행하지 않았다. 실제 UI 검수는 수행하지 않았다. 작업 시작 당시 있던 검색 가이드 변경, 첨부 데이터, 별도 미추적 파일은 이 기능과 무관하여 별도로 보존한다.
+
+## Grid Row State CSS 공통화 보완 (2026-09-27)
+
+`BaseKitDataGrid`는 `GridRowState`를 `NORMAL / INSERTED / UPDATED / DELETED` 표준 행 class로 변환하고 사용자 class 및 `currentRowKey` class와 함께 적용한다. `CodeManagePage`의 중복 상태 class 매핑은 제거했으며 기존 `basekitGrid.css` 디자인은 변경하지 않았다. Frontend 테스트 38건, build, lint, `git diff --check`를 통과했다. L1R2 브라우저 확인에서 선택 상태가 INSERTED/DELETED 배경을 덮지 않았고 DELETED 취소선·아이콘, 현재행과 상태 class 공존, 신규 행 삭제 정책을 확인했다. CodeManagePage는 공통 경로 및 회귀 테스트로 확인했으며 실제 Backend 데이터가 필요한 화면 조작은 수행하지 않았다.
+
 ## Project Working Set 후속 검수 (2026-09-20)
 
 `feature/project-working-set-search`에서 `fe55992` 기반 후속 초안 `5bef92f`를 보존하고 Mini Search/Working Set 개선을 마무리했다. 이번 변경은 dev-pm 미통합이다. 중복 context 제거, 좌우 action 분리, 조회 스냅샷 유지, FormModal 재사용, 상세 저장 후 작업 집합 유지가 구현됐다. build/lint, Project 회귀 9개, grid assertion 18개, backend 22개 통과. 실제 UI 주요 흐름 확인; 삭제 확인창 이후 브라우저 제어 제한과 미검증 오류 주입 범위는 [인계 보고서](project-reference-handoff.md)에 기록했다.
@@ -339,3 +347,9 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 ## UI-03 Reference Source 정리 (2026-09-26, feature 검수 대기)
 
 `feature/ui03-reference-source-standardization`은 `origin/dev-pm` `bc7b7b6` 기준이다. 공통코드관리 AG Grid의 ColDef 생성 경로를 Production `BaseKitDataGrid → gridColumnAdapter.toGridColumns`로 단일화하고 `GridEditing<T>`와 동적 Metadata 컬럼 Key 계약을 공유한다. 저장 Payload Mapper와 JSX 명명을 정리했으며, 운영 화면에서 사용하지 않는 `MetadataAgGrid`는 PoC 영역으로 격리했다. Production Adapter 회귀 테스트와 기존 Grid 테스트를 통과했지만, UI-03 Catalog 최종 승격은 PM 승인 전이다. 동적 속성별 `maxLength`는 현재 정의 Type·DTO·DB Schema에 없으므로 임의 길이 규칙을 추가하지 않았다.
+
+## 공통 Excel Import V1 (2026-09-30, codex-work 검수 대기)
+
+`frontend/src/components/common/excel`에 업무 독립적인 Excel Template 생성, `.xlsx/.xls` 첫 Sheet 파싱, Header/필수값/빈 Row 검증, 업무별 Row Validation·Mapping callback, Preview Grid, 정상/오류 건수 표시를 구현했다. UI는 기존 `FormModal`과 `DataTable`을 재사용하며 Import 전에는 저장 callback을 호출하지 않는다. Header 오류 또는 Row 오류가 있으면 Import를 막고, 오류가 없는 유효 Row만 `mapRow → onImport`로 전달한다. 업무 화면에서는 `ExcelImport`에 `columns`, `validateRow`, `mapRow`, `onImport`만 연결한다.
+
+추가 dependency는 `xlsx`이며, Template은 정적 `/public` 파일이 아니라 Column Definition으로 동적 생성한다. Requirement 화면/API/DTO는 연결하지 않았다.

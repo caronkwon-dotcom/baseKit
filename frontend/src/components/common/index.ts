@@ -21,3 +21,5 @@ export { default as BaseTabs } from './BaseTabs';
 export type { BaseTabDefinition } from './BaseTabs';
 export type { BaseUploadFile, BaseUploadPolicy, BaseFileUploadProps, UploadStatus } from './BaseFileUpload';
 export type { BaseKitMessageType } from './BaseKitMessage';
+export { ExcelImport, ExcelImportDialog, downloadExcelTemplate, parseExcelFile } from './excel';
+export type { ExcelImportColumn, ExcelImportDialogProps, ExcelImportParseResult, ExcelImportPreviewRow, ExcelRowMapper, ExcelRowValidator, UnknownHeaderPolicy } from './excel';

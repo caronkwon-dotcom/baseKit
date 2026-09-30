@@ -28,7 +28,7 @@ export interface GridActionContext<T> {
 export type GridActionHandlers<T> = Partial<
   Record<ActionCode, (context: GridActionContext<T>) => void>
 >;
-export interface GridToolbarAction<T> { actionCode: ActionCode; label: string; tone?: ActionButtonTone; disabled?: boolean; onClick: (context: GridActionContext<T>) => void; }
+export interface GridToolbarAction<T> { actionCode: ActionCode; label: string; tone?: ActionButtonTone; disabled?: boolean | ((context: GridActionContext<T>) => boolean); onClick: (context: GridActionContext<T>) => void; }
 
 export interface ProgramDataGridProps<T> {
   renderTable?: (props: DataTableProps<T>) => ReactNode;
@@ -110,7 +110,11 @@ export default function ProgramDataGrid<T>({
           ))}
         </div>
         <div className="grid-actions" aria-label="목록 기능">
-          {visibleToolbarActions ? visibleToolbarActions.map((action) => <ActionButton key={action.actionCode} actionCode={action.actionCode} label={action.label} tone={action.tone} displayMode={resolvedButtonDisplay} disabled={action.disabled} onClick={() => action.onClick({ rows, selectedRows })} />) : visibleActions.map((actionCode) => {
+          {visibleToolbarActions ? visibleToolbarActions.map((action) => {
+            const context = { rows, selectedRows };
+            const disabled = typeof action.disabled === 'function' ? action.disabled(context) : action.disabled;
+            return <ActionButton key={action.actionCode} actionCode={action.actionCode} label={action.label} tone={action.tone} displayMode={resolvedButtonDisplay} disabled={disabled} onClick={() => action.onClick(context)} />;
+          }) : visibleActions.map((actionCode) => {
             const actionName = actionNames.get(actionCode) ?? actionCode;
             const iconOnly = actionCode === COMMON_ACTIONS.EXCEL_DOWNLOAD;
             return (
