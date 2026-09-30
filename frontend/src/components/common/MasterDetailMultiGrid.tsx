@@ -7,12 +7,13 @@ interface MasterDetailMultiGridProps {
   message?: ReactNode;
   equalRows?: boolean;
   masterWidth?: string;
+  stacked?: boolean;
 }
 
-export default function MasterDetailMultiGrid({ master, detailTop, detailBottom, message, equalRows = false, masterWidth }: MasterDetailMultiGridProps) {
+export default function MasterDetailMultiGrid({ master, detailTop, detailBottom, message, equalRows = false, masterWidth, stacked = false }: MasterDetailMultiGridProps) {
   const style = masterWidth ? { '--multi-grid-master-width': masterWidth } as CSSProperties : undefined;
-  return <div className={`multi-grid-workspace${equalRows ? ' equal-detail-rows' : ''}`} style={style}>
-    <div className="master-detail-multi-grid">
+  return <div className={`multi-grid-workspace${equalRows ? ' equal-detail-rows' : ''}${stacked ? ' stacked-grid-workspace' : ''}`} style={style}>
+    <div className={`master-detail-multi-grid${stacked ? ' stacked-grid-layout' : ''}`}>
       <div className="multi-grid-master">{master}</div>
       <div className="multi-grid-detail">
         <div className="multi-grid-detail-top">{detailTop}</div>

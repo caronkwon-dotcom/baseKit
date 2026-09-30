@@ -1,19 +1,21 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { COMMON_ACTIONS, type ActionCode } from '../constants/actionCodes';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { COMMON_ACTIONS } from '../constants/actionCodes';
 import BaseKitDataGrid from '../components/grid/BaseKitDataGrid';
-import { MetadataSwitch } from '../components/grid/gridCellComponents';
-import { BaseKitMessage, MasterDetailMultiGrid, PageHeader, ProgramDataGrid, SearchPanel, type DataTableColumn, type SearchFieldConfig } from '../components/common';
+import { BaseKitMessage, MasterDetailMultiGrid, PageHeader, SearchPanel, type BaseKitMessageType, type DataTableColumn, type SearchFieldConfig } from '../components/common';
 import { getProgramFieldDefinitions } from '../adapters/programFieldAdapter';
 import type { FieldDefinition } from '../components/metadata';
 import { metadataRepository } from '../repositories/metadataRepository';
-import { programApi } from '../services/programApi';
+import { programApi, type ProgramSave } from '../services/programApi';
 import type { ActionMeta, ProgramMeta } from '../types/adminShell';
 import type { Program } from '../types/program';
+import { findGridValidationIssue, gridValidationIssueMessage, userGridErrorMessage } from '../components/grid/gridFieldValidation';
+import { useGridRowState } from '../components/grid/gridRowState';
 
 type RegistryStatus = 'AVAILABLE' | 'NEW' | 'MISSING_SOURCE';
 type Condition = { KEYWORD: string; MODULE_CODE: string; PROGRAM_TYPE_CODE: string; USE_YN: string };
 type RegistryProgram = Program & { SOURCE_STATUS: RegistryStatus; ACTION_COUNT: number; MENU_COUNT: number; SOURCE_FOUND: 'Y' | 'N' };
-type RegistryAction = { ACTION_KEY: ActionCode; ACTION_NAME: string; ACTION_TYPE: 'COMMON' | 'CUSTOM'; DESCRIPTION: string; USE_YN: 'Y' | 'N'; SOURCE_STATUS: RegistryStatus; PROGRAM_KEY: string };
+type RegistryAction = { ACTION_KEY: string; ACTION_NAME: string; ACTION_TYPE: 'COMMON' | 'CUSTOM'; DESCRIPTION: string; USE_YN: 'Y' | 'N'; SOURCE_STATUS: RegistryStatus; PROGRAM_KEY: string };
+type ProgramMessage = { type: BaseKitMessageType; text: string };
 
 const initial: Condition = { KEYWORD: '', MODULE_CODE: '', PROGRAM_TYPE_CODE: '', USE_YN: '' };
 const commonActionCodes = new Set<string>(Object.values(COMMON_ACTIONS));
@@ -45,88 +47,129 @@ function getActions(programKey: string): RegistryAction[] {
   });
 }
 
-const programColumns: DataTableColumn<RegistryProgram>[] = [
-  { key: 'SOURCE_STATUS', header: '상태', width: 112, align: 'center', render: (row) => <span className="metadata-badge">{row.SOURCE_STATUS}</span> },
-  { key: 'PROGRAM_KEY', header: 'Program Key', minWidth: 145, flex: 1, render: (row) => row.PROGRAM_KEY },
-  { key: 'PROGRAM_NAME', header: '프로그램명', minWidth: 125, flex: 1, render: (row) => row.PROGRAM_NAME },
-  { key: 'ACTION_COUNT', header: 'Action 수', width: 70, align: 'right', render: (row) => row.ACTION_COUNT },
-  { key: 'SOURCE_FOUND', header: 'Source', width: 70, align: 'center', render: (row) => row.SOURCE_FOUND },
-  { key: 'USE_YN', header: '사용', width: 55, align: 'center', render: (row) => row.USE_YN },
-  { key: 'MOD_DT', header: '최종 동기화일', width: 130, render: (row) => row.MOD_DT ? new Date(row.MOD_DT).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' }) : '-' },
-];
+const textField = (key: string, label: string, required = false): FieldDefinition => ({ key, label, dataType: 'STRING', controlType: 'TEXT', displayType: 'TEXT', required });
+const selectField = (key: string, label: string, options: Array<{ value: string; label: string }>): FieldDefinition => ({ key, label, dataType: 'STRING', controlType: 'SELECT', displayType: 'TEXT', required: true, options });
+const switchField = (key: string, label: string): FieldDefinition => ({ key, label, dataType: 'STRING', controlType: 'SWITCH', displayType: 'BOOLEAN', required: true, options: [{ value: 'Y', label: '사용' }, { value: 'N', label: '미사용' }] });
+const applyGridValue = <T,>(row: T, key: string, value: string): T => ({ ...row, [key]: value });
+const statusColumn = <T extends { SOURCE_STATUS: RegistryStatus }>(key: 'SOURCE_STATUS', header: string): DataTableColumn<T> => ({ key, header, width: 112, align: 'center', render: (row) => <span className="metadata-badge">{row.SOURCE_STATUS}</span> });
+
 const actionColumns: DataTableColumn<RegistryAction>[] = [
-  { key: 'ACTION_KEY', header: 'Action Key', width: 125, render: (row) => row.ACTION_KEY },
-  { key: 'ACTION_NAME', header: 'Action명', minWidth: 90, flex: 1, render: (row) => row.ACTION_NAME },
-  { key: 'ACTION_TYPE', header: 'Type', width: 78, align: 'center', render: (row) => <span className="metadata-badge">{row.ACTION_TYPE}</span> },
-  { key: 'USE_YN', header: '사용', width: 55, align: 'center', render: (row) => row.USE_YN },
-  { key: 'SOURCE_STATUS', header: 'Source', width: 100, align: 'center', render: (row) => row.SOURCE_STATUS },
+  { key: 'ACTION_KEY', header: 'Action Key', width: 145, render: row => row.ACTION_KEY },
+  { key: 'ACTION_NAME', header: 'Action명', minWidth: 150, flex: 1, fieldDefinition: textField('ACTION_NAME', 'Action명', true), render: row => row.ACTION_NAME },
+  { key: 'ACTION_TYPE', header: 'Type', width: 90, align: 'center', render: row => <span className="metadata-badge">{row.ACTION_TYPE}</span> },
+  { key: 'DESCRIPTION', header: '설명', minWidth: 220, flex: 2, fieldDefinition: textField('DESCRIPTION', '설명'), render: row => row.DESCRIPTION },
+  statusColumn<RegistryAction>('SOURCE_STATUS', 'Source 상태'),
+  { key: 'USE_YN', header: '사용', width: 72, align: 'center', fieldDefinition: switchField('USE_YN', '사용여부'), render: row => row.USE_YN },
 ];
-
-type DetailItem = { key: string; label: string; owner: 'SOURCE' | 'REGISTRY'; editor: 'TEXT' | 'SELECT' | 'SWITCH' | 'BADGE'; options?: Array<{ value: string; label: string }> };
-
-function DetailPanel({ title, fields, values, onChange }: { title: string; fields: DetailItem[]; values: Record<string, string>; onChange: (key: string, value: string) => void }) {
-  return <section className="detail-section">
-    <h2>{title}</h2>
-    <div className="standard-form-grid detail-grid">
-      {fields.map((field) => <label key={field.key}>
-        <span>{field.label}</span>
-        {field.editor === 'SWITCH' ? <MetadataSwitch value={values[field.key] ?? 'Y'} field={{ key: field.key, label: field.label, dataType: 'STRING', controlType: 'SWITCH', displayType: 'BOOLEAN', required: false, options: field.options }} editable={field.owner === 'REGISTRY'} onChange={(value) => onChange(field.key, value)} />
-          : field.owner === 'SOURCE' ? <span className="readonly-field">{values[field.key] || '-'}</span>
-            : field.editor === 'SELECT' ? <select value={values[field.key] ?? ''} onChange={(event) => onChange(field.key, event.target.value)}>{field.options?.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select>
-              : field.editor === 'BADGE' ? <span className="metadata-badge">{values[field.key] || '-'}</span>
-                : <input value={values[field.key] ?? ''} onChange={(event) => onChange(field.key, event.target.value)} />}
-      </label>)}
-    </div>
-  </section>;
-}
 
 export default function ProgramManagePage() {
   const [condition, setCondition] = useState(initial);
-  const [rows, setRows] = useState<RegistryProgram[]>([]);
   const [fields, setFields] = useState<FieldDefinition[]>([]);
   const [selectedKey, setSelectedKey] = useState('');
-  const [selectedActionKey, setSelectedActionKey] = useState('');
-  const [actionUseByKey, setActionUseByKey] = useState<Record<string, string>>({});
-  const [message, setMessage] = useState<{ type: 'info' | 'warn' | 'error' | 'success'; text: string }>({ type: 'info', text: 'Source Registry를 조회했습니다.' });
+  const [programSelected, setProgramSelected] = useState(new Set<string>());
+  const [actionSelected, setActionSelected] = useState(new Set<string>());
+  const [message, setMessage] = useState<ProgramMessage>({ type: 'info', text: 'Source Registry를 조회했습니다.' });
+  const [saving, setSaving] = useState(false);
+  const initialLoad = useRef(false);
+  const programKey = useCallback((row: RegistryProgram) => row.PROGRAM_KEY, []);
+  const actionKey = useCallback((row: RegistryAction) => row.ACTION_KEY, []);
+  const programs = useGridRowState<RegistryProgram>(programKey);
+  const actions = useGridRowState<RegistryAction>(actionKey);
+  const replacePrograms = programs.replace;
+  const replaceActions = actions.replace;
+  const notify = (text: string, type: BaseKitMessageType = 'warn') => setMessage({ type, text });
+
   const load = useCallback(async (next: Condition) => {
     try {
       const dbRows = await programApi.find(next);
       const merged = mergeRegistryPrograms(dbRows).filter((row) => !next.KEYWORD || `${row.PROGRAM_KEY} ${row.PROGRAM_NAME}`.toLowerCase().includes(next.KEYWORD.toLowerCase()));
-      setRows(merged); setSelectedKey((current) => merged.some((row) => row.PROGRAM_KEY === current) ? current : merged[0]?.PROGRAM_KEY ?? ''); setMessage({ type: 'success', text: `${merged.length}건의 Program Registry를 조회했습니다.` });
+      replacePrograms(merged);
+      setSelectedKey(current => merged.some(row => row.PROGRAM_KEY === current) ? current : merged[0]?.PROGRAM_KEY ?? '');
+      setProgramSelected(new Set());
+      notify(`${merged.length}건의 Program Registry를 조회했습니다.`, 'success');
     } catch (error) {
-      const merged = mergeRegistryPrograms([]); setRows(merged); setSelectedKey(merged[0]?.PROGRAM_KEY ?? ''); setMessage({ type: 'warn', text: `DB Registry를 읽지 못해 Source 기준으로 표시합니다. ${error instanceof Error ? error.message : ''}` });
+      const merged = mergeRegistryPrograms([]);
+      replacePrograms(merged);
+      setSelectedKey(merged[0]?.PROGRAM_KEY ?? '');
+      notify(`DB Registry를 읽지 못해 Source 기준으로 표시합니다. ${error instanceof Error ? error.message : ''}`);
     }
-  }, []);
+  }, [replacePrograms]);
+
   useEffect(() => {
-    const timer = window.setTimeout(() => { void getProgramFieldDefinitions().then(setFields).catch(() => setFields([])); void load(initial); }, 0);
+    const timer = window.setTimeout(() => { if (!initialLoad.current) { initialLoad.current = true; void getProgramFieldDefinitions().then(setFields).catch(() => setFields([])); void load(initial); } }, 0);
     return () => window.clearTimeout(timer);
   }, [load]);
-  const selectedProgram = rows.find((row) => row.PROGRAM_KEY === selectedKey);
-  const actions = useMemo(() => getActions(selectedKey), [selectedKey]);
-  const selectedAction = actions.find((row) => row.ACTION_KEY === selectedActionKey) ?? actions[0];
-  const updateProgram = (key: string, value: string) => setRows((current) => current.map((row) => row.PROGRAM_KEY === selectedKey ? { ...row, [key]: value } : row));
-  const updateAction = (key: string, value: string) => { if (key === 'USE_YN' && selectedAction) setActionUseByKey((current) => ({ ...current, [`${selectedKey}:${selectedAction.ACTION_KEY}`]: value })); };
+
+  const selectedProgram = programs.rows.find(row => row.PROGRAM_KEY === selectedKey);
+  useEffect(() => {
+    replaceActions(getActions(selectedKey));
+  }, [replaceActions, selectedKey]);
+
+  const programFields = useMemo(() => {
+    const get = (key: string) => fields.find(field => field.key === key);
+    return {
+      PROGRAM_NAME: get('PROGRAM_NAME') ?? textField('PROGRAM_NAME', '프로그램명', true),
+      DESCRIPTION: get('DESCRIPTION') ?? textField('DESCRIPTION', '설명'),
+      MODULE_CODE: get('MODULE_CODE') ?? selectField('MODULE_CODE', 'Module', []),
+      PROGRAM_TYPE_CODE: get('PROGRAM_TYPE_CODE') ?? selectField('PROGRAM_TYPE_CODE', '유형', []),
+      USE_YN: switchField('USE_YN', '사용여부'),
+    };
+  }, [fields]);
   const searchFields = useMemo<SearchFieldConfig<Condition>[]>(() => [
     { key: 'KEYWORD', label: '프로그램', placeholder: 'KEY / 프로그램명' },
-    { key: 'MODULE_CODE', label: 'Module', controlType: 'select', options: [{ value: '', label: '전체' }, ...(fields.find((field) => field.key === 'MODULE_CODE')?.options ?? [])] },
-    { key: 'PROGRAM_TYPE_CODE', label: '유형', controlType: 'select', options: [{ value: '', label: '전체' }, ...(fields.find((field) => field.key === 'PROGRAM_TYPE_CODE')?.options ?? [])] },
+    { key: 'MODULE_CODE', label: 'Module', controlType: 'select', options: [{ value: '', label: '전체' }, ...(programFields.MODULE_CODE.options ?? [])] },
+    { key: 'PROGRAM_TYPE_CODE', label: '유형', controlType: 'select', options: [{ value: '', label: '전체' }, ...(programFields.PROGRAM_TYPE_CODE.options ?? [])] },
     { key: 'USE_YN', label: '사용 여부', controlType: 'select', options: [{ value: '', label: '전체' }, { value: 'Y', label: '사용' }, { value: 'N', label: '미사용' }] },
-  ], [fields]);
-  const programDetailFields: DetailItem[] = [
-    { key: 'PROGRAM_KEY', label: 'Program Key', owner: 'SOURCE', editor: 'TEXT' }, { key: 'PROGRAM_NAME', label: '프로그램명', owner: 'REGISTRY', editor: 'TEXT' }, { key: 'DESCRIPTION', label: '설명', owner: 'REGISTRY', editor: 'TEXT' }, { key: 'MODULE_CODE', label: 'Module', owner: 'REGISTRY', editor: 'SELECT', options: [{ value: 'SYSTEM', label: '시스템관리' }, { value: 'DEV_GUIDE', label: '개발자가이드' }, { value: 'STANDARD_DESIGN', label: 'Standard Design' }] }, { key: 'PROGRAM_TYPE_CODE', label: '유형', owner: 'REGISTRY', editor: 'SELECT', options: [{ value: 'HOME', label: '홈' }, { value: 'GRID', label: '목록' }, { value: 'GRID_DETAIL', label: '목록/상세' }, { value: 'POPUP', label: '팝업' }] }, { key: 'SOURCE_STATUS', label: 'Source 상태', owner: 'SOURCE', editor: 'BADGE' }, { key: 'USE_YN', label: '사용여부', owner: 'REGISTRY', editor: 'SWITCH', options: [{ value: 'Y', label: '사용' }, { value: 'N', label: '미사용' }] }, { key: 'ACTION_COUNT', label: 'Action 수', owner: 'SOURCE', editor: 'TEXT' },
+  ], [programFields]);
+
+  const programColumns = useMemo<DataTableColumn<RegistryProgram>[]>(() => [
+    statusColumn<RegistryProgram>('SOURCE_STATUS', '상태'),
+    { key: 'PROGRAM_KEY', header: 'Program Key', minWidth: 150, flex: 1, render: row => row.PROGRAM_KEY },
+    { key: 'PROGRAM_NAME', header: '프로그램명', minWidth: 150, flex: 1, fieldDefinition: programFields.PROGRAM_NAME, render: row => row.PROGRAM_NAME },
+    { key: 'DESCRIPTION', header: '설명', minWidth: 220, flex: 2, fieldDefinition: programFields.DESCRIPTION, render: row => row.DESCRIPTION ?? '' },
+    { key: 'MODULE_CODE', header: 'Module', width: 130, fieldDefinition: programFields.MODULE_CODE, render: row => row.MODULE_CODE },
+    { key: 'PROGRAM_TYPE_CODE', header: '유형', width: 110, fieldDefinition: programFields.PROGRAM_TYPE_CODE, render: row => row.PROGRAM_TYPE_CODE },
+    { key: 'ACTION_COUNT', header: 'Action 수', width: 82, align: 'right', render: row => row.ACTION_COUNT },
+    { key: 'SOURCE_FOUND', header: 'Source', width: 72, align: 'center', render: row => row.SOURCE_FOUND },
+    { key: 'USE_YN', header: '사용', width: 72, align: 'center', fieldDefinition: programFields.USE_YN, render: row => row.USE_YN },
+    { key: 'MOD_DT', header: '최종 동기화', width: 130, render: row => row.MOD_DT ? new Date(row.MOD_DT).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' }) : '-' },
+  ], [programFields]);
+
+  const savePrograms = async () => {
+    if (!programs.dirty) return notify('저장할 Program 변경사항이 없습니다.', 'info');
+    const invalid = findGridValidationIssue([...programs.changeSet.INSERTED, ...programs.changeSet.UPDATED], programColumns);
+    if (invalid) return notify(gridValidationIssueMessage(invalid));
+    setSaving(true);
+    try {
+      const saved = await Promise.all(programs.changeSet.UPDATED.map(row => programApi.update(row as ProgramSave)));
+      const savedById = new Map(saved.map(row => [row.PROGRAM_ID, row]));
+      replacePrograms(programs.rows.map(row => savedById.has(row.PROGRAM_ID) ? { ...row, ...savedById.get(row.PROGRAM_ID) } : row));
+      notify(`${saved.length}건의 Program Registry를 저장했습니다.`, 'success');
+    } catch (error) { notify(userGridErrorMessage(error, Object.values(programFields), 'Program을 저장하지 못했습니다.'), 'error'); }
+    finally { setSaving(false); }
+  };
+
+  const saveActions = () => {
+    if (!actions.dirty) return notify('저장할 Action 변경사항이 없습니다.', 'info');
+    actions.replace(actions.rows.map(row => ({ ...row })));
+    notify('Action 변경사항을 현재 화면 원본으로 반영했습니다. 서버 Registry API는 아직 연결되지 않았습니다.', 'warn');
+  };
+  const programToolbar = [
+    { actionCode: COMMON_ACTIONS.REVERT_CHANGES, label: '변경취소', disabled: !programs.dirty, onClick: () => { programs.revert(programs.rows.filter(row => programs.getState(row) !== 'NORMAL').map(row => row.__GRID_ROW_ID)); setProgramSelected(new Set()); } },
+    { actionCode: COMMON_ACTIONS.SAVE, label: '저장', tone: 'primary' as const, disabled: !programs.dirty || saving, onClick: () => void savePrograms() },
   ];
-  const actionDetailFields: DetailItem[] = [
-    { key: 'ACTION_KEY', label: 'Action Key', owner: 'SOURCE', editor: 'TEXT' }, { key: 'ACTION_NAME', label: 'Action명', owner: 'SOURCE', editor: 'TEXT' }, { key: 'ACTION_TYPE', label: 'Type', owner: 'SOURCE', editor: 'BADGE' }, { key: 'DESCRIPTION', label: '설명', owner: 'SOURCE', editor: 'TEXT' }, { key: 'SOURCE_STATUS', label: 'Source 상태', owner: 'SOURCE', editor: 'BADGE' }, { key: 'USE_YN', label: '사용여부', owner: 'REGISTRY', editor: 'SWITCH', options: [{ value: 'Y', label: '사용' }, { value: 'N', label: '미사용' }] },
+  const actionToolbar = [
+    { actionCode: COMMON_ACTIONS.REVERT_CHANGES, label: '변경취소', disabled: !actions.dirty, onClick: () => { actions.revert(actions.rows.filter(row => actions.getState(row) !== 'NORMAL').map(row => row.__GRID_ROW_ID)); setActionSelected(new Set()); } },
+    { actionCode: COMMON_ACTIONS.SAVE, label: '저장', tone: 'primary' as const, disabled: !actions.dirty, onClick: saveActions },
   ];
-  const asValues = (value: object | undefined) => Object.fromEntries(Object.entries(value ?? {}).map(([key, item]) => [key, String(item ?? '')]));
-  const selectedActionValues = selectedAction ? { ...asValues(selectedAction), USE_YN: actionUseByKey[`${selectedKey}:${selectedAction.ACTION_KEY}`] ?? selectedAction.USE_YN } : {};
+
   return <section className="page multi-grid-page program-registry-page">
-    <PageHeader breadcrumbs={['시스템관리', '프로그램관리']} description="Source Discovery와 운영 Registry의 상태 및 Action Metadata를 조회합니다." />
+    <PageHeader breadcrumbs={['시스템관리', '프로그램관리']} description="Source Discovery와 운영 Registry를 Inline Batch Grid로 관리합니다." />
     <SearchPanel rows={1} fields={searchFields} value={condition} initialValue={initial} onValueChange={setCondition} onSearch={load} onReset={load} />
-    <MasterDetailMultiGrid equalRows masterWidth="60%"
-      master={<div className="multi-grid-detail equal-detail-rows"><div className="multi-grid-detail-top"><ProgramDataGrid programKey="PROGRAM_MGMT" roleCode="ADMIN" title="프로그램 목록" columns={programColumns} rows={rows} getRowKey={(row) => row.PROGRAM_KEY} selectable={false} enabledActions={[]} onRowClick={(row) => setSelectedKey(row.PROGRAM_KEY)} getRowClassName={(row) => row.PROGRAM_KEY === selectedKey ? 'active-master-row' : ''} /></div><div className="multi-grid-detail-bottom"><BaseKitDataGrid programKey="PROGRAM_MGMT" roleCode="ADMIN" title={`${selectedProgram?.PROGRAM_KEY ?? '프로그램'} Action 목록`} columns={actionColumns} rows={actions} getRowKey={(row) => row.ACTION_KEY} selectable={false} enabledActions={[]} onRowClick={(row) => setSelectedActionKey(row.ACTION_KEY)} getRowClassName={(row) => row.ACTION_KEY === selectedAction?.ACTION_KEY ? 'active-master-row' : ''} /></div></div>}
-      detailTop={<DetailPanel title="프로그램 상세정보" fields={programDetailFields} values={asValues(selectedProgram)} onChange={updateProgram} />}
-      detailBottom={<DetailPanel title="Action 상세정보" fields={actionDetailFields} values={selectedActionValues} onChange={updateAction} />}
+    <MasterDetailMultiGrid stacked
+      master={<BaseKitDataGrid programKey="PROGRAM_MGMT" roleCode="ADMIN" title="프로그램 목록" columns={programColumns} rows={programs.rows} getRowKey={row => row.__GRID_ROW_ID} getRowState={programs.getState} currentRowKey={selectedProgram?.__GRID_ROW_ID} selectedRowKeys={programSelected} onSelectedRowKeysChange={setProgramSelected} onRowClick={row => setSelectedKey(row.PROGRAM_KEY)} editing={{ keys: ['PROGRAM_NAME', 'DESCRIPTION', 'MODULE_CODE', 'PROGRAM_TYPE_CODE', 'USE_YN'], onChange: (row, key, value) => programs.update(row.__GRID_ROW_ID, current => applyGridValue(current, key, value)) }} toolbarActions={programToolbar} />}
+      detailTop={<BaseKitDataGrid programKey="PROGRAM_MGMT" roleCode="ADMIN" title={`${selectedKey || '선택 Program'} Action 목록`} columns={actionColumns} rows={actions.rows} getRowKey={row => row.__GRID_ROW_ID} getRowState={actions.getState} selectedRowKeys={actionSelected} onSelectedRowKeysChange={setActionSelected} editing={{ keys: ['ACTION_NAME', 'DESCRIPTION', 'USE_YN'], onChange: (row, key, value) => actions.update(row.__GRID_ROW_ID, current => applyGridValue(current, key, value)) }} toolbarActions={actionToolbar} />}
+      detailBottom={null}
       message={<BaseKitMessage type={message.type} message={message.text} />}
     />
   </section>;
