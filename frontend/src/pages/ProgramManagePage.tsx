@@ -50,13 +50,14 @@ function getActions(programKey: string): RegistryAction[] {
 const textField = (key: string, label: string, required = false): FieldDefinition => ({ key, label, dataType: 'STRING', controlType: 'TEXT', displayType: 'TEXT', required });
 const selectField = (key: string, label: string, options: Array<{ value: string; label: string }>): FieldDefinition => ({ key, label, dataType: 'STRING', controlType: 'SELECT', displayType: 'TEXT', required: true, options });
 const switchField = (key: string, label: string): FieldDefinition => ({ key, label, dataType: 'STRING', controlType: 'SWITCH', displayType: 'BOOLEAN', required: true, options: [{ value: 'Y', label: '사용' }, { value: 'N', label: '미사용' }] });
+const badgeField = (key: string, label: string): FieldDefinition => ({ key, label, dataType: 'STRING', controlType: 'TEXT', displayType: 'BADGE', required: false });
 const applyGridValue = <T,>(row: T, key: string, value: string): T => ({ ...row, [key]: value });
-const statusColumn = <T extends { SOURCE_STATUS: RegistryStatus }>(key: 'SOURCE_STATUS', header: string): DataTableColumn<T> => ({ key, header, width: 112, align: 'center', render: (row) => <span className="metadata-badge">{row.SOURCE_STATUS}</span> });
+const statusColumn = <T extends { SOURCE_STATUS: RegistryStatus }>(key: 'SOURCE_STATUS', header: string): DataTableColumn<T> => ({ key, header, width: 112, align: 'center', fieldDefinition: badgeField(key, header), render: (row) => row.SOURCE_STATUS });
 
 const actionColumns: DataTableColumn<RegistryAction>[] = [
   { key: 'ACTION_KEY', header: 'Action Key', width: 145, render: row => row.ACTION_KEY },
   { key: 'ACTION_NAME', header: 'Action명', minWidth: 150, flex: 1, fieldDefinition: textField('ACTION_NAME', 'Action명', true), render: row => row.ACTION_NAME },
-  { key: 'ACTION_TYPE', header: 'Type', width: 90, align: 'center', render: row => <span className="metadata-badge">{row.ACTION_TYPE}</span> },
+  { key: 'ACTION_TYPE', header: 'Type', width: 90, align: 'center', fieldDefinition: badgeField('ACTION_TYPE', 'Type'), render: row => row.ACTION_TYPE },
   { key: 'DESCRIPTION', header: '설명', minWidth: 220, flex: 2, fieldDefinition: textField('DESCRIPTION', '설명'), render: row => row.DESCRIPTION },
   statusColumn<RegistryAction>('SOURCE_STATUS', 'Source 상태'),
   { key: 'USE_YN', header: '사용', width: 72, align: 'center', fieldDefinition: switchField('USE_YN', '사용여부'), render: row => row.USE_YN },

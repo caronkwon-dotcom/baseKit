@@ -82,6 +82,9 @@ export function toGridColumns<T>({ columns, fields, getFieldValue, editing, getR
         colId: column.key, headerName: column.header, initialWidth: column.width, minWidth: field?.controlType === 'SWITCH' ? Math.max(column.minWidth ?? 0, 64) : column.minWidth,
         flex: column.width ? undefined : column.flex ?? 1,
         valueGetter: (params: ValueGetterParams<T>) => params.data ? displayValue((params.data as Record<string, unknown>)[column.key], field) : '',
+        valueFormatter: field?.controlType === 'SELECT'
+          ? (params) => field.options?.find((option) => option.value === String(params.value ?? ''))?.label ?? String(params.value ?? '')
+          : undefined,
         cellRenderer: (params: ICellRendererParams<T>) => {
           if (!params.data) return null;
           const editable = isEditable(params.data, column.key, column.editPolicy);
@@ -102,6 +105,9 @@ export function toGridColumns<T>({ columns, fields, getFieldValue, editing, getR
       return {
         colId: key, headerName: field.label, flex: 1, minWidth: field.controlType === 'SWITCH' ? 64 : 100,
         valueGetter: (params: ValueGetterParams<T>) => params.data ? displayValue(getFieldValue?.(params.data, field), field) : '',
+        valueFormatter: field.controlType === 'SELECT'
+          ? (params) => field.options?.find((option) => option.value === String(params.value ?? ''))?.label ?? String(params.value ?? '')
+          : undefined,
         cellClass: (params: EditableCallbackParams<T>) => params.data ? [isEditable(params.data, key) ? 'basekit-editable-cell' : '', field.controlType === 'SWITCH' ? 'basekit-grid-switch-cell' : '', `basekit-grid-cell-${alignment(field)}`, validationClass(params.data, key, field)].filter(Boolean).join(' ') : '',
         cellRenderer: (params: ICellRendererParams<T>) => {
           if (!params.data) return null;
