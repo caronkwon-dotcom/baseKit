@@ -1,0 +1,12 @@
+.excel-import-actions { display: flex; gap: 6px; }
+.excel-import-dialog { display: grid; gap: 10px; min-width: 0; }
+.excel-import-file-row { display: flex; align-items: center; gap: 8px; }
+.excel-import-file-name { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); }
+.excel-import-metrics { display: flex; gap: 14px; color: var(--text-secondary); font-size: 12px; }
+.excel-import-metrics .valid { color: var(--success, #087443); }
+.excel-import-metrics .error, .excel-import-message.error, .excel-import-header-errors { color: var(--danger, #b42318); }
+.excel-import-header-errors { display: grid; gap: 2px; padding: 7px 9px; border: 1px solid var(--message-error-border, #f0b7b1); background: var(--message-error-bg, #fff1f0); font-size: 11px; }
+.excel-import-help { margin: 0; color: var(--text-muted); font-size: 11px; }
+.excel-import-dialog .table-wrap { max-height: 360px; overflow: auto; }
+.excel-import-dialog .standard-data-table { min-width: 720px; }
+.excel-import-error-row { background: var(--message-error-bg, #fff1f0); }

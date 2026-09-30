@@ -346,3 +346,9 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 ## UI-03 Reference Source 정리 (2026-09-26, feature 검수 대기)
 
 `feature/ui03-reference-source-standardization`은 `origin/dev-pm` `bc7b7b6` 기준이다. 공통코드관리 AG Grid의 ColDef 생성 경로를 Production `BaseKitDataGrid → gridColumnAdapter.toGridColumns`로 단일화하고 `GridEditing<T>`와 동적 Metadata 컬럼 Key 계약을 공유한다. 저장 Payload Mapper와 JSX 명명을 정리했으며, 운영 화면에서 사용하지 않는 `MetadataAgGrid`는 PoC 영역으로 격리했다. Production Adapter 회귀 테스트와 기존 Grid 테스트를 통과했지만, UI-03 Catalog 최종 승격은 PM 승인 전이다. 동적 속성별 `maxLength`는 현재 정의 Type·DTO·DB Schema에 없으므로 임의 길이 규칙을 추가하지 않았다.
+
+## 공통 Excel Import V1 (2026-09-30, codex-work 검수 대기)
+
+`frontend/src/components/common/excel`에 업무 독립적인 Excel Template 생성, `.xlsx/.xls` 첫 Sheet 파싱, Header/필수값/빈 Row 검증, 업무별 Row Validation·Mapping callback, Preview Grid, 정상/오류 건수 표시를 구현했다. UI는 기존 `FormModal`과 `DataTable`을 재사용하며 Import 전에는 저장 callback을 호출하지 않는다. Header 오류 또는 Row 오류가 있으면 Import를 막고, 오류가 없는 유효 Row만 `mapRow → onImport`로 전달한다. 업무 화면에서는 `ExcelImport`에 `columns`, `validateRow`, `mapRow`, `onImport`만 연결한다.
+
+추가 dependency는 `xlsx`이며, Template은 정적 `/public` 파일이 아니라 Column Definition으로 동적 생성한다. Requirement 화면/API/DTO는 연결하지 않았다.
