@@ -22,6 +22,7 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - Standard Design Project Menu V1: 프로젝트별 LEVEL/SINGLE 분류 방식, Project Menu CRUD REST/Flyway V7, Requirement의 별도 Project Menu 관계(BSDRRPML), 기존 시스템 MENU_KEYS 보존, Excel 진입점만 제공. 재귀 트리·Parser·AI 기능은 미구현.
 - Standard Design Requirement Excel Import 연결 완료: Requirement 전용 Column 정의, Validation/Mapping, Project Menu Path → `PROJECT_MENU_IDS` 변환, 기존 Requirement create/update API 재사용, Template/Upload UI 연결을 구현했다. Project Context 선택 순서 결함도 수정했다. frontend build/lint와 backend test를 통과했다.
 - Standard Design Requirement Excel Import 실 E2E 보류: 실제 Excel 다운로드 파일 확인, 브라우저 Upload → Preview, Backend 저장, 새로고침 후 데이터 유지, 단일/복수 `PROJECT_MENU_IDS` 실저장 검증은 local H2 backend의 Tomcat loopback 초기화 오류로 보류했다. 코드 검증과 실 E2E 검증을 구분하며 전체 완료로 표시하지 않는다. Backend 실행 환경 정상화 후 E2E를 재개한다.
+- 실행 Database 경계 확정: 단위/통합 테스트는 H2를 유지할 수 있고, 실제 로컬 실행 및 브라우저 E2E는 PostgreSQL 또는 실제 채택 DB를 사용한다. [ADR-033](decisions/033-test-and-e2e-database-boundary.md)
 
 Requirement Intake 검증: 신규 H2 API 통합 테스트와 Frontend build/lint 통과. 기존 전체 Backend 테스트 22건은 신규 통합 테스트 추가 전에 통과했으며 이 실행에서 연결된 Supabase PostgreSQL에 Flyway V5가 적용되었다. 추가 변경 후 전체 Backend 재실행은 외부 DB 변경 위험으로 자동 승인 검토가 거부되어 보류했고, 신규 대상 테스트만 H2로 재검증했다. 화면은 프로젝트 Context 선택 후 `요구사항 관리` 메뉴에서 확인한다.
 
