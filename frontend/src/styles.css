@@ -1559,11 +1559,9 @@ tbody tr.selected-row td {
 .multi-grid-detail,
 .multi-grid-detail-top,
 .multi-grid-detail-bottom { min-width: 0; min-height: 0; }
-.multi-grid-detail { display: grid; grid-template-rows: minmax(var(--multi-grid-detail-top-min-height), var(--multi-grid-detail-top-ratio)) minmax(var(--multi-grid-detail-bottom-min-height), var(--multi-grid-detail-bottom-ratio)); gap: var(--multi-grid-gap); }
-.multi-grid-workspace.equal-detail-rows .multi-grid-detail { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
-.program-registry-master-stack { display: grid; min-height: 0; height: 100%; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); gap: var(--multi-grid-gap); }
-.program-registry-master-stack > *, .program-registry-detail-panel { min-height: 0; overflow: auto; }
-.program-registry-detail-panel .metadata-form-section { margin: 0; min-height: 100%; box-sizing: border-box; }
+.multi-grid-detail { display: grid; height: 100%; grid-template-rows: minmax(var(--multi-grid-detail-top-min-height), var(--multi-grid-detail-top-ratio)) minmax(var(--multi-grid-detail-bottom-min-height), var(--multi-grid-detail-bottom-ratio)); gap: var(--multi-grid-gap); }
+.multi-grid-workspace.equal-detail-rows .multi-grid-detail,
+.multi-grid-detail.equal-detail-rows { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
 .master-detail-multi-grid .program-data-grid { display: flex; height: 100%; min-height: 0; flex-direction: column; }
 .master-detail-multi-grid .program-data-grid .data-section { display: flex; min-height: 0; flex: 1; flex-direction: column; }
 .master-detail-multi-grid .program-data-grid .standard-table-wrap { min-height: 0; max-height: none; flex: 1; }

@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { COMMON_ACTIONS, type ActionCode } from '../constants/actionCodes';
 import BaseKitDataGrid from '../components/grid/BaseKitDataGrid';
 import { BaseKitMessage, MasterDetailMultiGrid, PageHeader, ProgramDataGrid, SearchPanel, type DataTableColumn, type SearchFieldConfig } from '../components/common';
-import { MetadataForm, type FieldDefinition } from '../components/metadata';
 import { getProgramFieldDefinitions } from '../adapters/programFieldAdapter';
+import type { FieldDefinition } from '../components/metadata';
 import { metadataRepository } from '../repositories/metadataRepository';
 import { programApi } from '../services/programApi';
 import type { ActionMeta, ProgramMeta } from '../types/adminShell';
@@ -61,8 +61,15 @@ const actionColumns: DataTableColumn<RegistryAction>[] = [
   { key: 'SOURCE_STATUS', header: 'Source', width: 100, align: 'center', render: (row) => row.SOURCE_STATUS },
 ];
 
-function DetailPanel({ title, fields, values }: { title: string; fields: FieldDefinition[]; values: Record<string, string> }) {
-  return <div className="program-registry-detail-panel"><MetadataForm legend={title} fields={fields} values={values} onChange={() => undefined} readOnly /></div>;
+type DetailItem = { key: string; label: string; badge?: boolean };
+
+function DetailPanel({ title, fields, values }: { title: string; fields: DetailItem[]; values: Record<string, string> }) {
+  return <section className="detail-section">
+    <h2>{title}</h2>
+    <dl className="detail-grid">
+      {fields.map((field) => <div className="readonly-field" key={field.key}><dt>{field.label}</dt><dd>{field.badge ? <span className="metadata-badge">{values[field.key] || '-'}</span> : values[field.key] || '-'}</dd></div>)}
+    </dl>
+  </section>;
 }
 
 export default function ProgramManagePage() {
@@ -94,18 +101,18 @@ export default function ProgramManagePage() {
     { key: 'PROGRAM_TYPE_CODE', label: '유형', controlType: 'select', options: [{ value: '', label: '전체' }, ...(fields.find((field) => field.key === 'PROGRAM_TYPE_CODE')?.options ?? [])] },
     { key: 'USE_YN', label: '사용 여부', controlType: 'select', options: [{ value: '', label: '전체' }, { value: 'Y', label: '사용' }, { value: 'N', label: '미사용' }] },
   ], [fields]);
-  const programDetailFields: FieldDefinition[] = [
-    { key: 'PROGRAM_KEY', label: 'Program Key', dataType: 'STRING', controlType: 'TEXT', displayType: 'TEXT' }, { key: 'PROGRAM_NAME', label: '프로그램명', dataType: 'STRING', controlType: 'TEXT', displayType: 'TEXT' }, { key: 'DESCRIPTION', label: '설명', dataType: 'STRING', controlType: 'TEXT', displayType: 'TEXT' }, { key: 'SOURCE_STATUS', label: 'Source 상태', dataType: 'STRING', controlType: 'TEXT', displayType: 'BADGE' }, { key: 'USE_YN', label: '사용 여부', dataType: 'STRING', controlType: 'SELECT', displayType: 'BADGE', options: [{ value: 'Y', label: '사용' }, { value: 'N', label: '미사용' }] }, { key: 'ACTION_COUNT', label: 'Action 수', dataType: 'NUMBER', controlType: 'NUMBER', displayType: 'TEXT' }, { key: 'MENU_COUNT', label: '연결 메뉴', dataType: 'NUMBER', controlType: 'NUMBER', displayType: 'TEXT' }, { key: 'MOD_DT', label: '최종 동기화', dataType: 'STRING', controlType: 'TEXT', displayType: 'TEXT' },
+  const programDetailFields: DetailItem[] = [
+    { key: 'PROGRAM_KEY', label: 'Program Key' }, { key: 'PROGRAM_NAME', label: '프로그램명' }, { key: 'DESCRIPTION', label: '설명' }, { key: 'MODULE_CODE', label: 'Module' }, { key: 'PROGRAM_TYPE_CODE', label: '유형' }, { key: 'SOURCE_STATUS', label: 'Source 상태', badge: true }, { key: 'USE_YN', label: '사용여부', badge: true }, { key: 'ACTION_COUNT', label: 'Action 수' },
   ];
-  const actionDetailFields: FieldDefinition[] = [
-    { key: 'ACTION_KEY', label: 'Action Key', dataType: 'STRING', controlType: 'TEXT', displayType: 'TEXT' }, { key: 'ACTION_NAME', label: 'Action명', dataType: 'STRING', controlType: 'TEXT', displayType: 'TEXT' }, { key: 'ACTION_TYPE', label: 'Action Type', dataType: 'STRING', controlType: 'TEXT', displayType: 'BADGE' }, { key: 'DESCRIPTION', label: '설명', dataType: 'STRING', controlType: 'TEXT', displayType: 'TEXT' }, { key: 'USE_YN', label: '사용 여부', dataType: 'STRING', controlType: 'SELECT', displayType: 'BADGE', options: [{ value: 'Y', label: '사용' }, { value: 'N', label: '미사용' }] }, { key: 'SOURCE_STATUS', label: 'Source 상태', dataType: 'STRING', controlType: 'TEXT', displayType: 'BADGE' },
+  const actionDetailFields: DetailItem[] = [
+    { key: 'ACTION_KEY', label: 'Action Key' }, { key: 'ACTION_NAME', label: 'Action명' }, { key: 'ACTION_TYPE', label: 'Type', badge: true }, { key: 'DESCRIPTION', label: '설명' }, { key: 'SOURCE_STATUS', label: 'Source 상태', badge: true }, { key: 'USE_YN', label: '사용여부', badge: true },
   ];
   const asValues = (value: object | undefined) => Object.fromEntries(Object.entries(value ?? {}).map(([key, item]) => [key, String(item ?? '')]));
   return <section className="page multi-grid-page program-registry-page">
     <PageHeader breadcrumbs={['시스템관리', '프로그램관리']} description="Source Discovery와 운영 Registry의 상태 및 Action Metadata를 조회합니다." />
     <SearchPanel rows={1} fields={searchFields} value={condition} initialValue={initial} onValueChange={setCondition} onSearch={load} onReset={load} />
     <MasterDetailMultiGrid equalRows
-      master={<div className="program-registry-master-stack"><ProgramDataGrid programKey="PROGRAM_MGMT" roleCode="ADMIN" title="프로그램 목록" columns={programColumns} rows={rows} getRowKey={(row) => row.PROGRAM_KEY} selectable={false} enabledActions={[]} onRowClick={(row) => setSelectedKey(row.PROGRAM_KEY)} getRowClassName={(row) => row.PROGRAM_KEY === selectedKey ? 'active-master-row' : ''} /><BaseKitDataGrid programKey="PROGRAM_MGMT" roleCode="ADMIN" title={`${selectedProgram?.PROGRAM_KEY ?? '프로그램'} Action 목록`} columns={actionColumns} rows={actions} getRowKey={(row) => row.ACTION_KEY} selectable={false} enabledActions={[]} onRowClick={(row) => setSelectedActionKey(row.ACTION_KEY)} getRowClassName={(row) => row.ACTION_KEY === selectedAction?.ACTION_KEY ? 'active-master-row' : ''} /></div>}
+      master={<div className="multi-grid-detail equal-detail-rows"><div className="multi-grid-detail-top"><ProgramDataGrid programKey="PROGRAM_MGMT" roleCode="ADMIN" title="프로그램 목록" columns={programColumns} rows={rows} getRowKey={(row) => row.PROGRAM_KEY} selectable={false} enabledActions={[]} onRowClick={(row) => setSelectedKey(row.PROGRAM_KEY)} getRowClassName={(row) => row.PROGRAM_KEY === selectedKey ? 'active-master-row' : ''} /></div><div className="multi-grid-detail-bottom"><BaseKitDataGrid programKey="PROGRAM_MGMT" roleCode="ADMIN" title={`${selectedProgram?.PROGRAM_KEY ?? '프로그램'} Action 목록`} columns={actionColumns} rows={actions} getRowKey={(row) => row.ACTION_KEY} selectable={false} enabledActions={[]} onRowClick={(row) => setSelectedActionKey(row.ACTION_KEY)} getRowClassName={(row) => row.ACTION_KEY === selectedAction?.ACTION_KEY ? 'active-master-row' : ''} /></div></div>}
       detailTop={<DetailPanel title="프로그램 상세정보" fields={programDetailFields} values={asValues(selectedProgram)} />}
       detailBottom={<DetailPanel title="Action 상세정보" fields={actionDetailFields} values={asValues(selectedAction)} />}
       message={<BaseKitMessage type={message.type} message={message.text} />}
