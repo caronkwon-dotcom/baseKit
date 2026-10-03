@@ -23,8 +23,11 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - Standard Design Requirement Excel Import 연결 완료: Requirement 전용 Column 정의, Validation/Mapping, Project Menu Path → `PROJECT_MENU_IDS` 변환, 기존 Requirement create/update API 재사용, Template/Upload UI 연결을 구현했다. Project Context 선택 순서 결함도 수정했다. frontend build/lint와 backend test를 통과했다.
 - Standard Design Requirement Excel Import 실 E2E 보류: 실제 Excel 다운로드 파일 확인, 브라우저 Upload → Preview, Backend 저장, 새로고침 후 데이터 유지, 단일/복수 `PROJECT_MENU_IDS` 실저장 검증은 local H2 backend의 Tomcat loopback 초기화 오류로 보류했다. 코드 검증과 실 E2E 검증을 구분하며 전체 완료로 표시하지 않는다. Backend 실행 환경 정상화 후 E2E를 재개한다.
 - 실행 Database 경계 확정: 단위/통합 테스트는 H2를 유지할 수 있고, 실제 로컬 실행 및 브라우저 E2E는 PostgreSQL 또는 실제 채택 DB를 사용한다. [ADR-033](decisions/033-test-and-e2e-database-boundary.md)
+- Requirement 실데이터 E2E 준비: 실제 Project/Project Menu에서 준비한 데이터를 사용해 Excel Template → Preview → Import → 새로고침 → 단일/복수 `PROJECT_MENU_IDS`를 검수하는 Runbook을 추가했다. 실제 E2E Database 선택과 실행은 승인 전 보류하며, H2 테스트 구조와 AI/OCR 미구현 경계를 유지한다. [Runbook](requirement-intake-e2e-runbook.md) · [다음 단계 사전 설계](ideas/requirement-intake-next-stage.md)
 
 Requirement Intake 검증: 신규 H2 API 통합 테스트와 Frontend build/lint 통과. 기존 전체 Backend 테스트 22건은 신규 통합 테스트 추가 전에 통과했으며 이 실행에서 연결된 Supabase PostgreSQL에 Flyway V5가 적용되었다. 추가 변경 후 전체 Backend 재실행은 외부 DB 변경 위험으로 자동 승인 검토가 거부되어 보류했고, 신규 대상 테스트만 H2로 재검증했다. 화면은 프로젝트 Context 선택 후 `요구사항 관리` 메뉴에서 확인한다.
+
+2026-10-03 SD 자율 작업: Requirement 실데이터 기반 E2E 실행 순서·합격 기준·증적 양식을 `docs/requirement-intake-e2e-runbook.md`에 정리하고, 승인 전 다음 단계 후보를 `docs/ideas/requirement-intake-next-stage.md`로 분리했다. 운영 DB 선택, AI/OCR 구현, H2 테스트 구조 변경은 하지 않았다. 이 환경의 재검증은 frontend TypeScript incremental cache 쓰기 권한과 Maven Wrapper 배포본 다운로드 네트워크 권한에서 차단되어 코드 실패와 구분해 기록한다.
 
 - `frontend/`, `backend/`, `database/` Full Stack Repository 구조
 - Java 21 + Spring Boot 3.5 기반 Backend Foundation
