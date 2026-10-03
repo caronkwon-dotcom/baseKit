@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caron.basekit.core.menu.MenuMapper">
+    <sql id="columns">
+        MENU_KEY, MENU_NAME, PARENT_MENU_KEY, MENU_TYPE_CODE, SORT_ORDER, PROGRAM_KEY,
+        USE_YN, DEL_YN, REG_DT, REG_BY, MOD_DT, MOD_BY
+    </sql>
+
+    <select id="findMenus" resultType="com.caron.basekit.core.menu.MenuData">
+        SELECT <include refid="columns"/>
+          FROM BSYMENU MENU
+         WHERE MENU.DEL_YN = 'N'
+        <if test="KEYWORD != null and KEYWORD != ''">
+           AND (UPPER(MENU.MENU_KEY) LIKE CONCAT('%', UPPER(#{KEYWORD}), '%')
+                OR UPPER(MENU.MENU_NAME) LIKE CONCAT('%', UPPER(#{KEYWORD}), '%'))
+        </if>
+        <if test="PARENT_MENU_KEY != null and PARENT_MENU_KEY != ''">
+           AND MENU.PARENT_MENU_KEY = #{PARENT_MENU_KEY}
+        </if>
+        <if test="MENU_TYPE_CODE != null and MENU_TYPE_CODE != ''">
+           AND MENU.MENU_TYPE_CODE = #{MENU_TYPE_CODE}
+        </if>
+        <if test="PROGRAM_KEY != null and PROGRAM_KEY != ''">
+           AND MENU.PROGRAM_KEY = #{PROGRAM_KEY}
+        </if>
+        <if test="USE_YN != null and USE_YN != ''">
+           AND MENU.USE_YN = #{USE_YN}
+        </if>
+         ORDER BY MENU.PARENT_MENU_KEY NULLS FIRST, MENU.SORT_ORDER, MENU.MENU_KEY
+    </select>
+
+    <select id="findMenu" resultType="com.caron.basekit.core.menu.MenuData">
+        SELECT <include refid="columns"/>
+          FROM BSYMENU MENU
+         WHERE MENU.MENU_KEY = #{MENU_KEY}
+           AND MENU.DEL_YN = 'N'
+    </select>
+
+    <select id="countMenuKey" resultType="int">
+        SELECT COUNT(*) FROM BSYMENU WHERE MENU_KEY = #{MENU_KEY}
+    </select>
+
+    <select id="countActiveChildren" resultType="int">
+        SELECT COUNT(*) FROM BSYMENU
+         WHERE PARENT_MENU_KEY = #{PARENT_MENU_KEY}
+           AND DEL_YN = 'N'
+           AND USE_YN = 'Y'
+    </select>
+
+    <select id="countActiveProgram" resultType="int">
+        SELECT COUNT(*) FROM BSYPROG
+         WHERE PROGRAM_KEY = #{PROGRAM_KEY}
+           AND DEL_YN = 'N'
+           AND USE_YN = 'Y'
+    </select>
+
+    <select id="countActiveMenuType" resultType="int">
+        SELECT COUNT(*) FROM BSYCMCD
+         WHERE CODE_GROUP_ID = 'MENU_TYPE_CODE'
+           AND CODE = #{MENU_TYPE_CODE}
+           AND DEL_YN = 'N'
+           AND USE_YN = 'Y'
+    </select>
+
+    <insert id="insertMenu">
+        INSERT INTO BSYMENU
+          (MENU_KEY, MENU_NAME, PARENT_MENU_KEY, MENU_TYPE_CODE, SORT_ORDER, PROGRAM_KEY,
+           USE_YN, DEL_YN, REG_DT, REG_BY, MOD_DT, MOD_BY)
+        VALUES
+          (#{MENU_KEY}, #{MENU_NAME}, #{PARENT_MENU_KEY}, #{MENU_TYPE_CODE}, #{SORT_ORDER}, #{PROGRAM_KEY},
+           #{USE_YN}, #{DEL_YN}, #{REG_DT}, #{REG_BY}, #{MOD_DT}, #{MOD_BY})
+    </insert>
+
+    <update id="updateMenu">
+        UPDATE BSYMENU MENU
+           SET MENU_NAME = #{MENU_NAME},
+               PARENT_MENU_KEY = #{PARENT_MENU_KEY},
+               MENU_TYPE_CODE = #{MENU_TYPE_CODE},
+               SORT_ORDER = #{SORT_ORDER},
+               PROGRAM_KEY = #{PROGRAM_KEY},
+               USE_YN = #{USE_YN},
+               MOD_DT = #{MOD_DT},
+               MOD_BY = #{MOD_BY}
+         WHERE MENU.MENU_KEY = #{MENU_KEY}
+           AND MENU.DEL_YN = 'N'
+    </update>
+
+    <update id="logicalDeleteMenu">
+        UPDATE BSYMENU MENU
+           SET DEL_YN = 'Y', USE_YN = 'N', MOD_DT = CURRENT_TIMESTAMP, MOD_BY = #{MOD_BY}
+         WHERE MENU.MENU_KEY = #{MENU_KEY}
+           AND MENU.DEL_YN = 'N'
+    </update>
+</mapper>

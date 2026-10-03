@@ -355,3 +355,7 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 ## Program Discovery 기반 프로그램 관리 V1 (2026-09-30, codex-work 검수 대기)
 
 기존 `programDiscovery`, Module Manifest, Core Registry와 읽기 전용 `BSYPROG` 조회를 병합해 Source/DB 상태(`AVAILABLE`, `NEW`, `MISSING_SOURCE`)를 표시하는 프로그램 관리 V1을 구현했다. 화면은 공통 `MasterDetailMultiGrid`의 stacked 모드로 Program Grid 상단·Action Grid 하단을 배치하고, `ProgramDataGrid`, `BaseKitDataGrid`, `useGridRowState`, 공통 Editable Cell/YN Switch/Message Area를 재사용한다. Program의 Registry 필드와 Action의 운영 편집 필드는 Inline Batch 상태(`UPDATED`) 및 변경취소를 지원하며, Program 저장은 기존 `programApi.update`를 사용한다. Action Registry 저장 API는 현재 계약에 없어 별도 API를 추가하지 않았다. Program과 Action은 Source 기준으로 목록화하며 COMMON/CUSTOM Action을 동일한 `ACTION_KEY` 계약으로 표시한다. DB에만 존재하는 Program은 삭제하지 않고 `MISSING_SOURCE`로 유지한다. Role 권한 UI와 Endpoint Enforcement는 범위에 포함하지 않았다.
+
+## Menu V2 Backend Foundation (2026-10-03, codex-work 검수 대기)
+
+`BSYMENU` Flyway V7과 JPA Schema Validate Entity, MyBatis CRUD/Tree Mapper, REST Controller, Service Validation, 도메인 예외 처리와 H2 통합 테스트를 구현했다. `MENU_LEVEL`은 저장하지 않고 Tree 응답에서 계산하며, Phase 1은 FOLDER/PAGE만 허용한다. FOLDER는 Program을 가질 수 없고 PAGE는 활성 `BSYPROG`를 필수로 참조한다. 기존 `frontend/meta/menus.json` Seed, MenuManagePage DB 연결, Runtime 전환, Role/Permission은 범위에 포함하지 않았다. H2 기반 전체 Backend 테스트와 Menu 통합 테스트를 통과했으며, 외부 PostgreSQL은 기존 V7 Migration checksum 불일치로 별도 검증이 보류되었다.
