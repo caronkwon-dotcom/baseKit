@@ -10,7 +10,7 @@ export interface FieldDefinition {
   dataType: FieldDataType;
   controlType: FieldControlType;
   displayType: FieldDisplayType;
-  required: boolean;
+  required?: boolean;
   maxLength?: number;
   defaultValue?: string;
   optionSource?: string;

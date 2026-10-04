@@ -8,8 +8,8 @@
 .basekit-ag-grid .ag-row.grid-deleted-row { box-shadow: inset 4px 0 var(--grid-state-deleted); background: var(--grid-state-deleted-bg); }
 .basekit-ag-grid .ag-row.grid-deleted-row .ag-cell:not(.basekit-row-state-cell):not(.ag-selection-column) { opacity: .56; text-decoration: line-through; }
 .basekit-ag-grid .ag-cell.basekit-editable-cell { background: transparent; }
-.basekit-ag-grid .ag-cell.basekit-editable-cell::after { content: ''; position: absolute; inset: 3px 2px; border: 1px solid var(--grid-editable-border); border-radius: 4px; pointer-events: none; }
-.basekit-ag-grid .ag-cell.basekit-editable-cell:hover::after { border-color: var(--grid-editable-border-hover); }
+.basekit-ag-grid .ag-cell.basekit-editable-cell::after { content: ''; position: absolute; inset: 3px 2px; border: 0 solid transparent; border-radius: 4px; pointer-events: none; }
+.basekit-ag-grid .ag-cell.basekit-editable-cell:hover::after { border-width: 1px; border-color: var(--grid-editable-border-hover); }
 .basekit-ag-grid .ag-cell.basekit-editable-cell.ag-cell-focus,
 .basekit-ag-grid .ag-cell.basekit-editable-cell.ag-cell-inline-editing { border-color: transparent; box-shadow: none; }
 .basekit-ag-grid .ag-cell.basekit-editable-cell.ag-cell-focus::after,

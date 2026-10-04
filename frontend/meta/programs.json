@@ -51,7 +51,7 @@
     "routePath": "/system/programs",
     "dataScope": "COMPANY",
     "modifyScope": "ROLE",
-    "actionCodes": ["SEARCH", "CREATE", "UPDATE", "DELETE", "MANUAL_VIEW"],
+    "actionCodes": ["SEARCH", "CREATE", "UPDATE", "DELETE", "REVERT_CHANGES", "SAVE", "MANUAL_VIEW"],
     "useYn": "Y"
   },
   {

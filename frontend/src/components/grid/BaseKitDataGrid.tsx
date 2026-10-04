@@ -88,6 +88,7 @@ function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRo
     rowSelection={{ mode: 'multiRow', enableClickSelection: false, headerCheckbox: true }}
     onSelectionChanged={(event) => onSelectedRowKeysChange?.(new Set(event.api.getSelectedRows().map(getRowKey)))}
     onRowClicked={(event) => event.data && onRowClick?.(event.data)}
+    onCellClicked={(event) => event.data && onRowClick?.(event.data)}
     getRowClass={(params) => {
       if (!params.data) return '';
       const rowState = getRowState?.(params.data);
