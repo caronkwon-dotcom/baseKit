@@ -2,7 +2,7 @@
 
 2026-10-05 · 기준 dev-pm `a928069d23c11bdac52f5b6fbe1bf28048345eba`, 작업 시작 design-work `24bfdfaecdb8f8f5b608b86bce878955efb59dda`.
 
-**판정: UI 보정 일부 완료 / Endpoint Toolbar 통합과 좌우 시작선은 COMMON 확장 후 재검수 / 이번 전체 목표의 dev-pm merge 승인 보류.**
+**판정: UI 보정 일부 완료 / Endpoint Toolbar 통합과 좌우 시작선은 COMMON 확장 후 재검수 / 전체 디자인 완료 판정 보류 / 사용자 승인에 따라 dev-pm 통합.**
 
 [DESIGN 역할](../DESIGN-role.md)을 적용한다. 과거 `40040d2` 기준 문서 검토는 당시 기록이며, Endpoint 미구현·코드 수정 금지·문서 인계만으로 종료한다는 판단은 현재 기준에 적용하지 않는다. 당시 원문은 Git 이력에 보존되어 있다.
 
@@ -53,4 +53,4 @@ DESIGN-team-task, DESIGN-next-task, SD-UX-handoff, UX-review, COMMON-UX-requests
 
 Frontend build/lint, Backend test(42건, 실패/오류 0, PostgreSQL 조건 5건 skip), git diff --check 통과. Backend 실행의 초기 sandbox 경로/연결 제약은 작업 폴더 Maven cache와 허용된 다운로드로 해결했다.
 
-문서와 직접 보정 코드를 design-work에 함께 commit/push한다. 이번 전체 작업은 Endpoint Toolbar/좌우 시작선이 남아 있으므로 **dev-pm merge 승인 보류**다. COMMON 확장 후 DESIGN 최종 보정·브라우저 재검수와 사용자 merge 승인이 필요하다.
+문서와 직접 보정 코드를 design-work에 함께 commit/push한다. Endpoint Toolbar/좌우 시작선은 미완료지만, 사용자가 design-work push 및 dev-pm merge를 명시적으로 승인했다. 이번 보정 코드를 dev-pm에 통합하고 COMMON 확장 후 DESIGN 최종 보정·브라우저 재검수를 후속 과제로 유지한다. 통합 승인은 미통과 시각 항목의 완료 판정을 뜻하지 않는다.
