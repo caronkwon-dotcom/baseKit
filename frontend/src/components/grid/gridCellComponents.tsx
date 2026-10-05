@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { ICellEditorParams } from 'ag-grid-community';
 import type { FieldDefinition } from '../metadata/fieldDefinition';
 import type { GridRowState } from './gridRowState';
@@ -60,18 +61,63 @@ export function MetadataSwitch({ value, field, editable, onChange }: { value: un
 export function MetadataSelect({ value, field, editable, onChange }: { value: unknown; field: FieldDefinition; editable: boolean; onChange: (value: string) => void }) {
   const current = String(value ?? '');
   const options = field.options ?? [];
-  return <select className="basekit-grid-input basekit-grid-select" aria-label={field.label} disabled={!editable} value={current}
-    onPointerDown={event => event.stopPropagation()}
-    onMouseDown={event => event.stopPropagation()}
-    onClick={event => event.stopPropagation()}
-    onDoubleClick={event => event.stopPropagation()}
-    onKeyDown={event => { if (event.key !== 'Tab') event.stopPropagation(); }}
-    onChange={event => { event.stopPropagation(); onChange(event.target.value); }}>
-    {!options.some(option => option.value === current) && <option value={current} disabled>{current || '-'}</option>}
-    {options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-  </select>;
+  const trigger = useRef<HTMLButtonElement>(null);
+  const popup = useRef<HTMLDivElement>(null);
+  const id = useId();
+  const [position, setPosition] = useState<{ left: number; top: number; width: number; maxHeight: number } | null>(null);
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    if (position) popup.current?.querySelector(`[id="${id}-${active}"]`)?.scrollIntoView({ block: 'nearest' });
+  }, [active, id, position]);
+  const open = () => {
+    const rect = trigger.current!.getBoundingClientRect();
+    const below = innerHeight - rect.bottom - 12;
+    const height = Math.min(240, options.length * 32 + 12);
+    const above = below < height && rect.top > below;
+    setPosition({ left: Math.max(8, Math.min(rect.left, innerWidth - Math.max(rect.width, 160) - 8)), top: above ? Math.max(8, rect.top - height - 4) : rect.bottom + 4, width: Math.max(rect.width, 160), maxHeight: above ? Math.min(240, rect.top - 12) : Math.min(240, below) });
+    setActive(Math.max(0, options.findIndex(option => option.value === current)));
+  };
+  useEffect(() => {
+    if (!position) return;
+    const dismiss = (event: PointerEvent) => {
+      if (!trigger.current?.contains(event.target as Node) && !popup.current?.contains(event.target as Node)) setPosition(null);
+    };
+    const close = (event: Event) => { if (!popup.current?.contains(event.target as Node)) setPosition(null); };
+    document.addEventListener('pointerdown', dismiss);
+    window.addEventListener('resize', close);
+    document.addEventListener('scroll', close, true);
+    return () => { document.removeEventListener('pointerdown', dismiss); window.removeEventListener('resize', close); document.removeEventListener('scroll', close, true); };
+  }, [position]);
+  const choose = (index: number) => {
+    if (editable && options[index]) onChange(options[index].value);
+    setPosition(null);
+    trigger.current?.focus();
+  };
+  return <>
+    <button ref={trigger} type="button" className="basekit-grid-input basekit-grid-select" role="combobox" aria-label={field.label} disabled={!editable}
+      aria-expanded={!!position} aria-controls={position ? id : undefined} aria-haspopup="listbox" aria-activedescendant={position ? `${id}-${active}` : undefined}
+      onPointerDown={event => event.stopPropagation()} onMouseDown={event => event.stopPropagation()} onDoubleClick={event => event.stopPropagation()}
+      onClick={event => { event.stopPropagation(); if (position) setPosition(null); else open(); }}
+      onBlur={event => { if (!popup.current?.contains(event.relatedTarget)) setPosition(null); }}
+      onKeyDown={event => {
+        if (event.key === 'Tab') { setPosition(null); return; }
+        event.stopPropagation();
+        if (['ArrowDown', 'ArrowUp', 'Enter', ' ', 'Escape', 'Home', 'End'].includes(event.key)) event.preventDefault();
+        if (event.key === 'Escape') setPosition(null);
+        else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+          if (!position) open(); else setActive(index => Math.max(0, Math.min(options.length - 1, index + (event.key === 'ArrowDown' ? 1 : -1))));
+        } else if (event.key === 'Home') setActive(0);
+        else if (event.key === 'End') setActive(options.length - 1);
+        else if (event.key === 'Enter' || event.key === ' ') { if (position) choose(active); else open(); }
+      }}><span>{options.find(option => option.value === current)?.label ?? (current || '-')}</span><span aria-hidden="true">▾</span></button>
+    {position && editable && createPortal(<div ref={popup} id={id} role="listbox" aria-label={field.label} className="basekit-select-popup" style={position}
+      onPointerDown={event => event.stopPropagation()} onMouseDown={event => event.preventDefault()} onClick={event => event.stopPropagation()}>
+      {options.map((option, index) => <div key={option.value} id={`${id}-${index}`} role="option" aria-selected={option.value === current}
+        className={`basekit-select-option${option.value === current ? ' selected' : ''}${index === active ? ' active' : ''}`}
+        onClick={() => choose(index)}><span>{option.label}</span><span aria-hidden="true">{option.value === current ? '✓' : ''}</span></div>)}
+    </div>, document.body)}
+  </>;
 }
-
 export function StatusColorIndicator({ label, color }: { label: string; color: string }) {
   return <span className="basekit-status-indicator">
     <i className="basekit-status-indicator__dot" style={{ backgroundColor: color }} aria-hidden="true" />

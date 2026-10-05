@@ -54,7 +54,7 @@ export default function MasterDetailMultiGrid({ master, detailTop, detailBottom,
     <div ref={workspace} className="master-detail-multi-grid resizable-stacked-grid" style={{ gridTemplateRows: `minmax(var(--multi-grid-detail-top-min-height), ${topRatio}fr) var(--multi-grid-gap) minmax(var(--multi-grid-detail-bottom-min-height), ${100-topRatio}fr)` }}>
       <div className="multi-grid-master">{master}</div>{divider('top')}
       <div ref={bottom} className={`multi-grid-detail resizable-grid-details${alignDetailToolbars ? ' aligned-detail-toolbars' : ''}${detailOptions ? ' has-detail-options' : ''}`} style={{ gridTemplateColumns: `minmax(var(--multi-grid-master-min-width), ${leftRatio}fr) var(--multi-grid-gap) minmax(var(--multi-grid-master-min-width), ${100-leftRatio}fr)` }}>
-        {detailOptions && <div className="multi-grid-detail-options">{detailOptions}</div>}
+        {detailOptions && <><div className="multi-grid-detail-options empty" role="group" aria-label="검색 조건 없음" /><div className="multi-grid-detail-options">{detailOptions}</div></>}
         <div className="multi-grid-detail-top">{detailTop}</div>{divider('left')}<div className="multi-grid-detail-bottom">{detailBottom}</div>
       </div>
     </div><div className="multi-grid-message-area" aria-live="polite">{message}</div>
