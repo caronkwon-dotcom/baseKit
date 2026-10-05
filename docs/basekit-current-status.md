@@ -435,3 +435,7 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 - clean package + H2 test 프로필: BUILD SUCCESS, 46건 중 41건 통과/5건 skip. frontend build/lint 통과. 실제 PostgreSQL 시작 및 V11 적용은 이 검증에서 수행하지 않음.
 
 최종 Grid 회귀 검수: 원격 dev-pm 62ffb79 build/lint·frontend 50/50·backend 42건(실패 0, 조건부 제외 5) 및 Chrome 6조합 통과. 원래 로컬 dev-pm 836d991 build/lint·frontend 53/53 통과. disabled/read-only 스타일, Batch UPDATED/INSERTED 및 프로그램 유형 실제 Select editor 테두리 확인. 로컬 의존성 파일 잠금으로 설치가 일시 중단됐으나 복구 후 검증 통과.
+
+## Form 보완 적용 (2026-10-05)
+
+FormField LEFT 오른쪽 정렬/고정 140px track, 빨간 required dot 및 다국어 안내, 공통 FormSelect portal popup, 요구사항 신규/수정 필수 누락 오류를 구현했다. UI commit 99fb974. 원격 dev-pm a93c72c 현행화 기준. build/lint/frontend 53/backend 46(조건부 제외 5) 및 실제 1280/1440/1920/공통 480px 검수 통과. API/DB/권한/업무 검증 의미 유지. 상세는 form-layout-required 작업 문서 11절. COMMON 추가 차단 협의 없음.
