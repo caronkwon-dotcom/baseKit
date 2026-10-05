@@ -1,0 +1,42 @@
+INSERT INTO BSYCDGP (CODE_GROUP_ID, CODE_GROUP_NAME, DESCRIPTION, REG_BY, MOD_BY) VALUES
+('PROGRAM_MODULE_CODE', '프로그램모듈코드', '프로그램의 소속 업무 모듈을 구분합니다.', 'system', 'system'),
+('PROGRAM_TYPE_CODE', '프로그램유형코드', '프로그램의 실행 유형을 구분합니다.', 'system', 'system');
+
+INSERT INTO BSYCMCD (CODE_ID, CODE_GROUP_ID, CODE, CODE_NAME, SORT_ORDER, REG_BY, MOD_BY) VALUES
+('PROGRAM_MODULE_SYSTEM', 'PROGRAM_MODULE_CODE', 'SYSTEM', '시스템관리', 1, 'system', 'system'),
+('PROGRAM_MODULE_DEV_GUIDE', 'PROGRAM_MODULE_CODE', 'DEV_GUIDE', '개발자가이드', 2, 'system', 'system'),
+('PROGRAM_MODULE_STANDARD_DESIGN', 'PROGRAM_MODULE_CODE', 'STANDARD_DESIGN', 'Standard Design', 3, 'system', 'system'),
+('PROGRAM_TYPE_HOME', 'PROGRAM_TYPE_CODE', 'HOME', '홈', 1, 'system', 'system'),
+('PROGRAM_TYPE_GRID', 'PROGRAM_TYPE_CODE', 'GRID', '목록', 2, 'system', 'system'),
+('PROGRAM_TYPE_GRID_DETAIL', 'PROGRAM_TYPE_CODE', 'GRID_DETAIL', '목록/상세', 3, 'system', 'system'),
+('PROGRAM_TYPE_POPUP', 'PROGRAM_TYPE_CODE', 'POPUP', '팝업', 4, 'system', 'system');
+
+CREATE TABLE BSYPROG (
+    PROGRAM_ID VARCHAR(50) PRIMARY KEY,
+    PROGRAM_KEY VARCHAR(100) NOT NULL,
+    PROGRAM_NAME VARCHAR(100) NOT NULL,
+    MODULE_CODE VARCHAR(50) NOT NULL,
+    PROGRAM_TYPE_CODE VARCHAR(50) NOT NULL,
+    ROUTE VARCHAR(255) NOT NULL,
+    DESCRIPTION VARCHAR(500),
+    USE_YN CHAR(1) NOT NULL DEFAULT 'Y',
+    DEL_YN CHAR(1) NOT NULL DEFAULT 'N',
+    REG_DT TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    REG_BY VARCHAR(50) NOT NULL,
+    MOD_DT TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    MOD_BY VARCHAR(50) NOT NULL,
+    CONSTRAINT UK_BSYPROG_PROGRAM_KEY UNIQUE (PROGRAM_KEY),
+    CONSTRAINT CK_BSYPROG_USE_YN CHECK (USE_YN IN ('Y', 'N')),
+    CONSTRAINT CK_BSYPROG_DEL_YN CHECK (DEL_YN IN ('Y', 'N'))
+);
+
+CREATE INDEX IX_BSYPROG_MODULE_TYPE ON BSYPROG (MODULE_CODE, PROGRAM_TYPE_CODE);
+
+INSERT INTO BSYPROG (PROGRAM_ID, PROGRAM_KEY, PROGRAM_NAME, MODULE_CODE, PROGRAM_TYPE_CODE, ROUTE, DESCRIPTION, REG_BY, MOD_BY) VALUES
+('HOME', 'HOME', '홈', 'SYSTEM', 'HOME', '/', 'BaseKit 기본 화면', 'system', 'system'),
+('USER_MGMT', 'USER_MGMT', '사용자관리', 'SYSTEM', 'GRID_DETAIL', '/system/users', '사용자 기준정보 관리', 'system', 'system'),
+('COMMON_CODE_MGMT', 'COMMON_CODE_MGMT', '공통코드관리', 'SYSTEM', 'GRID_DETAIL', '/system/codes', '공통코드와 속성 Metadata 관리', 'system', 'system'),
+('PROGRAM_MGMT', 'PROGRAM_MGMT', '프로그램관리', 'SYSTEM', 'GRID', '/system/programs', '실행·MDI·권한 기준 프로그램 관리', 'system', 'system'),
+('MENU_MGMT', 'MENU_MGMT', '메뉴관리', 'SYSTEM', 'GRID_DETAIL', '/system/menus', 'Navigation 구조 관리', 'system', 'system'),
+('TABLE_MGMT', 'TABLE_MGMT', '테이블관리', 'SYSTEM', 'GRID_DETAIL', '/system/tables', 'Schema Catalog 조회', 'system', 'system'),
+('DOCUMENT_CENTER', 'DOCUMENT_CENTER', 'BaseKit 문서센터', 'DEV_GUIDE', 'GRID_DETAIL', '/dev-guide/documents', 'Repository 문서 조회', 'system', 'system');
