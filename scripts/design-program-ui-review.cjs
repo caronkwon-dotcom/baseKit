@@ -44,16 +44,19 @@ const endpoints = Array.from({length:30}, (_,i) => ({ ENDPOINT_ID:`e${i}`, HTTP_
   await page.locator('.multi-grid-master .ag-cell[col-id="SOURCE_STATUS"]').first().hover();
   const focus=await page.locator('.multi-grid-master .ag-cell[col-id="SOURCE_STATUS"]').first().getAttribute('class');
   await page.getByLabel('Endpoint 표시 범위').selectOption('UNMAPPED');
-  const unmapped=await page.locator('.program-endpoint-detail .grid-total').innerText();
+  const unmapped=await page.locator('.multi-grid-detail-bottom .grid-total').innerText();
   await page.getByRole('button',{name:'조회',exact:true}).count();
     await page.locator('.multi-grid-master .ag-body-vertical-scroll-viewport').evaluate(e=>e.scrollTop=10000);
   await page.getByText('MISSING_SOURCE',{exact:true}).waitFor();
   const missing=await page.getByText('MISSING_SOURCE',{exact:true}).evaluate(e=>({height:e.getBoundingClientRect().height,background:getComputedStyle(e).backgroundColor,text:getComputedStyle(e).color}));
   await page.locator('.multi-grid-master .ag-body-vertical-scroll-viewport').evaluate(e=>e.scrollTop=0);
   await page.getByText('NEW',{exact:true}).first().click();
-  await page.locator('.program-endpoint-detail .ag-overlay').waitFor();
+  await page.locator('.multi-grid-detail-bottom .ag-overlay').waitFor();
   const emptyHeaders=await page.locator('.multi-grid-detail .ag-header').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().top));
-    assert.equal(errors.length, 0, '페이지 오류');
+    assert.equal(measurements.grids[1].header.y, measurements.grids[2].header.y, '좌우 Grid header 시작선');
+  assert.equal(measurements.grids[1].toolbar.y, measurements.grids[2].toolbar.y, '좌우 Toolbar 시작선');
+  assert.equal(measurements.grids[1].toolbar.height, measurements.grids[2].toolbar.height, '좌우 Toolbar 높이');
+  assert.equal(errors.length, 0, '페이지 오류');
   assert.equal(writes.length, 0, '쓰기 요청');
   assert.equal(measurements.documentWidth, width, '페이지 외곽 overflow');
   assert(measurements.badges.every(b => b.inside && Math.abs(b.rect.height - 20) < 0.01), 'Badge metric/셀 경계');
@@ -61,7 +64,12 @@ const endpoints = Array.from({length:30}, (_,i) => ({ ENDPOINT_ID:`e${i}`, HTTP_
   assert(measurements.selects.every(s => s.rect.height === 28 && s.radius === '5px'), 'Select metric');
   assert.equal(unmapped, '총 15건', '필터 후 건수');
   assert.deepEqual(emptyHeaders, measurements.grids.slice(1).map(g => g.header.y), '0건 header 위치');
-  results.push({width,mode,errors,writes,measurements,focus,unmapped,missing,emptyHeaders});
+  await page.getByRole('separator', {name:'권한 그룹과 Endpoint 너비 조절'}).focus();
+  for(let i=0;i<20;i++) await page.keyboard.press('ArrowRight');
+  const resizedHeaders=await page.locator('.multi-grid-detail .ag-header').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().top));
+  assert.equal(resizedHeaders[0], resizedHeaders[1], '옵션 줄바꿈 후 좌우 시작선');
+  await page.keyboard.press('Home');
+  results.push({width,mode,errors,writes,measurements,focus,unmapped,missing,emptyHeaders,resizedHeaders});
   await context.close();
  }
  fs.writeFileSync(path.join(output,'design-browser-results.json'),JSON.stringify(results,null,2));

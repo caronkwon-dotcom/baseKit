@@ -10,6 +10,7 @@ public record RequirementSaveRequest(
         @NotBlank @Size(max = 50) String REQUIREMENT_TYPE_CODE,
         @Size(max = 10000) String DESCRIPTION,
         @Size(max = 10000) String PROCESS_DESCRIPTION,
+        @Size(max = 10000) String DESIGN_OPINION,
         @NotBlank @Size(max = 30) String STATUS,
         List<@NotBlank String> MENU_KEYS, List<@NotBlank String> PROJECT_MENU_IDS,
         @Size(max = 2000) String LEGACY_WBS_IDS, @Size(max = 2000) String LEGACY_SCREEN_IDS,

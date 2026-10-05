@@ -31,9 +31,10 @@ public class AnalysisService {
     public record AnalysisRequest(String PROJECT_ID, String REQUEST_ID, List<RequirementInput> REQUIREMENTS, String OVERALL_OPINION) { }
     public record InputDraft(List<RequirementInput> REQUIREMENTS, String OVERALL_OPINION) { }
     public record CandidateUpdate(Integer RESULT_VERSION, JsonNode EDITED, Boolean SELECTED, Boolean RESET) { }
-    public record ConfirmRequest(Integer RESULT_VERSION, List<String> CANDIDATE_IDS) { }
-    public record GenerateRequest(String GENERATION_REQUEST_ID, Integer RESULT_VERSION) { }
+    public record ConfirmRequest(Integer RESULT_VERSION, List<String> CANDIDATE_IDS, InputDraft INPUT) { }
+    public record GenerateRequest(String GENERATION_REQUEST_ID, Integer RESULT_VERSION, InputDraft INPUT) { }
 
+    private static final Set<String> STALE_CHECKED = Set.of("REVIEW_READY", "CONFIRMED", "PARTIAL", "GENERATION_FAILED");
     private static final Set<String> NO_RESULT_RETRY = Set.of("STALE", "ANALYSIS_FAILED", "ANALYSIS_UNKNOWN", "INPUT_READY");
     private static final Map<String, String> ERROR_MESSAGES = Map.of(
             "LLM_NOT_CONFIGURED", "회사 LLM 연결 설정이 되어 있지 않습니다. 관리자에게 문의하세요.",
@@ -120,11 +121,26 @@ public class AnalysisService {
     public ObjectNode checkInput(String id, InputDraft input) {
         Map<String, Object> a = row(id);
         String status = (String) a.get("ANALYSIS_STATUS");
-        if (Set.of("REVIEW_READY", "CONFIRMED").contains(status)) {
-            List<Snapshot> snaps = snapshots((String) a.get("PROJECT_ID"), input.REQUIREMENTS());
-            if (!inputVersion(snaps, input.OVERALL_OPINION()).equals(a.get("INPUT_VERSION"))) markStale(id);
-        }
+        if (STALE_CHECKED.contains(status) && !inputMatches(a, input)) markStale(id);
         return view(id);
+    }
+
+    /** An empty selection, a changed opinion/version or a vanished requirement all mean the result no longer matches the input. */
+    private boolean inputMatches(Map<String, Object> a, InputDraft input) {
+        if (input == null || input.REQUIREMENTS() == null || input.REQUIREMENTS().isEmpty()) return false;
+        try {
+            return inputVersion(snapshots((String) a.get("PROJECT_ID"), input.REQUIREMENTS()), input.OVERALL_OPINION()).equals(a.get("INPUT_VERSION"));
+        } catch (AnalysisException e) {
+            if (Set.of("REQUIREMENT_VERSION_CONFLICT", "REQUIREMENT_NOT_FOUND").contains(e.code())) return false;
+            throw e;
+        }
+    }
+
+    private void requireCurrentInput(String id, Map<String, Object> a, InputDraft input) {
+        if (input == null) throw bad("현재 입력(INPUT)이 필요합니다.");
+        if (inputMatches(a, input)) return;
+        if (STALE_CHECKED.contains((String) a.get("ANALYSIS_STATUS"))) markStale(id);
+        throw new AnalysisException(HttpStatus.CONFLICT, "ANALYSIS_STALE", "입력이 변경되어 결과가 최신이 아닙니다. 다시 분석하세요.");
     }
 
     public ObjectNode get(String id) {
@@ -213,7 +229,7 @@ public class AnalysisService {
 
     private void detectStale(String id) {
         Map<String, Object> a = row(id);
-        if (!Set.of("REVIEW_READY", "CONFIRMED").contains((String) a.get("ANALYSIS_STATUS"))) return;
+        if (!STALE_CHECKED.contains((String) a.get("ANALYSIS_STATUS"))) return;
         for (Map<String, Object> r : jdbc.queryForList("SELECT REQUIREMENT_ID, SNAPSHOT_JSON FROM BSDAAREQ WHERE ANALYSIS_ID=?", id)) {
             try {
                 RequirementData now = requirements.one((String) r.get("REQUIREMENT_ID"));
@@ -228,7 +244,7 @@ public class AnalysisService {
 
     private void markStale(String id) {
         tx.executeWithoutResult(s -> {
-            int n = jdbc.update("UPDATE BSDAANLS SET ANALYSIS_STATUS='STALE', UPDATED_AT=CURRENT_TIMESTAMP WHERE ANALYSIS_ID=? AND ANALYSIS_STATUS IN ('REVIEW_READY','CONFIRMED')", id);
+            int n = jdbc.update("UPDATE BSDAANLS SET ANALYSIS_STATUS='STALE', UPDATED_AT=CURRENT_TIMESTAMP WHERE ANALYSIS_ID=? AND ANALYSIS_STATUS IN ('REVIEW_READY','CONFIRMED','PARTIAL','GENERATION_FAILED')", id);
             if (n > 0) jdbc.update("UPDATE BSDACAND SET SELECTED_YN='N', CONFIRMED_YN='N', UPDATED_AT=CURRENT_TIMESTAMP WHERE ANALYSIS_ID=? AND GENERATED_YN='N'", id);
         });
     }
@@ -257,6 +273,7 @@ public class AnalysisService {
         detectStale(id);
         Map<String, Object> a = row(id);
         guardEditable(a, req.RESULT_VERSION());
+        requireCurrentInput(id, a, req.INPUT());
         List<String> ids = req.CANDIDATE_IDS() == null ? List.of() : req.CANDIDATE_IDS();
         if (ids.isEmpty()) throw bad("확정할 후보를 1개 이상 선택하세요.");
         Set<String> reqIds = reqIds(id);
@@ -299,13 +316,24 @@ public class AnalysisService {
         Map<String, Object> a = row(id);
         String status = (String) a.get("ANALYSIS_STATUS");
         if ("STALE".equals(status)) throw new AnalysisException(HttpStatus.CONFLICT, "ANALYSIS_STALE", "입력이 변경되어 결과가 최신이 아닙니다. 다시 분석하세요.");
-        if (!Set.of("CONFIRMED", "PARTIAL", "GENERATION_FAILED", "GENERATION_UNKNOWN", "GENERATING").contains(status))
+        if ("GENERATION_UNKNOWN".equals(status))
+            throw new AnalysisException(HttpStatus.CONFLICT, "GENERATION_STATE_UNCONFIRMED", "이전 생성 결과가 확인되지 않았습니다. 생성 상태를 먼저 조회하세요.");
+        if ("GENERATING".equals(status))
+            throw new AnalysisException(HttpStatus.CONFLICT, "GENERATION_IN_PROGRESS", "생성이 진행 중입니다. 생성 상태를 조회하세요.");
+        if (!Set.of("CONFIRMED", "PARTIAL", "GENERATION_FAILED").contains(status))
             throw new AnalysisException(HttpStatus.CONFLICT, "ANALYSIS_NOT_CONFIRMED", "확정된 후보가 없어 생성할 수 없습니다.");
         int version = ((Number) a.get("RESULT_VERSION")).intValue();
         if (req.RESULT_VERSION() == null || req.RESULT_VERSION() != version)
             throw new AnalysisException(HttpStatus.CONFLICT, "RESULT_VERSION_CONFLICT", "분석 결과가 갱신되었습니다. 화면을 새로 고치세요.");
+        requireCurrentInput(id, a, req.INPUT());
         if (existing == null) {
             List<String> targets = jdbc.queryForList("SELECT CANDIDATE_ID FROM BSDACAND WHERE ANALYSIS_ID=? AND RESULT_VERSION=? AND SELECTED_YN='Y' AND CONFIRMED_YN='Y' AND GENERATED_YN='N'", String.class, id, version);
+            Set<String> reqIds = reqIds(id);
+            Set<String> menus = menuIds((String) a.get("PROJECT_ID"));
+            boolean unresolved = hasUnresolved(id, version);
+            for (String cid : targets)
+                if (CandidateRules.blocked(CandidateRules.issues(effective(candidate(id, cid)), reqIds, menus, unresolved)))
+                    throw new AnalysisException(HttpStatus.UNPROCESSABLE_ENTITY, "CANDIDATE_BLOCKED", "확정 이후 검증 오류가 생긴 후보가 있습니다. 후보를 다시 확정하세요: " + cid);
             if (targets.isEmpty()) throw new AnalysisException(HttpStatus.UNPROCESSABLE_ENTITY, "NOTHING_TO_GENERATE", "생성할 확정 후보가 없습니다.");
             try {
                 tx.executeWithoutResult(s -> {
@@ -329,12 +357,35 @@ public class AnalysisService {
                 itemFailed(req.GENERATION_REQUEST_ID(), cid, "PROGRAM_CREATE_FAILED", "Program 생성에 실패했습니다. 재시도할 수 있습니다.");
             }
         }
-        int total = jdbc.queryForObject("SELECT COUNT(*) FROM BSDAGITM WHERE GENERATION_REQUEST_ID=?", Integer.class, req.GENERATION_REQUEST_ID());
-        int ok = jdbc.queryForObject("SELECT COUNT(*) FROM BSDAGITM WHERE GENERATION_REQUEST_ID=? AND STATUS='SUCCESS'", Integer.class, req.GENERATION_REQUEST_ID());
-        String result = ok == total ? "GENERATED" : ok > 0 ? "PARTIAL" : "GENERATION_FAILED";
-        jdbc.update("UPDATE BSDAGREQ SET STATUS=?, UPDATED_AT=CURRENT_TIMESTAMP WHERE GENERATION_REQUEST_ID=?", result, req.GENERATION_REQUEST_ID());
-        jdbc.update("UPDATE BSDAANLS SET ANALYSIS_STATUS=?, UPDATED_AT=CURRENT_TIMESTAMP WHERE ANALYSIS_ID=?", result, id);
+        finalizeGeneration(id, req.GENERATION_REQUEST_ID());
         return generation(id);
+    }
+
+    private void finalizeGeneration(String id, String requestId) {
+        int total = jdbc.queryForObject("SELECT COUNT(*) FROM BSDAGITM WHERE GENERATION_REQUEST_ID=?", Integer.class, requestId);
+        int ok = jdbc.queryForObject("SELECT COUNT(*) FROM BSDAGITM WHERE GENERATION_REQUEST_ID=? AND STATUS='SUCCESS'", Integer.class, requestId);
+        String result = ok == total ? "GENERATED" : ok > 0 ? "PARTIAL" : "GENERATION_FAILED";
+        jdbc.update("UPDATE BSDAGREQ SET STATUS=?, UPDATED_AT=CURRENT_TIMESTAMP WHERE GENERATION_REQUEST_ID=?", result, requestId);
+        jdbc.update("UPDATE BSDAANLS SET ANALYSIS_STATUS=?, UPDATED_AT=CURRENT_TIMESTAMP WHERE ANALYSIS_ID=?", result, id);
+    }
+
+    /** Querying an unconfirmed generation checks which Programs really exist, then opens retry for the failed items only. */
+    private void reconcileGeneration(String id) {
+        List<Map<String, Object>> reqs = jdbc.queryForList("SELECT GENERATION_REQUEST_ID FROM BSDAGREQ WHERE ANALYSIS_ID=? ORDER BY CREATED_AT DESC, GENERATION_REQUEST_ID DESC", id);
+        if (reqs.isEmpty()) {
+            jdbc.update("UPDATE BSDAANLS SET ANALYSIS_STATUS='CONFIRMED', UPDATED_AT=CURRENT_TIMESTAMP WHERE ANALYSIS_ID=?", id);
+            return;
+        }
+        String requestId = (String) reqs.getFirst().get("GENERATION_REQUEST_ID");
+        for (Map<String, Object> item : jdbc.queryForList("SELECT CANDIDATE_ID FROM BSDAGITM WHERE GENERATION_REQUEST_ID=? AND STATUS<>'SUCCESS'", requestId)) {
+            String cid = (String) item.get("CANDIDATE_ID");
+            List<String> programs = jdbc.queryForList("SELECT PROGRAM_ID FROM BSDGPROG WHERE SOURCE_CANDIDATE_ID=?", String.class, cid);
+            if (!programs.isEmpty())
+                jdbc.update("UPDATE BSDAGITM SET STATUS='SUCCESS', PROGRAM_ID=?, ERROR_CODE=NULL, ERROR_MESSAGE=NULL, UPDATED_AT=CURRENT_TIMESTAMP WHERE GENERATION_REQUEST_ID=? AND CANDIDATE_ID=?", programs.getFirst(), requestId, cid);
+            else
+                itemFailed(requestId, cid, "GENERATION_NOT_CONFIRMED", "생성 여부를 확인할 수 없어 실패로 처리했습니다. 재시도할 수 있습니다.");
+        }
+        finalizeGeneration(id, requestId);
     }
 
     private void itemFailed(String requestId, String candidateId, String code, String message) {
@@ -343,7 +394,7 @@ public class AnalysisService {
     }
 
     public ObjectNode generation(String id) {
-        row(id);
+        if ("GENERATION_UNKNOWN".equals(row(id).get("ANALYSIS_STATUS"))) reconcileGeneration(id);
         ObjectNode out = om.createObjectNode();
         List<Map<String, Object>> reqs = jdbc.queryForList("SELECT GENERATION_REQUEST_ID, RESULT_VERSION, STATUS FROM BSDAGREQ WHERE ANALYSIS_ID=? ORDER BY CREATED_AT DESC, GENERATION_REQUEST_ID DESC", id);
         out.put("ANALYSIS_ID", id);

@@ -22,6 +22,7 @@ export interface Requirement {
   REQUIREMENT_TYPE_CODE: string;
   DESCRIPTION: string;
   PROCESS_DESCRIPTION: string;
+  DESIGN_OPINION?: string;
   STATUS: string;
   MOD_DT: string;
   MENU_KEYS: string[];
@@ -29,7 +30,7 @@ export interface Requirement {
   ATTACHMENTS: RequirementAttachment[];
   LEGACY_SOURCE_ID?: string;
 }
-export type RequirementInput = Pick<Requirement, 'PROJECT_ID' | 'REQUIREMENT_NAME' | 'REQUIREMENT_TYPE_CODE' | 'DESCRIPTION' | 'PROCESS_DESCRIPTION' | 'STATUS' | 'MENU_KEYS' | 'PROJECT_MENU_IDS'> & {
+export type RequirementInput = Pick<Requirement, 'PROJECT_ID' | 'REQUIREMENT_NAME' | 'REQUIREMENT_TYPE_CODE' | 'DESCRIPTION' | 'PROCESS_DESCRIPTION' | 'DESIGN_OPINION' | 'STATUS' | 'MENU_KEYS' | 'PROJECT_MENU_IDS'> & {
   LEGACY_SOURCE_ID?: string;
   LEGACY_WBS_IDS?: string;
   LEGACY_SCREEN_IDS?: string;

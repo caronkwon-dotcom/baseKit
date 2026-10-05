@@ -17,6 +17,8 @@ API 계약, DB, 권한 로직, Action Code 의미, 업무 데이터 매핑·저�
 
 ## 작업과 완료
 
-최신 dev-pm 포함 여부 확인 → 기존 지시서·검토 문서 확인 → 구현된 화면의 UI 직접 보정 → 실제 브라우저 검수 → 문서·코드 동기화 → design-work commit/push → dev-pm merge 가능 여부 판정.
+최신 dev-pm으로 design-work 현행화 → 기존 지시서·검토 문서 확인 → 실제 화면 UI 직접 보정 → 검증 → design-work에 모든 변경 commit/push → DESIGN 내부 산출물과 제품 UI 코드 분류 → 제품에 필요한 UI commit만 dev-pm cherry-pick → dev-pm build/lint/관련 테스트·브라우저 재검수.
 
-기능 전체 완료를 기다리지 않고 구현된 부분부터 디자인 보정한다. 미구현 기능·미확정 상태/API를 디자인 작업으로 구현하지 않는다. 실제 연동과 API fixture 검수를 구분하고, 미통과 항목과 COMMON/SD 의존성을 남긴다. Merge는 별도 사용자 승인 대상이다.
+제품 UI 코드와 DESIGN 내부 문서·프로토타입·검수 스크립트는 별도 commit으로 작성한다. DESIGN 내부 산출물은 제품 동작에 필요하지 않으면 dev-pm에 반영하지 않는다. 문서가 제품 계약에 꼭 필요할 때만 근거를 기록하고 별도 반영한다. design-work 전체 merge로 내부 산출물을 함께 섞지 않는다. 이미 병합된 과거 문서는 이번에 삭제하거나 이력을 재작성하지 않는다.
+
+기능 전체 완료를 기다리지 않고 구현된 부분부터 디자인 보정한다. 미구현 기능·미확정 상태/API를 디자인 작업으로 구현하지 않는다. 실제 연동과 API fixture 검수를 구분하고, 미통과 항목과 COMMON/SD 의존성을 남긴다. 이번 요청은 위 순서의 commit/push 및 제품 UI만 dev-pm 반영을 승인한다. main 승격은 별도 승인 대상이다. 공통 구조/API 확장은 COMMON 협의로 분리하되 사용자가 이번에 승인한 최소 Toolbar 연결점은 직접 구현한다.
