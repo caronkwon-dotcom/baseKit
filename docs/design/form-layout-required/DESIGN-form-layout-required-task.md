@@ -216,3 +216,4 @@ DESIGN 팀은 실제 제품 화면의 UI 표현을 직접 수정할 수 있다.
 - build/lint 통과, Frontend 53/53, Backend 46건 실패 0·외부 DB 조건 제외 5건, diff check 통과.
 - In-app Chromium 실제 요구사항 화면 1280/1440/1920에서 혼합 배치와 겹침 없음 확인. 기존 Backend 조회 데이터 사용, 실제 저장 변경 없음. 공통 MetadataForm fixture에서 같은 3개 폭과 480px 패널, 긴 한글/영문 label, textarea, 다중행 error, aria-required/invalid/describedby, dot 5px, 가로 넘침 없음 확인. Fixture의 좁은 폭 검수는 Shell 최소 폭을 제외한 독립 Form 검수다.
 - COMMON: 이번 승인된 최소 표현 계약 확장을 적용했으며 추가 차단 협의 없음. 다른 Form도 FormField와 standard-form-layout으로 순차 적용 가능.
+- 최종 게시 직전 dev-pm이 5d31a1d로 갱신되어 이를 추가 현행화했다. 제품 변경만 선택한 통합 브랜치 a93c72c에서 build/lint/Frontend 53건 및 실제 UI 3개 폭을 재검수했다.
