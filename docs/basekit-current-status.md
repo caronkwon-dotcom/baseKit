@@ -15,6 +15,10 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 
 현재는 **Level 1: 시스템 공통 Foundation** 단계다. 초급 개발자도 가이드와 규약을 따르면 일관된 화면과 코드를 만들 수 있고, 개발자 변경에도 프로젝트 스타일이 흔들리지 않는 기반을 목표로 한다.
 
+## DESIGN 선택 반영 운영 및 Endpoint 정렬 완료 (2026-10-05)
+
+기준 dev-pm b28dc96 → design-work 현행화. 사용자 승인한 최소 공통 옵션 슬롯·공유 Detail Toolbar track으로 Endpoint Select를 Toolbar에 통합했다. Chrome 6조합에서 header 차이 0px, 빈 목록·너비 변경 유지, build/lint 및 Backend 42건(5 skip) 통과. 기능/API/DB/권한 의미 변경 없음. 제품 UI 파일 4개만 dev-pm에 cherry-pick하며 이번 문서/검수 스크립트/측정은 DESIGN 내부 산출물로 design-work에 유지한다. 아래 이전 작업 기록은 과거 이력이다.
+
 ## DESIGN 역할 정정 및 프로그램관리 UI 보정 (2026-10-05)
 
 최신 dev-pm a928069를 포함한 design-work에서 DESIGN 문서를 재검토하고 실제 UI 표현 수정 책임을 명시했다. [역할 기준](design/DESIGN-role.md), [검토 결과](design/grid-status-type-badge/DESIGN-grid-badge-review.md). 상태 compact semantic Badge, 유형 neutral label, 공통 Toolbar Select 스타일 및 긴 Title/Action 표현 보정은 직접 적용했다. API/DB/권한/업무 매핑은 유지했다.

@@ -2,7 +2,7 @@
 
 2026-10-05 · 기준 dev-pm `a928069d23c11bdac52f5b6fbe1bf28048345eba`, 작업 시작 design-work `24bfdfaecdb8f8f5b608b86bce878955efb59dda`.
 
-**판정: UI 보정 일부 완료 / Endpoint Toolbar 통합과 좌우 시작선은 COMMON 확장 후 재검수 / 전체 디자인 완료 판정 보류 / 사용자 승인에 따라 dev-pm 통합.**
+**이전 검수 판정:  UI 보정 일부 완료 / Endpoint Toolbar 통합과 좌우 시작선은 COMMON 확장 후 재검수 / 전체 디자인 완료 판정 보류 / 사용자 승인에 따라 dev-pm 통합.**
 
 [DESIGN 역할](../DESIGN-role.md)을 적용한다. 과거 `40040d2` 기준 문서 검토는 당시 기록이며, Endpoint 미구현·코드 수정 금지·문서 인계만으로 종료한다는 판단은 현재 기준에 적용하지 않는다. 당시 원문은 Git 이력에 보존되어 있다.
 
@@ -54,3 +54,15 @@ DESIGN-team-task, DESIGN-next-task, SD-UX-handoff, UX-review, COMMON-UX-requests
 Frontend build/lint, Backend test(42건, 실패/오류 0, PostgreSQL 조건 5건 skip), git diff --check 통과. Backend 실행의 초기 sandbox 경로/연결 제약은 작업 폴더 Maven cache와 허용된 다운로드로 해결했다.
 
 문서와 직접 보정 코드를 design-work에 함께 commit/push한다. Endpoint Toolbar/좌우 시작선은 미완료지만, 사용자가 design-work push 및 dev-pm merge를 명시적으로 승인했다. 이번 보정 코드를 dev-pm에 통합하고 COMMON 확장 후 DESIGN 최종 보정·브라우저 재검수를 후속 과제로 유지한다. 통합 승인은 미통과 시각 항목의 완료 판정을 뜻하지 않는다.
+
+## 이번 작업 최종 검수 (2026-10-05)
+
+기준 최신 dev-pm: b28dc96bb22e87040a70c7af686e17c44c3741e5. design-work를 fast-forward 현행화했다. 이전 Badge·neutral Label 수정은 이미 dev-pm에 포함되어 재작성하지 않았다. 과거 문서 전체 merge 이력은 유지하고, 이번부터 제품 UI와 내부 산출물을 별도 commit으로 분리한다.
+
+사용자 승인에 따라 최소 공통 Toolbar 옵션 슬롯과 선택형 좌우 Detail 정렬 계약을 구현했다. Endpoint Select 둘을 공통 Toolbar 둘째 행으로 옮기고 기존 handlers/disabled/권한 필터/metrics를 유지했다. 직계 Detail Grid들은 공유 subgrid track으로 같은 높이를 사용하며 옵션 줄바꿈에도 시작선을 유지한다.
+
+Chrome 실제 React/CSS + API fixture: 1920/1440/1280 × ICON_TEXT/ICON_ONLY 6조합 통과. 좌우 Toolbar 상단/높이 및 Grid header 차이 0px, 0건 상세와 divider 너비 조절 후에도 header 일치. Row 32px, Header theme 34px(border-box 실측 35px), Badge 20px 셀 내부, Select 28px, neutral Label·표시 필터(UNMAPPED 15건)·내부 scroll 확인. 페이지 오류/쓰기 요청 0. 1280 ICON_TEXT 화면 캡처를 직접 확인했다. 실제 Backend/DB 연동 브라우저 검수는 아니다.
+
+내부 문서 4개와 검수 스크립트 및 측정 JSON은 design-work 전용이다. dev-pm에는 frontend UI 파일 4개만 cherry-pick한다. 과거 본문의 미통과·전체 merge 지시는 과거 기록이며 이번 운영 기준에는 적용하지 않는다. COMMON 추가 구현 요청과 SD 기능 개발 요청은 없다.
+
+이번 실행: frontend build/lint 및 git diff --check 통과. Backend 전체 42건, 실패/오류 0, 외부 PostgreSQL 조건 5건 skip. Vite 대형 chunk 경고는 기존 항목으로 남는다.
