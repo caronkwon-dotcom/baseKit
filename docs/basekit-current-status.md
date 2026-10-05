@@ -18,6 +18,7 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 ## 2. 코드까지 구현 완료
 
 - COMMON-002 (`common-work`): Program 표준 Grid 60:40 / 40:60 resizable Master/Detail, Program별 버튼 권한 그룹 DB 저장, Spring MVC Endpoint 자동수집·ACTIVE/STALE 상태, 다대다 Program 연결과 UNMAPPED 조회. 서버 권한 정책과 Host 인증 Provider 연결 계약 및 HTTP interceptor 검증 구현. 기본 실행에는 인증 Provider가 없으므로 운영 사용자 권한 집행 연결은 미완료다. Menu/Role/SD 확장은 제외. Frontend build/lint 통과, Backend 34건 중 29건 통과·외부 PostgreSQL 조건 5건 skip, 브라우저 1440×900·1280×800 검증. [ADR-033](decisions/033-program-endpoint-button-groups.md) · [RESULT](tasks/common/COMMON-002-RESULT.md)
+- Worktree 공통 실행 프로필: Spring dev-pm/common/design/sd와 Vite mode로 5173~5176 / 8080~8083 고정 포트 제공. DB 설정과 API proxy 경로 유지. 실행 명령은 README의 Worktree 실행 프로필 참고.
 
 - Standard Design Requirement Intake V1: Backend canonical Requirement·Menu 관계·Attachment (Flyway V5), 명시적 LocalStorage 이관, Project List-Detail 재사용, 복수 메뉴·파일·이미지 Preview. 프로젝트/메뉴 원본은 기존 구조와 논리 참조하며 OCR/LLM은 미구현. [ADR-031](decisions/031-requirement-intake-backend-boundary.md)
 - 공통 `BaseFileUpload` V1: native input/drag & drop, 다중 파일, 정책 기반 사전검증, 파일별 진행률·취소·재시도·삭제, bounded concurrency와 XHR multipart transport. Requirement Attachment에 첫 적용. [ADR-032](decisions/032-base-file-upload-component.md) · [인계 보고서](base-file-upload-v1-handoff.md)
