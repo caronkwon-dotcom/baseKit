@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
@@ -8,7 +8,6 @@ import type { ViteDevServer } from 'vite'
 
 const CURATION_FILE = path.resolve('meta/term-curation.json')
 const REPOSITORY_ROOT = fileURLToPath(new URL('..', import.meta.url))
-const BACKEND_URL = process.env.BASEKIT_BACKEND_URL ?? 'http://localhost:8080'
 const DOCUMENT_VIRTUAL_ID = 'virtual:basekit-documents'
 const RESOLVED_DOCUMENT_VIRTUAL_ID = `\0${DOCUMENT_VIRTUAL_ID}`
 const EDITABLE_METADATA_FILES = new Map([
@@ -166,19 +165,28 @@ function editableMetadataLocalApi() {
 }
 
 // GitHub Pages project site: https://caronkwon-dotcom.github.io/baseKit/
-export default defineConfig({
-  base: '/baseKit/',
-  plugins: [react(), basekitDocumentsPlugin(), termCurationLocalApi(), editableMetadataLocalApi()],
-  server: {
-    host: '0.0.0.0',
-    allowedHosts: ['.app.github.dev'],
-    proxy: {
-      '/api/health': BACKEND_URL,
-      '/api/core': BACKEND_URL,
-      '/api/standard-design': BACKEND_URL,
-      '/actuator': BACKEND_URL,
-      '/v3/api-docs': BACKEND_URL,
-      '/swagger-ui': BACKEND_URL,
-    },
-  },
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, fileURLToPath(new URL('.', import.meta.url)), 'VITE_')
+  const backendUrl = process.env.BASEKIT_BACKEND_URL ?? env.VITE_BACKEND_URL ?? 'http://localhost:8080'
+  const port = Number(env.VITE_PORT ?? 5173)
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error('VITE_PORT must be an integer between 1 and 65535')
+  }
+  return {
+    base: '/baseKit/',
+    plugins: [react(), basekitDocumentsPlugin(), termCurationLocalApi(), editableMetadataLocalApi()],
+    server: {
+      port,
+      strictPort: true,
+      host: '0.0.0.0',
+      allowedHosts: ['.app.github.dev'],
+      proxy: {
+        '/api/health': backendUrl,
+        '/api/core': backendUrl,
+        '/api/standard-design': backendUrl,
+        '/actuator': backendUrl,
+        '/v3/api-docs': backendUrl,
+        '/swagger-ui': backendUrl,
+      },
+    },  }
 })

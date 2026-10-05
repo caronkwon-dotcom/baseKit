@@ -158,6 +158,33 @@ npm run backend:test
 - Actuator: `http://localhost:8080/actuator/health`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 
+## Worktree 실행 프로필
+
+저장소 루트에서 Frontend와 Backend를 별도 터미널로 실행합니다.
+
+| 브랜치 / worktree | Vite mode / Spring profile | Frontend | Backend | Frontend 명령 |
+| --- | --- | --- | --- | --- |
+| dev-pm | dev-pm | 5173 | 8080 | `npm run dev:dev-pm` |
+| common-work / common | common | 5174 | 8081 | `npm run dev:common` |
+| design-work / design | design | 5175 | 8082 | `npm run dev:design` |
+| sd-work / sd | sd | 5176 | 8083 | `npm run dev:sd` |
+
+Backend는 해당 profile 이름을 전달합니다 (아래 common을 dev-pm/design/sd로 바꿔 사용).
+
+```bash
+npm run backend:run -- -Dspring-boot.run.profiles=common
+```
+
+H2 로컬 DB를 사용할 때는 Maven local 옵션과 Spring local profile을 함께 지정합니다.
+
+```bash
+node scripts/run-backend-maven.mjs -Plocal spring-boot:run -Dspring-boot.run.profiles=local,common
+```
+
+포트 profile은 `server.port`만 설정하며 기존 PostgreSQL/환경변수 설정을 그대로 사용합니다. `local`, `codespace` 등 환경 profile과 조합할 수 있습니다. 포트 profile은 한 번에 하나만 선택합니다. Spring의 `SERVER_PORT`/명령행 옵션은 명시적 override로 우선합니다.
+
+Frontend mode 파일은 `frontend/.env.*`에서 포트와 proxy target을 제공합니다. 기존 `BASEKIT_BACKEND_URL` 환경변수 override와 API proxy 경로를 유지합니다. `npm run dev` 기본값은 5173/8080이고, 지정 포트가 사용 중이면 자동으로 다른 포트로 이동하지 않고 종료합니다. 비밀정보는 공통 mode 파일에 넣지 않습니다.
+
 ## Full Stack 디렉터리
 
 ```text
