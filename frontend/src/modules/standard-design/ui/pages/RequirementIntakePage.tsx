@@ -1,3 +1,5 @@
+import FormSelect from '../../../../components/common/FormSelect';
+import RequiredFieldsNotice from '../../../../components/common/RequiredFieldsNotice';
 import FormField from '../../../../components/common/FormField';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { ActionButton, BaseKitMessage, BaseTabs, ExcelImportDialog, PageHeader, SearchPanel, downloadExcelTemplate, type BaseTabDefinition, type DataTableColumn, type SearchFieldConfig } from '../../../../components/common';
@@ -45,14 +47,16 @@ interface MaxLengthFieldProps {
   rows?: number;
   required?: boolean;
   placeholder?: string;
+  error?: string;
+  errorId?: string;
 }
 
-function MaxLengthField({ value, maxLength, onChange, multiline = false, rows, required = false, placeholder }: MaxLengthFieldProps) {
+function MaxLengthField({ value, maxLength, onChange, multiline = false, rows, required = false, placeholder, error, errorId }: MaxLengthFieldProps) {
   const nextValue = (next: string) => onChange(next.slice(0, maxLength));
   return <span className={`sd-max-length-field${multiline ? ' sd-max-length-field--multiline' : ''}`}>
     {multiline
-      ? <textarea rows={rows} required={required} maxLength={maxLength} value={value} placeholder={placeholder} onChange={(event) => nextValue(event.target.value)} />
-      : <input required={required} maxLength={maxLength} value={value} placeholder={placeholder} onChange={(event) => nextValue(event.target.value)} />}
+      ? <textarea rows={rows} required={required} aria-invalid={error ? true : undefined} aria-describedby={error ? errorId : undefined} maxLength={maxLength} value={value} placeholder={placeholder} onChange={(event) => nextValue(event.target.value)} />
+      : <input required={required} aria-invalid={error ? true : undefined} aria-describedby={error ? errorId : undefined} maxLength={maxLength} value={value} placeholder={placeholder} onChange={(event) => nextValue(event.target.value)} />}
     <small aria-live="polite">{value.length}/{maxLength}</small>
   </span>;
 }
@@ -70,6 +74,8 @@ export default function RequirementIntakePage() {
   const [statuses, setStatuses] = useState(defaultRequirementStatuses);
   const [statusColors, setStatusColors] = useState(new Map<string, string>());
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info' | 'warn'; text: string } | null>(null);
+  const [validationAttempted, setValidationAttempted] = useState(false);
+  const fieldErrors = { name: validationAttempted && !draft.REQUIREMENT_NAME.trim() ? '요구사항명을 입력하세요.' : undefined, description: validationAttempted && !draft.DESCRIPTION.trim() ? '요구사항 내용을 입력하세요.' : undefined };
   const [busy, setBusy] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
   const [selectedRowKeys, setSelectedRowKeys] = useState(new Set<string>());
@@ -100,7 +106,7 @@ export default function RequirementIntakePage() {
   const reportAttachmentError = useCallback((text: string) => setMessage({ type: 'error', text }), []);
   const select = (row: Requirement) => {
     const value: RequirementInput = { PROJECT_ID: row.PROJECT_ID, REQUIREMENT_NAME: row.REQUIREMENT_NAME, REQUIREMENT_TYPE_CODE: row.REQUIREMENT_TYPE_CODE, DESCRIPTION: row.DESCRIPTION, PROCESS_DESCRIPTION: row.PROCESS_DESCRIPTION, DESIGN_OPINION: row.DESIGN_OPINION ?? '', STATUS: row.STATUS, MENU_KEYS: row.MENU_KEYS, PROJECT_MENU_IDS: row.PROJECT_MENU_IDS ?? [] };
-    setSelectedId(row.REQUIREMENT_ID); setSelectedRowKeys(new Set([row.REQUIREMENT_ID])); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); setMenuRelationSelected(new Set());
+    setValidationAttempted(false); setSelectedId(row.REQUIREMENT_ID); setSelectedRowKeys(new Set([row.REQUIREMENT_ID])); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); setMenuRelationSelected(new Set());
     setLegacyMenuKeys(row.MENU_KEYS);
     replaceMenuRelations(row.PROJECT_MENU_IDS.map((id) => { const item = projectMenus.find((menu) => menu.PROJECT_MENU_ID === id); return item ? { PROJECT_MENU_ID: item.PROJECT_MENU_ID, MENU_ID: item.MENU_ID, MENU_NAME: item.MENU_NAME, LEVEL1_MENU_ID: item.LEVEL1_MENU_ID } : { PROJECT_MENU_ID: id, MENU_ID: id, MENU_NAME: '프로젝트 메뉴를 찾을 수 없음', LEVEL1_MENU_ID: null }; }));
   };
@@ -133,7 +139,7 @@ export default function RequirementIntakePage() {
   useEffect(() => { if (!dirty) return; const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; }; window.addEventListener('beforeunload', warn); return () => window.removeEventListener('beforeunload', warn); }, [dirty]);
   const update = <K extends keyof RequirementInput>(key: K, value: RequirementInput[K]) => setDraft((previous) => ({ ...previous, [key]: value }));
   const run = async (work: () => Promise<void>) => { setBusy(true); try { await work(); } catch (error) { setMessage({ type: 'error', text: error instanceof Error ? error.message : '작업을 완료하지 못했습니다.' }); } finally { setBusy(false); } };
-  const resetDraft = () => { setSelectedId(''); setSelectedRowKeys(new Set()); setMenuRelationSelected(new Set()); setLegacyMenuKeys([]); replaceMenuRelations([]); const value = emptyDraft(projectId); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); };
+  const resetDraft = () => { setValidationAttempted(false); setSelectedId(''); setSelectedRowKeys(new Set()); setMenuRelationSelected(new Set()); setLegacyMenuKeys([]); replaceMenuRelations([]); const value = emptyDraft(projectId); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); };
   const excelContext = { projectId, types, statuses, projectMenus };
   const importedKeys = useRef(new Set<string>());
   const importRequirements = async (items: RequirementInput[]) => {
@@ -155,6 +161,7 @@ export default function RequirementIntakePage() {
   };
   const save = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setValidationAttempted(true);
     if (draft.PROJECT_ID !== projectId) { setMessage({ type: 'warn', text: '프로젝트 변경이 완료된 후 다시 저장하세요.' }); return; }
     if (!draft.REQUIREMENT_NAME.trim()) { setMessage({ type: 'warn', text: '요구사항명을 입력하세요.' }); return; }
     if (!draft.DESCRIPTION.trim()) { setMessage({ type: 'warn', text: '요구사항 내용을 입력하세요.' }); return; }
@@ -198,10 +205,10 @@ export default function RequirementIntakePage() {
   const filteredProjectMenus = projectMenus.filter((menu) => !menuRelationRows.some((row) => row.PROJECT_MENU_ID === menu.PROJECT_MENU_ID)
     && (!projectMenuSearch.trim() || `${menu.MENU_ID} ${menu.MENU_NAME}`.toLocaleLowerCase().includes(projectMenuSearch.trim().toLocaleLowerCase())));
   const basicInfo: ReactNode = <div className="standard-form-layout standard-design-project-fields standard-design-project-fields--long-text">
-    <FormField label="요구사항명" required labelPosition="TOP" className="standard-design-project-description"><MaxLengthField required maxLength={200} value={draft.REQUIREMENT_NAME} onChange={(value) => update('REQUIREMENT_NAME', value)} /></FormField>
-    <FormField label="요구 유형"><select value={draft.REQUIREMENT_TYPE_CODE} onChange={(e) => update('REQUIREMENT_TYPE_CODE', e.target.value)}>{types.map((code) => <option key={code.CODE} value={code.CODE}>{code.CODE_NAME}</option>)}</select></FormField>
-    <FormField label="상태"><select value={draft.STATUS} onChange={(e) => update('STATUS', e.target.value)}>{statuses.map((status) => <option key={status.CODE} value={status.CODE}>{status.CODE_NAME}</option>)}</select></FormField>
-    <FormField label="요구사항 내용" required labelPosition="TOP" className="standard-design-project-description"><MaxLengthField required multiline rows={8} maxLength={4000} value={draft.DESCRIPTION} onChange={(value) => update('DESCRIPTION', value)} /></FormField>
+    <FormField error={fieldErrors.name} errorId="requirement-name-error" label="요구사항명" required labelPosition="TOP" className="standard-design-project-description"><MaxLengthField error={fieldErrors.name} errorId="requirement-name-error" required maxLength={200} value={draft.REQUIREMENT_NAME} onChange={(value) => update('REQUIREMENT_NAME', value)} /></FormField>
+    <FormField label="요구 유형"><FormSelect value={draft.REQUIREMENT_TYPE_CODE} onChange={value => update('REQUIREMENT_TYPE_CODE', value)} options={types.map(code => ({ value: code.CODE, label: code.CODE_NAME }))} /></FormField>
+    <FormField label="상태"><FormSelect value={draft.STATUS} onChange={value => update('STATUS', value)} options={statuses.map(code => ({ value: code.CODE, label: code.CODE_NAME }))} /></FormField>
+    <FormField error={fieldErrors.description} errorId="requirement-description-error" label="요구사항 내용" required labelPosition="TOP" className="standard-design-project-description"><MaxLengthField error={fieldErrors.description} errorId="requirement-description-error" required multiline rows={8} maxLength={4000} value={draft.DESCRIPTION} onChange={(value) => update('DESCRIPTION', value)} /></FormField>
     <FormField label="프로세스 설명" labelPosition="TOP" className="standard-design-project-description"><MaxLengthField multiline rows={8} maxLength={4000} value={draft.PROCESS_DESCRIPTION} onChange={(value) => update('PROCESS_DESCRIPTION', value)} /></FormField>
     <FormField label="설계 의견" labelPosition="TOP" className="standard-design-project-description"><MaxLengthField multiline rows={6} maxLength={10000} value={draft.DESIGN_OPINION ?? ''} onChange={(value) => update('DESIGN_OPINION', value)} /></FormField>
   </div>;
@@ -254,7 +261,7 @@ export default function RequirementIntakePage() {
           ]} />
           <ExcelImportDialog open={excelOpen} columns={requirementExcelColumns} validateRow={createRequirementExcelValidator(excelContext)} mapRow={createRequirementExcelMapper(excelContext)} onImport={importRequirements} onClose={() => { importedKeys.current.clear(); setExcelOpen(false); }} />
         </div>}
-        detail={<div className="sd-requirement-detail"><form id="requirement-detail-form" className="standard-design-lifecycle-form standard-design-project-form" onSubmit={save}><div className="standard-design-project-detail-heading"><h2>{selectedId ? '요구사항 상세' : '신규 요구사항'}</h2><dl className="standard-design-project-id"><div><dt>ID</dt><dd>{selectedId || '신규 저장 시 생성'}</dd></div></dl></div><BaseTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} ariaLabel="요구사항 상세" /></form></div>}
+        detail={<div className="sd-requirement-detail"><form noValidate id="requirement-detail-form" className="standard-design-lifecycle-form standard-design-project-form" onSubmit={save}><div><div className="standard-design-project-detail-heading"><h2>{selectedId ? '요구사항 상세' : '신규 요구사항'}</h2><dl className="standard-design-project-id"><div><dt>ID</dt><dd>{selectedId || '신규 저장 시 생성'}</dd></div></dl></div><RequiredFieldsNotice /></div><BaseTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} ariaLabel="요구사항 상세" /></form></div>}
       />
       <div className="sd-requirement-message-area" aria-live="polite">
         {message ? <BaseKitMessage type={message.type} message={message.text} dismissible onDismiss={() => setMessage(null)} /> : null}
