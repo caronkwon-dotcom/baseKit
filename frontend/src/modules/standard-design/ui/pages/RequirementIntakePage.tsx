@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
-import { ActionButton, BaseKitMessage, BaseTabs, PageHeader, SearchPanel, type BaseTabDefinition, type DataTableColumn, type SearchFieldConfig } from '../../../../components/common';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { ActionButton, BaseKitMessage, BaseTabs, ExcelImportDialog, PageHeader, SearchPanel, downloadExcelTemplate, type BaseTabDefinition, type DataTableColumn, type SearchFieldConfig } from '../../../../components/common';
 import { COMMON_ACTIONS } from '../../../../constants/actionCodes';
 import BaseKitDataGrid from '../../../../components/grid/BaseKitDataGrid';
 import { StatusColorIndicator } from '../../../../components/grid/gridCellComponents';
@@ -11,6 +11,7 @@ import RequirementAttachmentPanel from '../components/RequirementAttachmentPanel
 import { useProjectContext } from '../components/useProjectContext';
 import { requirementApi, type Requirement, type RequirementInput } from '../../requirement/requirementApi';
 import { projectMenuApi, type ProjectMenu } from '../../projectmenu/projectMenuApi';
+import { createRequirementExcelMapper, createRequirementExcelValidator, planRequirementImport, requirementExcelColumns, requirementImportKey } from '../../requirement/requirementExcel';
 
 const emptyDraft = (projectId: string): RequirementInput => ({ PROJECT_ID: projectId, REQUIREMENT_NAME: '', REQUIREMENT_TYPE_CODE: 'NEW', DESCRIPTION: '', PROCESS_DESCRIPTION: '', STATUS: 'DRAFT', MENU_KEYS: [], PROJECT_MENU_IDS: [] });
 const legacyKey = 'basekit.standard-design.lifecycle.v1';
@@ -80,6 +81,7 @@ export default function RequirementIntakePage() {
   const [projectMenus, setProjectMenus] = useState<ProjectMenu[]>([]);
   const [projectMenuSearch, setProjectMenuSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [excelOpen, setExcelOpen] = useState(false);
   const menuRelations = useGridRowState<MenuRelationRow>(menuRelationKey);
   const replaceMenuRelations = menuRelations.replace;
   const menuRelationRows = menuRelations.rows;
@@ -136,6 +138,25 @@ export default function RequirementIntakePage() {
   const update = <K extends keyof RequirementInput>(key: K, value: RequirementInput[K]) => setDraft((previous) => ({ ...previous, [key]: value }));
   const run = async (work: () => Promise<void>) => { setBusy(true); try { await work(); } catch (error) { setMessage({ type: 'error', text: error instanceof Error ? error.message : '작업을 완료하지 못했습니다.' }); } finally { setBusy(false); } };
   const resetDraft = () => { setSelectedId(''); setSelectedRowKeys(new Set()); setMenuRelationSelected(new Set()); setLegacyMenuKeys([]); replaceMenuRelations([]); const value = emptyDraft(projectId); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); setAnalysisRequirementIds([]); };
+  const excelContext = { projectId, types, statuses, projectMenus };
+  const importedKeys = useRef(new Set<string>());
+  const importRequirements = async (items: RequirementInput[]) => {
+    const plan = planRequirementImport(items, rows.map((row) => row.REQUIREMENT_NAME), importedKeys.current);
+    if (plan.duplicateNames.length > 0 && !window.confirm(`같은 이름의 요구사항이 이미 있거나 파일 안에 중복되어 있습니다(${plan.duplicateNames.length}건: ${plan.duplicateNames.slice(0, 3).join(', ')}${plan.duplicateNames.length > 3 ? ' 외' : ''}).\nExcel Import는 항상 신규 등록하며 기존 요구사항을 덮어쓰지 않습니다. 계속 등록하시겠습니까?`)) {
+      throw new Error('중복 가능 요구사항 확인에서 취소하여 등록하지 않았습니다.');
+    }
+    let created = 0;
+    for (const item of plan.toCreate) {
+      try { await requirementApi.create(item); importedKeys.current.add(requirementImportKey(item)); created += 1; }
+      catch (error) {
+        await load(selectedId);
+        throw new Error(`${plan.skippedAlreadyCreated + created}/${items.length}건 저장 후 '${item.REQUIREMENT_NAME}'에서 중단되었습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}. 저장된 건은 유지되며, 같은 파일로 Import를 다시 누르면 저장된 건은 건너뛰고 나머지만 등록합니다.`, { cause: error });
+      }
+    }
+    importedKeys.current.clear();
+    await load(selectedId);
+    setMessage({ type: 'success', text: `Excel에서 요구사항 ${plan.skippedAlreadyCreated + created}건을 신규 등록했습니다.${plan.skippedAlreadyCreated ? ` (이전 시도에서 저장된 ${plan.skippedAlreadyCreated}건 포함)` : ''}` });
+  };
   const save = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (draft.PROJECT_ID !== projectId) { setMessage({ type: 'warn', text: '프로젝트 변경이 완료된 후 다시 저장하세요.' }); return; }
@@ -243,7 +264,11 @@ export default function RequirementIntakePage() {
         list={<div className="project-list-detail-workspace__list-content">
       {mode === 'LIST' || searchOpen ? <div id="requirement-inline-search" className="project-inline-search"><SearchPanel rows={1} actionDisplay="label" fields={searchFields} value={searchCondition} initialValue={initialSearchCondition} onValueChange={setSearchCondition} onSearch={setAppliedSearch} onReset={(value) => { setSearchCondition(value); setAppliedSearch(value); }} /></div> : null}
           {mode !== 'LIST' ? <div className="project-master-heading project-master-heading--search-toggle"><span /><button type="button" className="secondary-button" aria-expanded={searchOpen} aria-controls="requirement-inline-search" onClick={() => setSearchOpen((open) => !open)}>검색</button></div> : null}
-          <BaseKitDataGrid programKey="SD_REQUIREMENT_DESIGN" roleCode="ADMIN" title="요구사항 목록" columns={requirementColumns} rows={visibleRows} getRowKey={(row) => row.REQUIREMENT_ID} selectedRowKeys={selectedRowKeys} onSelectedRowKeysChange={setSelectedRowKeys} currentRowKey={selectedId} onRowClick={(row) => { if (confirmDiscard()) select(row); }} emptyMessage="조회 조건에 맞는 요구사항이 없습니다." loading={busy} enabledActions={[]} toolbarActions={[{ actionCode: COMMON_ACTIONS.EXCEL_UPLOAD, label: 'Excel 가져오기', onClick: () => setMessage({ type: 'info', text: 'Excel 가져오기는 다음 단계에서 구현합니다.' }) }]} />
+          <BaseKitDataGrid programKey="SD_REQUIREMENT_DESIGN" roleCode="ADMIN" title="요구사항 목록" columns={requirementColumns} rows={visibleRows} getRowKey={(row) => row.REQUIREMENT_ID} selectedRowKeys={selectedRowKeys} onSelectedRowKeysChange={setSelectedRowKeys} currentRowKey={selectedId} onRowClick={(row) => { if (confirmDiscard()) select(row); }} emptyMessage="조회 조건에 맞는 요구사항이 없습니다." loading={busy} enabledActions={[]} toolbarActions={[
+            { actionCode: COMMON_ACTIONS.EXCEL_DOWNLOAD, label: 'Excel 양식', onClick: () => downloadExcelTemplate(requirementExcelColumns, 'requirement-import-template.xlsx') },
+            { actionCode: COMMON_ACTIONS.EXCEL_UPLOAD, label: 'Excel 가져오기', disabled: busy, onClick: () => setExcelOpen(true) },
+          ]} />
+          <ExcelImportDialog open={excelOpen} columns={requirementExcelColumns} validateRow={createRequirementExcelValidator(excelContext)} mapRow={createRequirementExcelMapper(excelContext)} onImport={importRequirements} onClose={() => { importedKeys.current.clear(); setExcelOpen(false); }} />
         </div>}
         detail={<div className="sd-requirement-detail"><form id="requirement-detail-form" className="standard-design-lifecycle-form standard-design-project-form" onSubmit={save}><div className="standard-design-project-detail-heading"><h2>{selectedId ? '요구사항 상세' : '신규 요구사항'}</h2><dl className="standard-design-project-id"><div><dt>ID</dt><dd>{selectedId || '신규 저장 시 생성'}</dd></div></dl></div><BaseTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} ariaLabel="요구사항 상세" /></form></div>}
       />
