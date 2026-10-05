@@ -204,3 +204,15 @@ DESIGN 팀은 실제 제품 화면의 UI 표현을 직접 수정할 수 있다.
 - dev-pm 반영 SHA
 - build/lint/test/브라우저 검수 결과
 - COMMON 추가 협의 여부
+
+## 10. 구현 확정 (2026-10-05)
+
+- 최신 원격 dev-pm `0f14086`을 design-work에 반영했다.
+- 공통 `FormField`와 `FieldDefinition.labelPosition: LEFT | TOP`을 사용한다. MetadataForm은 필드 옵션 → Form 옵션 → 컨트롤 권장값 순으로 결정한다. TEXTAREA 기본 TOP, 기타 기본 LEFT. 긴 단일행은 TOP을 명시한다.
+- 공통 `.standard-form-grid` 또는 `.standard-form-layout` 컨테이너가 560px 이하이면 LEFT도 TOP으로 전환한다. 라벨 track은 76~140px 범위이며 긴 문자열은 줄바꿈한다. 전체 Shell의 기존 최소 폭 1280px 정책은 유지한다.
+- `.standard-form-label.is-required::after`에 5px dot, 6px 간격, `--required-indicator`(기본 text-secondary)를 사용한다. Marker는 오류 색상과 독립이다. 실제 MetadataForm control에는 aria-required, 요구사항 기존 required는 유지한다.
+- MetadataForm.errors는 호출자의 기존 검증 결과만 표시한다. 오류 border/background/message, aria-invalid 및 aria-describedby를 적용하고 새 업무 검증을 추가하지 않는다.
+- 실제 요구사항 기본정보: 요구 유형/상태 LEFT, 요구사항명과 내용/프로세스 설명/설계 의견 TOP. 필수 명칭/내용 dot 적용. API/DB/권한/저장 검증 의미 변경 없음.
+- build/lint 통과, Frontend 53/53, Backend 46건 실패 0·외부 DB 조건 제외 5건, diff check 통과.
+- In-app Chromium 실제 요구사항 화면 1280/1440/1920에서 혼합 배치와 겹침 없음 확인. 기존 Backend 조회 데이터 사용, 실제 저장 변경 없음. 공통 MetadataForm fixture에서 같은 3개 폭과 480px 패널, 긴 한글/영문 label, textarea, 다중행 error, aria-required/invalid/describedby, dot 5px, 가로 넘침 없음 확인. Fixture의 좁은 폭 검수는 Shell 최소 폭을 제외한 독립 Form 검수다.
+- COMMON: 이번 승인된 최소 표현 계약 확장을 적용했으며 추가 차단 협의 없음. 다른 Form도 FormField와 standard-form-layout으로 순차 적용 가능.

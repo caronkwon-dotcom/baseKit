@@ -13,6 +13,10 @@
 - 최신 dev-pm 기준 build/lint/frontend 50건, design-work build/lint/frontend 53건, Backend 총 42건(실패 0, 조건부 제외 5건), diff check 통과. Chrome 1920/1440/1280 × ICON_TEXT/ICON_ONLY 6조합에서 초기 콤보, 변경 표시/취소/fixture PUT 저장, 32px 행, 20px Badge, 28px 옵션, UNMAPPED 15건, 좌우 title/header 차이 0px, 폭·높이 splitter 조절, 패널 버튼 경계 및 페이지 overflow를 확인했다. 공통 Grid 별도 fixture에서 readonly/DELETED disabled 및 방향키 변경 확인. 브라우저는 API fixture로 실제 DB 저장은 미검증이다.
 - COMMON 추가 협의: 차단 사항 없음. 이번 사용자 승인 범위에서 최소 공통 표현 계약 확장을 함께 구현했다. opt-in SELECT와 detailOptions를 다른 화면에서 사용할 때 같은 규격을 따른다. API/DB/권한 변경 없음.
 
+## Form LEFT/TOP 및 Required dot 표준 (2026-10-05)
+
+최신 원격 dev-pm 0f14086 기준으로 공통 FormField, FieldDefinition.labelPosition, MetadataForm textarea/오류 표현과 요구사항 화면을 수정했다. 짧은 필드 LEFT, 긴 입력 TOP을 혼합하며 560px 이하 Form 패널은 TOP 전환한다. 5px CSS pseudo-element dot와 실제 required/aria-required를 유지하고 error border/background/message를 분리했다. API/DB/권한/업무 검증 의미 변경 없음. build/lint 및 Frontend 53건 통과, Backend 46건 실패 0·조건부 제외 5건. 실제 요구사항 화면 1280/1440/1920, 공통 fixture 480px·긴 label·textarea·error 검수 완료. Shell 기존 최소 1280px는 유지한다. COMMON 추가 차단 협의 없음. 제품 반영에는 UI 변경 커밋만 선택하고 DESIGN 문서는 design-work에 유지한다. 상세는 docs/design/form-layout-required/DESIGN-form-layout-required-task.md 10절을 따른다.
+
 ## 1. 프로젝트 단계
 
 BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundation을 함께 확장하는 Full Stack 단계다. Admin Shell과 공통 관리 화면 패턴을 유지하면서 시스템 공통 V1의 API·DB 계약을 구체화한다.
