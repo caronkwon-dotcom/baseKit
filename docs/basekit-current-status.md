@@ -23,6 +23,13 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 
 통합본 build/lint, Frontend 회귀 53건, Backend H2 46건(41건 통과·외부 PostgreSQL 조건 5건 skip), git diff --check 통과. 브라우저 console error 0. 검수 주소: `http://localhost:5173/baseKit/#/standard-design/requirements`. 상세 범위와 남은 미검증 사항은 [오늘 작업 종결 보고](releases/2026-10-05-dev-pm-closeout.md)를 따른다. remote push와 main 승격은 수행하지 않았다. 아래 개별 작업 기록은 당시 검증 이력이다.
 
+## DESIGN Grid editable 기본 테두리 회귀 복원 (2026-10-05)
+
+공통 CSS의 1292264 변경이 resting editable cell 테두리를 1px에서 0으로 제거한 원인이다. 기존 공통 inset box 테두리를 복원하고 inline text/number/select editor의 border/background/padding 및 disabled/read-only 색상을 공통 토큰으로 보완했다. Batch 배경, row/header 크기, selection/focus, API/DB/권한 계약은 유지한다. 제품 반영은 CSS 커밋 500eb84만 cherry-pick하며 이 기록은 DESIGN에 유지한다.
+
+최신 로컬 dev-pm 통합본 5447cab을 보존하여 design-work를 현행화했다. 원격 dev-pm은 fetch 시 7ef190c으로 되돌아간 상태였으므로 강제 push하지 않고 기존 통합 이력을 보존하는 fast-forward만 사용한다.
+
+검증: build/lint, frontend 53/53, backend 46건 실패 0·조건부 제외 5. Chrome API fixture 검수: 공통코드 default 1px/hover/focus 2px, text editor border 1px·white background·좌우 padding 6px, read-only ID 편집 불가, 행 32px. 프로그램관리 1920/1440/1280 × 버튼 2모드에서 Badge 20px·Select 28px·헤더 정렬 차이 0px. 실제 DB 저장 검증은 이번 CSS 범위에서 수행하지 않았다. COMMON 옵션 슬롯/toolbarLayout/alignDetailToolbars 및 subgrid 지원 검토는 기존 협의사항으로 유지하며 신규 공개 API 변경은 없다. SD 추가 협의 없음.
 ## DESIGN 선택 반영 운영 및 Endpoint 정렬 완료 (2026-10-05)
 
 기준 dev-pm b28dc96 → design-work 현행화. 사용자 승인한 최소 공통 옵션 슬롯·공유 Detail Toolbar track으로 Endpoint Select를 Toolbar에 통합했다. Chrome 6조합에서 header 차이 0px, 빈 목록·너비 변경 유지, build/lint 및 Backend 42건(5 skip) 통과. 기능/API/DB/권한 의미 변경 없음. 제품 UI 파일 4개만 dev-pm에 cherry-pick하며 이번 문서/검수 스크립트/측정은 DESIGN 내부 산출물로 design-work에 유지한다. 아래 이전 작업 기록은 과거 이력이다.
