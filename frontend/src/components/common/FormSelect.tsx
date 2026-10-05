@@ -6,13 +6,15 @@ interface FormSelectProps {
   options: { value: string; label: string }[];
   onChange: (value: string) => void;
   disabled?: boolean;
+  className?: string;
+  'aria-label'?: string;
   'aria-required'?: boolean;
   'aria-invalid'?: boolean;
   'aria-describedby'?: string;
 }
 
 /** Shared form popup; business validation remains with the caller. */
-export default function FormSelect({ value, options, onChange, disabled, ...aria }: FormSelectProps) {
+export default function FormSelect({ value, options, onChange, disabled, className, ...aria }: FormSelectProps) {
   const id = useId();
   const control = useRef<HTMLButtonElement>(null);
   const popup = useRef<HTMLDivElement>(null);
@@ -39,7 +41,9 @@ export default function FormSelect({ value, options, onChange, disabled, ...aria
   }, [open]);
   useEffect(() => { if (open) popup.current?.querySelector(`[data-index="${active}"]`)?.scrollIntoView({ block: 'nearest' }); }, [active, open]);
   return <>
-    <button ref={control} type="button" className="standard-form-select" role="combobox" aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? id : undefined} aria-activedescendant={open && options.length ? `${id}-${active}` : undefined} disabled={disabled} {...aria}
+    <button ref={control} type="button" className={className ?? "standard-form-select"} role="combobox" aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? id : undefined} aria-activedescendant={open && options.length ? `${id}-${active}` : undefined} disabled={disabled} {...aria}
+      onBlur={event => { if (!popup.current?.contains(event.relatedTarget)) setOpen(false); }}
+      onMouseDown={event => event.stopPropagation()} onDoubleClick={event => event.stopPropagation()}
       onPointerDown={event => event.stopPropagation()} onClick={event => { event.stopPropagation(); if (open) setOpen(false); else show(); }}
       onKeyDown={event => {
         if (event.key !== 'Tab') event.stopPropagation();
@@ -53,7 +57,7 @@ export default function FormSelect({ value, options, onChange, disabled, ...aria
         else if (open && event.key === 'Home') setActive(0);
         else if (open && event.key === 'End') setActive(Math.max(0, options.length - 1));
       }}><span>{options.find(option => option.value === value)?.label ?? value}</span><span aria-hidden="true">▾</span></button>
-    {open && createPortal(<div ref={popup} id={id} role="listbox" className="standard-form-select-popup" style={position} onPointerDown={event => { event.preventDefault(); event.stopPropagation(); }}>
+    {open && !disabled && createPortal(<div ref={popup} id={id} role="listbox" aria-label={aria['aria-label']} className="standard-form-select-popup" style={position} onPointerDown={event => { event.preventDefault(); event.stopPropagation(); }}>
       {options.map((option, index) => <div key={option.value} id={`${id}-${index}`} role="option" aria-selected={value === option.value} data-index={index} className={`standard-form-select-option ${value === option.value ? 'is-selected' : ''} ${index === active ? 'is-active' : ''}`} onMouseEnter={() => setActive(index)} onClick={event => { event.stopPropagation(); onChange(option.value); setOpen(false); control.current?.focus(); }}><span>{option.label}</span><span aria-hidden="true">{value === option.value ? '✓' : ''}</span></div>)}
     </div>, document.body)}
   </>;
