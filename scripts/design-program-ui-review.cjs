@@ -1,0 +1,70 @@
+const { chromium } = require(process.env.BASEKIT_PLAYWRIGHT_MODULE || 'playwright');
+const fs = require('fs');
+const assert = require('node:assert/strict');
+const path = require('path');
+const root = path.resolve(__dirname, '..');
+const output = process.env.BASEKIT_DESIGN_REVIEW_OUTPUT || path.join(root, 'frontend/node_modules/.cache/design-review');
+fs.mkdirSync(output, { recursive: true });
+const programs = JSON.parse(fs.readFileSync(path.join(root, 'frontend/meta/programs.json'), 'utf8'));
+const fixtures = programs.slice(0, 2).map(p => ({ PROGRAM_ID:p.programKey, PROGRAM_KEY:p.programKey, PROGRAM_NAME:p.programName, MODULE_CODE:p.moduleCode, PROGRAM_TYPE_CODE:'GRID_DETAIL', ROUTE:p.routePath, DESCRIPTION:'디자인 검수 fixture', USE_YN:'Y' }));
+fixtures.push({ ...fixtures[0], PROGRAM_ID:'orphan', PROGRAM_KEY:'ORPHAN_FIXTURE' });
+const endpoints = Array.from({length:30}, (_,i) => ({ ENDPOINT_ID:`e${i}`, HTTP_METHOD:'GET', PATH:'/api/design/long-endpoint-path/'+i, CONTROLLER_CLASS:'DesignFixtureController', HANDLER_METHOD:'findPrograms', COLLECTION_STATUS:i%2?'STALE':'ACTIVE', MAPPING_STATUS:i%2?'UNMAPPED':'MAPPED', GROUP_CODE:null }));
+(async()=>{
+ const browser = await chromium.launch({headless:true,channel:process.env.BASEKIT_REVIEW_BROWSER || "chrome"});
+ const results=[];
+ for(const width of [1920,1440,1280]) for(const mode of ['ICON_TEXT','ICON_ONLY']) {
+  const context=await browser.newContext({viewport:{width,height:width===1920?1080:width===1440?900:800}});
+  await context.addInitScript(mode=>localStorage.setItem('basekit.ui-preferences.v1',JSON.stringify({skinId:'base',buttonDisplayMode:mode})),mode);
+  const page=await context.newPage(); const errors=[]; const writes=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.route('**/api/**', async route=>{
+   const r=route.request(), url=new URL(r.url()); let data=[];
+   if(r.method()!=='GET') { writes.push(r.method()+' '+url.pathname); return route.abort(); }
+   if(url.pathname.endsWith('/button-groups')) data=[{GROUP_CODE:'COMMON.SEARCH',GROUP_TYPE:'COMMON',GROUP_NAME:'조회',DESCRIPTION:'fixture',USE_YN:'Y'},{GROUP_CODE:'CUSTOM.APPROVE',GROUP_TYPE:'CUSTOM',GROUP_NAME:'승인',DESCRIPTION:'fixture',USE_YN:'Y'}];
+   else if(url.pathname.endsWith('/endpoints')) data=endpoints;
+   else if(url.pathname==='/api/core/programs') data=fixtures;
+   else if(url.pathname==='/api/core/codes') data=(url.searchParams.get('CODE_GROUP_ID')==='PROGRAM_TYPE_CODE'?[['GRID_DETAIL','목록·상세'],['HOME','홈'],['GRID','목록']]:[['SYSTEM','시스템'],['DEV_GUIDE','개발자가이드'],['SD','Standard Design']]).map(([CODE,CODE_NAME])=>({CODE,CODE_NAME}));
+   await route.fulfill({json:{SUCCESS:true,DATA:data}});
+  });
+  await page.goto((process.env.BASEKIT_REVIEW_URL || 'http://127.0.0.1:5175/baseKit/#/system/programs'));
+  await page.getByText('AVAILABLE',{exact:true}).first().waitFor();
+  await page.locator('.multi-grid-master .ag-cell[col-id="PROGRAM_KEY"]').first().click();
+  await page.getByText('COMMON.SEARCH',{exact:true}).first().waitFor();
+  await page.getByLabel('Endpoint 표시 범위').selectOption('ALL');
+  await page.getByLabel('추가 버튼 권한 그룹').focus();
+  const measurements=await page.evaluate(()=>{
+   const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}};
+   const grids=[...document.querySelectorAll('.program-data-grid')].map(g=>({title:g.querySelector('h2').textContent,toolbar:rect(g.querySelector('.grid-toolbar')),header:rect(g.querySelector('.ag-header')),row:g.querySelector('.ag-row')?rect(g.querySelector('.ag-row')):null}));
+   const badges=[...document.querySelectorAll('.metadata-badge')].map(e=>({text:e.textContent,rect:rect(e),cell:rect(e.closest('.ag-cell')),inside:e.getBoundingClientRect().top>=e.closest('.ag-cell').getBoundingClientRect().top && e.getBoundingClientRect().bottom<=e.closest('.ag-cell').getBoundingClientRect().bottom}));
+   const selects=[...document.querySelectorAll('.program-endpoint-controls select')].map(e=>({rect:rect(e),radius:getComputedStyle(e).borderRadius,outline:getComputedStyle(e).outlineStyle}));
+   return {grids,badges,selects,documentWidth:document.documentElement.scrollWidth,viewport:innerWidth,neutralLabels:document.querySelectorAll('.basekit-grid-label').length};
+  });
+  await page.screenshot({path:path.join(output,`design-${width}-${mode}.png`),fullPage:true});
+  await page.locator('.multi-grid-master .ag-cell[col-id="SOURCE_STATUS"]').first().click();
+  await page.locator('.multi-grid-master .ag-cell[col-id="SOURCE_STATUS"]').first().hover();
+  const focus=await page.locator('.multi-grid-master .ag-cell[col-id="SOURCE_STATUS"]').first().getAttribute('class');
+  await page.getByLabel('Endpoint 표시 범위').selectOption('UNMAPPED');
+  const unmapped=await page.locator('.program-endpoint-detail .grid-total').innerText();
+  await page.getByRole('button',{name:'조회',exact:true}).count();
+    await page.locator('.multi-grid-master .ag-body-vertical-scroll-viewport').evaluate(e=>e.scrollTop=10000);
+  await page.getByText('MISSING_SOURCE',{exact:true}).waitFor();
+  const missing=await page.getByText('MISSING_SOURCE',{exact:true}).evaluate(e=>({height:e.getBoundingClientRect().height,background:getComputedStyle(e).backgroundColor,text:getComputedStyle(e).color}));
+  await page.locator('.multi-grid-master .ag-body-vertical-scroll-viewport').evaluate(e=>e.scrollTop=0);
+  await page.getByText('NEW',{exact:true}).first().click();
+  await page.locator('.program-endpoint-detail .ag-overlay').waitFor();
+  const emptyHeaders=await page.locator('.multi-grid-detail .ag-header').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().top));
+    assert.equal(errors.length, 0, '페이지 오류');
+  assert.equal(writes.length, 0, '쓰기 요청');
+  assert.equal(measurements.documentWidth, width, '페이지 외곽 overflow');
+  assert(measurements.badges.every(b => b.inside && Math.abs(b.rect.height - 20) < 0.01), 'Badge metric/셀 경계');
+  assert(measurements.grids.every(g => g.row.height === 32 && g.header.height === 35), 'Grid metric');
+  assert(measurements.selects.every(s => s.rect.height === 28 && s.radius === '5px'), 'Select metric');
+  assert.equal(unmapped, '총 15건', '필터 후 건수');
+  assert.deepEqual(emptyHeaders, measurements.grids.slice(1).map(g => g.header.y), '0건 header 위치');
+  results.push({width,mode,errors,writes,measurements,focus,unmapped,missing,emptyHeaders});
+  await context.close();
+ }
+ fs.writeFileSync(path.join(output,'design-browser-results.json'),JSON.stringify(results,null,2));
+ console.log(JSON.stringify(results.map(r=>({width:r.width,mode:r.mode,errors:r.errors,writes:r.writes,headers:r.measurements.grids.map(g=>g.header.y),rowHeights:r.measurements.grids.map(g=>g.row?.height),badgeHeights:[...new Set(r.measurements.badges.map(b=>b.rect.height))],badgesInside:r.measurements.badges.every(b=>b.inside),selectHeights:r.measurements.selects.map(s=>s.rect.height),documentWidth:r.measurements.documentWidth,neutralLabels:r.measurements.neutralLabels,unmapped:r.unmapped})),null,2));
+ await browser.close();
+})().catch(e=>{console.error(e);process.exit(1)});

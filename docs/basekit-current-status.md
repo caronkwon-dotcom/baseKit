@@ -15,6 +15,12 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 
 현재는 **Level 1: 시스템 공통 Foundation** 단계다. 초급 개발자도 가이드와 규약을 따르면 일관된 화면과 코드를 만들 수 있고, 개발자 변경에도 프로젝트 스타일이 흔들리지 않는 기반을 목표로 한다.
 
+## DESIGN 역할 정정 및 프로그램관리 UI 보정 (2026-10-05)
+
+최신 dev-pm a928069를 포함한 design-work에서 DESIGN 문서를 재검토하고 실제 UI 표현 수정 책임을 명시했다. [역할 기준](design/DESIGN-role.md), [검토 결과](design/grid-status-type-badge/DESIGN-grid-badge-review.md). 상태 compact semantic Badge, 유형 neutral label, 공통 Toolbar Select 스타일 및 긴 Title/Action 표현 보정은 직접 적용했다. API/DB/권한/업무 매핑은 유지했다.
+
+Chrome 실제 제품/fixture 검수: 1920/1440/1280 × 두 버튼 모드, row/header 32/34px·Badge 20px·Select 28px, JS 오류 0. Endpoint 옵션은 아직 Toolbar 밖이며 좌우 header 차이 36px로 미통과. [COMMON 옵션 삽입 계약 요청](design/grid-status-type-badge/COMMON-Endpoint-toolbar-request.md)을 분리했고, 공통 확장 후 DESIGN이 배치와 재검수를 마무리해야 한다. 전체 목표 완료/merge 승인은 보류한다. build/lint/Backend test(42건, 실패 0·외부 PostgreSQL 조건 5건 skip) 통과.
+
 ## 2. 코드까지 구현 완료
 - Flyway V9 리소스 충돌 로컬 수정 (2026-10-05): Maven은 `backend/src/main/resources`와 `database/migration`을 모두 classpath에 복사한다. 공유 디렉터리의 `V9__create_sd_analysis.sql`은 backend의 V10과 동일한 SQL이므로 해당 구버전 파일만 Maven 복사 대상에서 제외했다. 기존 SQL/적용 이력을 수정하지 않았으며, 로컬 PostgreSQL에서 기존 V9 검증 후 V10 신규 적용, `mvnw.cmd clean spring-boot:run` 및 8080 health `UP` 확인. Frontend build/lint, Backend test 42건(실패 0, 오류 0, 외부 PostgreSQL 조건 5건 skip), `git diff --check` 통과. 작업 브랜치 `fix/flyway-v9-resource-collision`; 사용자의 기존 V9→V10 파일 변경과 함께 유지해야 한다.
 

@@ -7,7 +7,7 @@
 
 DESIGN 검토 결과: [DESIGN-grid-badge-review.md](DESIGN-grid-badge-review.md)
 
-검토 상태: 기준 SHA 소스 대조 완료 / 구현·시각 승인 대기. 아래는 원 작업 요구이며 실제 소스 근거, 권장 metric, native Select 재사용 및 Endpoint 미구현 범위는 연결된 검토 결과를 우선한다.
+검토 상태: 최신 dev-pm(a928069) 기준 UI 직접 보정 및 실제 브라우저 검수. Endpoint 공통 옵션 삽입 계약은 COMMON 의존성으로 남긴다. [DESIGN 역할](../DESIGN-role.md)과 연결된 최신 검토 결과를 따른다.
 
 ## 1. 목적
 
@@ -137,7 +137,7 @@ DESIGN 권고:
 
 ## 4. DESIGN 산출물
 
-DESIGN 팀은 다음을 확인하고 기준을 문서화한다.
+DESIGN 팀은 다음을 확인하고 UI 표현 코드를 직접 수정한 뒤 실제 화면과 문서를 함께 검수한다.
 
 1. 현재 상태/유형 renderer 및 관련 CSS가 공통인지 화면 전용인지 확인
 2. 상태 Badge / 유형 Label 각각의 권장 시각 규격 정리
@@ -145,22 +145,16 @@ DESIGN 팀은 다음을 확인하고 기준을 문서화한다.
 4. Endpoint 상단 `표시 / 선택 Program 연결 / 추가 권한` 영역이 어떤 기존 Toolbar/Form control 패턴을 재사용해야 하는지 확인
 5. 좌측 권한 그룹 Grid와 우측 Endpoint Grid의 상단/본문 시작선 정렬 기준 제시
 6. 최소 1개 프로그램관리 화면 기준 Before / After 비교안 작성
-7. 공통 적용 가능한 경우 COMMON 전달 여부 판정
-8. 화면 전용 구현이면 해당 화면 구현팀 전달 여부 판정
+7. 기존 공통 CSS/renderer 안의 표현은 DESIGN이 직접 보정하고 공통 확장이 꼭 필요한 경우만 COMMON 요청
+8. 화면 JSX/표현 조합은 DESIGN이 직접 보정; 업무 매핑·API/DB/권한 의미는 구현팀과 협의
 
 새 UI 라이브러리나 별도 디자인 시스템은 만들지 않는다.
 
-## 5. 구현 주체 판정
+## 5. 직접 수정과 협의 경계
 
-DESIGN은 우선 기준만 확정한다.
+DESIGN은 상태 Badge/유형 Label, 기존 renderer/CSS/JSX 배치, control 스타일, spacing/density를 직접 수정하고 실제 제품 화면까지 책임진다. 공통 CSS라는 이유만으로 모두 COMMON에 넘기지 않는다.
 
-확정 후:
-
-- 공통 Cell renderer / 공통 CSS / 공통 Badge / 공통 Select/Toolbar 변경이 필요하면 → `COMMON`
-- 프로그램관리 화면 전용 renderer/CSS/Toolbar 조합이면 → 해당 화면 구현팀
-- 양쪽에 걸치면 공통 표현 규격은 COMMON, 화면별 데이터 매핑/배치는 화면 구현팀
-
-DESIGN 팀이 공통 코드를 임의 수정하지 않는다.
+API/DB/권한/Action 의미/업무 매핑은 변경하지 않는다. 현재 ProgramDataGrid에는 옵션 삽입 계약이 없으므로 해당 공통 확장은 COMMON 요청으로 분리한다. 연결점 제공 후 DESIGN이 기존 선택 handler와 Action을 유지한 채 Endpoint 옵션 배치와 좌우 시작선을 직접 보정한다. 화면 전용 CSS/absolute/음수 margin으로 우회하지 않는다.
 
 ## 6. 검수 기준
 
@@ -186,8 +180,8 @@ DESIGN 팀이 공통 코드를 임의 수정하지 않는다.
 
 - 완료 commit SHA
 - 수정/추가 문서 목록
-- 권장안 요약: 상태 Badge / 유형 Label / Endpoint Toolbar
-- 공통 변경 필요 여부: COMMON / 화면 구현팀 / 없음
-- 보류 사항
+- 수정한 실제 UI 코드 파일과 직접 수정한 디자인 항목
+- COMMON/SD 추가 협의 항목 및 브라우저 검수 결과
+- 보류 사항 및 dev-pm merge 가능 여부
 
 DESIGN 검토는 회신된 SHA 기준으로 진행한다.

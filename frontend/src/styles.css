@@ -992,6 +992,10 @@ button {
 }
 
 .grid-heading-group h2 {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   margin: 0;
   color: var(--text-primary);
   font-size: 13px;
@@ -1009,6 +1013,7 @@ button {
 }
 
 .grid-total {
+  flex-shrink: 0;
   color: var(--text-muted);
   font-size: 12px;
   white-space: nowrap;
@@ -1019,10 +1024,12 @@ button {
 }
 
 .grid-actions {
+  flex-shrink: 0;
   gap: 5px;
 }
 
 .grid-actions button {
+  white-space: nowrap;
   min-height: 28px;
 }
 
@@ -1364,7 +1371,8 @@ tbody tr.selected-row td {
 
 .metadata-toolbar > label { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 12px; font-weight: 800; }
 .metadata-toolbar input { width: 260px; min-height: 28px; border: 1px solid var(--border-strong); border-radius: 5px; padding: 0 8px; }
-.metadata-toolbar select { min-height: 28px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-panel); padding: 0 7px; }
+.metadata-toolbar select,
+.basekit-toolbar-control { min-height: 28px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface-panel); padding: 0 7px; }
 .metadata-toolbar .persistence-badge { margin-left: auto; }
 
 .metadata-master-detail { display: grid; grid-template-columns: minmax(0, 1fr) 330px; min-height: 530px; gap: 8px; }
@@ -1580,7 +1588,9 @@ tbody tr.selected-row td {
 .program-endpoint-detail .program-data-grid { flex: 1; height: auto; }
 .program-endpoint-controls { display: flex; flex-wrap: wrap; gap: var(--multi-grid-gap); padding: 4px 0; }
 .program-endpoint-controls label { display: flex; align-items: center; gap: 4px; font-size: 12px; }
-.program-endpoint-controls select { border: 1px solid var(--border-default); background: var(--surface-panel); color: var(--text-primary); font: inherit; }
+.program-endpoint-controls select { min-width: 0; max-width: 100%; color: var(--text-primary); font: inherit; }
+.metadata-toolbar select:focus-visible,
+.basekit-toolbar-control:focus-visible { border-color: var(--brand-primary); outline: 2px solid color-mix(in srgb, var(--brand-primary) 25%, transparent); outline-offset: 0; }
 .multi-grid-message-area { min-height: var(--multi-grid-message-height); flex: 0 0 var(--multi-grid-message-height); }
 .multi-grid-message-area .page-message { height: var(--multi-grid-message-height); margin: 0; padding: 6px 10px; }
 

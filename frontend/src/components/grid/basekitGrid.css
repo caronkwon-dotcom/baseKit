@@ -40,6 +40,10 @@
 .basekit-ag-grid .ag-header-cell-text { font-weight: 600; }
 .basekit-ag-grid .ag-cell { overflow: hidden; text-overflow: ellipsis; }
 .basekit-ag-grid .ag-overlay { color: var(--text-muted); }
+.basekit-ag-grid .metadata-badge { max-width: 100%; box-sizing: border-box; height: 20px; padding: 0 5px; border-radius: 4px; font-weight: 600; line-height: 20px; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.basekit-ag-grid .metadata-badge.info { background: var(--message-info-bg); color: var(--message-info-text); }
+.basekit-ag-grid .metadata-badge.warn { background: var(--message-warn-bg); color: var(--message-warn-text); }
+.basekit-grid-label { color: var(--text-secondary); font: inherit; }
 .basekit-ag-grid .basekit-status-indicator { display: inline-flex; align-items: center; gap: 5px; min-width: 0; max-width: 100%; color: var(--text-primary); }
 .basekit-ag-grid .basekit-status-indicator__dot { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; box-shadow: 0 0 0 1px rgb(15 23 42 / 10%); }
 .basekit-ag-grid .basekit-status-indicator > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
