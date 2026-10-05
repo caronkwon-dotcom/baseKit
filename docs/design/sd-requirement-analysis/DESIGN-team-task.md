@@ -24,6 +24,35 @@ SD 요구사항 분석·프로그램 생성 UX 2차 설계를 DESIGN 기준으�
 - 성공 건 재생성 금지, 일부 실패는 실패 건만 재시도
 - 응답 유실/불명 상태에서는 상태 조회 우선
 
+## BaseKit 화면 표준 우선 원칙
+
+현재 `SD-UX-wireframes.html`은 UX 흐름과 상태 전이를 검토하기 위한 프로토타입이다. 프로토타입에서 실제 BaseKit Grid 및 공통 CSS를 완전히 적용하지 못한 부분은 제품 UI 규격으로 간주하지 않는다.
+
+실제 SD 구현과 DESIGN 검수에서는 **BaseKit의 기존 화면 규격과 공통 CSS/컴포넌트를 최우선 기준**으로 사용한다.
+
+반드시 유지할 기준:
+
+- BaseKit 공통 CSS 및 화면 density/padding/spacing 기준 우선
+- 기존 `PageHeader`, `BaseKitDataGrid`/공통 Grid, `BaseTabs`, `ActionButton`, `BaseKitMessage`, `FormModal`, `ProjectListDetailWorkspace` 등 공통 컴포넌트 우선 사용
+- 기존 표준 화면의 Title/Section Title 계층과 위치 유지
+- 목록/그리드 영역의 **총건수 표시 규칙 유지**
+- 검색영역, Toolbar, Grid, 상세 영역의 기존 정렬·간격·높이 규칙 유지
+- Grid Header/Row 높이, 내부 Scroll, 컬럼 정렬·말줄임·Tooltip 등 BaseKit Grid 규격 유지
+- 버튼 위치·크기·표시 방식은 기존 공통 Action 규격 유지
+- 화면별 임의 CSS 추가보다 공통 token/class/component 재사용을 우선
+- 프로토타입의 시각 표현과 BaseKit 표준이 충돌하면 **BaseKit 표준을 우선**하고 UX 의도만 유지
+
+특히 프로토타입에서 보이는 단순 HTML table, 임시 card/pill, spacing 값은 구현 규격이 아니다. 실제 제품에서는 기존 BaseKit Grid·CSS·타이틀·총건수 표현을 기준으로 치환한다.
+
+DESIGN 검수 시 기능 흐름만 확인하지 않고 아래도 함께 확인한다.
+
+1. 페이지 Title과 상단 Action 위치가 기존 BaseKit 표준과 일치하는가
+2. 목록/그리드 Title 옆 또는 표준 위치의 총건수 표현이 유지되는가
+3. 검색/목록/상세/탭 간 padding·gap·height가 공통 규격과 일치하는가
+4. 신규 화면만 별도 CSS 체계로 보이지 않는가
+5. 공통 Grid로 표현 가능한 영역을 임의 table/div로 새로 구현하지 않았는가
+6. 기존 공통 컴포넌트로 가능한 UI를 신규 로컬 컴포넌트로 중복 구현하지 않았는가
+
 ## DESIGN 팀 현재 작업
 
 ### 1. 승인 기준 고정
@@ -63,6 +92,8 @@ SD에서 다음 정보를 전달받아야 한다.
 8. 생성 성공 건 중복 생성 방지, 일부 실패 건 재시도, 응답 유실 시 상태 조회가 동작하는가
 9. 시스템 관리 Program/Runtime/권한과 SD 설계 프로그램 생성이 분리되어 있는가
 10. 키보드, 모달 focus, splitter, 320px, 긴 결과에서도 주요 행동이 가능하고 읽을 수 있는가
+11. BaseKit 공통 CSS, Grid, Title, 총건수, spacing/padding 규격이 기존 표준 화면과 일치하는가
+12. 프로토타입 임시 표현이 제품 코드에 그대로 복제되지 않고 공통 컴포넌트로 치환되었는가
 
 ### 4. 판정 원칙
 
@@ -77,6 +108,7 @@ SD에서 다음 정보를 전달받아야 한다.
 - 중복 생성 가능
 - 생성 후 재조회 불일치
 - 성공/실패 상태 복구 불가
+- BaseKit 표준 Grid/CSS/Title/총건수 규격을 무시한 별도 화면 구현
 
 접근성·반응형 결함은 심각도와 수정 여부를 기록하고 동일 시나리오로 재검수한다.
 
@@ -102,6 +134,7 @@ DESIGN 팀의 현재 완료 상태는 `SD 구현 검수 대기`이며, SD 구현
 - 기준 SHA 확인
 - 상태: SD 구현 검수 대기
 - 추가 DESIGN 변경 없음
+- BaseKit 화면 표준 우선 원칙 확인
 - SD 구현 완료 SHA 수신 후 UX-review 기준 검수 예정
 
 SD 구현 후 검수가 끝나면 다음만 회신한다.
@@ -109,5 +142,6 @@ SD 구현 후 검수가 끝나면 다음만 회신한다.
 - 검수 대상 SD SHA
 - PASS / 수정 필요
 - 실패한 UX-review ID
+- BaseKit 화면 표준 위반 여부
 - 필수 수정 사항
 - 재검수 필요 여부
