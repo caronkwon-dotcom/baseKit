@@ -101,7 +101,7 @@ export default function ProgramDataGrid<T>({
     <section className={scrollSample ? 'program-data-grid scroll-sample' : 'program-data-grid'} aria-label={resolvedTitle}>
       <div className="grid-toolbar">
         <div className="grid-heading-group">
-          <h2>{resolvedTitle}</h2>
+          <h2 title={resolvedTitle}>{resolvedTitle}</h2>
           <span className="grid-total">총 <strong>{rows.length}</strong>건</span>
           {metrics.map((metric) => (
             <span key={metric.label} className={`grid-metric ${metric.tone ?? 'default'}`}>

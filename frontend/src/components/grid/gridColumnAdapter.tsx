@@ -29,6 +29,7 @@ export function renderMetadataValue(value: string, field: FieldDefinition) {
   const label = field.options?.find(option => option.value === value)?.label ?? value;
   if (field.displayType === 'BADGE') return <span className="metadata-badge">{label}</span>;
   if (field.displayType === 'BOOLEAN') return value === 'true' ? '예' : '아니오';
+  if (field.controlType === 'SELECT' && field.displayType === 'TEXT') return <span className="basekit-grid-label">{label}</span>;
   return label;
 }
 

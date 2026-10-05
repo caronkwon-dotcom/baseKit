@@ -1,0 +1,4860 @@
+[
+  {
+    "width": 1920,
+    "mode": "ICON_TEXT",
+    "errors": [],
+    "writes": [],
+    "measurements": {
+      "grids": [
+        {
+          "title": "프로그램 목록",
+          "toolbar": {
+            "x": 13,
+            "y": 147,
+            "width": 1894,
+            "height": 38
+          },
+          "header": {
+            "x": 14,
+            "y": 186,
+            "width": 1892,
+            "height": 35
+          },
+          "row": {
+            "x": 14,
+            "y": 221,
+            "width": 1892,
+            "height": 32
+          }
+        },
+        {
+          "title": "HOME 버튼 권한 그룹",
+          "toolbar": {
+            "x": 13,
+            "y": 681.796875,
+            "width": 753.1875,
+            "height": 38
+          },
+          "header": {
+            "x": 14,
+            "y": 720.796875,
+            "width": 792,
+            "height": 35
+          },
+          "row": {
+            "x": 14,
+            "y": 755.796875,
+            "width": 792,
+            "height": 32
+          }
+        },
+        {
+          "title": "HOME Endpoint 목록",
+          "toolbar": {
+            "x": 776.1875,
+            "y": 717.796875,
+            "width": 1130.796875,
+            "height": 38
+          },
+          "header": {
+            "x": 777.1875,
+            "y": 756.796875,
+            "width": 1210,
+            "height": 35
+          },
+          "row": {
+            "x": 777.1875,
+            "y": 1083.273193359375,
+            "width": 1210,
+            "height": 32
+          }
+        }
+      ],
+      "badges": [
+        {
+          "text": "AVAILABLE",
+          "rect": {
+            "x": 117.703125,
+            "y": 228,
+            "width": 64.578125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 221,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "AVAILABLE",
+          "rect": {
+            "x": 117.703125,
+            "y": 260,
+            "width": 64.578125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 253,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 292,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 285,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 324,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 317,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 356,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 349,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 388,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 381,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 420,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 413,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 452,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 445,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 484,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 477,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 516,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 509,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 548,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 541,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 580,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 573,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 612,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 605,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 644,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 637,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 676,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 669,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 708,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 701,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 740,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 733,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 772,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 765,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 804,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 797,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 836,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 829,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 868,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 861,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MISSING_SOURCE",
+          "rect": {
+            "x": 110,
+            "y": 900,
+            "width": 80,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 893,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1090.273193359375,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1083.273193359375,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1120.0029296875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1113.0029296875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1149.732666015625,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1142.732666015625,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1179.46240234375,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1172.46240234375,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1209.192138671875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1202.192138671875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1238.921875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1231.921875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 798.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 791.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 830.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 823.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 862.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 855.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 894.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 887.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 926.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 919.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 958.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 951.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 990.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 983.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1022.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1015.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1054.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1047.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1086.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1079.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1118.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1111.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1150.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1143.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1182.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1175.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1214.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1207.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1246.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1239.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1278.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1271.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1310.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1303.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1342.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1335.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        }
+      ],
+      "selects": [
+        {
+          "rect": {
+            "x": 803.1875,
+            "y": 684.796875,
+            "width": 142,
+            "height": 28
+          },
+          "radius": "5px",
+          "outline": "none"
+        },
+        {
+          "rect": {
+            "x": 1009.40625,
+            "y": 684.796875,
+            "width": 140,
+            "height": 28
+          },
+          "radius": "5px",
+          "outline": "solid"
+        }
+      ],
+      "documentWidth": 1920,
+      "viewport": 1920,
+      "neutralLabels": 45
+    },
+    "focus": "ag-cell ag-cell-not-inline-editing ag-cell-normal-height ag-cell-value basekit-grid-cell-center ag-cell-focus",
+    "unmapped": "총 15건",
+    "missing": {
+      "height": 20,
+      "background": "rgb(255, 251, 235)",
+      "text": "rgb(146, 64, 14)"
+    },
+    "emptyHeaders": [
+      720.796875,
+      756.796875
+    ]
+  },
+  {
+    "width": 1920,
+    "mode": "ICON_ONLY",
+    "errors": [],
+    "writes": [],
+    "measurements": {
+      "grids": [
+        {
+          "title": "프로그램 목록",
+          "toolbar": {
+            "x": 13,
+            "y": 147,
+            "width": 1894,
+            "height": 38
+          },
+          "header": {
+            "x": 14,
+            "y": 186,
+            "width": 1892,
+            "height": 35
+          },
+          "row": {
+            "x": 14,
+            "y": 221,
+            "width": 1892,
+            "height": 32
+          }
+        },
+        {
+          "title": "HOME 버튼 권한 그룹",
+          "toolbar": {
+            "x": 13,
+            "y": 681.796875,
+            "width": 753.1875,
+            "height": 38
+          },
+          "header": {
+            "x": 14,
+            "y": 720.796875,
+            "width": 792,
+            "height": 35
+          },
+          "row": {
+            "x": 14,
+            "y": 755.796875,
+            "width": 792,
+            "height": 32
+          }
+        },
+        {
+          "title": "HOME Endpoint 목록",
+          "toolbar": {
+            "x": 776.1875,
+            "y": 717.796875,
+            "width": 1130.796875,
+            "height": 38
+          },
+          "header": {
+            "x": 777.1875,
+            "y": 756.796875,
+            "width": 1210,
+            "height": 35
+          },
+          "row": {
+            "x": 777.1875,
+            "y": 1083.278564453125,
+            "width": 1210,
+            "height": 32
+          }
+        }
+      ],
+      "badges": [
+        {
+          "text": "AVAILABLE",
+          "rect": {
+            "x": 117.703125,
+            "y": 228,
+            "width": 64.578125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 221,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "AVAILABLE",
+          "rect": {
+            "x": 117.703125,
+            "y": 260,
+            "width": 64.578125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 253,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 292,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 285,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 324,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 317,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 356,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 349,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 388,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 381,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 420,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 413,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 452,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 445,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 484,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 477,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 516,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 509,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 548,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 541,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 580,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 573,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 612,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 605,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 644,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 637,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 676,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 669,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 708,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 701,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 740,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 733,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 772,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 765,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 804,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 797,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 836,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 829,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 868,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 861,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MISSING_SOURCE",
+          "rect": {
+            "x": 110,
+            "y": 900,
+            "width": 80,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 893,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1090.278564453125,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1083.278564453125,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1120.0048828125,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1113.0048828125,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1149.7310791015625,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1142.7310791015625,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1179.457275390625,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1172.457275390625,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1209.1834716796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1202.1834716796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1238.90966796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1231.90966796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 798.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 791.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 830.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 823.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 862.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 855.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 894.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 887.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 926.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 919.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 958.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 951.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 990.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 983.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1022.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1015.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1054.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1047.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1086.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1079.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1118.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1111.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1150.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1143.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1182.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1175.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1214.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1207.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1246.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1239.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1278.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1271.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1310.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1303.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 843.1875,
+            "y": 1342.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 827.1875,
+            "y": 1335.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        }
+      ],
+      "selects": [
+        {
+          "rect": {
+            "x": 803.1875,
+            "y": 684.796875,
+            "width": 142,
+            "height": 28
+          },
+          "radius": "5px",
+          "outline": "none"
+        },
+        {
+          "rect": {
+            "x": 1009.40625,
+            "y": 684.796875,
+            "width": 140,
+            "height": 28
+          },
+          "radius": "5px",
+          "outline": "solid"
+        }
+      ],
+      "documentWidth": 1920,
+      "viewport": 1920,
+      "neutralLabels": 45
+    },
+    "focus": "ag-cell ag-cell-not-inline-editing ag-cell-normal-height ag-cell-value basekit-grid-cell-center ag-cell-focus",
+    "unmapped": "총 15건",
+    "missing": {
+      "height": 20,
+      "background": "rgb(255, 251, 235)",
+      "text": "rgb(146, 64, 14)"
+    },
+    "emptyHeaders": [
+      720.796875,
+      756.796875
+    ]
+  },
+  {
+    "width": 1440,
+    "mode": "ICON_TEXT",
+    "errors": [],
+    "writes": [],
+    "measurements": {
+      "grids": [
+        {
+          "title": "프로그램 목록",
+          "toolbar": {
+            "x": 13,
+            "y": 147,
+            "width": 1414,
+            "height": 38
+          },
+          "header": {
+            "x": 14,
+            "y": 186,
+            "width": 1412,
+            "height": 35
+          },
+          "row": {
+            "x": 14,
+            "y": 221,
+            "width": 1412,
+            "height": 32
+          }
+        },
+        {
+          "title": "HOME 버튼 권한 그룹",
+          "toolbar": {
+            "x": 13,
+            "y": 573.796875,
+            "width": 561.1875,
+            "height": 38
+          },
+          "header": {
+            "x": 14,
+            "y": 612.796875,
+            "width": 792,
+            "height": 35
+          },
+          "row": {
+            "x": 14,
+            "y": 647.796875,
+            "width": 792,
+            "height": 32
+          }
+        },
+        {
+          "title": "HOME Endpoint 목록",
+          "toolbar": {
+            "x": 584.1875,
+            "y": 609.796875,
+            "width": 842.8125,
+            "height": 38
+          },
+          "header": {
+            "x": 585.1875,
+            "y": 648.796875,
+            "width": 1210,
+            "height": 35
+          },
+          "row": {
+            "x": 585.1875,
+            "y": 940.4359130859375,
+            "width": 1210,
+            "height": 32
+          }
+        }
+      ],
+      "badges": [
+        {
+          "text": "AVAILABLE",
+          "rect": {
+            "x": 117.703125,
+            "y": 228,
+            "width": 64.578125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 221,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "AVAILABLE",
+          "rect": {
+            "x": 117.703125,
+            "y": 260,
+            "width": 64.578125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 253,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 292,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 285,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 324,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 317,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 356,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 349,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 388,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 381,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 420,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 413,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 452,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 445,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 484,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 477,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 516,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 509,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 548,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 541,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 580,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 573,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 612,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 605,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 644,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 637,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 676,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 669,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 708,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 701,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 740,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 733,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 772,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 765,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 804,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 797,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 836,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 829,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 868,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 861,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 947.4359130859375,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 940.4359130859375,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 977.1636962890625,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 970.1636962890625,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1006.891357421875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 999.891357421875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1036.619140625,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1029.619140625,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1066.3468017578125,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1059.3468017578125,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1096.074462890625,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1089.074462890625,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1125.80224609375,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1118.80224609375,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 690.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 683.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 722.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 715.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 754.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 747.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 786.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 779.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 818.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 811.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 850.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 843.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 882.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 875.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 914.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 907.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 946.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 939.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 978.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 971.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1010.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1003.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1042.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1035.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1074.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1067.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1106.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1099.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1138.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1131.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1170.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1163.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        }
+      ],
+      "selects": [
+        {
+          "rect": {
+            "x": 611.1875,
+            "y": 576.796875,
+            "width": 142,
+            "height": 28
+          },
+          "radius": "5px",
+          "outline": "none"
+        },
+        {
+          "rect": {
+            "x": 817.40625,
+            "y": 576.796875,
+            "width": 140,
+            "height": 28
+          },
+          "radius": "5px",
+          "outline": "solid"
+        }
+      ],
+      "documentWidth": 1440,
+      "viewport": 1440,
+      "neutralLabels": 44
+    },
+    "focus": "ag-cell ag-cell-not-inline-editing ag-cell-normal-height ag-cell-value basekit-grid-cell-center ag-cell-focus",
+    "unmapped": "총 15건",
+    "missing": {
+      "height": 20,
+      "background": "rgb(255, 251, 235)",
+      "text": "rgb(146, 64, 14)"
+    },
+    "emptyHeaders": [
+      612.796875,
+      648.796875
+    ]
+  },
+  {
+    "width": 1440,
+    "mode": "ICON_ONLY",
+    "errors": [],
+    "writes": [],
+    "measurements": {
+      "grids": [
+        {
+          "title": "프로그램 목록",
+          "toolbar": {
+            "x": 13,
+            "y": 147,
+            "width": 1414,
+            "height": 38
+          },
+          "header": {
+            "x": 14,
+            "y": 186,
+            "width": 1412,
+            "height": 35
+          },
+          "row": {
+            "x": 14,
+            "y": 221,
+            "width": 1412,
+            "height": 32
+          }
+        },
+        {
+          "title": "HOME 버튼 권한 그룹",
+          "toolbar": {
+            "x": 13,
+            "y": 573.796875,
+            "width": 561.1875,
+            "height": 38
+          },
+          "header": {
+            "x": 14,
+            "y": 612.796875,
+            "width": 792,
+            "height": 35
+          },
+          "row": {
+            "x": 14,
+            "y": 647.796875,
+            "width": 792,
+            "height": 32
+          }
+        },
+        {
+          "title": "HOME Endpoint 목록",
+          "toolbar": {
+            "x": 584.1875,
+            "y": 609.796875,
+            "width": 842.8125,
+            "height": 38
+          },
+          "header": {
+            "x": 585.1875,
+            "y": 648.796875,
+            "width": 1210,
+            "height": 35
+          },
+          "row": {
+            "x": 585.1875,
+            "y": 940.436279296875,
+            "width": 1210,
+            "height": 32
+          }
+        }
+      ],
+      "badges": [
+        {
+          "text": "AVAILABLE",
+          "rect": {
+            "x": 117.703125,
+            "y": 228,
+            "width": 64.578125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 221,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "AVAILABLE",
+          "rect": {
+            "x": 117.703125,
+            "y": 260,
+            "width": 64.578125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 253,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 292,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 285,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 324,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 317,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 356,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 349,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 388,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 381,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 420,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 413,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 452,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 445,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 484,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 477,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 516,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 509,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 548,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 541,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 580,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 573,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 612,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 605,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 644,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 637,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 676,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 669,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 708,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 701,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 740,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 733,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 772,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 765,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 804,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 797,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 836,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 829,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 132.515625,
+            "y": 868,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 94,
+            "y": 861,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 947.436279296875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 940.436279296875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 977.162841796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 970.162841796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1006.8893432617188,
+            "width": 54,
+            "height": 20.00006103515625
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 999.8893432617188,
+            "width": 145,
+            "height": 31.00006103515625
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1036.6158447265625,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1029.6158447265625,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1066.3424072265625,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1059.3424072265625,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1096.0689697265625,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1089.0689697265625,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1125.7955322265625,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1118.7955322265625,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 690.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 683.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 722.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 715.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 754.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 747.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 786.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 779.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 818.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 811.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 850.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 843.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 882.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 875.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 914.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 907.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 946.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 939.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 978.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 971.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1010.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1003.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1042.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1035.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1074.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1067.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1106.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1099.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1138.796875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1131.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 651.1875,
+            "y": 1170.796875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 635.1875,
+            "y": 1163.796875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        }
+      ],
+      "selects": [
+        {
+          "rect": {
+            "x": 611.1875,
+            "y": 576.796875,
+            "width": 142,
+            "height": 28
+          },
+          "radius": "5px",
+          "outline": "none"
+        },
+        {
+          "rect": {
+            "x": 817.40625,
+            "y": 576.796875,
+            "width": 140,
+            "height": 28
+          },
+          "radius": "5px",
+          "outline": "solid"
+        }
+      ],
+      "documentWidth": 1440,
+      "viewport": 1440,
+      "neutralLabels": 44
+    },
+    "focus": "ag-cell ag-cell-not-inline-editing ag-cell-normal-height ag-cell-value basekit-grid-cell-center ag-cell-focus",
+    "unmapped": "총 15건",
+    "missing": {
+      "height": 20,
+      "background": "rgb(255, 251, 235)",
+      "text": "rgb(146, 64, 14)"
+    },
+    "emptyHeaders": [
+      612.796875,
+      648.796875
+    ]
+  },
+  {
+    "width": 1280,
+    "mode": "ICON_TEXT",
+    "errors": [],
+    "writes": [],
+    "measurements": {
+      "grids": [
+        {
+          "title": "프로그램 목록",
+          "toolbar": {
+            "x": 9,
+            "y": 147,
+            "width": 1262,
+            "height": 38
+          },
+          "header": {
+            "x": 10,
+            "y": 186,
+            "width": 1308,
+            "height": 35
+          },
+          "row": {
+            "x": 10,
+            "y": 221,
+            "width": 1308,
+            "height": 32
+          }
+        },
+        {
+          "title": "HOME 버튼 권한 그룹",
+          "toolbar": {
+            "x": 9,
+            "y": 516.1875,
+            "width": 500.390625,
+            "height": 38
+          },
+          "header": {
+            "x": 10,
+            "y": 555.1875,
+            "width": 792,
+            "height": 35
+          },
+          "row": {
+            "x": 10,
+            "y": 590.1875,
+            "width": 792,
+            "height": 32
+          }
+        },
+        {
+          "title": "HOME Endpoint 목록",
+          "toolbar": {
+            "x": 519.390625,
+            "y": 552.1875,
+            "width": 751.609375,
+            "height": 38
+          },
+          "header": {
+            "x": 520.390625,
+            "y": 591.1875,
+            "width": 1210,
+            "height": 35
+          },
+          "row": {
+            "x": 520.390625,
+            "y": 881.8300170898438,
+            "width": 1210,
+            "height": 32
+          }
+        }
+      ],
+      "badges": [
+        {
+          "text": "AVAILABLE",
+          "rect": {
+            "x": 113.703125,
+            "y": 228,
+            "width": 64.578125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 221,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "AVAILABLE",
+          "rect": {
+            "x": 113.703125,
+            "y": 260,
+            "width": 64.578125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 253,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 292,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 285,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 324,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 317,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 356,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 349,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 388,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 381,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 420,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 413,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 452,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 445,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 484,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 477,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 516,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 509,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 548,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 541,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 580,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 573,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 612,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 605,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 644,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 637,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 676,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 669,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 708,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 701,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 740,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 733,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 772,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 765,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 804,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 797,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 888.8300170898438,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 881.8300170898438,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 920.0128784179688,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 913.0128784179688,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 951.1957397460938,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 944.1957397460938,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 982.3786010742188,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 975.3786010742188,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 1013.5614624023438,
+            "width": 54,
+            "height": 20.00006103515625
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 1006.5614624023438,
+            "width": 145,
+            "height": 31.00006103515625
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 1044.744384765625,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 1037.744384765625,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 1075.92724609375,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 1068.92724609375,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 633.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 626.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 665.1875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 658.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 697.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 690.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 729.1875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 722.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 761.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 754.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 793.1875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 786.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 825.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 818.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 857.1875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 850.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 889.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 882.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 921.1875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 914.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 953.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 946.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 985.1875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 978.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 1017.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 1010.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 1049.1875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 1042.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 1081.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 1074.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        }
+      ],
+      "selects": [
+        {
+          "rect": {
+            "x": 546.390625,
+            "y": 519.1875,
+            "width": 142,
+            "height": 28
+          },
+          "radius": "5px",
+          "outline": "none"
+        },
+        {
+          "rect": {
+            "x": 752.609375,
+            "y": 519.1875,
+            "width": 140,
+            "height": 28
+          },
+          "radius": "5px",
+          "outline": "solid"
+        }
+      ],
+      "documentWidth": 1280,
+      "viewport": 1280,
+      "neutralLabels": 40
+    },
+    "focus": "ag-cell ag-cell-not-inline-editing ag-cell-normal-height ag-cell-value basekit-grid-cell-center ag-cell-focus",
+    "unmapped": "총 15건",
+    "missing": {
+      "height": 20,
+      "background": "rgb(255, 251, 235)",
+      "text": "rgb(146, 64, 14)"
+    },
+    "emptyHeaders": [
+      555.1875,
+      591.1875
+    ]
+  },
+  {
+    "width": 1280,
+    "mode": "ICON_ONLY",
+    "errors": [],
+    "writes": [],
+    "measurements": {
+      "grids": [
+        {
+          "title": "프로그램 목록",
+          "toolbar": {
+            "x": 9,
+            "y": 147,
+            "width": 1262,
+            "height": 38
+          },
+          "header": {
+            "x": 10,
+            "y": 186,
+            "width": 1308,
+            "height": 35
+          },
+          "row": {
+            "x": 10,
+            "y": 221,
+            "width": 1308,
+            "height": 32
+          }
+        },
+        {
+          "title": "HOME 버튼 권한 그룹",
+          "toolbar": {
+            "x": 9,
+            "y": 516.1875,
+            "width": 500.390625,
+            "height": 38
+          },
+          "header": {
+            "x": 10,
+            "y": 555.1875,
+            "width": 792,
+            "height": 35
+          },
+          "row": {
+            "x": 10,
+            "y": 590.1875,
+            "width": 792,
+            "height": 32
+          }
+        },
+        {
+          "title": "HOME Endpoint 목록",
+          "toolbar": {
+            "x": 519.390625,
+            "y": 552.1875,
+            "width": 751.609375,
+            "height": 38
+          },
+          "header": {
+            "x": 520.390625,
+            "y": 591.1875,
+            "width": 1210,
+            "height": 35
+          },
+          "row": {
+            "x": 520.390625,
+            "y": 881.1954956054688,
+            "width": 1210,
+            "height": 32
+          }
+        }
+      ],
+      "badges": [
+        {
+          "text": "AVAILABLE",
+          "rect": {
+            "x": 113.703125,
+            "y": 228,
+            "width": 64.578125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 221,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "AVAILABLE",
+          "rect": {
+            "x": 113.703125,
+            "y": 260,
+            "width": 64.578125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 253,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 292,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 285,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 324,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 317,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 356,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 349,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 388,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 381,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 420,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 413,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 452,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 445,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 484,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 477,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 516,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 509,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 548,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 541,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 580,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 573,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 612,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 605,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 644,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 637,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 676,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 669,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 708,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 701,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 740,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 733,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 772,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 765,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "NEW",
+          "rect": {
+            "x": 128.515625,
+            "y": 804,
+            "width": 34.953125,
+            "height": 20
+          },
+          "cell": {
+            "x": 90,
+            "y": 797,
+            "width": 112,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 888.1954956054688,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 881.1954956054688,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 917.927978515625,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 910.927978515625,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 947.6605224609375,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 940.6605224609375,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 977.39306640625,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 970.39306640625,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 1007.1256103515625,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 1000.1256103515625,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 1036.858154296875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 1029.858154296875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 1066.5906982421875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 1059.5906982421875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 633.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 626.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 665.1875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 658.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 697.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 690.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 729.1875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 722.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 761.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 754.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 793.1875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 786.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 825.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 818.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 857.1875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 850.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 889.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 882.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 921.1875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 914.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 953.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 946.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 985.1875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 978.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 1017.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 1010.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "UNMAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 1049.1875,
+            "width": 70.171875,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 1042.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        },
+        {
+          "text": "MAPPED",
+          "rect": {
+            "x": 586.390625,
+            "y": 1081.1875,
+            "width": 54,
+            "height": 20
+          },
+          "cell": {
+            "x": 570.390625,
+            "y": 1074.1875,
+            "width": 145,
+            "height": 31
+          },
+          "inside": true
+        }
+      ],
+      "selects": [
+        {
+          "rect": {
+            "x": 546.390625,
+            "y": 519.1875,
+            "width": 142,
+            "height": 28
+          },
+          "radius": "5px",
+          "outline": "none"
+        },
+        {
+          "rect": {
+            "x": 752.609375,
+            "y": 519.1875,
+            "width": 140,
+            "height": 28
+          },
+          "radius": "5px",
+          "outline": "solid"
+        }
+      ],
+      "documentWidth": 1280,
+      "viewport": 1280,
+      "neutralLabels": 40
+    },
+    "focus": "ag-cell ag-cell-not-inline-editing ag-cell-normal-height ag-cell-value basekit-grid-cell-center ag-cell-focus",
+    "unmapped": "총 15건",
+    "missing": {
+      "height": 20,
+      "background": "rgb(255, 251, 235)",
+      "text": "rgb(146, 64, 14)"
+    },
+    "emptyHeaders": [
+      555.1875,
+      591.1875
+    ]
+  }
+]
