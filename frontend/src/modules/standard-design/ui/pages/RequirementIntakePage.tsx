@@ -1,3 +1,4 @@
+import FormField from '../../../../components/common/FormField';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { ActionButton, BaseKitMessage, BaseTabs, ExcelImportDialog, PageHeader, SearchPanel, downloadExcelTemplate, type BaseTabDefinition, type DataTableColumn, type SearchFieldConfig } from '../../../../components/common';
 import { COMMON_ACTIONS } from '../../../../constants/actionCodes';
@@ -196,13 +197,13 @@ export default function RequirementIntakePage() {
   ], []);
   const filteredProjectMenus = projectMenus.filter((menu) => !menuRelationRows.some((row) => row.PROJECT_MENU_ID === menu.PROJECT_MENU_ID)
     && (!projectMenuSearch.trim() || `${menu.MENU_ID} ${menu.MENU_NAME}`.toLocaleLowerCase().includes(projectMenuSearch.trim().toLocaleLowerCase())));
-  const basicInfo: ReactNode = <div className="standard-design-project-fields standard-design-project-fields--long-text">
-    <label className="standard-design-project-description"><span>요구사항명</span><MaxLengthField required maxLength={200} value={draft.REQUIREMENT_NAME} onChange={(value) => update('REQUIREMENT_NAME', value)} /></label>
-    <label><span>요구 유형</span><select value={draft.REQUIREMENT_TYPE_CODE} onChange={(e) => update('REQUIREMENT_TYPE_CODE', e.target.value)}>{types.map((code) => <option key={code.CODE} value={code.CODE}>{code.CODE_NAME}</option>)}</select></label>
-    <label><span>상태</span><select value={draft.STATUS} onChange={(e) => update('STATUS', e.target.value)}>{statuses.map((status) => <option key={status.CODE} value={status.CODE}>{status.CODE_NAME}</option>)}</select></label>
-    <label className="standard-design-project-description"><span>요구사항 내용 *</span><MaxLengthField required multiline rows={8} maxLength={4000} value={draft.DESCRIPTION} onChange={(value) => update('DESCRIPTION', value)} /></label>
-    <label className="standard-design-project-description"><span>프로세스 설명</span><MaxLengthField multiline rows={8} maxLength={4000} value={draft.PROCESS_DESCRIPTION} onChange={(value) => update('PROCESS_DESCRIPTION', value)} /></label>
-    <label className="standard-design-project-description"><span>설계 의견</span><MaxLengthField multiline rows={6} maxLength={10000} value={draft.DESIGN_OPINION ?? ''} onChange={(value) => update('DESIGN_OPINION', value)} /></label>
+  const basicInfo: ReactNode = <div className="standard-form-layout standard-design-project-fields standard-design-project-fields--long-text">
+    <FormField label="요구사항명" required labelPosition="TOP" className="standard-design-project-description"><MaxLengthField required maxLength={200} value={draft.REQUIREMENT_NAME} onChange={(value) => update('REQUIREMENT_NAME', value)} /></FormField>
+    <FormField label="요구 유형"><select value={draft.REQUIREMENT_TYPE_CODE} onChange={(e) => update('REQUIREMENT_TYPE_CODE', e.target.value)}>{types.map((code) => <option key={code.CODE} value={code.CODE}>{code.CODE_NAME}</option>)}</select></FormField>
+    <FormField label="상태"><select value={draft.STATUS} onChange={(e) => update('STATUS', e.target.value)}>{statuses.map((status) => <option key={status.CODE} value={status.CODE}>{status.CODE_NAME}</option>)}</select></FormField>
+    <FormField label="요구사항 내용" required labelPosition="TOP" className="standard-design-project-description"><MaxLengthField required multiline rows={8} maxLength={4000} value={draft.DESCRIPTION} onChange={(value) => update('DESCRIPTION', value)} /></FormField>
+    <FormField label="프로세스 설명" labelPosition="TOP" className="standard-design-project-description"><MaxLengthField multiline rows={8} maxLength={4000} value={draft.PROCESS_DESCRIPTION} onChange={(value) => update('PROCESS_DESCRIPTION', value)} /></FormField>
+    <FormField label="설계 의견" labelPosition="TOP" className="standard-design-project-description"><MaxLengthField multiline rows={6} maxLength={10000} value={draft.DESIGN_OPINION ?? ''} onChange={(value) => update('DESIGN_OPINION', value)} /></FormField>
   </div>;
   const attachmentTab: ReactNode = <RequirementAttachmentPanel requirementId={selectedId} attachments={selected?.ATTACHMENTS ?? []} onUploaded={(file) => { void load(selectedId); setMessage({ type: 'success', text: `${file.ORIGINAL_FILE_NAME}을(를) 업로드했습니다.` }); }} onDeleted={() => { void load(selectedId); setMessage({ type: 'success', text: '첨부파일을 삭제했습니다.' }); }} onError={reportAttachmentError} />;
   const menuTab: ReactNode = <section className="sd-requirement-menu-tab" aria-label="관련 메뉴">
