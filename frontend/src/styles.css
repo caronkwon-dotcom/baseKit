@@ -1691,7 +1691,7 @@ tbody tr.active-master-row td { background: var(--brand-soft); }
 
 .standard-form-grid label { display: grid; gap: 5px; }
 .standard-form-grid label > span { color: var(--text-secondary); font-size: 12px; font-weight: 800; }
-.standard-form-grid em { color: #dc2626; font-style: normal; }
+
 .standard-form-grid input,
 .standard-form-grid select,
 .standard-form-grid textarea {
@@ -1711,3 +1711,51 @@ tbody tr.active-master-row td { background: var(--brand-soft); }
 @media (max-width: 1439px) {
   :root { --multi-grid-master-min-width: 340px; }
 }
+
+
+/* Shared form presentation: field layout is independent of validation policy. */
+.standard-form-grid, .standard-form-layout { container-type: inline-size; }
+.standard-form-field.standard-form-field {
+  display: grid;
+  grid-template-columns: minmax(76px, min(28%, 140px)) minmax(0, 1fr);
+  align-content: start;
+  align-items: start;
+  gap: 8px;
+  min-width: 0;
+}
+.standard-form-field.standard-form-field--top { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+.standard-form-field > .standard-form-label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  padding-top: 6px;
+}
+.standard-form-field--top > .standard-form-label { padding-top: 0; }
+.standard-form-label.is-required::after {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--required-indicator, var(--text-secondary));
+  vertical-align: middle;
+}
+.standard-form-control { min-width: 0; }
+.standard-form-field .standard-form-control :is(input, select, textarea) { width: 100%; min-width: 0; box-sizing: border-box; }
+.standard-form-field .standard-form-control input[type='checkbox'] { width: auto; }
+.standard-form-field .standard-form-control :is(input, select, textarea):disabled { background: var(--surface-muted); color: var(--text-muted); }
+.standard-form-field.has-error .standard-form-control :is(input, select, textarea),
+.standard-form-field .standard-form-control :is(input, select, textarea)[aria-invalid='true'] {
+  border-color: var(--danger, #dc2626);
+  background: var(--danger-soft, #fff1f2);
+}
+.standard-form-error { display: block; margin-top: 4px; color: var(--danger, #dc2626); font-size: 12px; overflow-wrap: anywhere; }
+@container (max-width: 560px) {
+  .standard-form-field.standard-form-field { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+  .standard-form-field > .standard-form-label { padding-top: 0; }
+}
+@media (max-width: 620px) { .standard-form-grid { grid-template-columns: minmax(0, 1fr); } }
+.metadata-form-section { min-width: 0; }
