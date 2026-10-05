@@ -2,6 +2,17 @@
 
 이 문서는 새 작업자와 GPT Work가 실제 Repository 상태를 빠르게 파악하기 위한 기준 문서다. 특정 날짜나 과거 작업 branch가 아니라 최신 `dev-pm`과 열린 PR을 기준으로 갱신한다.
 
+## 프로그램관리 상시 콤보 / 공통 옵션 행 (2026-10-05)
+
+최신 원격 dev-pm `62ffb796fecd77c480dce0b52425edd817846b8a`에서 독립 작업 브랜치로 UI를 수정했다. 기존 design-work의 통합 이력이나 로컬 dev-pm ahead 커밋은 제품 반영에 포함하지 않는다.
+
+- 문제: SELECT는 평상시 label, 편집 진입 후 agSelectCellEditor였으며 Endpoint 옵션은 제목 아래 Toolbar 내부에 있었다. 좁은 패널에서 공통 Toolbar 버튼이 잘렸다.
+- FieldDefinition의 선택적 `gridControlDisplay: 'always'`와 공통 MetadataSelect를 추가하고 Module/유형만 명시적으로 적용했다. 기존 options/검증/isEditable/editPolicy/DELETED/row state/저장·취소/API 의미를 유지한다. 미등록 현재값은 그대로 보이되 새 선택값으로 허용하지 않는다. 다른 SELECT는 기존 표시 방식을 유지한다.
+- 콤보 mouse/pointer/double-click 및 비 Tab 키를 Grid 처리에서 분리한다. 행 갱신은 셀 refresh로 수행하고 rowClassRules가 변경 표시를 제거하여 저장·취소 뒤 NORMAL 표현을 복원한다.
+- MasterDetailMultiGrid의 detailOptions 공통 행은 오른쪽 패널 열에 위치하며 양쪽 공통 header 위에서 높이를 함께 관리한다. subgrid가 title/Grid header를 정렬한다. Toolbar 버튼은 필요하면 공통 wrap 규칙으로 줄바꿈한다. absolute/음수 margin/왼쪽 패널 빈 spacer는 추가하지 않는다.
+- 최신 dev-pm 기준 build/lint/frontend 50건, design-work build/lint/frontend 53건, Backend 총 42건(실패 0, 조건부 제외 5건), diff check 통과. Chrome 1920/1440/1280 × ICON_TEXT/ICON_ONLY 6조합에서 초기 콤보, 변경 표시/취소/fixture PUT 저장, 32px 행, 20px Badge, 28px 옵션, UNMAPPED 15건, 좌우 title/header 차이 0px, 폭·높이 splitter 조절, 패널 버튼 경계 및 페이지 overflow를 확인했다. 공통 Grid 별도 fixture에서 readonly/DELETED disabled 및 방향키 변경 확인. 브라우저는 API fixture로 실제 DB 저장은 미검증이다.
+- COMMON 추가 협의: 차단 사항 없음. 이번 사용자 승인 범위에서 최소 공통 표현 계약 확장을 함께 구현했다. opt-in SELECT와 detailOptions를 다른 화면에서 사용할 때 같은 규격을 따른다. API/DB/권한 변경 없음.
+
 ## 1. 프로젝트 단계
 
 BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundation을 함께 확장하는 Full Stack 단계다. Admin Shell과 공통 관리 화면 패턴을 유지하면서 시스템 공통 V1의 API·DB 계약을 구체화한다.
