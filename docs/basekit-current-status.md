@@ -27,7 +27,7 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 
 공통 CSS의 1292264 변경이 resting editable cell 테두리를 1px에서 0으로 제거한 원인이다. 기존 공통 inset box 테두리를 복원하고 inline text/number/select editor의 border/background/padding 및 disabled/read-only 색상을 공통 토큰으로 보완했다. Batch 배경, row/header 크기, selection/focus, API/DB/권한 계약은 유지한다. 제품 반영은 CSS 커밋 500eb84만 cherry-pick하며 이 기록은 DESIGN에 유지한다.
 
-최신 로컬 dev-pm 통합본 5447cab을 보존하여 design-work를 현행화했다. 원격 dev-pm은 fetch 시 7ef190c으로 되돌아간 상태였으므로 강제 push하지 않고 기존 통합 이력을 보존하는 fast-forward만 사용한다.
+최신 로컬 dev-pm 통합본 5447cab을 보존하여 design-work를 현행화했다. 원격 dev-pm은 fetch 시 7ef190c으로 되돌아간 상태였다. 원격에는 CSS 한 커밋 62ffb79만 fast-forward push했다. 원래 로컬 dev-pm은 기존 통합 이력을 보존하여 836d991으로 병합했고 원격보다 8커밋 ahead인 clean 상태다. 추가 통합 이력의 원격 게시가 자동 승인 검토에서 범위 위험으로 거절되어 게시하지 않았다.
 
 검증: build/lint, frontend 53/53, backend 46건 실패 0·조건부 제외 5. Chrome API fixture 검수: 공통코드 default 1px/hover/focus 2px, text editor border 1px·white background·좌우 padding 6px, read-only ID 편집 불가, 행 32px. 프로그램관리 1920/1440/1280 × 버튼 2모드에서 Badge 20px·Select 28px·헤더 정렬 차이 0px. 실제 DB 저장 검증은 이번 CSS 범위에서 수행하지 않았다. COMMON 옵션 슬롯/toolbarLayout/alignDetailToolbars 및 subgrid 지원 검토는 기존 협의사항으로 유지하며 신규 공개 API 변경은 없다. SD 추가 협의 없음.
 ## DESIGN 선택 반영 운영 및 Endpoint 정렬 완료 (2026-10-05)
@@ -418,3 +418,5 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 - sd-work에서 dev-pm/origin/dev-pm a928069을 fast-forward 병합. 기존 Copilot/요구사항 화면 정리 미커밋 작업은 stash 후 apply로 보존. 복구용 stash는 유지함. 신규 branch/worktree 및 push 없음.
 - Flyway 오류 원인: DB 이력 V9=공통 endpoint permission(1801662515), V10=SD 분석(-488513351)에 비해 sd 파일 번호가 달랐음. backend와 database 폴더를 V9 공통 / V10 분석 / V11 설계 의견으로 통일. 기존 V9/V10 SQL 본문 및 DB 이력은 수정하지 않음.
 - clean package + H2 test 프로필: BUILD SUCCESS, 46건 중 41건 통과/5건 skip. frontend build/lint 통과. 실제 PostgreSQL 시작 및 V11 적용은 이 검증에서 수행하지 않음.
+
+최종 Grid 회귀 검수: 원격 dev-pm 62ffb79 build/lint·frontend 50/50·backend 42건(실패 0, 조건부 제외 5) 및 Chrome 6조합 통과. 원래 로컬 dev-pm 836d991 build/lint·frontend 53/53 통과. disabled/read-only 스타일, Batch UPDATED/INSERTED 및 프로그램 유형 실제 Select editor 테두리 확인. 로컬 의존성 파일 잠금으로 설치가 일시 중단됐으나 복구 후 검증 통과.
