@@ -4,7 +4,7 @@
 기준: DESIGN SHA `99bd96dfd2441184344045ed63186fdde6eeac3d`, `BASEKIT-SD-implementation-task.md`.
 
 ## 결정
-- 저장 구조: Flyway V9 (`BSDAANLS`, `BSDAAREQ`, `BSDARSLT`, `BSDACAND`, `BSDAGREQ`, `BSDAGITM`, `BSDGPROG`, `BSDGPREQ`, `BSDGPMNU`). 작업지시서 명칭을 따랐으며 기존 `BSD*` 접두사 규칙과 다르므로 **명칭 확정 필요**.
+- 저장 구조: Flyway V10 (`BSDAANLS`, `BSDAAREQ`, `BSDARSLT`, `BSDACAND`, `BSDAGREQ`, `BSDAGITM`, `BSDGPROG`, `BSDGPREQ`, `BSDGPMNU`)이며 V9는 공통 endpoint permission이다. 작업지시서 명칭을 따랐으며 기존 `BSD*` 접두사 규칙과 다르므로 **명칭 확정 필요**.
 - JdbcTemplate + 순수 SQL 사용. Requirement 스냅샷 의미를 유지하기 위해 BSDRREQ FK를 두지 않음.
 - 입력 버전(INPUT_VERSION)은 요구사항 ID·MOD_DT·설계 의견·전체 의견의 SHA-256. 서버가 DB에서 재구성하며 MOD_DT 불일치는 409 `REQUIREMENT_VERSION_CONFLICT`.
 - STALE: 입력 변경 시 영속 처리하고 비생성 후보의 선택·확정을 해제. 이전 결과는 참고용 표시만 하며 편집·확정·생성 불가. 재분석 시 RESULT_VERSION 증가, 후보는 선택 0건으로 시작.

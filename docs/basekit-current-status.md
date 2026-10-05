@@ -15,6 +15,14 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 
 현재는 **Level 1: 시스템 공통 Foundation** 단계다. 초급 개발자도 가이드와 규약을 따르면 일관된 화면과 코드를 만들 수 있고, 개발자 변경에도 프로젝트 스타일이 흔들리지 않는 기반을 목표로 한다.
 
+## 2026-10-05 최종 dev-pm 통합 및 실행 검수 완료
+
+사용자 승인으로 COMMON(`a928069`), DESIGN(`f2d156e`), SD(`7233375`)의 최종 작업을 dev-pm에 통합했다. 제품 통합 커밋은 `15c3805`이며, 오늘 종결 범위에는 DESIGN 문서·검수 기록도 포함한다. 기존 COMMON과 DESIGN 제품 UI 변경은 보존했다. 이전 Copilot 작업 트리의 Excel 구현은 현행 SD와 동일하여 재적용하지 않았고, 해당 미커밋 파일과 복구용 stash는 보존했다.
+
+요구사항 목록 내용 컬럼 제거, 요구사항명 전체폭, 요구유형·상태 동일 행, 기본정보 설계 의견, AI 분석 탭 제거/구현 KEEP을 5173 실제 화면에서 확인했다. dev-pm 백엔드를 clean 재빌드·재실행하여 8080 health UP, PostgreSQL 기존 V11 및 11개 migration 검증, 요구사항 10건 조회와 DESIGN_OPINION 응답을 확인했다. 실데이터 수정·삭제는 수행하지 않았다.
+
+통합본 build/lint, Frontend 회귀 53건, Backend H2 46건(41건 통과·외부 PostgreSQL 조건 5건 skip), git diff --check 통과. 브라우저 console error 0. 검수 주소: `http://localhost:5173/baseKit/#/standard-design/requirements`. 상세 범위와 남은 미검증 사항은 [오늘 작업 종결 보고](releases/2026-10-05-dev-pm-closeout.md)를 따른다. remote push와 main 승격은 수행하지 않았다. 아래 개별 작업 기록은 당시 검증 이력이다.
+
 ## DESIGN 선택 반영 운영 및 Endpoint 정렬 완료 (2026-10-05)
 
 기준 dev-pm b28dc96 → design-work 현행화. 사용자 승인한 최소 공통 옵션 슬롯·공유 Detail Toolbar track으로 Endpoint Select를 Toolbar에 통합했다. Chrome 6조합에서 header 차이 0px, 빈 목록·너비 변경 유지, build/lint 및 Backend 42건(5 skip) 통과. 기능/API/DB/권한 의미 변경 없음. 제품 UI 파일 4개만 dev-pm에 cherry-pick하며 이번 문서/검수 스크립트/측정은 DESIGN 내부 산출물로 design-work에 유지한다. 아래 이전 작업 기록은 과거 이력이다.
@@ -35,7 +43,7 @@ Chrome 실제 제품/fixture 검수: 1920/1440/1280 × 두 버튼 모드, row/he
 - 공통 `BaseFileUpload` V1: native input/drag & drop, 다중 파일, 정책 기반 사전검증, 파일별 진행률·취소·재시도·삭제, bounded concurrency와 XHR multipart transport. Requirement Attachment에 첫 적용. [ADR-032](decisions/032-base-file-upload-component.md) · [인계 보고서](base-file-upload-v1-handoff.md)
 - Standard Design Project Menu V1: 프로젝트별 LEVEL/SINGLE 분류 방식, Project Menu CRUD REST/Flyway V7, Requirement의 별도 Project Menu 관계(BSDRRPML), 기존 시스템 MENU_KEYS 보존, Excel 진입점만 제공. 재귀 트리·Parser·AI 기능은 미구현.
 
-- Standard Design Requirement Excel Import (2026-10-05, 미커밋): 공통 Excel Import를 재사용한 요구사항 양식·검증·저장 연결. LLM 분석·설계 대상 프로그램은 미구현이며 결정 사항과 COMMON·디자인 요청은 [인계 문서](sd-requirement-llm-handoff.md). 실제 LLM·승인 DB 검증은 미완료.
+- Standard Design Requirement Excel Import (2026-10-05, dev-pm 통합 완료): 공통 Excel Import를 재사용한 요구사항 양식·검증·저장 연결. 분석 V1은 별도 구현 후 KEEP하며 후속 그룹 분석에서 재사용한다. 기존 [Excel 인계 문서](sd-requirement-llm-handoff.md)는 당시 범위 기록이며 현행 분석·화면 상태는 ADR 033과 오늘 종결 보고를 따른다. 실제 회사 LLM 검증은 미완료.
 
 Requirement Intake 검증: 신규 H2 API 통합 테스트와 Frontend build/lint 통과. 기존 전체 Backend 테스트 22건은 신규 통합 테스트 추가 전에 통과했으며 이 실행에서 연결된 Supabase PostgreSQL에 Flyway V5가 적용되었다. 추가 변경 후 전체 Backend 재실행은 외부 DB 변경 위험으로 자동 승인 검토가 거부되어 보류했고, 신규 대상 테스트만 H2로 재검증했다. 화면은 프로젝트 Context 선택 후 `요구사항 관리` 메뉴에서 확인한다.
 
@@ -381,7 +389,7 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 
 기존 columns/validateRow/mapRow/onImport 계약 유지. 파싱·반영 잠금, Preview 초기화, Header/행 오류 분리, 물리 Excel 행 번호, 선택 title/submitLabel/disabled 및 FormModal submitDisabled를 보완했다. 상세 계약과 검증은 [SD Excel COMMON 인계](sd-excel-common-handoff.md) 참고. Frontend build/lint 및 42건 테스트, 외부 DB 환경변수를 제거한 Backend 30건(5 skip)이 통과했다. SD 업무 로직·LLM Client·시스템 Program/Runtime/권한 변경은 없다. Modal focus와 실화면 SD/LLM 연결은 후속 검증 범위다.
 
-## SD 요구사항 분석 V1 (sd-work, 미커밋)
+## SD 요구사항 분석 V1 (2026-10-05, dev-pm 통합 완료)
 - 구현: Flyway V9, `standarddesign/analysis` 백엔드(분석·후보·확정·생성 API), `RequirementAnalysisPanel` 4단계 UX, STALE·버전 충돌·생성 멱등성. 결정은 `docs/decisions/033-sd-requirement-analysis-v1.md`.
 - 검증: 백엔드 전체 테스트(H2) 통과, Frontend lint/build/node test 46건 통과.
 - 미검증: 실제 회사 LLM(`COMPANY_LLM_*` 미설정), 승인 DB(PostgreSQL), 브라우저 수동 검수.
@@ -389,9 +397,9 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 
 ## SD V1 리뷰 보완 (B01/B02/R01/R02/R04)
 
-구현 완료(미커밋). 상세는 ADR 033 '리뷰 보완' 참조. 실제 LLM·승인 PostgreSQL 검증은 미완료.
+구현 완료·dev-pm 통합. 상세는 ADR 033 '리뷰 보완' 참조. 실제 LLM·분석 파이프라인의 PostgreSQL 통합 검증은 미완료.
 
-## 요구사항 화면 정리 인수인계 (2026-10-05, 구현 완료·미커밋)
+## 요구사항 화면 정리 인수인계 (2026-10-05, dev-pm 통합 완료)
 
 - 기존 sd / sd-work에서 Copilot 미커밋 변경을 보존하며 진행. 신규 branch/worktree 및 commit/push/merge 없음.
 - 목록 DESCRIPTION 컬럼 제거, 요구사항명 전체 폭 및 요구유형+상태 같은 줄 배치 적용.
