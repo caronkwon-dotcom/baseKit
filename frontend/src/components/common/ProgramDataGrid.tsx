@@ -38,6 +38,8 @@ export interface ProgramDataGridProps<T> {
   metrics?: GridMetric[];
   actionHandlers?: GridActionHandlers<T>;
   toolbarActions?: GridToolbarAction<T>[];
+  toolbarOptions?: ReactNode;
+  toolbarLayout?: 'single-row' | 'two-row';
   buttonDisplay?: ActionButtonDisplay | ActionButtonDisplayMode;
   columns: DataTableColumn<T>[];
   rows: T[];
@@ -59,6 +61,8 @@ export default function ProgramDataGrid<T>({
   metrics = [],
   actionHandlers = {},
   toolbarActions,
+  toolbarOptions,
+  toolbarLayout = 'single-row',
   buttonDisplay,
   columns,
   rows,
@@ -99,7 +103,7 @@ export default function ProgramDataGrid<T>({
 
   return (
     <section className={scrollSample ? 'program-data-grid scroll-sample' : 'program-data-grid'} aria-label={resolvedTitle}>
-      <div className="grid-toolbar">
+      <div className={`grid-toolbar${toolbarLayout === 'two-row' || toolbarOptions ? ' two-row' : ''}`}>
         <div className="grid-heading-group">
           <h2 title={resolvedTitle}>{resolvedTitle}</h2>
           <span className="grid-total">총 <strong>{rows.length}</strong>건</span>
@@ -122,6 +126,7 @@ export default function ProgramDataGrid<T>({
             );
           })}
         </div>
+        {(toolbarLayout === 'two-row' || toolbarOptions) && <div className="grid-toolbar-options">{toolbarOptions}</div>}
       </div>
       {renderTable({ columns, rows, getRowKey, emptyMessage, selectedRowKeys: selectable ? selectedRowKeys : undefined, onSelectedRowKeysChange: selectable ? setSelectedRowKeys : undefined, onRowClick, getRowClassName })}
     </section>

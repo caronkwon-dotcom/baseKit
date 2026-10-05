@@ -1584,11 +1584,19 @@ tbody tr.selected-row td {
 .multi-grid-splitter.top { cursor: row-resize; }
 .multi-grid-splitter.left { cursor: col-resize; }
 .multi-grid-splitter:hover,.multi-grid-splitter:focus { background: var(--brand-soft); outline: 1px solid var(--brand-primary); }
-.program-endpoint-detail { display: flex; height: 100%; min-height: 0; flex-direction: column; }
-.program-endpoint-detail .program-data-grid { flex: 1; height: auto; }
-.program-endpoint-controls { display: flex; flex-wrap: wrap; gap: var(--multi-grid-gap); padding: 4px 0; }
-.program-endpoint-controls label { display: flex; align-items: center; gap: 4px; font-size: 12px; }
-.program-endpoint-controls select { min-width: 0; max-width: 100%; color: var(--text-primary); font: inherit; }
+/* Shared tracks keep paired Grid toolbars aligned even when options wrap. */
+.multi-grid-detail.resizable-grid-details.aligned-detail-toolbars { grid-template-rows: auto minmax(0, 1fr); }
+.aligned-detail-toolbars > .multi-grid-detail-top,
+.aligned-detail-toolbars > .multi-grid-detail-bottom { display: grid; grid-template-rows: subgrid; grid-row: 1 / span 2; }
+.aligned-detail-toolbars > .multi-grid-detail-top { grid-column: 1; }
+.aligned-detail-toolbars > .multi-grid-detail-bottom { grid-column: 3; }
+.aligned-detail-toolbars > .multi-grid-splitter { grid-column: 2; grid-row: 1 / span 2; }
+.aligned-detail-toolbars > div > .program-data-grid { display: grid; grid-template-rows: subgrid; grid-row: 1 / span 2; }
+.grid-toolbar.two-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: minmax(28px, auto) minmax(28px, auto); gap: 4px 12px; }
+.grid-toolbar.two-row .grid-toolbar-options { grid-column: 1 / -1; min-width: 0; }
+.grid-toolbar-options > [role="group"] { display: flex; flex-wrap: wrap; align-items: center; gap: var(--multi-grid-gap); }
+.grid-toolbar-options label { display: flex; min-width: 0; align-items: center; gap: 4px; color: var(--text-secondary); font-size: 12px; }
+.grid-toolbar-options select { min-width: 0; max-width: 100%; color: var(--text-primary); font: inherit; }
 .metadata-toolbar select:focus-visible,
 .basekit-toolbar-control:focus-visible { border-color: var(--brand-primary); outline: 2px solid color-mix(in srgb, var(--brand-primary) 25%, transparent); outline-offset: 0; }
 .multi-grid-message-area { min-height: var(--multi-grid-message-height); flex: 0 0 var(--multi-grid-message-height); }
