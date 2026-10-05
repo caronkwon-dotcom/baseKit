@@ -24,3 +24,11 @@ ProgramManagePage의 program-endpoint-controls는 ProgramDataGrid 앞에 있다.
 - native select에 기존 basekit-toolbar-control 적용. API/DB/권한·업무 데이터 변경 없음.
 
 COMMON 구현 후 DESIGN이 직접 프로그램관리 옵션 배치·spacing을 마무리하고 브라우저 재검수한다. 문서 인계만으로 DESIGN 완료하지 않는다. 별도 채팅/Issue 메시지는 발송하지 않았으며, 이 요청은 저장소 산출물이다.
+
+## 이번 요청으로 해결 (2026-10-05)
+
+사용자가 최소 공통 확장 구현을 명시적으로 허용했다. ProgramDataGrid에 선택형 `toolbarOptions` 및 `toolbarLayout`을 추가했다. BaseKitDataGrid는 기존 props 전달 구조로 이를 지원한다. `toolbarLayout="two-row"`는 첫 행 Title/총건수/metrics/Actions와 둘째 행 옵션을 제공한다. 기본 호출은 기존 single-row다.
+
+MasterDetailMultiGrid의 resizable stacked 구성에서 `alignDetailToolbars`를 켜면 직계 Detail Grid들이 공통 subgrid track을 공유한다. 옵션 줄바꿈 시에도 양쪽 Toolbar 하단과 Grid header를 같은 높이에 놓는다. 화면 전용 margin/absolute/음수 보정·Toolbar 복제·API/권한 변경은 없다. 이 옵션은 직계 Grid 두 개를 사용하는 resizable stacked 구성용이며 기존 레이아웃에는 적용하지 않는다.
+
+현재 지원 해상도 Chrome fixture 검수와 divider 조절에서 좌우 header 차이 0px. COMMON 추가 구현 대기는 해소했다. 향후 다른 Grid에 이 계약을 적용하거나 구형 브라우저를 지원할 때는 COMMON 영향 검토가 필요하다.

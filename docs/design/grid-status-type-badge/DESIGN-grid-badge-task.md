@@ -7,7 +7,7 @@
 
 DESIGN 검토 결과: [DESIGN-grid-badge-review.md](DESIGN-grid-badge-review.md)
 
-검토 상태: 최신 dev-pm(a928069) 기준 UI 직접 보정 및 실제 브라우저 검수. Endpoint 공통 옵션 삽입 계약은 COMMON 의존성으로 남긴다. [DESIGN 역할](../DESIGN-role.md)과 연결된 최신 검토 결과를 따른다.
+검토 상태: 최신 dev-pm(b28dc96)으로 현행화. 사용자가 최소 공통 확장을 승인하여 Endpoint 옵션 삽입·좌우 Toolbar 공통 정렬을 직접 구현한다. 내부 문서·검수 코드는 design-work에만, 제품 UI 코드는 별도 commit으로 dev-pm에 반영한다. [DESIGN 역할](../DESIGN-role.md)과 연결된 최신 검토 결과를 따른다.
 
 ## 1. 목적
 
