@@ -238,3 +238,13 @@ DESIGN 팀은 실제 제품 화면의 UI 표현을 직접 수정할 수 있다.
 기존 구현에는 이미 `FormField`, `FieldDefinition.labelPosition: LEFT | TOP`, MetadataForm label position 결정 로직, 좁은 폭 TOP 전환, required marker, validation error 연결이 일부 반영되어 있다.
 
 이번 작업은 기존 구현을 폐기하지 않고, 본 문서에서 확정한 **LEFT 라벨 오른쪽 정렬 / red dot / 상단 안내 / Input-Combo 시각 통일 / Combo popup 표현**까지 실제 화면 기준으로 보완하는 작업이다.
+
+## 11. Form 보완 확정 구현 (2026-10-05)
+
+- 원격 dev-pm a93c72c 기준 현행화. UI commit 99fb974.
+- FormField LEFT는 공통 140px track/8px gap 및 오른쪽 정렬. TOP 옵션 유지, LEFT textarea 라벨은 상단 정렬. 긴 라벨은 단일 inline group에서 ellipsis/title로 보존하고 dot은 축소/줄바꿈되지 않는다. 560px 이하 Form은 TOP 전환.
+- 공통 FormSelect를 MetadataForm 및 요구사항 기본정보에 적용. Input과 32px/border/radius 일치, BaseKit focus, 흰 BODY portal popup/border/shadow/6px gap/4px padding, selected blue+check/active gray. 방향키/Enter/Escape와 mouse 처리, resize/외부 scroll/외부 click 닫기 및 viewport 위치 제한.
+- 빨간 dot #e60012는 required 상태에 항상 유지. RequiredFieldsNotice는 ko/en/ja 문자열 및 document lang/명시 language로 관리한다. 실제 required/aria-required 유지.
+- 요구사항 기존 trim 필수 조건을 그대로 사용해 저장 시 누락된 항목에만 border/background/message/aria-invalid/describedby 표현. 신규/다른 행 전환 시 오류 상태 reset. API/DB/권한/업무 validation 변경 없음.
+- 실제 수정 화면 1280/1440/1920, 신규 화면 빈 저장 및 keyboard 선택 확인. 공통 MetadataForm 480px TOP/긴 label/dot/error, 700px LEFT textarea 상단/ellipsis, mouse 선택 확인. Shell 기존 min-width 1280 유지, 실제 DB 유효 저장은 수행하지 않음.
+- build/lint/frontend 53/53/backend 46(실패 0, 조건부 제외 5)/diff check 통과. COMMON 추가 차단 협의 없음. 디자인 문서는 design-work에만 유지, 제품에는 UI commit만 반영.
