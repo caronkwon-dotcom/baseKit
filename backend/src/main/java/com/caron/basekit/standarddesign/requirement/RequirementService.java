@@ -34,7 +34,7 @@ public class RequirementService {
     }
     private RequirementData expand(RequirementRow row) {
         return new RequirementData(row.REQUIREMENT_ID(),row.PROJECT_ID(),row.REQUIREMENT_NAME(),row.REQUIREMENT_TYPE_CODE(),
-                row.DESCRIPTION(),row.PROCESS_DESCRIPTION(),row.STATUS(),row.LEGACY_WBS_IDS(),row.LEGACY_SCREEN_IDS(),
+                row.DESCRIPTION(),row.PROCESS_DESCRIPTION(),row.DESIGN_OPINION(),row.STATUS(),row.LEGACY_WBS_IDS(),row.LEGACY_SCREEN_IDS(),
                 row.LEGACY_TABLE_IDS(),row.LEGACY_SOURCE_ID(),row.REG_DT(),row.MOD_DT(),mapper.menuKeys(row.REQUIREMENT_ID()),mapper.projectMenuIds(row.REQUIREMENT_ID()),mapper.attachments(row.REQUIREMENT_ID()));
     }
     @Transactional
@@ -47,7 +47,7 @@ public class RequirementService {
         }
         String id = "REQ-" + UUID.randomUUID().toString().substring(0, 12).toUpperCase(Locale.ROOT);
         RequirementRow row = new RequirementRow(id,request.PROJECT_ID(),request.REQUIREMENT_NAME().trim(),request.REQUIREMENT_TYPE_CODE(),
-                nonnull(request.DESCRIPTION()),nonnull(request.PROCESS_DESCRIPTION()),request.STATUS(),request.LEGACY_WBS_IDS(),
+                nonnull(request.DESCRIPTION()),nonnull(request.PROCESS_DESCRIPTION()),nonnull(request.DESIGN_OPINION()),request.STATUS(),request.LEGACY_WBS_IDS(),
                 request.LEGACY_SCREEN_IDS(),request.LEGACY_TABLE_IDS(),request.LEGACY_SOURCE_ID(),null,null);
         mapper.insert(row);
         replaceMenus(id, request.MENU_KEYS());
@@ -61,7 +61,7 @@ public class RequirementService {
         RequirementData current = one(id);
         if (!current.PROJECT_ID().equals(request.PROJECT_ID())) throw new IllegalArgumentException("프로젝트 ID는 변경할 수 없습니다.");
         RequirementRow row = new RequirementRow(id,current.PROJECT_ID(),request.REQUIREMENT_NAME().trim(),request.REQUIREMENT_TYPE_CODE(),
-                nonnull(request.DESCRIPTION()),nonnull(request.PROCESS_DESCRIPTION()),request.STATUS(),current.LEGACY_WBS_IDS(),
+                nonnull(request.DESCRIPTION()),nonnull(request.PROCESS_DESCRIPTION()),request.DESIGN_OPINION() == null ? current.DESIGN_OPINION() : request.DESIGN_OPINION(),request.STATUS(),current.LEGACY_WBS_IDS(),
                 current.LEGACY_SCREEN_IDS(),current.LEGACY_TABLE_IDS(),current.LEGACY_SOURCE_ID(),current.REG_DT(),current.MOD_DT());
         mapper.update(row);
         replaceMenus(id, request.MENU_KEYS());

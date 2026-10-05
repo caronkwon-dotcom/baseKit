@@ -79,8 +79,8 @@ export const analysisApi = {
   reanalyze: (id: string, input: AnalysisInput) => request<Analysis>(`/${encodeURIComponent(id)}/reanalyze`, body('POST', input)),
   updateCandidate: (id: string, candidateId: string, value: { RESULT_VERSION: number; EDITED?: CandidateBody; SELECTED?: boolean; RESET?: boolean }) =>
     request<Analysis>(`/${encodeURIComponent(id)}/candidates/${encodeURIComponent(candidateId)}`, body('PUT', value)),
-  confirm: (id: string, resultVersion: number, candidateIds: string[]) => request<Analysis>(`/${encodeURIComponent(id)}/confirm`, body('POST', { RESULT_VERSION: resultVersion, CANDIDATE_IDS: candidateIds })),
-  generate: (id: string, generationRequestId: string, resultVersion: number) => request<Generation>(`/${encodeURIComponent(id)}/generate`, body('POST', { GENERATION_REQUEST_ID: generationRequestId, RESULT_VERSION: resultVersion })),
+  confirm: (id: string, resultVersion: number, candidateIds: string[], input: AnalysisInput) => request<Analysis>(`/${encodeURIComponent(id)}/confirm`, body('POST', { RESULT_VERSION: resultVersion, CANDIDATE_IDS: candidateIds, INPUT: input })),
+  generate: (id: string, generationRequestId: string, resultVersion: number, input: AnalysisInput) => request<Generation>(`/${encodeURIComponent(id)}/generate`, body('POST', { GENERATION_REQUEST_ID: generationRequestId, RESULT_VERSION: resultVersion, INPUT: input })),
   generation: (id: string) => request<Generation>(`/${encodeURIComponent(id)}/generation`),
 };
 
@@ -125,4 +125,49 @@ export function inputSignature(input: AnalysisInput): string {
 
 export function summarizeGeneration(items: GenerationItem[]): { success: number; failed: number; pending: number } {
   return { success: items.filter((i) => i.STATUS === 'SUCCESS').length, failed: items.filter((i) => i.STATUS === 'FAILED').length, pending: items.filter((i) => i.STATUS === 'PENDING').length };
+}
+
+const staleChecked: AnalysisStatus[] = ['REVIEW_READY', 'CONFIRMED', 'PARTIAL', 'GENERATION_FAILED'];
+
+/** Input of the analysis as stored on the server; the baseline for the immediate local STALE decision. */
+export function baselineInput(analysis: Pick<Analysis, 'REQUIREMENTS' | 'OVERALL_OPINION'>): AnalysisInput {
+  return {
+    REQUIREMENTS: analysis.REQUIREMENTS.map((r) => ({ REQUIREMENT_ID: r.REQUIREMENT_ID, MOD_DT: r.MOD_DT, DESIGN_OPINION: r.DESIGN_OPINION ?? '' })),
+    OVERALL_OPINION: analysis.OVERALL_OPINION ?? '',
+  };
+}
+
+/** Immediate STALE: any difference from the analysed input (including an empty selection) invalidates the result. */
+export function isLocallyStale(analysis: Pick<Analysis, 'ANALYSIS_STATUS' | 'REQUIREMENTS' | 'OVERALL_OPINION'>, current: AnalysisInput): boolean {
+  if (analysis.ANALYSIS_STATUS === 'STALE') return true;
+  if (!staleChecked.includes(analysis.ANALYSIS_STATUS)) return false;
+  return current.REQUIREMENTS.length === 0 || inputSignature(baselineInput(analysis)) !== inputSignature(current);
+}
+
+/** Reuse the GENERATION_REQUEST_ID only for retrying after a server-confirmed partial/failed generation. */
+export function retryRequestId(generation: Generation | null, current: { ANALYSIS_STATUS: AnalysisStatus }): string | null {
+  if (!generation?.GENERATION_REQUEST_ID) return null;
+  if (current.ANALYSIS_STATUS !== 'PARTIAL' && current.ANALYSIS_STATUS !== 'GENERATION_FAILED') return null;
+  return generation.GENERATION_REQUEST_ID;
+}
+
+export interface CandidateDiffRow { label: string; original: string; edited: string; changed: boolean }
+export type RelationKind = 'MENU' | 'ROLE' | 'ACTION' | 'STEP';
+
+/** Original vs edited comparison of every editable candidate attribute (name, purpose, layout, relations, sources). */
+export function candidateDiff(candidate: Pick<AnalysisCandidate, 'ORIGINAL' | 'EFFECTIVE'>, nameOf: (kind: RelationKind, tempId: string) => string = (_k, id) => id): CandidateDiffRow[] {
+  const list = (kind: RelationKind, ids?: string[]) => (ids ?? []).map((id) => nameOf(kind, id)).join(', ') || '-';
+  const text = (v?: string) => (v && v.trim()) || '-';
+  const o = candidate.ORIGINAL, e = candidate.EFFECTIVE;
+  const rows: [string, string, string][] = [
+    ['프로그램명', text(o.PROGRAM_NAME), text(e.PROGRAM_NAME)],
+    ['목적', text(o.PURPOSE), text(e.PURPOSE)],
+    ['Layout', text(o.LAYOUT_TYPE), text(e.LAYOUT_TYPE)],
+    ['출처 Requirement', (o.SOURCE_REQUIREMENT_IDS ?? []).join(', ') || '-', (e.SOURCE_REQUIREMENT_IDS ?? []).join(', ') || '-'],
+    ['Menu 관계', list('MENU', o.MENU_TEMP_IDS), list('MENU', e.MENU_TEMP_IDS)],
+    ['Role 관계', list('ROLE', o.ROLE_TEMP_IDS), list('ROLE', e.ROLE_TEMP_IDS)],
+    ['Action 관계', list('ACTION', o.ACTION_TEMP_IDS), list('ACTION', e.ACTION_TEMP_IDS)],
+    ['Step 관계', list('STEP', o.STEP_TEMP_IDS), list('STEP', e.STEP_TEMP_IDS)],
+  ];
+  return rows.map(([label, original, edited]) => ({ label, original, edited, changed: original !== edited }));
 }

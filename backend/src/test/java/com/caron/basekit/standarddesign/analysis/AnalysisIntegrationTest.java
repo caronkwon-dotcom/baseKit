@@ -86,9 +86,28 @@ class AnalysisIntegrationTest {
         return id;
     }
 
+    private String inputOf(String id, String overall) throws Exception {
+        ObjectNode in = om.createObjectNode();
+        in.put("OVERALL_OPINION", overall);
+        var arr = in.putArray("REQUIREMENTS");
+        for (JsonNode r : fetch(id).path("REQUIREMENTS")) {
+            ObjectNode n = arr.addObject();
+            n.put("REQUIREMENT_ID", r.path("REQUIREMENT_ID").asText());
+            n.put("MOD_DT", r.path("MOD_DT").asText());
+            n.put("DESIGN_OPINION", r.path("DESIGN_OPINION").asText());
+        }
+        return in.toString();
+    }
+
+    private String inputOf(String id) throws Exception { return inputOf(id, fetch(id).path("OVERALL_OPINION").asText()); }
+
+    private String genBody(String id) throws Exception {
+        return "{\"GENERATION_REQUEST_ID\":\"G-" + id + "\",\"RESULT_VERSION\":1,\"INPUT\":" + inputOf(id) + "}";
+    }
+
     private void confirmAll(String id, int version) throws Exception {
         String ids = om.writeValueAsString(fetch(id).path("CANDIDATES").findValuesAsText("CANDIDATE_ID"));
-        send("/api/standard-design/analyses/" + id + "/confirm", "{\"RESULT_VERSION\":" + version + ",\"CANDIDATE_IDS\":" + ids + "}");
+        send("/api/standard-design/analyses/" + id + "/confirm", "{\"RESULT_VERSION\":" + version + ",\"CANDIDATE_IDS\":" + ids + ",\"INPUT\":" + inputOf(id) + "}");
     }
 
     @Test void analysisYieldsUnselectedCandidatesAndIsIdempotentPerRequest() throws Exception {
@@ -181,7 +200,7 @@ class AnalysisIntegrationTest {
         String id = analyzed(req);
         int menus = jdbc.queryForObject("SELECT COUNT(*) FROM BSDPMENU", Integer.class);
         confirmAll(id, 1);
-        String gen = "{\"GENERATION_REQUEST_ID\":\"G-" + id + "\",\"RESULT_VERSION\":1}";
+        String gen = genBody(id);
         JsonNode r = send("/api/standard-design/analyses/" + id + "/generate", gen).path("DATA");
         assertThat(r.path("STATUS").asText()).isEqualTo("GENERATED");
         assertThat(r.path("ITEMS")).hasSize(2);
@@ -197,7 +216,7 @@ class AnalysisIntegrationTest {
         confirmAll(id, 1);
         String failing = fetch(id).path("CANDIDATES").get(1).path("CANDIDATE_ID").asText();
         doThrow(new IllegalStateException("boom")).when(programFactory).create(failing);
-        String gen = "{\"GENERATION_REQUEST_ID\":\"G-" + id + "\",\"RESULT_VERSION\":1}";
+        String gen = genBody(id);
         JsonNode r = send("/api/standard-design/analyses/" + id + "/generate", gen).path("DATA");
         assertThat(r.path("STATUS").asText()).isEqualTo("PARTIAL");
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM BSDGPROG WHERE SOURCE_ANALYSIS_ID=?", Integer.class, id)).isEqualTo(1);
@@ -208,5 +227,59 @@ class AnalysisIntegrationTest {
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM BSDGPROG WHERE SOURCE_ANALYSIS_ID=?", Integer.class, id)).isEqualTo(2);
         verify(programFactory, times(1)).create(anyString());
         verify(programFactory).create(failing);
+    }
+
+    @Test void changedInputIsRejectedByServerAndMarksStale() throws Exception {
+        JsonNode req = requirement("B1");
+        String id = analyzed(req);
+        confirmAll(id, 1);
+        String ids = om.writeValueAsString(fetch(id).path("CANDIDATES").findValuesAsText("CANDIDATE_ID"));
+        assertThat(send("/api/standard-design/analyses/" + id + "/generate", "{\"GENERATION_REQUEST_ID\":\"g1\",\"RESULT_VERSION\":1}").path("ERROR_CODE").asText()).isEqualTo("ANALYSIS_INVALID");
+        String changed = "{\"GENERATION_REQUEST_ID\":\"g2\",\"RESULT_VERSION\":1,\"INPUT\":" + inputOf(id, "다른 의견") + "}";
+        assertThat(send("/api/standard-design/analyses/" + id + "/generate", changed).path("ERROR_CODE").asText()).isEqualTo("ANALYSIS_STALE");
+        JsonNode a = fetch(id);
+        assertThat(a.path("ANALYSIS_STATUS").asText()).isEqualTo("STALE");
+        a.path("CANDIDATES").forEach(c -> assertThat(c.path("CONFIRMED_YN").asText()).isEqualTo("N"));
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM BSDGPROG WHERE SOURCE_ANALYSIS_ID=?", Integer.class, id)).isZero();
+        assertThat(ids).isNotBlank();
+    }
+
+    @Test void emptySelectionAndChangedConfirmInputMarkStale() throws Exception {
+        JsonNode req = requirement("B2");
+        String id = analyzed(req);
+        mvc.perform(put("/api/standard-design/analyses/" + id + "/input").contentType(MediaType.APPLICATION_JSON).content("{\"OVERALL_OPINION\":\"의견\",\"REQUIREMENTS\":[]}")).andExpect(status().isOk());
+        assertThat(fetch(id).path("ANALYSIS_STATUS").asText()).isEqualTo("STALE");
+
+        String id2 = analyzed(requirement("B3"));
+        String ids = om.writeValueAsString(fetch(id2).path("CANDIDATES").findValuesAsText("CANDIDATE_ID"));
+        String body = "{\"RESULT_VERSION\":1,\"CANDIDATE_IDS\":" + ids + ",\"INPUT\":" + inputOf(id2, "변경") + "}";
+        assertThat(send("/api/standard-design/analyses/" + id2 + "/confirm", body).path("ERROR_CODE").asText()).isEqualTo("ANALYSIS_STALE");
+        assertThat(fetch(id2).path("ANALYSIS_STATUS").asText()).isEqualTo("STALE");
+    }
+
+    @Test void unknownGenerationMustBeQueriedBeforeRetryingFailedItemsOnly() throws Exception {
+        JsonNode req = requirement("B4");
+        String id = analyzed(req);
+        confirmAll(id, 1);
+        String failing = fetch(id).path("CANDIDATES").get(1).path("CANDIDATE_ID").asText();
+        doThrow(new IllegalStateException("boom")).when(programFactory).create(failing);
+        String gen = genBody(id);
+        assertThat(send("/api/standard-design/analyses/" + id + "/generate", gen).path("DATA").path("STATUS").asText()).isEqualTo("PARTIAL");
+        reset(programFactory);
+
+        jdbc.update("UPDATE BSDAANLS SET ANALYSIS_STATUS='GENERATION_UNKNOWN' WHERE ANALYSIS_ID=?", id);
+        jdbc.update("UPDATE BSDAGREQ SET STATUS='GENERATING' WHERE ANALYSIS_ID=?", id);
+        assertThat(send("/api/standard-design/analyses/" + id + "/generate", gen).path("ERROR_CODE").asText()).isEqualTo("GENERATION_STATE_UNCONFIRMED");
+        assertThat(send("/api/standard-design/analyses/" + id + "/generate", gen.replace("\"G-", "\"N-")).path("ERROR_CODE").asText()).isEqualTo("GENERATION_STATE_UNCONFIRMED");
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM BSDGPROG WHERE SOURCE_ANALYSIS_ID=?", Integer.class, id)).isEqualTo(1);
+
+        JsonNode checked = om.readTree(mvc.perform(get("/api/standard-design/analyses/" + id + "/generation")).andReturn().getResponse().getContentAsString()).path("DATA");
+        assertThat(checked.path("STATUS").asText()).isEqualTo("PARTIAL");
+        assertThat(fetch(id).path("ANALYSIS_STATUS").asText()).isEqualTo("PARTIAL");
+
+        JsonNode retry = send("/api/standard-design/analyses/" + id + "/generate", gen).path("DATA");
+        assertThat(retry.path("STATUS").asText()).isEqualTo("GENERATED");
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM BSDGPROG WHERE SOURCE_ANALYSIS_ID=?", Integer.class, id)).isEqualTo(2);
+        verify(programFactory, times(1)).create(anyString());
     }
 }

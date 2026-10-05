@@ -7,14 +7,13 @@ import { useGridRowState } from '../../../../components/grid/gridRowState';
 import { coreCodeApi } from '../../../../services/coreCodeApi';
 import ProjectListDetailWorkspace, { type ProjectWorkspaceMode } from '../components/ProjectListDetailWorkspace';
 import ProjectContextSelector from '../components/ProjectContextSelector';
-import RequirementAnalysisPanel from '../components/RequirementAnalysisPanel';
 import RequirementAttachmentPanel from '../components/RequirementAttachmentPanel';
 import { useProjectContext } from '../components/useProjectContext';
 import { requirementApi, type Requirement, type RequirementInput } from '../../requirement/requirementApi';
 import { projectMenuApi, type ProjectMenu } from '../../projectmenu/projectMenuApi';
 import { createRequirementExcelMapper, createRequirementExcelValidator, planRequirementImport, requirementExcelColumns, requirementImportKey } from '../../requirement/requirementExcel';
 
-const emptyDraft = (projectId: string): RequirementInput => ({ PROJECT_ID: projectId, REQUIREMENT_NAME: '', REQUIREMENT_TYPE_CODE: 'NEW', DESCRIPTION: '', PROCESS_DESCRIPTION: '', STATUS: 'DRAFT', MENU_KEYS: [], PROJECT_MENU_IDS: [] });
+const emptyDraft = (projectId: string): RequirementInput => ({ PROJECT_ID: projectId, REQUIREMENT_NAME: '', REQUIREMENT_TYPE_CODE: 'NEW', DESCRIPTION: '', PROCESS_DESCRIPTION: '', DESIGN_OPINION: '', STATUS: 'DRAFT', MENU_KEYS: [], PROJECT_MENU_IDS: [] });
 const legacyKey = 'basekit.standard-design.lifecycle.v1';
 interface LegacyRequirement { REQUIREMENT_ID: string; PROJECT_ID: string; REQUIREMENT_NAME: string; DESCRIPTION: string; STATUS: string; WBS_IDS?: string[]; SCREEN_IDS?: string[]; TABLE_IDS?: string[] }
 function legacyRequirements(): LegacyRequirement[] {
@@ -99,7 +98,7 @@ export default function RequirementIntakePage() {
   const confirmDiscard = () => !dirty || window.confirm('저장하지 않은 변경사항이 있습니다. 변경사항을 버리시겠습니까?');
   const reportAttachmentError = useCallback((text: string) => setMessage({ type: 'error', text }), []);
   const select = (row: Requirement) => {
-    const value: RequirementInput = { PROJECT_ID: row.PROJECT_ID, REQUIREMENT_NAME: row.REQUIREMENT_NAME, REQUIREMENT_TYPE_CODE: row.REQUIREMENT_TYPE_CODE, DESCRIPTION: row.DESCRIPTION, PROCESS_DESCRIPTION: row.PROCESS_DESCRIPTION, STATUS: row.STATUS, MENU_KEYS: row.MENU_KEYS, PROJECT_MENU_IDS: row.PROJECT_MENU_IDS ?? [] };
+    const value: RequirementInput = { PROJECT_ID: row.PROJECT_ID, REQUIREMENT_NAME: row.REQUIREMENT_NAME, REQUIREMENT_TYPE_CODE: row.REQUIREMENT_TYPE_CODE, DESCRIPTION: row.DESCRIPTION, PROCESS_DESCRIPTION: row.PROCESS_DESCRIPTION, DESIGN_OPINION: row.DESIGN_OPINION ?? '', STATUS: row.STATUS, MENU_KEYS: row.MENU_KEYS, PROJECT_MENU_IDS: row.PROJECT_MENU_IDS ?? [] };
     setSelectedId(row.REQUIREMENT_ID); setSelectedRowKeys(new Set([row.REQUIREMENT_ID])); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); setMenuRelationSelected(new Set());
     setLegacyMenuKeys(row.MENU_KEYS);
     replaceMenuRelations(row.PROJECT_MENU_IDS.map((id) => { const item = projectMenus.find((menu) => menu.PROJECT_MENU_ID === id); return item ? { PROJECT_MENU_ID: item.PROJECT_MENU_ID, MENU_ID: item.MENU_ID, MENU_NAME: item.MENU_NAME, LEVEL1_MENU_ID: item.LEVEL1_MENU_ID } : { PROJECT_MENU_ID: id, MENU_ID: id, MENU_NAME: '프로젝트 메뉴를 찾을 수 없음', LEVEL1_MENU_ID: null }; }));
@@ -163,7 +162,7 @@ export default function RequirementIntakePage() {
   const migrate = () => void run(async () => {
     let count = 0;
     for (const row of pendingLegacy) {
-      const saved = await requirementApi.create({ PROJECT_ID: row.PROJECT_ID, REQUIREMENT_NAME: row.REQUIREMENT_NAME, REQUIREMENT_TYPE_CODE: 'NEW', DESCRIPTION: row.DESCRIPTION ?? '', PROCESS_DESCRIPTION: '', STATUS: row.STATUS, MENU_KEYS: [], PROJECT_MENU_IDS: [], LEGACY_SOURCE_ID: row.REQUIREMENT_ID, LEGACY_WBS_IDS: JSON.stringify(row.WBS_IDS ?? []), LEGACY_SCREEN_IDS: JSON.stringify(row.SCREEN_IDS ?? []), LEGACY_TABLE_IDS: JSON.stringify(row.TABLE_IDS ?? []) });
+      const saved = await requirementApi.create({ PROJECT_ID: row.PROJECT_ID, REQUIREMENT_NAME: row.REQUIREMENT_NAME, REQUIREMENT_TYPE_CODE: 'NEW', DESCRIPTION: row.DESCRIPTION ?? '', PROCESS_DESCRIPTION: '', DESIGN_OPINION: '', STATUS: row.STATUS, MENU_KEYS: [], PROJECT_MENU_IDS: [], LEGACY_SOURCE_ID: row.REQUIREMENT_ID, LEGACY_WBS_IDS: JSON.stringify(row.WBS_IDS ?? []), LEGACY_SCREEN_IDS: JSON.stringify(row.SCREEN_IDS ?? []), LEGACY_TABLE_IDS: JSON.stringify(row.TABLE_IDS ?? []) });
       if (saved.LEGACY_SOURCE_ID !== row.REQUIREMENT_ID) throw new Error(`${row.REQUIREMENT_ID} 이관 확인에 실패했습니다.`); count += 1;
     }
     await load(); setMessage({ type: 'success', text: `${count}건 이관을 확인했습니다. 기존 브라우저 데이터는 보존됩니다.` });
@@ -178,7 +177,6 @@ export default function RequirementIntakePage() {
   const statusLabels = useMemo(() => new Map(statuses.map((status) => [status.CODE, status.CODE_NAME])), [statuses]);
   const requirementColumns = useMemo<DataTableColumn<Requirement>[]>(() => [
     { key: 'REQUIREMENT_NAME', header: '요구사항명', flex: 1, minWidth: 180, render: (row) => row.REQUIREMENT_NAME },
-    { key: 'DESCRIPTION', header: '요구사항 내용', flex: 1, minWidth: 220, render: (row) => row.DESCRIPTION || '-' },
     { key: 'STATUS', header: '상태', width: 120, render: (row) => <StatusColorIndicator label={statusLabels.get(row.STATUS) ?? row.STATUS} color={statusColors.get(row.STATUS) ?? '#64748B'} /> },
     { key: 'REQUIREMENT_TYPE_CODE', header: '요구 유형', width: 120, render: (row) => types.find((type) => type.CODE === row.REQUIREMENT_TYPE_CODE)?.CODE_NAME ?? row.REQUIREMENT_TYPE_CODE },
     { key: 'MENU_KEYS', header: '관련 메뉴', flex: 1, minWidth: 180, render: (row) => row.MENU_KEYS.length ? row.MENU_KEYS.join(', ') : '-' },
@@ -199,11 +197,12 @@ export default function RequirementIntakePage() {
   const filteredProjectMenus = projectMenus.filter((menu) => !menuRelationRows.some((row) => row.PROJECT_MENU_ID === menu.PROJECT_MENU_ID)
     && (!projectMenuSearch.trim() || `${menu.MENU_ID} ${menu.MENU_NAME}`.toLocaleLowerCase().includes(projectMenuSearch.trim().toLocaleLowerCase())));
   const basicInfo: ReactNode = <div className="standard-design-project-fields standard-design-project-fields--long-text">
-    <label><span>요구사항명</span><MaxLengthField required maxLength={200} value={draft.REQUIREMENT_NAME} onChange={(value) => update('REQUIREMENT_NAME', value)} /></label>
+    <label className="standard-design-project-description"><span>요구사항명</span><MaxLengthField required maxLength={200} value={draft.REQUIREMENT_NAME} onChange={(value) => update('REQUIREMENT_NAME', value)} /></label>
     <label><span>요구 유형</span><select value={draft.REQUIREMENT_TYPE_CODE} onChange={(e) => update('REQUIREMENT_TYPE_CODE', e.target.value)}>{types.map((code) => <option key={code.CODE} value={code.CODE}>{code.CODE_NAME}</option>)}</select></label>
     <label><span>상태</span><select value={draft.STATUS} onChange={(e) => update('STATUS', e.target.value)}>{statuses.map((status) => <option key={status.CODE} value={status.CODE}>{status.CODE_NAME}</option>)}</select></label>
     <label className="standard-design-project-description"><span>요구사항 내용 *</span><MaxLengthField required multiline rows={8} maxLength={4000} value={draft.DESCRIPTION} onChange={(value) => update('DESCRIPTION', value)} /></label>
     <label className="standard-design-project-description"><span>프로세스 설명</span><MaxLengthField multiline rows={8} maxLength={4000} value={draft.PROCESS_DESCRIPTION} onChange={(value) => update('PROCESS_DESCRIPTION', value)} /></label>
+    <label className="standard-design-project-description"><span>설계 의견</span><MaxLengthField multiline rows={6} maxLength={10000} value={draft.DESIGN_OPINION ?? ''} onChange={(value) => update('DESIGN_OPINION', value)} /></label>
   </div>;
   const attachmentTab: ReactNode = <RequirementAttachmentPanel requirementId={selectedId} attachments={selected?.ATTACHMENTS ?? []} onUploaded={(file) => { void load(selectedId); setMessage({ type: 'success', text: `${file.ORIGINAL_FILE_NAME}을(를) 업로드했습니다.` }); }} onDeleted={() => { void load(selectedId); setMessage({ type: 'success', text: '첨부파일을 삭제했습니다.' }); }} onError={reportAttachmentError} />;
   const menuTab: ReactNode = <section className="sd-requirement-menu-tab" aria-label="관련 메뉴">
@@ -220,7 +219,7 @@ export default function RequirementIntakePage() {
       ]}
     />
   </section>;
-  const aiTab: ReactNode = <RequirementAnalysisPanel projectId={projectId} requirements={rows} projectMenus={projectMenus} />;
+  // KEEP: RequirementAnalysisPanel and analysis backend/API/state/tests are preserved for the future requirement group analysis menu.
   const relatedTab: ReactNode = <section className="base-tab-placeholder" aria-label="연관정보 준비 영역">
     <h3>연관정보</h3>
     <p>요구사항 관계와 설계 Traceability를 표시할 준비 영역입니다. 현재는 별도 관계 데이터를 저장하지 않습니다.</p>
@@ -235,7 +234,6 @@ export default function RequirementIntakePage() {
     { id: 'history', label: '변경이력', content: historyTab },
     { id: 'attachments', label: '첨부/미리보기', content: attachmentTab },
     { id: 'menus', label: '관련 메뉴', content: menuTab },
-    { id: 'analysis', label: 'AI 분석', content: aiTab },
     { id: 'related', label: '연관정보', content: relatedTab },
   ];
   return <div className="page standard-design-page standard-design-project-page sd-requirement-page">
