@@ -67,3 +67,6 @@
 .basekit-ag-grid :is(.ag-cell-inline-editing, .basekit-text-length-editor) :is(.ag-input-field-input, .ag-picker-field-wrapper, input):focus-within { border-color: var(--brand-primary); }
 .basekit-ag-grid :is(.ag-cell-inline-editing, .basekit-text-length-editor) :is(input:disabled, input[readonly], .ag-picker-field-wrapper[aria-disabled="true"]),
 .basekit-ag-grid .basekit-grid-input:is(:disabled, [readonly]) { background: var(--surface-muted); color: var(--text-muted); border-color: var(--border-default); cursor: default; }
+.basekit-ag-grid .basekit-grid-select { height: 24px; margin-block: 3px; border-color: var(--grid-editable-border); }
+.basekit-ag-grid .ag-cell:has(.basekit-grid-select) { padding-inline: 2px; }
+.basekit-ag-grid .ag-cell:has(.basekit-grid-select)::after { content: none; }
