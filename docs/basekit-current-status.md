@@ -24,6 +24,8 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - 공통 `BaseFileUpload` V1: native input/drag & drop, 다중 파일, 정책 기반 사전검증, 파일별 진행률·취소·재시도·삭제, bounded concurrency와 XHR multipart transport. Requirement Attachment에 첫 적용. [ADR-032](decisions/032-base-file-upload-component.md) · [인계 보고서](base-file-upload-v1-handoff.md)
 - Standard Design Project Menu V1: 프로젝트별 LEVEL/SINGLE 분류 방식, Project Menu CRUD REST/Flyway V7, Requirement의 별도 Project Menu 관계(BSDRRPML), 기존 시스템 MENU_KEYS 보존, Excel 진입점만 제공. 재귀 트리·Parser·AI 기능은 미구현.
 
+- Standard Design Requirement Excel Import (2026-10-05, 미커밋): 공통 Excel Import를 재사용한 요구사항 양식·검증·저장 연결. LLM 분석·설계 대상 프로그램은 미구현이며 결정 사항과 COMMON·디자인 요청은 [인계 문서](sd-requirement-llm-handoff.md). 실제 LLM·승인 DB 검증은 미완료.
+
 Requirement Intake 검증: 신규 H2 API 통합 테스트와 Frontend build/lint 통과. 기존 전체 Backend 테스트 22건은 신규 통합 테스트 추가 전에 통과했으며 이 실행에서 연결된 Supabase PostgreSQL에 Flyway V5가 적용되었다. 추가 변경 후 전체 Backend 재실행은 외부 DB 변경 위험으로 자동 승인 검토가 거부되어 보류했고, 신규 대상 테스트만 H2로 재검증했다. 화면은 프로젝트 Context 선택 후 `요구사항 관리` 메뉴에서 확인한다.
 
 - `frontend/`, `backend/`, `database/` Full Stack Repository 구조
@@ -367,3 +369,9 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 ## 2026-10-05 COMMON SD Excel 지원
 
 기존 columns/validateRow/mapRow/onImport 계약 유지. 파싱·반영 잠금, Preview 초기화, Header/행 오류 분리, 물리 Excel 행 번호, 선택 title/submitLabel/disabled 및 FormModal submitDisabled를 보완했다. 상세 계약과 검증은 [SD Excel COMMON 인계](sd-excel-common-handoff.md) 참고. Frontend build/lint 및 42건 테스트, 외부 DB 환경변수를 제거한 Backend 30건(5 skip)이 통과했다. SD 업무 로직·LLM Client·시스템 Program/Runtime/권한 변경은 없다. Modal focus와 실화면 SD/LLM 연결은 후속 검증 범위다.
+
+## SD 요구사항 분석 V1 (sd-work, 미커밋)
+- 구현: Flyway V9, `standarddesign/analysis` 백엔드(분석·후보·확정·생성 API), `RequirementAnalysisPanel` 4단계 UX, STALE·버전 충돌·생성 멱등성. 결정은 `docs/decisions/033-sd-requirement-analysis-v1.md`.
+- 검증: 백엔드 전체 테스트(H2) 통과, Frontend lint/build/node test 46건 통과.
+- 미검증: 실제 회사 LLM(`COMPANY_LLM_*` 미설정), 승인 DB(PostgreSQL), 브라우저 수동 검수.
+- 후속 필수: Requirement 단위 Lock과 OWNER/LOCK OWNER 분리, `SD_*` 테이블 명칭 확정, 사용자 승인된 Program 메뉴 연결 정책.
