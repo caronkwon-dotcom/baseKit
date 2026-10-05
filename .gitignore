@@ -28,3 +28,9 @@ target
 *.njsproj
 *.sln
 *.sw?
+
+# Shared non-secret worktree modes
+!frontend/.env.dev-pm
+!frontend/.env.common
+!frontend/.env.design
+!frontend/.env.sd

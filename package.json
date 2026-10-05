@@ -3,6 +3,10 @@
   "private": true,
   "scripts": {
     "dev": "npm run dev --prefix frontend",
+    "dev:dev-pm": "npm run dev --prefix frontend -- --mode dev-pm",
+    "dev:common": "npm run dev --prefix frontend -- --mode common",
+    "dev:design": "npm run dev --prefix frontend -- --mode design",
+    "dev:sd": "npm run dev --prefix frontend -- --mode sd",
     "build": "npm run build --prefix frontend",
     "lint": "npm run lint --prefix frontend",
     "preview": "npm run preview --prefix frontend",
