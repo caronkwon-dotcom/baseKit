@@ -1718,7 +1718,7 @@ tbody tr.active-master-row td { background: var(--brand-soft); }
 .standard-form-grid, .standard-form-layout { container-type: inline-size; }
 .standard-form-field.standard-form-field {
   display: grid;
-  grid-template-columns: minmax(76px, min(28%, 140px)) minmax(0, 1fr);
+  grid-template-columns: var(--form-label-width, 140px) minmax(0, 1fr);
   align-content: start;
   align-items: start;
   gap: 8px;
@@ -1741,7 +1741,7 @@ tbody tr.active-master-row td { background: var(--brand-soft); }
   height: 5px;
   margin-left: 6px;
   border-radius: 50%;
-  background: var(--required-indicator, var(--text-secondary));
+  background: #e60012;
   vertical-align: middle;
 }
 .standard-form-control { min-width: 0; }
@@ -1760,3 +1760,32 @@ tbody tr.active-master-row td { background: var(--brand-soft); }
 }
 @media (max-width: 620px) { .standard-form-grid { grid-template-columns: minmax(0, 1fr); } }
 .metadata-form-section { min-width: 0; }
+
+/* Shared Form contract: required markers and validation are independent. */
+.standard-form-field.standard-form-field { column-gap: var(--form-field-gap, 8px); }
+.standard-form-field--left > .standard-form-label { text-align: right; justify-self: stretch; }
+.standard-form-label { white-space: nowrap; }
+.standard-form-field--top > .standard-form-label { text-align: left; }
+.standard-form-field:has(textarea) > .standard-form-label { padding-top: 0; }
+.standard-form-required-notice { margin: 0 0 10px; color: var(--text-secondary); font-size: 12px; }
+.standard-form-field .standard-form-control :is(input:not([type='checkbox']), select, textarea), .standard-form-select {
+  min-height: 32px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface-panel); padding: 6px 8px; color: var(--text-primary); font: inherit; box-sizing: border-box;
+}
+.standard-form-select { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; text-align: left; cursor: pointer; }
+.standard-form-select > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.standard-form-field .standard-form-control :is(input, textarea, select, .standard-form-select):focus-visible { outline: 2px solid var(--brand-soft); outline-offset: 1px; border-color: var(--brand-primary); }
+.standard-form-select:disabled { background: var(--surface-muted); color: var(--text-muted); cursor: default; }
+.standard-form-field.has-error .standard-form-select, .standard-form-select[aria-invalid='true'] { border-color: var(--danger, #dc2626); background: var(--danger-soft, #fff1f2); }
+.standard-form-select-popup { position: fixed; z-index: 10000; overflow-y: auto; padding: 4px; box-sizing: border-box; background: #fff; border: 1px solid #aeb9c9; border-radius: 6px; box-shadow: 0 8px 24px #14233b33; color: #1d2433; }
+.standard-form-select-option { display: flex; justify-content: space-between; gap: 8px; padding: 7px 8px; border-radius: 3px; cursor: pointer; overflow-wrap: anywhere; }
+.standard-form-select-option.is-active, .standard-form-select-option:hover { background: #edf0f4; }
+.standard-form-select-option.is-selected { background: var(--brand-primary); color: #fff; }
+@container (max-width: 560px) { .standard-form-field--left > .standard-form-label { text-align: left; } }
+.standard-form-field > .standard-form-label { display: flex; align-items: center; min-width: 0; }
+.standard-form-field--left > .standard-form-label { justify-content: flex-end; }
+.standard-form-field--top > .standard-form-label { justify-content: flex-start; }
+.standard-form-label-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.standard-form-label.is-required::after { flex: 0 0 5px; }
+@container (max-width: 560px) { .standard-form-field--left > .standard-form-label { justify-content: flex-start; } }
+.standard-form-field.standard-form-field.has-error .standard-form-control :is(input, select, textarea, .standard-form-select),
+.standard-form-field.standard-form-field .standard-form-control :is(input, select, textarea, .standard-form-select)[aria-invalid='true'] { border-color: var(--danger, #dc2626); background: var(--danger-soft, #fff1f2); }
