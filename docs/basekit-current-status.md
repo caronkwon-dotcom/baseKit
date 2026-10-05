@@ -17,6 +17,8 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 
 ## 2. 코드까지 구현 완료
 
+- Worktree 공통 실행 프로필: Spring dev-pm/common/design/sd와 Vite mode로 5173~5176 / 8080~8083 고정 포트 제공. DB 설정과 API proxy 경로 유지. 실행 명령은 README의 Worktree 실행 프로필 참고.
+
 - Standard Design Requirement Intake V1: Backend canonical Requirement·Menu 관계·Attachment (Flyway V5), 명시적 LocalStorage 이관, Project List-Detail 재사용, 복수 메뉴·파일·이미지 Preview. 프로젝트/메뉴 원본은 기존 구조와 논리 참조하며 OCR/LLM은 미구현. [ADR-031](decisions/031-requirement-intake-backend-boundary.md)
 - 공통 `BaseFileUpload` V1: native input/drag & drop, 다중 파일, 정책 기반 사전검증, 파일별 진행률·취소·재시도·삭제, bounded concurrency와 XHR multipart transport. Requirement Attachment에 첫 적용. [ADR-032](decisions/032-base-file-upload-component.md) · [인계 보고서](base-file-upload-v1-handoff.md)
 - Standard Design Project Menu V1: 프로젝트별 LEVEL/SINGLE 분류 방식, Project Menu CRUD REST/Flyway V7, Requirement의 별도 Project Menu 관계(BSDRRPML), 기존 시스템 MENU_KEYS 보존, Excel 진입점만 제공. 재귀 트리·Parser·AI 기능은 미구현.
