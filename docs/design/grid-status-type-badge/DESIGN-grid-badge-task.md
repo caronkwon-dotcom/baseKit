@@ -5,6 +5,10 @@
 대상: BaseKit Grid 내 상태(Status) / 유형(Type) 값 표현 및 Grid 상단 보조 컨트롤 배치
 참고 화면: 시스템관리 > 프로그램관리
 
+DESIGN 검토 결과: [DESIGN-grid-badge-review.md](DESIGN-grid-badge-review.md)
+
+검토 상태: 기준 SHA 소스 대조 완료 / 구현·시각 승인 대기. 아래는 원 작업 요구이며 실제 소스 근거, 권장 metric, native Select 재사용 및 Endpoint 미구현 범위는 연결된 검토 결과를 우선한다.
+
 ## 1. 목적
 
 프로그램관리 화면의 Grid에서 `상태(AVAILABLE / NEW)`와 `유형(목록 / 목록·상세 / 홈 등)` 값이 셀 내부 데이터라기보다 셀 위에 별도 라벨이 떠 있는 것처럼 보여 BaseKit Grid의 밀도와 정렬 규칙이 깨져 보인다.
