@@ -15,4 +15,6 @@ export interface FieldDefinition {
   defaultValue?: string;
   optionSource?: string;
   options?: FieldOption[];
+  /** Opt in to a persistent SELECT control in editable grids. */
+  gridControlDisplay?: 'always';
 }

@@ -57,6 +57,21 @@ export function MetadataSwitch({ value, field, editable, onChange }: { value: un
   ><span /></button>;
 }
 
+export function MetadataSelect({ value, field, editable, onChange }: { value: unknown; field: FieldDefinition; editable: boolean; onChange: (value: string) => void }) {
+  const current = String(value ?? '');
+  const options = field.options ?? [];
+  return <select className="basekit-grid-input basekit-grid-select" aria-label={field.label} disabled={!editable} value={current}
+    onPointerDown={event => event.stopPropagation()}
+    onMouseDown={event => event.stopPropagation()}
+    onClick={event => event.stopPropagation()}
+    onDoubleClick={event => event.stopPropagation()}
+    onKeyDown={event => { if (event.key !== 'Tab') event.stopPropagation(); }}
+    onChange={event => { event.stopPropagation(); onChange(event.target.value); }}>
+    {!options.some(option => option.value === current) && <option value={current} disabled>{current || '-'}</option>}
+    {options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+  </select>;
+}
+
 export function StatusColorIndicator({ label, color }: { label: string; color: string }) {
   return <span className="basekit-status-indicator">
     <i className="basekit-status-indicator__dot" style={{ backgroundColor: color }} aria-hidden="true" />
