@@ -2,7 +2,7 @@ import type { ColDef, EditableCallbackParams, ICellRendererParams, ITooltipParam
 import type { DataTableColumn } from '../common/DataTable';
 import type { FieldDefinition } from '../metadata/fieldDefinition';
 import { toMetadataColumnKey } from './metadataColumnKey';
-import { RowStateIcon, ColorCellEditor, TextLengthCellEditor, MetadataSwitch } from './gridCellComponents';
+import { RowStateIcon, ColorCellEditor, TextLengthCellEditor, MetadataSwitch, MetadataSelect } from './gridCellComponents';
 import { validateGridField } from './gridFieldValidation';
 import type { GridRowState } from './gridRowState';
 
@@ -79,6 +79,7 @@ export function toGridColumns<T>({ columns, fields, getFieldValue, editing, getR
     } satisfies ColDef<T>] : []),
     ...columns.map((column): ColDef<T> => {
       const field = column.fieldDefinition;
+      const persistentSelect = field?.controlType === 'SELECT' && field.gridControlDisplay === 'always';
       return {
         colId: column.key, headerName: column.header, initialWidth: column.width, minWidth: field?.controlType === 'SWITCH' ? Math.max(column.minWidth ?? 0, 64) : column.minWidth,
         flex: column.width ? undefined : column.flex ?? 1,
@@ -89,13 +90,16 @@ export function toGridColumns<T>({ columns, fields, getFieldValue, editing, getR
         cellRenderer: (params: ICellRendererParams<T>) => {
           if (!params.data) return null;
           const editable = isEditable(params.data, column.key, column.editPolicy);
+          if (persistentSelect && field) return <MetadataSelect value={params.value} field={field} editable={editable} onChange={value => changeSwitch(params.data!, column.key, value, field)} />;
           if (field?.controlType === 'SWITCH') return <MetadataSwitch value={(params.data as Record<string, unknown>)[column.key]} field={field} editable={editable} onChange={(value) => changeSwitch(params.data!, column.key, value, field)} />;
           if (field && (field.controlType === 'SELECT' || field.displayType === 'COLOR' || field.displayType === 'BADGE' || field.displayType === 'BOOLEAN')) return renderMetadataValue(String(params.value ?? ''), field);
           if (field?.dataType === 'NUMBER') return params.value;
           return column.render(params.data);
         },
         cellClass: (params: EditableCallbackParams<T>) => params.data ? [isEditable(params.data, column.key, column.editPolicy) ? 'basekit-editable-cell' : '', field?.controlType === 'SWITCH' ? 'basekit-grid-switch-cell' : '', `basekit-grid-cell-${alignment(field, column.align)}`, validationClass(params.data, column.key, field)].filter(Boolean).join(' ') : '',
-        editable: (params: EditableCallbackParams<T>) => Boolean(params.data && field?.controlType !== 'SWITCH' && isEditable(params.data, column.key, column.editPolicy)),
+        editable: (params: EditableCallbackParams<T>) => Boolean(params.data && field?.controlType !== 'SWITCH' && !persistentSelect && isEditable(params.data, column.key, column.editPolicy)),
+        cellRendererParams: persistentSelect ? { suppressMouseEventHandling: () => true } : undefined,
+        suppressKeyboardEvent: params => persistentSelect && params.event.key !== 'Tab' && params.event.target instanceof HTMLSelectElement,
         cellEditor: editorForField(field),
         cellEditorParams: editorParamsForField(field),
         tooltipValueGetter: (params: ITooltipParams<T>) => field && validateGridField(params.value, field) ? `${field.label}: ${validateGridField(params.value, field)}` : String(params.value ?? ''),
@@ -103,6 +107,7 @@ export function toGridColumns<T>({ columns, fields, getFieldValue, editing, getR
     }),
     ...fields.map((field): ColDef<T> => {
       const key = toMetadataColumnKey(field.key);
+      const persistentSelect = field.controlType === 'SELECT' && field.gridControlDisplay === 'always';
       return {
         colId: key, headerName: field.label, flex: 1, minWidth: field.controlType === 'SWITCH' ? 64 : 100,
         valueGetter: (params: ValueGetterParams<T>) => params.data ? displayValue(getFieldValue?.(params.data, field), field) : '',
@@ -112,10 +117,13 @@ export function toGridColumns<T>({ columns, fields, getFieldValue, editing, getR
         cellClass: (params: EditableCallbackParams<T>) => params.data ? [isEditable(params.data, key) ? 'basekit-editable-cell' : '', field.controlType === 'SWITCH' ? 'basekit-grid-switch-cell' : '', `basekit-grid-cell-${alignment(field)}`, validationClass(params.data, key, field)].filter(Boolean).join(' ') : '',
         cellRenderer: (params: ICellRendererParams<T>) => {
           if (!params.data) return null;
+          if (persistentSelect) return <MetadataSelect value={params.value} field={field} editable={isEditable(params.data, key)} onChange={value => changeSwitch(params.data!, key, value, field)} />;
           if (field.controlType === 'SWITCH') return <MetadataSwitch value={getFieldValue?.(params.data, field)} field={field} editable={isEditable(params.data, key)} onChange={(value) => changeSwitch(params.data!, key, value, field)} />;
           return renderMetadataValue(params.value == null ? '' : String(params.value), field);
         },
-        editable: (params: EditableCallbackParams<T>) => Boolean(params.data && field.controlType !== 'SWITCH' && isEditable(params.data, key)),
+        editable: (params: EditableCallbackParams<T>) => Boolean(params.data && field.controlType !== 'SWITCH' && !persistentSelect && isEditable(params.data, key)),
+        cellRendererParams: persistentSelect ? { suppressMouseEventHandling: () => true } : undefined,
+        suppressKeyboardEvent: params => persistentSelect && params.event.key !== 'Tab' && params.event.target instanceof HTMLSelectElement,
         cellEditor: editorForField(field),
         cellEditorParams: editorParamsForField(field),
         tooltipValueGetter: (params: ITooltipParams<T>) => validateGridField(params.value, field) ? `${field.label}: ${validateGridField(params.value, field)}` : String(params.value ?? ''),

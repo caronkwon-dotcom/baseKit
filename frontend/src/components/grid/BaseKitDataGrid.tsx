@@ -72,7 +72,7 @@ function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRo
 
   useEffect(() => {
     apiRef.current?.forEachNode((node) => node.setSelected(Boolean(node.data && selectedRowKeys?.has(getRowKey(node.data)))));
-    apiRef.current?.redrawRows();
+    apiRef.current?.refreshCells({ force: true });
   }, [getRowKey, rows, selectedRowKeys]);
 
   useEffect(() => {
@@ -88,7 +88,7 @@ function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRo
     rowSelection={{ mode: 'multiRow', enableClickSelection: false, headerCheckbox: true }}
     onSelectionChanged={(event) => onSelectedRowKeysChange?.(new Set(event.api.getSelectedRows().map(getRowKey)))}
     onRowClicked={(event) => event.data && onRowClick?.(event.data)}
-    onCellClicked={(event) => event.data && onRowClick?.(event.data)}
+    onCellClicked={(event) => event.data && !event.isEventHandlingSuppressed && onRowClick?.(event.data)}
     getRowClass={(params) => {
       if (!params.data) return '';
       const rowState = getRowState?.(params.data);
@@ -98,6 +98,7 @@ function GridTable<T,>({ columns, rows, getRowKey, selectedRowKeys, onSelectedRo
         getRowKey(params.data) === currentRowKey ? 'basekit-current-row' : '',
       ].filter(Boolean).join(' ');
     }}
+    rowClassRules={Object.fromEntries(Object.entries(ROW_STATE_CLASS).filter(([, className]) => className).map(([state, className]) => [className, (params: { data?: T }) => Boolean(params.data && getRowState?.(params.data) === state)]))}
     readOnlyEdit={Boolean(editing)}
     editType={editing?.mode === 'row' ? 'fullRow' : undefined}
     stopEditingWhenCellsLoseFocus
