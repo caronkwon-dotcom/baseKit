@@ -16,12 +16,16 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 현재는 **Level 1: 시스템 공통 Foundation** 단계다. 초급 개발자도 가이드와 규약을 따르면 일관된 화면과 코드를 만들 수 있고, 개발자 변경에도 프로젝트 스타일이 흔들리지 않는 기반을 목표로 한다.
 
 ## 2. 코드까지 구현 완료
+- Flyway V9 리소스 충돌 로컬 수정 (2026-10-05): Maven은 `backend/src/main/resources`와 `database/migration`을 모두 classpath에 복사한다. 공유 디렉터리의 `V9__create_sd_analysis.sql`은 backend의 V10과 동일한 SQL이므로 해당 구버전 파일만 Maven 복사 대상에서 제외했다. 기존 SQL/적용 이력을 수정하지 않았으며, 로컬 PostgreSQL에서 기존 V9 검증 후 V10 신규 적용, `mvnw.cmd clean spring-boot:run` 및 8080 health `UP` 확인. Frontend build/lint, Backend test 42건(실패 0, 오류 0, 외부 PostgreSQL 조건 5건 skip), `git diff --check` 통과. 작업 브랜치 `fix/flyway-v9-resource-collision`; 사용자의 기존 V9→V10 파일 변경과 함께 유지해야 한다.
 
+- COMMON-002 (`common-work`): Program 표준 Grid 60:40 / 40:60 resizable Master/Detail, Program별 버튼 권한 그룹 DB 저장, Spring MVC Endpoint 자동수집·ACTIVE/STALE 상태, 다대다 Program 연결과 UNMAPPED 조회. 서버 권한 정책과 Host 인증 Provider 연결 계약 및 HTTP interceptor 검증 구현. 기본 실행에는 인증 Provider가 없으므로 운영 사용자 권한 집행 연결은 미완료다. Menu/Role/SD 확장은 제외. Frontend build/lint 통과, Backend 34건 중 29건 통과·외부 PostgreSQL 조건 5건 skip, 브라우저 1440×900·1280×800 검증. [ADR-033](decisions/033-program-endpoint-button-groups.md) · [RESULT](tasks/common/COMMON-002-RESULT.md)
 - Worktree 공통 실행 프로필: Spring dev-pm/common/design/sd와 Vite mode로 5173~5176 / 8080~8083 고정 포트 제공. DB 설정과 API proxy 경로 유지. 실행 명령은 README의 Worktree 실행 프로필 참고.
 
 - Standard Design Requirement Intake V1: Backend canonical Requirement·Menu 관계·Attachment (Flyway V5), 명시적 LocalStorage 이관, Project List-Detail 재사용, 복수 메뉴·파일·이미지 Preview. 프로젝트/메뉴 원본은 기존 구조와 논리 참조하며 OCR/LLM은 미구현. [ADR-031](decisions/031-requirement-intake-backend-boundary.md)
 - 공통 `BaseFileUpload` V1: native input/drag & drop, 다중 파일, 정책 기반 사전검증, 파일별 진행률·취소·재시도·삭제, bounded concurrency와 XHR multipart transport. Requirement Attachment에 첫 적용. [ADR-032](decisions/032-base-file-upload-component.md) · [인계 보고서](base-file-upload-v1-handoff.md)
 - Standard Design Project Menu V1: 프로젝트별 LEVEL/SINGLE 분류 방식, Project Menu CRUD REST/Flyway V7, Requirement의 별도 Project Menu 관계(BSDRRPML), 기존 시스템 MENU_KEYS 보존, Excel 진입점만 제공. 재귀 트리·Parser·AI 기능은 미구현.
+
+- Standard Design Requirement Excel Import (2026-10-05, 미커밋): 공통 Excel Import를 재사용한 요구사항 양식·검증·저장 연결. LLM 분석·설계 대상 프로그램은 미구현이며 결정 사항과 COMMON·디자인 요청은 [인계 문서](sd-requirement-llm-handoff.md). 실제 LLM·승인 DB 검증은 미완료.
 
 Requirement Intake 검증: 신규 H2 API 통합 테스트와 Frontend build/lint 통과. 기존 전체 Backend 테스트 22건은 신규 통합 테스트 추가 전에 통과했으며 이 실행에서 연결된 Supabase PostgreSQL에 Flyway V5가 적용되었다. 추가 변경 후 전체 Backend 재실행은 외부 DB 변경 위험으로 자동 승인 검토가 거부되어 보류했고, 신규 대상 테스트만 H2로 재검증했다. 화면은 프로젝트 Context 선택 후 `요구사항 관리` 메뉴에서 확인한다.
 
@@ -362,3 +366,13 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 ## Menu V2 Backend Foundation (2026-10-03, codex-work 검수 대기)
 
 `BSYMENU` Flyway V7과 JPA Schema Validate Entity, MyBatis CRUD/Tree Mapper, REST Controller, Service Validation, 도메인 예외 처리와 H2 통합 테스트를 구현했다. `MENU_LEVEL`은 저장하지 않고 Tree 응답에서 계산하며, Phase 1은 FOLDER/PAGE만 허용한다. FOLDER는 Program을 가질 수 없고 PAGE는 활성 `BSYPROG`를 필수로 참조한다. 기존 `frontend/meta/menus.json` Seed, MenuManagePage DB 연결, Runtime 전환, Role/Permission은 범위에 포함하지 않았다. H2 기반 전체 Backend 테스트와 Menu 통합 테스트를 통과했으며, 외부 PostgreSQL은 기존 V7 Migration checksum 불일치로 별도 검증이 보류되었다.
+
+## 2026-10-05 COMMON SD Excel 지원
+
+기존 columns/validateRow/mapRow/onImport 계약 유지. 파싱·반영 잠금, Preview 초기화, Header/행 오류 분리, 물리 Excel 행 번호, 선택 title/submitLabel/disabled 및 FormModal submitDisabled를 보완했다. 상세 계약과 검증은 [SD Excel COMMON 인계](sd-excel-common-handoff.md) 참고. Frontend build/lint 및 42건 테스트, 외부 DB 환경변수를 제거한 Backend 30건(5 skip)이 통과했다. SD 업무 로직·LLM Client·시스템 Program/Runtime/권한 변경은 없다. Modal focus와 실화면 SD/LLM 연결은 후속 검증 범위다.
+
+## SD 요구사항 분석 V1 (sd-work, 미커밋)
+- 구현: Flyway V9, `standarddesign/analysis` 백엔드(분석·후보·확정·생성 API), `RequirementAnalysisPanel` 4단계 UX, STALE·버전 충돌·생성 멱등성. 결정은 `docs/decisions/033-sd-requirement-analysis-v1.md`.
+- 검증: 백엔드 전체 테스트(H2) 통과, Frontend lint/build/node test 46건 통과.
+- 미검증: 실제 회사 LLM(`COMPANY_LLM_*` 미설정), 승인 DB(PostgreSQL), 브라우저 수동 검수.
+- 후속 필수: Requirement 단위 Lock과 OWNER/LOCK OWNER 분리, `SD_*` 테이블 명칭 확정, 사용자 승인된 Program 메뉴 연결 정책.

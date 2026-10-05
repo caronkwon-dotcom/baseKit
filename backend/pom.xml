@@ -73,6 +73,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>1.5.6</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -83,6 +88,11 @@
             <resource>
                 <directory>../database/migration</directory>
                 <targetPath>db/migration</targetPath>
+                <!-- SD analysis is supplied as V10 by src/main/resources.
+                     Do not reintroduce its legacy V9 copy from the shared directory. -->
+                <excludes>
+                    <exclude>V9__create_sd_analysis.sql</exclude>
+                </excludes>
             </resource>
         </resources>
         <plugins>

@@ -6,6 +6,7 @@ interface FormModalProps {
   children: ReactNode;
   submitLabel?: string;
   submitting?: boolean;
+  submitDisabled?: boolean;
   submitTone?: 'primary' | 'danger';
   onSubmit?: () => void;
   onClose: () => void;
@@ -17,6 +18,7 @@ export default function FormModal({
   children,
   submitLabel = '저장',
   submitting = false,
+  submitDisabled = false,
   submitTone = 'primary',
   onSubmit,
   onClose,
@@ -49,7 +51,7 @@ export default function FormModal({
         <footer className="form-modal-footer">
           <button type="button" className="secondary-button" onClick={onClose} disabled={submitting}>취소</button>
           {onSubmit ? (
-            <button type="button" className={submitTone === 'danger' ? 'danger-button' : 'primary-button'} onClick={onSubmit} disabled={submitting}>
+            <button type="button" className={submitTone === 'danger' ? 'danger-button' : 'primary-button'} onClick={onSubmit} disabled={submitting || submitDisabled}>
               {submitting ? '처리 중...' : submitLabel}
             </button>
           ) : null}
