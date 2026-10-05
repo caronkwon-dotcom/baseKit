@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["ANALYSIS_SUMMARY", "BUSINESS_STRUCTURE", "PROCESS_MODEL", "LAYOUT_RECOMMENDATION", "SD_PROGRAM_CANDIDATES"],
+  "properties": {
+    "ANALYSIS_SUMMARY": {
+      "type": "object",
+      "required": ["TITLE", "SUMMARY", "SOURCE_REQUIREMENT_IDS"],
+      "properties": {
+        "TITLE": {"type": "string", "minLength": 1},
+        "SUMMARY": {"type": "string", "minLength": 1},
+        "SOURCE_REQUIREMENT_IDS": {"type": "array", "items": {"type": "string"}},
+        "KEY_POINTS": {"type": "array", "items": {"type": "string"}},
+        "ASSUMPTIONS": {"type": "array", "items": {"type": "string"}},
+        "UNRESOLVED_ITEMS": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "BUSINESS_STRUCTURE": {
+      "type": "object",
+      "required": ["MENUS", "ROLES", "ACTIONS"],
+      "properties": {
+        "MENUS": {"type": "array", "items": {"type": "object", "required": ["TEMP_ID", "NAME"], "properties": {"TEMP_ID": {"type": "string", "minLength": 1}, "NAME": {"type": "string"}}}},
+        "ROLES": {"type": "array", "items": {"type": "object", "required": ["TEMP_ID", "NAME"], "properties": {"TEMP_ID": {"type": "string", "minLength": 1}, "NAME": {"type": "string"}}}},
+        "ACTIONS": {"type": "array", "items": {"type": "object", "required": ["TEMP_ID", "NAME"], "properties": {"TEMP_ID": {"type": "string", "minLength": 1}, "NAME": {"type": "string"}}}}
+      }
+    },
+    "PROCESS_MODEL": {
+      "type": "object",
+      "required": ["STEPS", "TRANSITIONS"],
+      "properties": {
+        "STEPS": {"type": "array", "items": {"type": "object", "required": ["TEMP_ID", "NAME"], "properties": {"TEMP_ID": {"type": "string", "minLength": 1}, "NAME": {"type": "string"}}}},
+        "TRANSITIONS": {"type": "array", "items": {"type": "object", "required": ["FROM", "TO"], "properties": {"FROM": {"type": "string"}, "TO": {"type": "string"}}}}
+      }
+    },
+    "LAYOUT_RECOMMENDATION": {
+      "type": "object",
+      "required": ["LAYOUT_TYPE"],
+      "properties": {
+        "LAYOUT_TYPE": {"type": "string"},
+        "COMPONENTS": {"type": "array", "items": {"type": "string"}},
+        "REASON": {"type": "string"}
+      }
+    },
+    "SD_PROGRAM_CANDIDATES": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["TEMP_ID", "PROGRAM_NAME", "PURPOSE", "SOURCE_REQUIREMENT_IDS"],
+        "properties": {
+          "TEMP_ID": {"type": "string", "minLength": 1},
+          "PROGRAM_NAME": {"type": "string", "minLength": 1},
+          "PURPOSE": {"type": "string", "minLength": 1},
+          "SOURCE_REQUIREMENT_IDS": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "MENU_TEMP_IDS": {"type": "array", "items": {"type": "string"}},
+          "ROLE_TEMP_IDS": {"type": "array", "items": {"type": "string"}},
+          "ACTION_TEMP_IDS": {"type": "array", "items": {"type": "string"}},
+          "STEP_TEMP_IDS": {"type": "array", "items": {"type": "string"}},
+          "LAYOUT_TYPE": {"type": "string"}
+        }
+      }
+    }
+  }
+}

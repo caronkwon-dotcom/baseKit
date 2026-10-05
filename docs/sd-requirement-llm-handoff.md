@@ -60,3 +60,5 @@
 - 실제 브라우저 검증(Edge headless, local H2 프로필): 양식 다운로드 헤더, 오류 파일(저장 0건), 정상 3건 매핑(메뉴/유형/상태 기본값), 2번째 건 실패 주입 시 1/3 저장 후 중단 안내, 재시도 시 중복 없이 3건, 동일 파일 재업로드 시 중복 확인 후 취소(건수 불변).
 - COMMON 적용 여부: COMMON 보완본·인계 문서는 어떤 remote branch에서도 확인되지 않음. SD는 foundation 4e4eb2f만 사용. 공통 코드 수정·복사 없음.
 - 제한: 서버 측 멱등성 없음(중복 방지는 클라이언트 한정), roleCode ADMIN 고정으로 실제 권한 거부 동작 미검증, 오류 시 Import 버튼이 비활성화되지 않고 무반응(COMMON/디자인 요청), 미리보기 그리드가 모달 폭에서 2열만 표시(디자인 요청), PostgreSQL 승인 DB 검증 없음.
+## V1 구현 상태
+분석·후보·생성 V1이 SD 내부에 구현됨(docs/decisions/033-sd-requirement-analysis-v1.md). 실제 LLM 접속과 승인 DB 검증은 미완료이며 COMMON 코드는 수정하지 않았다.

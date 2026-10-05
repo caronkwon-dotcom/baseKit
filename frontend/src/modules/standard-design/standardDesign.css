@@ -358,3 +358,23 @@
 .sd-requirement-menu-picker input, .sd-requirement-menu-picker select { width: 100%; min-width: 0; box-sizing: border-box; }
 .sd-requirement-menu-picker span { color: var(--text-secondary); font-size: 12px; white-space: nowrap; }
 .sd-requirement-legacy-menu-note { margin-bottom: 8px; color: var(--text-secondary); font-size: 12px; }
+
+.sd-analysis { display: grid; gap: 12px; }
+.sd-analysis-steps { display: flex; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.sd-analysis-steps li { flex: 1; padding: 6px 10px; border: 1px solid var(--border-default); background: var(--surface-muted); color: var(--text-muted); font-size: 13px; }
+.sd-analysis-steps li.is-current { border-color: var(--brand-primary); background: var(--brand-soft); color: var(--text-primary); font-weight: 600; }
+.sd-analysis-steps li.is-done { color: var(--text-secondary); }
+.sd-analysis-section { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--border-default); background: var(--surface-panel); }
+.sd-analysis-section h4, .sd-analysis-result h5, .sd-analysis-result h6 { margin: 0; }
+.sd-analysis-help, .sd-analysis-status { margin: 0; color: var(--text-secondary); font-size: 13px; }
+.sd-analysis-table { width: 100%; border-collapse: collapse; }
+.sd-analysis-table th, .sd-analysis-table td { padding: 6px 8px; border: 1px solid var(--border-default); text-align: left; vertical-align: top; font-size: 13px; }
+.sd-analysis-table td small { display: block; color: var(--text-muted); }
+.sd-analysis-table textarea { width: 100%; }
+.sd-analysis-table tr.is-confirmed { background: var(--brand-soft); }
+.sd-analysis-field { display: grid; gap: 4px; }
+.sd-analysis-actions, .sd-analysis-row-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.sd-analysis-badge { display: inline-block; margin-right: 4px; padding: 0 6px; border: 1px solid var(--border-strong); font-size: 11px; color: var(--text-secondary); }
+.sd-analysis-badge--ok { border-color: var(--brand-primary); color: var(--brand-primary); }
+.sd-analysis-block { color: var(--danger-text); }
+.sd-analysis-warn { color: var(--text-secondary); }

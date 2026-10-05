@@ -7,6 +7,7 @@ import { useGridRowState } from '../../../../components/grid/gridRowState';
 import { coreCodeApi } from '../../../../services/coreCodeApi';
 import ProjectListDetailWorkspace, { type ProjectWorkspaceMode } from '../components/ProjectListDetailWorkspace';
 import ProjectContextSelector from '../components/ProjectContextSelector';
+import RequirementAnalysisPanel from '../components/RequirementAnalysisPanel';
 import RequirementAttachmentPanel from '../components/RequirementAttachmentPanel';
 import { useProjectContext } from '../components/useProjectContext';
 import { requirementApi, type Requirement, type RequirementInput } from '../../requirement/requirementApi';
@@ -22,7 +23,6 @@ function legacyRequirements(): LegacyRequirement[] {
 interface RequirementSearchCondition { keyword: string; menuKeyword: string; requirementType: string; status: string }
 interface MenuRelationRow { PROJECT_MENU_ID: string; MENU_ID: string; MENU_NAME: string; LEVEL1_MENU_ID: string | null }
 const initialSearchCondition: RequirementSearchCondition = { keyword: '', menuKeyword: '', requirementType: '', status: '' };
-const relationshipTypes = ['참조', '선행', '후행', '중복'];
 const menuRelationKey = (row: MenuRelationRow) => row.PROJECT_MENU_ID;
 const defaultRequirementStatuses = [
   { CODE: 'DRAFT', CODE_NAME: '초안', CODE_ID: 'REQUIREMENT_STATUS_DRAFT' },
@@ -72,9 +72,6 @@ export default function RequirementIntakePage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info' | 'warn'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
-  const [analysisPrompt, setAnalysisPrompt] = useState('');
-  const [relationshipType, setRelationshipType] = useState(relationshipTypes[0]);
-  const [analysisRequirementIds, setAnalysisRequirementIds] = useState<string[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState(new Set<string>());
   const [menuRelationSelected, setMenuRelationSelected] = useState(new Set<string>());
   const [legacyMenuKeys, setLegacyMenuKeys] = useState<string[]>([]);
@@ -86,7 +83,6 @@ export default function RequirementIntakePage() {
   const replaceMenuRelations = menuRelations.replace;
   const menuRelationRows = menuRelations.rows;
   const selected = rows.find((row) => row.PROJECT_ID === projectId && row.REQUIREMENT_ID === selectedId);
-  const connectedRequirements = rows.filter((row) => row.PROJECT_ID === projectId && row.REQUIREMENT_ID !== selectedId);
   const projectMenuIds = menuRelationRows.filter((row) => menuRelations.getState(row) !== 'DELETED').map((row) => row.PROJECT_MENU_ID).filter((id) => !id.startsWith('NEW_'));
   const draftWithMenuKeys = { ...draft, MENU_KEYS: legacyMenuKeys, PROJECT_MENU_IDS: projectMenuIds };
   const dirty = baseline !== '' && JSON.stringify(draftWithMenuKeys) !== baseline;
@@ -104,7 +100,7 @@ export default function RequirementIntakePage() {
   const reportAttachmentError = useCallback((text: string) => setMessage({ type: 'error', text }), []);
   const select = (row: Requirement) => {
     const value: RequirementInput = { PROJECT_ID: row.PROJECT_ID, REQUIREMENT_NAME: row.REQUIREMENT_NAME, REQUIREMENT_TYPE_CODE: row.REQUIREMENT_TYPE_CODE, DESCRIPTION: row.DESCRIPTION, PROCESS_DESCRIPTION: row.PROCESS_DESCRIPTION, STATUS: row.STATUS, MENU_KEYS: row.MENU_KEYS, PROJECT_MENU_IDS: row.PROJECT_MENU_IDS ?? [] };
-    setSelectedId(row.REQUIREMENT_ID); setSelectedRowKeys(new Set([row.REQUIREMENT_ID])); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); setAnalysisRequirementIds([]); setMenuRelationSelected(new Set());
+    setSelectedId(row.REQUIREMENT_ID); setSelectedRowKeys(new Set([row.REQUIREMENT_ID])); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); setMenuRelationSelected(new Set());
     setLegacyMenuKeys(row.MENU_KEYS);
     replaceMenuRelations(row.PROJECT_MENU_IDS.map((id) => { const item = projectMenus.find((menu) => menu.PROJECT_MENU_ID === id); return item ? { PROJECT_MENU_ID: item.PROJECT_MENU_ID, MENU_ID: item.MENU_ID, MENU_NAME: item.MENU_NAME, LEVEL1_MENU_ID: item.LEVEL1_MENU_ID } : { PROJECT_MENU_ID: id, MENU_ID: id, MENU_NAME: '프로젝트 메뉴를 찾을 수 없음', LEVEL1_MENU_ID: null }; }));
   };
@@ -137,7 +133,7 @@ export default function RequirementIntakePage() {
   useEffect(() => { if (!dirty) return; const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; }; window.addEventListener('beforeunload', warn); return () => window.removeEventListener('beforeunload', warn); }, [dirty]);
   const update = <K extends keyof RequirementInput>(key: K, value: RequirementInput[K]) => setDraft((previous) => ({ ...previous, [key]: value }));
   const run = async (work: () => Promise<void>) => { setBusy(true); try { await work(); } catch (error) { setMessage({ type: 'error', text: error instanceof Error ? error.message : '작업을 완료하지 못했습니다.' }); } finally { setBusy(false); } };
-  const resetDraft = () => { setSelectedId(''); setSelectedRowKeys(new Set()); setMenuRelationSelected(new Set()); setLegacyMenuKeys([]); replaceMenuRelations([]); const value = emptyDraft(projectId); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); setAnalysisRequirementIds([]); };
+  const resetDraft = () => { setSelectedId(''); setSelectedRowKeys(new Set()); setMenuRelationSelected(new Set()); setLegacyMenuKeys([]); replaceMenuRelations([]); const value = emptyDraft(projectId); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); };
   const excelContext = { projectId, types, statuses, projectMenus };
   const importedKeys = useRef(new Set<string>());
   const importRequirements = async (items: RequirementInput[]) => {
@@ -224,18 +220,7 @@ export default function RequirementIntakePage() {
       ]}
     />
   </section>;
-  const aiTab: ReactNode = <section className="base-tab-placeholder" aria-label="AI 분석 준비 영역">
-    <h3>AI 요구사항 분석</h3>
-    <p>분석 실행과 결과 저장은 후속 AI 연계 범위입니다. 현재는 분석 대상과 프롬프트를 준비하는 화면 골격만 제공합니다.</p>
-    <div className="base-tab-placeholder__grid">
-      <label className="base-tab-placeholder__field"><span>현재 요구사항</span><input value={selected ? `${selected.REQUIREMENT_ID} · ${selected.REQUIREMENT_NAME}` : '신규 요구사항은 저장 후 분석할 수 있습니다.'} readOnly /></label>
-      <label className="base-tab-placeholder__field"><span>관계 유형</span><select value={relationshipType} onChange={(event) => setRelationshipType(event.target.value)}>{relationshipTypes.map((type) => <option key={type}>{type}</option>)}</select></label>
-      <label className="base-tab-placeholder__field base-tab-placeholder__field--wide"><span>연결할 요구사항</span><select multiple size={4} value={analysisRequirementIds} onChange={(event) => setAnalysisRequirementIds(Array.from(event.target.selectedOptions, (option) => option.value))}>{connectedRequirements.map((row) => <option key={row.REQUIREMENT_ID} value={row.REQUIREMENT_ID}>{row.REQUIREMENT_ID} · {row.REQUIREMENT_NAME}</option>)}</select></label>
-      <label className="base-tab-placeholder__field base-tab-placeholder__field--wide"><span>분석 입력</span><textarea rows={4} value={analysisPrompt} onChange={(event) => setAnalysisPrompt(event.target.value)} placeholder="분석 관점이나 확인할 질문을 입력하세요." /></label>
-    </div>
-    <div className="base-tab-placeholder__actions"><button type="button" className="primary-button" disabled={!selectedId || busy}>분석 실행 준비 중</button></div>
-    <div className="base-tab-placeholder__grid"><div className="base-tab-placeholder"><h3>분석 결과</h3><p>Extracted Text, OCR, LLM 요약·구조화 결과가 연결될 자리입니다.</p></div><div className="base-tab-placeholder"><h3>설계 후보</h3><p>프로세스 정의와 화면·테이블 설계 후보 템플릿이 표시될 자리입니다.</p></div></div>
-  </section>;
+  const aiTab: ReactNode = <RequirementAnalysisPanel projectId={projectId} requirements={rows} projectMenus={projectMenus} />;
   const relatedTab: ReactNode = <section className="base-tab-placeholder" aria-label="연관정보 준비 영역">
     <h3>연관정보</h3>
     <p>요구사항 관계와 설계 Traceability를 표시할 준비 영역입니다. 현재는 별도 관계 데이터를 저장하지 않습니다.</p>

@@ -364,3 +364,9 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 ## Menu V2 Backend Foundation (2026-10-03, codex-work 검수 대기)
 
 `BSYMENU` Flyway V7과 JPA Schema Validate Entity, MyBatis CRUD/Tree Mapper, REST Controller, Service Validation, 도메인 예외 처리와 H2 통합 테스트를 구현했다. `MENU_LEVEL`은 저장하지 않고 Tree 응답에서 계산하며, Phase 1은 FOLDER/PAGE만 허용한다. FOLDER는 Program을 가질 수 없고 PAGE는 활성 `BSYPROG`를 필수로 참조한다. 기존 `frontend/meta/menus.json` Seed, MenuManagePage DB 연결, Runtime 전환, Role/Permission은 범위에 포함하지 않았다. H2 기반 전체 Backend 테스트와 Menu 통합 테스트를 통과했으며, 외부 PostgreSQL은 기존 V7 Migration checksum 불일치로 별도 검증이 보류되었다.
+
+## SD 요구사항 분석 V1 (sd-work, 미커밋)
+- 구현: Flyway V9, `standarddesign/analysis` 백엔드(분석·후보·확정·생성 API), `RequirementAnalysisPanel` 4단계 UX, STALE·버전 충돌·생성 멱등성. 결정은 `docs/decisions/033-sd-requirement-analysis-v1.md`.
+- 검증: 백엔드 전체 테스트(H2) 통과, Frontend lint/build/node test 46건 통과.
+- 미검증: 실제 회사 LLM(`COMPANY_LLM_*` 미설정), 승인 DB(PostgreSQL), 브라우저 수동 검수.
+- 후속 필수: Requirement 단위 Lock과 OWNER/LOCK OWNER 분리, `SD_*` 테이블 명칭 확정, 사용자 승인된 Program 메뉴 연결 정책.
