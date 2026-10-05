@@ -2,6 +2,15 @@
 
 이 문서는 새 작업자와 GPT Work가 실제 Repository 상태를 빠르게 파악하기 위한 기준 문서다. 특정 날짜나 과거 작업 branch가 아니라 최신 `dev-pm`과 열린 PR을 기준으로 갱신한다.
 
+## 프로그램관리 검색 영역 및 Grid 팝업 보완 (2026-10-05)
+
+원격 dev-pm a93c72c를 포함한 design-work 590e726 기준으로 UI 커밋 6d486b9를 작성했다. 기존 프로그램관리 및 폼 변경과 충돌 없음.
+
+- 공통 MasterDetailMultiGrid 옵션 행에 실제 좌우 검색 영역을 배치했다. 좌측은 조건 없이 빈 검색 영역이며 두 컨테이너가 동일 부모 Grid track 높이를 공유한다. 검색 패널과 같은 border/background/radius/padding을 사용한다. 좌측 패널 내부 spacer나 임의 margin으로 정렬하지 않는다. 우측에는 표시 범위/추가 권한만 유지한다.
+- opt-in 상시 MetadataSelect를 body portal popup으로 확장했다. 흰 불투명 배경, 1px border, shadow, 4px gap, 5px padding, blue selected/check, gray hover. 위/아래 공간과 화면 폭을 고려하며 외부 클릭/스크롤/resize/blur로 닫는다. 방향키/Enter/Escape/Home/End와 Grid 이벤트를 분리하고 Tab은 기본 이동을 유지한다. disabled 및 미등록 현재값 보존, 옵션 검증/저장/API/권한 의미 유지. 다른 일반 SELECT/editor는 변경하지 않는다.
+- Chrome API fixture 1920/1440/1280 × ICON_TEXT/ICON_ONLY 6조합 통과: 검색 영역 상단/하단 차이 0px, 제목/헤더 차이 0px, splitter 조절 및 옵션 wrap 후 동일 높이/헤더 정렬. Module/유형 한 클릭 팝업, body portal/불투명/border/shadow, selected/check/hover, 방향키/Enter/Escape/마우스 선택과 행선택 유지 확인. JS 오류 및 실제 API 쓰기 0. 실제 DB 저장은 검증하지 않았다.
+- build/lint/frontend 53건, 공통 Grid adapter, backend 46건(실패 0, 외부 PostgreSQL 조건 5건 skip), diff check 통과. 기존 번들 크기 경고만 유지.
+- 제품 반영은 UI 파일 6개만 별도 통합 브랜치에 cherry-pick한다. DESIGN 기록은 design-work에 유지한다. COMMON 추가 차단 협의 없음. 영향은 detailOptions를 사용하는 정렬 레이아웃과 gridControlDisplay always SELECT로 제한한다.
 ## 프로그램관리 상시 콤보 / 공통 옵션 행 (2026-10-05)
 
 최신 원격 dev-pm `62ffb796fecd77c480dce0b52425edd817846b8a`에서 독립 작업 브랜치로 UI를 수정했다. 기존 design-work의 통합 이력이나 로컬 dev-pm ahead 커밋은 제품 반영에 포함하지 않는다.
