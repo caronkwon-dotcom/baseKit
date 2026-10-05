@@ -88,6 +88,11 @@
             <resource>
                 <directory>../database/migration</directory>
                 <targetPath>db/migration</targetPath>
+                <!-- SD analysis is supplied as V10 by src/main/resources.
+                     Do not reintroduce its legacy V9 copy from the shared directory. -->
+                <excludes>
+                    <exclude>V9__create_sd_analysis.sql</exclude>
+                </excludes>
             </resource>
         </resources>
         <plugins>

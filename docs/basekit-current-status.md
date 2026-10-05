@@ -16,6 +16,7 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 현재는 **Level 1: 시스템 공통 Foundation** 단계다. 초급 개발자도 가이드와 규약을 따르면 일관된 화면과 코드를 만들 수 있고, 개발자 변경에도 프로젝트 스타일이 흔들리지 않는 기반을 목표로 한다.
 
 ## 2. 코드까지 구현 완료
+- Flyway V9 리소스 충돌 로컬 수정 (2026-10-05): Maven은 `backend/src/main/resources`와 `database/migration`을 모두 classpath에 복사한다. 공유 디렉터리의 `V9__create_sd_analysis.sql`은 backend의 V10과 동일한 SQL이므로 해당 구버전 파일만 Maven 복사 대상에서 제외했다. 기존 SQL/적용 이력을 수정하지 않았으며, 로컬 PostgreSQL에서 기존 V9 검증 후 V10 신규 적용, `mvnw.cmd clean spring-boot:run` 및 8080 health `UP` 확인. Frontend build/lint, Backend test 42건(실패 0, 오류 0, 외부 PostgreSQL 조건 5건 skip), `git diff --check` 통과. 작업 브랜치 `fix/flyway-v9-resource-collision`; 사용자의 기존 V9→V10 파일 변경과 함께 유지해야 한다.
 
 - COMMON-002 (`common-work`): Program 표준 Grid 60:40 / 40:60 resizable Master/Detail, Program별 버튼 권한 그룹 DB 저장, Spring MVC Endpoint 자동수집·ACTIVE/STALE 상태, 다대다 Program 연결과 UNMAPPED 조회. 서버 권한 정책과 Host 인증 Provider 연결 계약 및 HTTP interceptor 검증 구현. 기본 실행에는 인증 Provider가 없으므로 운영 사용자 권한 집행 연결은 미완료다. Menu/Role/SD 확장은 제외. Frontend build/lint 통과, Backend 34건 중 29건 통과·외부 PostgreSQL 조건 5건 skip, 브라우저 1440×900·1280×800 검증. [ADR-033](decisions/033-program-endpoint-button-groups.md) · [RESULT](tasks/common/COMMON-002-RESULT.md)
 - Worktree 공통 실행 프로필: Spring dev-pm/common/design/sd와 Vite mode로 5173~5176 / 8080~8083 고정 포트 제공. DB 설정과 API proxy 경로 유지. 실행 명령은 README의 Worktree 실행 프로필 참고.
