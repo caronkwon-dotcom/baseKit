@@ -376,3 +376,20 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 - 검증: 백엔드 전체 테스트(H2) 통과, Frontend lint/build/node test 46건 통과.
 - 미검증: 실제 회사 LLM(`COMPANY_LLM_*` 미설정), 승인 DB(PostgreSQL), 브라우저 수동 검수.
 - 후속 필수: Requirement 단위 Lock과 OWNER/LOCK OWNER 분리, `SD_*` 테이블 명칭 확정, 사용자 승인된 Program 메뉴 연결 정책.
+
+## SD V1 리뷰 보완 (B01/B02/R01/R02/R04)
+
+구현 완료(미커밋). 상세는 ADR 033 '리뷰 보완' 참조. 실제 LLM·승인 PostgreSQL 검증은 미완료.
+
+## 요구사항 화면 정리 인수인계 (2026-10-05, 구현 완료·미커밋)
+
+- 기존 sd / sd-work에서 Copilot 미커밋 변경을 보존하며 진행. 신규 branch/worktree 및 commit/push/merge 없음.
+- 목록 DESCRIPTION 컬럼 제거, 요구사항명 전체 폭 및 요구유형+상태 같은 줄 배치 적용.
+- 상세 AI 분석 탭과 import/렌더 연결만 제거. RequirementAnalysisPanel, backend/API/상태/테스트 구현은 KEEP하며 후속 요구사항 그룹 분석에서 재사용 예정. 신규 그룹 분석 기능은 구현하지 않음.
+- 설계 의견: 기본정보 PROCESS_DESCRIPTION 아래에 입력을 연결하고 BSDRREQ.DESIGN_OPINION 및 기존 Requirement 조회/저장 API를 최소 확장. V11은 최신 분석 스냅샷 의견을 초기값으로 이관하며 BSDAAREQ 원본은 보존. 이전 클라이언트의 누락/null 의견은 수정 시 현재 값을 유지하고 빈 문자열은 명시적 삭제로 처리. 의견 변경은 기존 MOD_DT 버전 검사에 반영됨. 향후 그룹 분석은 이 필드를 입력으로 연결할 예정이며 이번 작업에서 분석 계약은 변경하지 않음.
+- 검증: frontend build/lint 통과, 분석·Excel 단위 테스트 11건 통과, 전체 backend H2 test 프로필 42건(실행 37건 통과, 5건 skip), git diff --check 통과. 설계 의견 생성/수정/조회/목록/지우기 및 기존 클라이언트 호환 테스트 추가. 실제 브라우저 시각 검증·실제 PostgreSQL 적용·실제 LLM 검증은 미실행.
+## SD dev-pm 최신화 및 backend 재빌드 (2026-10-05)
+
+- sd-work에서 dev-pm/origin/dev-pm a928069을 fast-forward 병합. 기존 Copilot/요구사항 화면 정리 미커밋 작업은 stash 후 apply로 보존. 복구용 stash는 유지함. 신규 branch/worktree 및 push 없음.
+- Flyway 오류 원인: DB 이력 V9=공통 endpoint permission(1801662515), V10=SD 분석(-488513351)에 비해 sd 파일 번호가 달랐음. backend와 database 폴더를 V9 공통 / V10 분석 / V11 설계 의견으로 통일. 기존 V9/V10 SQL 본문 및 DB 이력은 수정하지 않음.
+- clean package + H2 test 프로필: BUILD SUCCESS, 46건 중 41건 통과/5건 skip. frontend build/lint 통과. 실제 PostgreSQL 시작 및 V11 적용은 이 검증에서 수행하지 않음.

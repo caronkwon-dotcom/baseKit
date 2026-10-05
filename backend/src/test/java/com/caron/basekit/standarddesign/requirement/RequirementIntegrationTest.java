@@ -46,4 +46,28 @@ class RequirementIntegrationTest {
         mvc.perform(delete("/api/standard-design/requirements/"+id)).andExpect(status().isNoContent());
         mvc.perform(get("/api/standard-design/requirements/"+id)).andExpect(status().isNotFound());
     }
+
+    @Test
+    void designOpinionPersistsAndLegacyUpdatesDoNotEraseIt() throws Exception {
+        String input = INPUT.replace("REQ-001", "OPINION-" + java.util.UUID.randomUUID());
+        String withOpinion = input.replaceFirst("\\{", "{\"DESIGN_OPINION\":\"초기 설계 의견\",");
+        String response = mvc.perform(post("/api/standard-design/requirements")
+                .contentType(MediaType.APPLICATION_JSON).content(withOpinion))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.DATA.DESIGN_OPINION").value("초기 설계 의견"))
+                .andReturn().getResponse().getContentAsString();
+        String id = json.readTree(response).path("DATA").path("REQUIREMENT_ID").asText();
+        mvc.perform(put("/api/standard-design/requirements/" + id).contentType(MediaType.APPLICATION_JSON).content(input))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.DATA.DESIGN_OPINION").value("초기 설계 의견"));
+        mvc.perform(put("/api/standard-design/requirements/" + id).contentType(MediaType.APPLICATION_JSON)
+                .content(withOpinion.replace("초기 설계 의견", "수정 의견")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.DATA.DESIGN_OPINION").value("수정 의견"));
+        mvc.perform(get("/api/standard-design/requirements/" + id))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.DATA.DESIGN_OPINION").value("수정 의견"));
+        mvc.perform(get("/api/standard-design/requirements").param("PROJECT_ID", "SDP-001"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.DATA[?(@.REQUIREMENT_ID == '" + id + "')].DESIGN_OPINION").value("수정 의견"));
+        mvc.perform(put("/api/standard-design/requirements/" + id).contentType(MediaType.APPLICATION_JSON)
+                .content(withOpinion.replace("초기 설계 의견", "")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.DATA.DESIGN_OPINION").value(""));
+        mvc.perform(delete("/api/standard-design/requirements/" + id)).andExpect(status().isNoContent());
+    }
 }
