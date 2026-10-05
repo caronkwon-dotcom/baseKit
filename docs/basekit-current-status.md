@@ -363,3 +363,7 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 ## Menu V2 Backend Foundation (2026-10-03, codex-work 검수 대기)
 
 `BSYMENU` Flyway V7과 JPA Schema Validate Entity, MyBatis CRUD/Tree Mapper, REST Controller, Service Validation, 도메인 예외 처리와 H2 통합 테스트를 구현했다. `MENU_LEVEL`은 저장하지 않고 Tree 응답에서 계산하며, Phase 1은 FOLDER/PAGE만 허용한다. FOLDER는 Program을 가질 수 없고 PAGE는 활성 `BSYPROG`를 필수로 참조한다. 기존 `frontend/meta/menus.json` Seed, MenuManagePage DB 연결, Runtime 전환, Role/Permission은 범위에 포함하지 않았다. H2 기반 전체 Backend 테스트와 Menu 통합 테스트를 통과했으며, 외부 PostgreSQL은 기존 V7 Migration checksum 불일치로 별도 검증이 보류되었다.
+
+## 2026-10-05 COMMON SD Excel 지원
+
+기존 columns/validateRow/mapRow/onImport 계약 유지. 파싱·반영 잠금, Preview 초기화, Header/행 오류 분리, 물리 Excel 행 번호, 선택 title/submitLabel/disabled 및 FormModal submitDisabled를 보완했다. 상세 계약과 검증은 [SD Excel COMMON 인계](sd-excel-common-handoff.md) 참고. Frontend build/lint 및 42건 테스트, 외부 DB 환경변수를 제거한 Backend 30건(5 skip)이 통과했다. SD 업무 로직·LLM Client·시스템 Program/Runtime/권한 변경은 없다. Modal focus와 실화면 SD/LLM 연결은 후속 검증 범위다.
