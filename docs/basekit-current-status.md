@@ -412,11 +412,13 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 - Flyway 오류 원인: DB 이력 V9=공통 endpoint permission(1801662515), V10=SD 분석(-488513351)에 비해 sd 파일 번호가 달랐음. backend와 database 폴더를 V9 공통 / V10 분석 / V11 설계 의견으로 통일. 기존 V9/V10 SQL 본문 및 DB 이력은 수정하지 않음.
 - clean package + H2 test 프로필: BUILD SUCCESS, 46건 중 41건 통과/5건 skip. frontend build/lint 통과. 실제 PostgreSQL 시작 및 V11 적용은 이 검증에서 수행하지 않음.
 
-## SD 요구사항 그룹 V1 첫 단위 (2026-10-06, sd-work)
+## SD 요구사항 그룹 관리 V1 (2026-10-06, sd-work 구현 완료·통합 전)
 
-- 최신 origin/dev-pm d1124d1을 기존 sd-work에 fast-forward 반영. 신규 branch/worktree 및 dev-pm 직접 변경 없음.
-- 사용자 선택에 따라 기존 Program Analysis와 별개의 불변 Requirement 추천 결과 저장·조회 모델/API와 frontend client 추가. 분석 실행은 제외. Flyway V12는 backend/database 동일 파일로 유지.
-- 추천 참조 Requirement 물리 삭제는 파일 삭제 전에 차단하여 FK와 첨부파일을 보호한다. 최종 폐기/삭제 정책은 사용자 답변 대기.
-- 요구사항 그룹 CRUD/화면/확정/REVIEW_REQUIRED는 아직 미구현. 전체 V1 완료로 표시하지 않는다.
-- backend H2 전체 49건: 44건 통과, 5 skip. 시작 기준 frontend build/lint 통과. 상세 계약/변경 범위/리스크는 docs/sd-requirement-group-v1-progress.md 참조.
-- 최종 frontend build/lint 및 frontend 회귀 53건 통과. JDBC 시각 타입/정밀도 보완 후 신규 API 통합 테스트 3건 재통과. 제품 코드 commit d9430c548898bafbce8d85457af0e015c3ca5f1f.
+- origin/dev-pm d1124d1을 기존 sd-work에 fast-forward한 기준으로 구현. 신규 branch/worktree, dev-pm 직접 개발/merge, design-work 전체 이관 없음.
+- 독립 Requirement 추천 결과 저장·조회(V12)와 그룹 master/N:M 구성/복수 Analysis 근거, Requirement 폐기·Revision 이력(V13), 그룹 CRUD/확정/재확정 API와 제품 화면 구현.
+- Requirement DELETE는 사용자 지시에 따라 폐기이며 대표 ID/첨부/메뉴 관계/그룹 구성/근거를 보존한다. 변경·폐기 시 포함 그룹 REVIEW_REQUIRED. 사용자가 영향 검토 후 구성 조정 또는 그대로 재확정.
+- 기존 BaseKit Grid/Form/Modal/Toolbar/CSS 재사용. 직접 선택+여러 추천 실행 선택을 수동 병합한다. Requirement 상세는 포함 그룹 조회/이동만 제공한다. 그룹 분석/설계·Program 생성·LLM 실행 제외.
+- Backend H2 51건 중 46건 실행 통과/5 skip, frontend 55건 통과, build/lint/diff check 통과. 격리 memory DB의 실제 브라우저에서 직접/Analysis 혼합·폐기·재검토·재확정·연관 이동·미저장 이탈 검수.
+- 실제 PostgreSQL migration/다중 서버 동시성/인증 Host endpoint grant는 별도 통합 검수. 좁은 화면은 기존 최소 폭/가로 스크롤 유지.
+- 제품 commit: foundation d9430c548898bafbce8d85457af0e015c3ca5f1f, 그룹 V1 4223a801e2875f720a49bc009086e743f5d1f950. sd-work push만 수행하며 dev-pm merge는 별도 통합 단계다.
+- 상세: docs/sd-requirement-group-v1-progress.md 및 ADR 034.
