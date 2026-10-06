@@ -26,6 +26,10 @@
 
 최신 원격 dev-pm 0f14086 기준으로 공통 FormField, FieldDefinition.labelPosition, MetadataForm textarea/오류 표현과 요구사항 화면을 수정했다. 짧은 필드 LEFT, 긴 입력 TOP을 혼합하며 560px 이하 Form 패널은 TOP 전환한다. 5px CSS pseudo-element dot와 실제 required/aria-required를 유지하고 error border/background/message를 분리했다. API/DB/권한/업무 검증 의미 변경 없음. build/lint 및 Frontend 53건 통과, Backend 46건 실패 0·조건부 제외 5건. 실제 요구사항 화면 1280/1440/1920, 공통 fixture 480px·긴 label·textarea·error 검수 완료. Shell 기존 최소 1280px는 유지한다. COMMON 추가 차단 협의 없음. 제품 반영에는 UI 변경 커밋만 선택하고 DESIGN 문서는 design-work에 유지한다. 상세는 docs/design/form-layout-required/DESIGN-form-layout-required-task.md 10절을 따른다.
 
+## DESIGN 요구사항 그룹 UX 재설계 (2026-10-06)
+
+제품 SoT dev-pm `d1124d11bb636f466abffa65c9f29cad00ecebe3`, 작업지시 `3825aebbb054d53a1d913bdd278c37c85c5ad512` 기준으로 그룹 UX/Prototype을 재설계했다. [UX 설계](design/sd-requirement-group/UX-design.md), [SD 구현 인계](design/sd-requirement-group/SD-implementation-handoff.md), [검증](design/sd-requirement-group/verification.md). 직접 추가/여러 독립 Analysis 누적·비교/근거/재검토 Gate/Requirement 상세/미저장·예외를 정의하고 Prototype 브라우저 83건 통과, runtime 오류 0건. 제품/API/DB/LLM 변경은 없고 그룹 기능은 여전히 제품 미구현이다. 저장·독립 추천 Analysis·검토 기준 등 신규 업무 계약은 미결정이며 SD 확정 후 구현한다. 내부 산출물은 design-work에 유지, dev-pm 전체 merge/제품 반영 대상 없음. 제품 구현 완료 기록과 구분한다.
+
 ## 1. 프로젝트 단계
 
 BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundation을 함께 확장하는 Full Stack 단계다. Admin Shell과 공통 관리 화면 패턴을 유지하면서 시스템 공통 V1의 API·DB 계약을 구체화한다.

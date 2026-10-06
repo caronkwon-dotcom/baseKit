@@ -1,5 +1,7 @@
 # SD 요구사항 분석·프로그램 생성 UX 인계안
 
+2026-10-06 범위 안내: 이 문서는 기존 Program 후보 생성 분석의 인계 이력이다. 이번 요구사항 그룹 구성은 [별도 재설계](../sd-requirement-group/UX-design.md) 및 [SD 인계안](../sd-requirement-group/SD-implementation-handoff.md)을 따른다. 관련 Requirement 추천의 독립 Analysis와 이 문서의 RESULT_VERSION/reanalyze·후보 생성 계약을 동일시하지 않는다. 그룹 메뉴는 Requirement 목록만 사용자 확정하며 Layout/Role/Action/Program 설계는 다음 단계다. 기존 분석 구현과 원래 검수 기록은 보존한다.
+
 역할 정정(2026-10-05): [DESIGN 역할과 완료 기준](../DESIGN-role.md)을 적용한다. 구현된 화면의 UI 표현은 DESIGN이 직접 수정하고 브라우저에서 검수한다. 기존 대기·미수행 표기는 해당 검수 시점의 기록이며 코드 수정 금지나 기능 전체 완료까지의 대기를 뜻하지 않는다.
 
 작성일: 2026-10-05 · 상태: 화면 설계 초안 / 기존 계약 대조 완료 / SD 합의·실제 구현 검수 대기
