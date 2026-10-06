@@ -44,7 +44,7 @@ class RequirementRecommendationIntegrationTest {
         String original = payload(project, request, id, "첫 실행의 원본 사유");
         String first = save(original);
         assertEquals(first, save(original));
-        mvc.perform(delete("/api/standard-design/requirements/"+id)).andExpect(status().isBadRequest());
+        mvc.perform(delete("/api/standard-design/requirements/"+id)).andExpect(status().isNoContent());
         mvc.perform(get("/api/standard-design/requirements/"+id)).andExpect(status().isOk());
         String second = save(payload(project, UUID.randomUUID().toString(), id, "다른 실행의 원본 사유"));
         assertNotEquals(first, second);

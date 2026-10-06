@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.dao.DataIntegrityViolationException;
 
-@RestControllerAdvice(assignableTypes = RequirementRecommendationController.class)
+@RestControllerAdvice(assignableTypes = {RequirementRecommendationController.class, RequirementGroupController.class})
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class RequirementRecommendationExceptionHandler {
     @ExceptionHandler(ResponseStatusException.class)

@@ -11,6 +11,7 @@ import { coreCodeApi } from '../../../../services/coreCodeApi';
 import ProjectListDetailWorkspace, { type ProjectWorkspaceMode } from '../components/ProjectListDetailWorkspace';
 import ProjectContextSelector from '../components/ProjectContextSelector';
 import RequirementAttachmentPanel from '../components/RequirementAttachmentPanel';
+import IncludedRequirementGroups from '../components/IncludedRequirementGroups';
 import { useProjectContext } from '../components/useProjectContext';
 import { requirementApi, type Requirement, type RequirementInput } from '../../requirement/requirementApi';
 import { projectMenuApi, type ProjectMenu } from '../../projectmenu/projectMenuApi';
@@ -184,7 +185,7 @@ export default function RequirementIntakePage() {
   ], [statuses, types]);
   const statusLabels = useMemo(() => new Map(statuses.map((status) => [status.CODE, status.CODE_NAME])), [statuses]);
   const requirementColumns = useMemo<DataTableColumn<Requirement>[]>(() => [
-    { key: 'REQUIREMENT_NAME', header: '요구사항명', flex: 1, minWidth: 180, render: (row) => row.REQUIREMENT_NAME },
+    { key: 'REQUIREMENT_NAME', header: '요구사항명', flex: 1, minWidth: 180, render: (row) => `${row.REQUIREMENT_NAME}${row.DISCARDED_YN === 'Y' ? ' · 폐기됨' : ''}` },
     { key: 'STATUS', header: '상태', width: 120, render: (row) => <StatusColorIndicator label={statusLabels.get(row.STATUS) ?? row.STATUS} color={statusColors.get(row.STATUS) ?? '#64748B'} /> },
     { key: 'REQUIREMENT_TYPE_CODE', header: '요구 유형', width: 120, render: (row) => types.find((type) => type.CODE === row.REQUIREMENT_TYPE_CODE)?.CODE_NAME ?? row.REQUIREMENT_TYPE_CODE },
     { key: 'MENU_KEYS', header: '관련 메뉴', flex: 1, minWidth: 180, render: (row) => row.MENU_KEYS.length ? row.MENU_KEYS.join(', ') : '-' },
@@ -230,6 +231,7 @@ export default function RequirementIntakePage() {
   // KEEP: RequirementAnalysisPanel and analysis backend/API/state/tests are preserved for the future requirement group analysis menu.
   const relatedTab: ReactNode = <section className="base-tab-placeholder" aria-label="연관정보 준비 영역">
     <h3>연관정보</h3>
+    {selectedId ? <IncludedRequirementGroups key={selectedId} projectId={projectId} requirementId={selectedId} revision={selected?.REQUIREMENT_REVISION} /> : <p>요구사항을 저장하면 포함 그룹을 확인할 수 있습니다.</p>}
     <p>요구사항 관계와 설계 Traceability를 표시할 준비 영역입니다. 현재는 별도 관계 데이터를 저장하지 않습니다.</p>
     <div className="base-tab-placeholder__grid"><div className="base-tab-placeholder"><h3>Requirement 관계</h3><p>{selectedId ? '저장된 관계 데이터가 없습니다.' : '요구사항을 저장하면 관계를 확인할 수 있습니다.'}</p></div><div className="base-tab-placeholder"><h3>설계 Traceability</h3><p>Requirement → WBS → Screen → Table 연결은 후속 설계 단계에서 관리됩니다.</p></div></div>
   </section>;
@@ -248,7 +250,7 @@ export default function RequirementIntakePage() {
     <PageHeader breadcrumbs={['Standard Design', '요구사항 관리']} rightContent={<div className="standard-design-header-actions"><ProjectContextSelector onSelected={() => confirmDiscard()} /><div className="standard-design-lifecycle-actions" aria-label="요구사항 기능">
       <ActionButton display="text" actionCode="CREATE" label="등록" tone="primary" disabled={busy || !projectId} onClick={() => { if (confirmDiscard()) resetDraft(); }} />
       <ActionButton display="text" actionCode="SAVE" label="저장" tone="primary" htmlType="submit" form="requirement-detail-form" disabled={busy || !projectId} onClick={() => undefined} />
-      <ActionButton display="text" actionCode="DELETE" label="삭제" tone="danger" disabled={busy || !selectedId} onClick={() => { if (selectedId && window.confirm('선택한 요구사항과 첨부파일을 삭제하시겠습니까?')) void run(async () => { await requirementApi.delete(selectedId); resetDraft(); await load(); setMessage({ type: 'success', text: '요구사항을 삭제했습니다.' }); }); }} />
+      <ActionButton display="text" actionCode="DELETE" label="폐기" tone="danger" disabled={busy || !selectedId || selected?.DISCARDED_YN === 'Y'} onClick={() => { if (selectedId && window.confirm('선택한 요구사항을 폐기하시겠습니까? 그룹 구성과 Analysis 근거 및 첨부파일은 보존됩니다.')) void run(async () => { await requirementApi.delete(selectedId); await load(selectedId); setMessage({ type: 'success', text: '요구사항을 폐기했습니다. 포함 그룹은 재검토가 필요합니다.' }); }); }} />
     </div></div>} />
     {!projectId ? <p className="sd-project-empty-help">프로젝트 Context를 선택하세요.</p> : <div className="sd-requirement-workspace-shell">
       <ProjectListDetailWorkspace subject="요구사항" initialListWidthPercent={55} mode={mode} onModeChange={setMode}
@@ -261,7 +263,7 @@ export default function RequirementIntakePage() {
           ]} />
           <ExcelImportDialog open={excelOpen} columns={requirementExcelColumns} validateRow={createRequirementExcelValidator(excelContext)} mapRow={createRequirementExcelMapper(excelContext)} onImport={importRequirements} onClose={() => { importedKeys.current.clear(); setExcelOpen(false); }} />
         </div>}
-        detail={<div className="sd-requirement-detail"><form noValidate id="requirement-detail-form" className="standard-design-lifecycle-form standard-design-project-form" onSubmit={save}><div><div className="standard-design-project-detail-heading"><h2>{selectedId ? '요구사항 상세' : '신규 요구사항'}</h2><dl className="standard-design-project-id"><div><dt>ID</dt><dd>{selectedId || '신규 저장 시 생성'}</dd></div></dl></div><RequiredFieldsNotice /></div><BaseTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} ariaLabel="요구사항 상세" /></form></div>}
+        detail={<div className="sd-requirement-detail"><form noValidate id="requirement-detail-form" className="standard-design-lifecycle-form standard-design-project-form" onSubmit={save}><div><div className="standard-design-project-detail-heading"><h2>{selectedId ? '요구사항 상세' + (selected?.DISCARDED_YN === 'Y' ? ' · 폐기됨' : '') : '신규 요구사항'}</h2><dl className="standard-design-project-id"><div><dt>ID</dt><dd>{selectedId || '신규 저장 시 생성'}</dd></div></dl></div><RequiredFieldsNotice /></div><BaseTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} ariaLabel="요구사항 상세" /></form></div>}
       />
       <div className="sd-requirement-message-area" aria-live="polite">
         {message ? <BaseKitMessage type={message.type} message={message.text} dismissible onDismiss={() => setMessage(null)} /> : null}

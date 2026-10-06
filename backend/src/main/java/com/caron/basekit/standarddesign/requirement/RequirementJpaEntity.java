@@ -12,6 +12,8 @@ class RequirementJpaEntity {
     @Column(name="DESCRIPTION",nullable=false,length=10000) private String description;
     @Column(name="PROCESS_DESCRIPTION",nullable=false,length=10000) private String processDescription;
     @Column(name="DESIGN_OPINION",nullable=false,columnDefinition="text") private String designOpinion;
+    @Column(name="DISCARDED_YN",nullable=false,length=1) private String discarded;
+    @Column(name="REQUIREMENT_REVISION",nullable=false) private long revision;
     @Column(name="STATUS",nullable=false,length=30) private String status;
     @Column(name="LEGACY_WBS_IDS",length=2000) private String legacyWbs;
     @Column(name="LEGACY_SCREEN_IDS",length=2000) private String legacyScreens;

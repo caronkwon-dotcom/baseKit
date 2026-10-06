@@ -25,6 +25,8 @@ export interface Requirement {
   DESIGN_OPINION?: string;
   STATUS: string;
   MOD_DT: string;
+  DISCARDED_YN: "Y" | "N";
+  REQUIREMENT_REVISION: number;
   MENU_KEYS: string[];
   PROJECT_MENU_IDS: string[];
   ATTACHMENTS: RequirementAttachment[];

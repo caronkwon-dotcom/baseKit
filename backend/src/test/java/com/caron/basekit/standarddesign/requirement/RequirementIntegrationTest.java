@@ -43,8 +43,11 @@ class RequirementIntegrationTest {
         mvc.perform(get("/api/standard-design/requirements/"+id+"/attachments/"+attachmentId+"/file"))
                 .andExpect(status().isOk()).andExpect(content().bytes(png));
         mvc.perform(delete("/api/standard-design/requirements/"+id+"/attachments/"+attachmentId)).andExpect(status().isNoContent());
+        String preservedUpload=mvc.perform(multipart("/api/standard-design/requirements/"+id+"/attachments").file(file)).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        String preservedId=json.readTree(preservedUpload).path("DATA").path("ATTACHMENT_ID").asText();
         mvc.perform(delete("/api/standard-design/requirements/"+id)).andExpect(status().isNoContent());
-        mvc.perform(get("/api/standard-design/requirements/"+id)).andExpect(status().isNotFound());
+        mvc.perform(get("/api/standard-design/requirements/"+id+"/attachments/"+preservedId+"/file")).andExpect(status().isOk()).andExpect(content().bytes(png));
+        mvc.perform(get("/api/standard-design/requirements/"+id)).andExpect(status().isOk()).andExpect(jsonPath("$.DATA.DISCARDED_YN").value("Y"));
     }
 
     @Test

@@ -6,6 +6,7 @@ import RequirementIntakePage from './ui/pages/RequirementIntakePage';
 import ScreenDesignPage from './ui/pages/ScreenDesignPage';
 import TermGlossaryPage from './ui/pages/TermGlossaryPage';
 import ProjectMenuPage from './ui/pages/ProjectMenuPage';
+import RequirementGroupPage from './ui/pages/RequirementGroupPage';
 import './standardDesign.css';
 
 const MODULE_ID = 'standard-design';
@@ -16,6 +17,7 @@ const STANDARD_DESIGN_ACTIONS = {
 const standardDesignModule: ApplicationModule = {
   id: MODULE_ID,
   programs: [
+    { programKey: 'SD_REQUIREMENT_GROUP', programName: '요구사항 그룹 관리', componentName: 'RequirementGroupPage', screenType: 'GRID_DETAIL', routePath: '/standard-design/requirement-groups', requiresProjectContext: true, dataScope: 'COMPANY', modifyScope: 'ROLE', actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE, COMMON_ACTIONS.APPROVE], useYn: 'Y' },
     {
       programKey: 'SD_PROJECT_MGMT',
       programName: '프로젝트 개요',
@@ -111,6 +113,7 @@ const standardDesignModule: ApplicationModule = {
     },
   ],
   menus: [
+    { menuKey: 'STANDARD_DESIGN.REQUIREMENT_GROUP', parentMenuKey: 'STANDARD_DESIGN', menuName: '요구사항 그룹 관리', menuLevel: 2, menuType: 'SCREEN', programKey: 'SD_REQUIREMENT_GROUP', sortOrder: 4.5, useYn: 'Y' },
     {
       menuKey: 'STANDARD_DESIGN',
       parentMenuKey: null,
@@ -206,6 +209,7 @@ const standardDesignModule: ApplicationModule = {
     { actionCode: STANDARD_DESIGN_ACTIONS.DESIGN_VALIDATE, actionName: '설계검증', auditYn: 'Y' },
   ],
   permissions: [
+    ...([COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE, COMMON_ACTIONS.APPROVE] as const).map(action => ({ ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_REQUIREMENT_GROUP', ACTION_CODE: action, ALLOW_YN: 'Y' as const })),
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_PROJECT_MGMT', ACTION_CODE: COMMON_ACTIONS.SEARCH, ALLOW_YN: 'Y' },
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_PROJECT_MGMT', ACTION_CODE: COMMON_ACTIONS.CREATE, ALLOW_YN: 'Y' },
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_PROJECT_MGMT', ACTION_CODE: COMMON_ACTIONS.UPDATE, ALLOW_YN: 'Y' },
@@ -238,6 +242,7 @@ const standardDesignModule: ApplicationModule = {
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_TERM_GLOSSARY', ACTION_CODE: COMMON_ACTIONS.SEARCH, ALLOW_YN: 'Y' },
   ],
   components: {
+    SD_REQUIREMENT_GROUP: () => <RequirementGroupPage />,
     SD_PROJECT_MGMT: () => <DesignLifecyclePage view="overview" />,
     SD_PROJECT_MENU: ProjectMenuPage,
     SD_WBS_DESIGN: () => <DesignLifecyclePage view="wbs" />,
