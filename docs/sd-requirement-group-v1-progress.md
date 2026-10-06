@@ -106,3 +106,11 @@ Group 저장 payload: PROJECT_ID, REQUIREMENT_GROUP_NAME, DESCRIPTION, VERSION, 
 - 최초 조사/중간 문서: `ae125b7d9cb4f99fa8a34869f949567eb8822992`.
 - 그룹 관리/폐기·Revision/화면/회귀 테스트 제품: `4223a801e2875f720a49bc009086e743f5d1f950`.
 - 최종 문서는 별도 commit. sd-work commit/push만 하며 dev-pm merge는 별도 통합 단계다.
+## dev-pm 통합 후 화면 오류 점검 (2026-10-06)
+
+- 그룹 조회 404 원인은 코드 누락이 아니라 2026-10-05부터 실행 중인 이전 dev-pm 백엔드 프로세스였다. dev-pm 제품 소스는 수정하지 않고 최신 compile 확인 후 해당 8080 서버만 같은 dev-pm profile로 재시작했다.
+- 실제 PostgreSQL 17.11에서 Flyway 13개 migration 검증 통과, schema up to date. `/api/standard-design/requirement-groups?PROJECT_ID=SDP-001` 직접/5173 proxy 조회 200과 DATA=[] 확인. 브라우저의 정상 빈 목록 및 신규 그룹 활성 확인. 기존 데이터에 쓰기 테스트는 하지 않았다.
+- ProgramDataGrid가 custom toolbar의 key를 actionCode만 사용하여 두 CREATE 버튼이 충돌했다. 권한 코드는 유지하고 actionCode+label로 화면 key를 구분했다. 제품 수정 commit a2c60889036a0275dfdef3a62b7a6df6393c1c64 (1줄).
+- SD frontend build/lint 통과, 새 브라우저에서 콘솔 error 0 확인. 새 CSS/migration/backend API 수정 없음.
+- local dev-pm은 e69533e로 V1 통합되어 있고 origin/dev-pm은 d1124d1이다. SD는 해당 local 통합 commit과 같은 기준에서 수정했다. 신규 branch/worktree 없음.
+- 중복 키 수정은 sd-work push 대상으로 준비했다. 사용자의 별도 dev-pm 통합 규칙에 따라 해당 수정 commit의 dev-pm 통합 승인을 요청했다.
