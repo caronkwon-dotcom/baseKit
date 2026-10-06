@@ -411,3 +411,12 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 - sd-work에서 dev-pm/origin/dev-pm a928069을 fast-forward 병합. 기존 Copilot/요구사항 화면 정리 미커밋 작업은 stash 후 apply로 보존. 복구용 stash는 유지함. 신규 branch/worktree 및 push 없음.
 - Flyway 오류 원인: DB 이력 V9=공통 endpoint permission(1801662515), V10=SD 분석(-488513351)에 비해 sd 파일 번호가 달랐음. backend와 database 폴더를 V9 공통 / V10 분석 / V11 설계 의견으로 통일. 기존 V9/V10 SQL 본문 및 DB 이력은 수정하지 않음.
 - clean package + H2 test 프로필: BUILD SUCCESS, 46건 중 41건 통과/5건 skip. frontend build/lint 통과. 실제 PostgreSQL 시작 및 V11 적용은 이 검증에서 수행하지 않음.
+
+## SD 요구사항 그룹 V1 첫 단위 (2026-10-06, sd-work)
+
+- 최신 origin/dev-pm d1124d1을 기존 sd-work에 fast-forward 반영. 신규 branch/worktree 및 dev-pm 직접 변경 없음.
+- 사용자 선택에 따라 기존 Program Analysis와 별개의 불변 Requirement 추천 결과 저장·조회 모델/API와 frontend client 추가. 분석 실행은 제외. Flyway V12는 backend/database 동일 파일로 유지.
+- 추천 참조 Requirement 물리 삭제는 파일 삭제 전에 차단하여 FK와 첨부파일을 보호한다. 최종 폐기/삭제 정책은 사용자 답변 대기.
+- 요구사항 그룹 CRUD/화면/확정/REVIEW_REQUIRED는 아직 미구현. 전체 V1 완료로 표시하지 않는다.
+- backend H2 전체 49건: 44건 통과, 5 skip. 시작 기준 frontend build/lint 통과. 상세 계약/변경 범위/리스크는 docs/sd-requirement-group-v1-progress.md 참조.
+- 최종 frontend build/lint 및 frontend 회귀 53건 통과. JDBC 시각 타입/정밀도 보완 후 신규 API 통합 테스트 3건 재통과. 제품 코드 commit d9430c548898bafbce8d85457af0e015c3ca5f1f.
