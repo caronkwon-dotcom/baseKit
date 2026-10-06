@@ -12,11 +12,12 @@ import java.util.*;
 @Service
 public class RequirementService {
     private final RequirementMapper mapper;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
     private final ProjectMenuService projectMenuService;
     private final AttachmentUploadPolicy uploadPolicy;
     private final Path storageRoot;
-    RequirementService(RequirementMapper mapper, ProjectMenuService projectMenuService, AttachmentUploadPolicy uploadPolicy, @Value("${standard-design.requirements.storage-path:./data/requirement-attachments}") String storagePath) {
-        this.mapper = mapper; this.projectMenuService = projectMenuService;
+    RequirementService(RequirementMapper mapper, org.springframework.jdbc.core.JdbcTemplate jdbc, ProjectMenuService projectMenuService, AttachmentUploadPolicy uploadPolicy, @Value("${standard-design.requirements.storage-path:./data/requirement-attachments}") String storagePath) {
+        this.mapper = mapper; this.jdbc = jdbc; this.projectMenuService = projectMenuService;
         this.uploadPolicy = uploadPolicy;
         this.storageRoot = Path.of(storagePath).toAbsolutePath().normalize();
     }
@@ -79,7 +80,11 @@ public class RequirementService {
     }
     @Transactional
     public void delete(String id) {
+        // Check durable recommendation references before deleting attachment files.
+        jdbc.queryForList("SELECT REQUIREMENT_ID FROM BSDRREQ WHERE REQUIREMENT_ID=? FOR UPDATE", id);
         RequirementData current = one(id);
+        if (jdbc.queryForObject("SELECT COUNT(*) FROM BSDRARIT WHERE REQUIREMENT_ID=?", Integer.class, id) > 0)
+            throw new IllegalArgumentException("추천 Analysis가 참조하는 요구사항은 물리 삭제할 수 없습니다. 폐기 정책 확인이 필요합니다.");
         for (AttachmentData attachment : current.ATTACHMENTS()) deleteAttachment(id,attachment.ATTACHMENT_ID());
         mapper.deleteMenus(id);
         mapper.deleteProjectMenuRelations(id);
