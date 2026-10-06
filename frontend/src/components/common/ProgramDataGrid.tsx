@@ -117,7 +117,7 @@ export default function ProgramDataGrid<T>({
           {visibleToolbarActions ? visibleToolbarActions.map((action) => {
             const context = { rows, selectedRows };
             const disabled = typeof action.disabled === 'function' ? action.disabled(context) : action.disabled;
-            return <ActionButton key={action.actionCode} actionCode={action.actionCode} label={action.label} tone={action.tone} displayMode={resolvedButtonDisplay} disabled={disabled} onClick={() => action.onClick(context)} />;
+            return <ActionButton key={`${action.actionCode}:${action.label}`} actionCode={action.actionCode} label={action.label} tone={action.tone} displayMode={resolvedButtonDisplay} disabled={disabled} onClick={() => action.onClick(context)} />;
           }) : visibleActions.map((actionCode) => {
             const actionName = actionNames.get(actionCode) ?? actionCode;
             const iconOnly = actionCode === COMMON_ACTIONS.EXCEL_DOWNLOAD;
