@@ -424,5 +424,4 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 - 상세: docs/sd-requirement-group-v1-progress.md 및 ADR 034.
 ## SD 그룹 통합 후 오류 점검 (2026-10-06)
 
-이전 8080 dev-pm 백엔드를 최신 코드로 재시작하여 그룹 API 404 복구. PostgreSQL V13까지 migration 검증 및 5173 proxy API 200 확인. Grid CREATE 버튼 중복 React key는 sd-work a2c6088에서 1줄 수정, build/lint와 브라우저 콘솔 error 0 확인. dev-pm 수정 commit 통합은 별도 승인 대기.
-
+이전 8080 dev-pm 백엔드를 최신 코드로 재시작하여 그룹 API 404 복구. PostgreSQL V13까지 migration 검증 및 5173 proxy API 200 확인. Grid CREATE 버튼 중복 React key는 sd-work a2c6088에서 1줄 수정, build/lint와 브라우저 콘솔 error 0 확인. 사용자 승인으로 수정 commit a2c6088만 로컬 dev-pm에 fast-forward 통합 완료. 5173 실제 화면 정상 빈 목록과 콘솔 error 0 재검증.

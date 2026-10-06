@@ -113,4 +113,4 @@ Group 저장 payload: PROJECT_ID, REQUIREMENT_GROUP_NAME, DESCRIPTION, VERSION, 
 - ProgramDataGrid가 custom toolbar의 key를 actionCode만 사용하여 두 CREATE 버튼이 충돌했다. 권한 코드는 유지하고 actionCode+label로 화면 key를 구분했다. 제품 수정 commit a2c60889036a0275dfdef3a62b7a6df6393c1c64 (1줄).
 - SD frontend build/lint 통과, 새 브라우저에서 콘솔 error 0 확인. 새 CSS/migration/backend API 수정 없음.
 - local dev-pm은 e69533e로 V1 통합되어 있고 origin/dev-pm은 d1124d1이다. SD는 해당 local 통합 commit과 같은 기준에서 수정했다. 신규 branch/worktree 없음.
-- 중복 키 수정은 sd-work push 대상으로 준비했다. 사용자의 별도 dev-pm 통합 규칙에 따라 해당 수정 commit의 dev-pm 통합 승인을 요청했다.
+- 사용자 승인 후 수정 commit a2c6088만 로컬 dev-pm에 fast-forward 통합했다. 새 5173 검증 탭에서 정상 빈 목록과 콘솔 error 0 확인. dev-pm 소스 직접 개발/추가 commit 및 origin/dev-pm push는 하지 않았다.
