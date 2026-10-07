@@ -47,3 +47,15 @@ SD 전용 CSS, 신규 디자인 토큰, 독자 Grid/Form/Layout 없음. API/DB/m
 - FormModal.tsx: 기존 Footer에 선택적인 footerActions 슬롯 추가. 미저장 그룹 변경의 변경 버리고 이동을 본문에서 하단 취소/저장 후 이동과 같은 줄로 이동. 다른 변경 검토·초안 비교 팝업은 기존 공통 Footer를 이미 사용하며 유지.
 
 검증: build/lint/diff check 통과, Frontend 55건 통과, Backend 51건(46통과/5 외부 PostgreSQL 조건 skip). 5176 수정 프론트엔드에서 실제 8080 백엔드를 조회만 했다. 저장/확정/삭제 버튼 top 82px 동일, 그룹 검색 Label 76px와 입력 251.59px, 요구사항 검색 Label 76px와 입력 441.19px 측정. 팝업 변경 버리고 이동/취소/저장 후 이동은 모두 Footer에 존재하며 top 391.39px 동일. 브라우저 Console error 0. 임시 초안은 저장하지 않고 버린 뒤 기존 화면으로 이동했다. 실제 DB 쓰기/삭제 없음. 기존 번들 크기 경고 및 외부 DB 조건 skip은 유지.
+
+## 추가 검수 반영 — 등록 버튼 (2026-10-07)
+
+RequirementGroupPage.tsx의 목록 Toolbar 신규 그룹 Action을 제거하고 PageHeader 공통 그룹 기능 영역의 첫 버튼을 등록(CREATE)으로 배치했다. 그룹 0건 또는 미선택 상태에서도 등록은 표시되며 프로젝트 미선택/조회 미완료/처리 중에는 비활성화한다. 기존 미저장 변경 확인과 신규 초안 생성 로직을 유지한다. Empty 안내도 등록 버튼으로 연결했다. 공통 CSS/컴포넌트와 API/DB 변경 없음.
+
+## 같은 검수 단위 추가 반영 — 행 상태·일괄 저장·저장 활성화
+
+- 공통 getRowState 계약을 연결하여 포함 사유/검토 기준/근거 변경은 UPDATED, 신규 구성은 INSERTED, 행 삭제 예정은 DELETED로 표시한다. 기존 공통 색상·아이콘·취소선 스타일을 재사용하며 새 CSS 없음.
+- 삭제 예정 행은 화면에 남고 편집/내용 검토를 비활성화한다. 저장 요청 구성에서만 제외하며 서버에는 저장 시 일괄 반영된다. 저장 성공 후 조회 기준과 삭제 표시를 초기화하고 실패 시 초안을 유지한다. 변경 버리기/그룹 이동으로 기존 구성을 복원한다. 삭제 예정 항목을 다시 추가하면 기존 초안 값을 복원하여 중복 행 없이 삭제 표시를 해제한다.
+- 저장은 수정 여부와 관계없이 활성화한다. 처리 중/확정 읽기전용 상태만 disable. 원래 확정 제약은 유지한다.
+- requirementGroupRowState.ts와 회귀 테스트 추가: 신규/수정/원복/저장 기준 재설정/Revision 변경/조회 snapshot 비변경을 검증했다.
+- 최종 build/lint/diff check 통과, Frontend 56건 통과, Backend 51건(46통과/5 skip). 실제 브라우저에서 기본 저장 활성화, 상단 등록과 신규 초안, UPDATED 및 DELETED 공통 class, 삭제 후 네 행 유지, INSERTED class, 변경 버리고 이동 및 console error 0 확인. 실데이터 저장/삭제는 수행하지 않았다. 실제 저장 API는 기존 groupInput의 구성 원자 저장 계약을 사용한다.
