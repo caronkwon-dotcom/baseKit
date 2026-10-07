@@ -72,3 +72,8 @@
 .basekit-ag-grid .ag-cell:has(.basekit-grid-select)::after { content: none; }
 .basekit-ag-grid .basekit-grid-select { display: inline-flex; align-items: center; justify-content: space-between; gap: 4px; cursor: pointer; }
 .basekit-grid-select > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Rendered actions fit the shared row without trailing text overflow. */
+.basekit-ag-grid .ag-cell:has(.action-button) { display: flex; align-items: center; text-overflow: clip; }
+.basekit-ag-grid .ag-cell:has(.action-button) .ag-cell-value { min-width: 0; max-width: 100%; text-overflow: clip; }
+.basekit-ag-grid .action-button { min-height: 24px; height: 24px; min-width: 24px; max-width: 100%; padding: 0 6px; font-size: 11px; }

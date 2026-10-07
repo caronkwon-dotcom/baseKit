@@ -11,9 +11,11 @@ interface MasterDetailMultiGridProps {
   resizable?: boolean;
   alignDetailToolbars?: boolean;
   detailOptions?: ReactNode;
+  detailTopSizing?: 'ratio' | 'content';
+  detailEmpty?: ReactNode;
 }
 
-export default function MasterDetailMultiGrid({ master, detailTop, detailBottom, message, equalRows = false, masterWidth, stacked = false, resizable = false, alignDetailToolbars = false, detailOptions }: MasterDetailMultiGridProps) {
+export default function MasterDetailMultiGrid({ master, detailTop, detailBottom, message, equalRows = false, masterWidth, stacked = false, resizable = false, alignDetailToolbars = false, detailOptions, detailTopSizing = 'ratio', detailEmpty }: MasterDetailMultiGridProps) {
   const workspace = useRef<HTMLDivElement>(null);
   const bottom = useRef<HTMLDivElement>(null);
   const [topRatio, setTopRatio] = useState(60);
@@ -62,9 +64,9 @@ export default function MasterDetailMultiGrid({ master, detailTop, detailBottom,
   return <div className={`multi-grid-workspace${equalRows ? ' equal-detail-rows' : ''}${stacked ? ' stacked-grid-workspace' : ''}`} style={style}>
     <div className={`master-detail-multi-grid${stacked ? ' stacked-grid-layout' : ''}`}>
       <div className="multi-grid-master">{master}</div>
-      <div className="multi-grid-detail">
-        <div className="multi-grid-detail-top">{detailTop}</div>
-        <div className="multi-grid-detail-bottom">{detailBottom}</div>
+      <div className={`multi-grid-detail${detailTopSizing === 'content' ? ' content-detail-top' : ''}${detailEmpty ? ' empty-detail' : ''}`}>
+        {detailEmpty ?? <><div className="multi-grid-detail-top">{detailTop}</div>
+        <div className="multi-grid-detail-bottom">{detailBottom}</div></>}
       </div>
     </div>
     <div className="multi-grid-message-area" aria-live="polite">{message}</div>

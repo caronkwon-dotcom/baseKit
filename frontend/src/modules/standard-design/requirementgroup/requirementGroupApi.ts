@@ -34,6 +34,7 @@ export function mergeGroupMembers(existing:GroupMember[],added:GroupMember[]):Gr
  return [...result.values()];
 }
 export function openRequirementGroup(projectId:string,id:string) {
+ sessionStorage.setItem('basekit:requirement-group-jump',JSON.stringify({PROJECT_ID:projectId,REQUIREMENT_GROUP_ID:id}));
  sessionStorage.setItem('basekit:requirement-group-target',JSON.stringify({PROJECT_ID:projectId,REQUIREMENT_GROUP_ID:id}));
  window.dispatchEvent(new CustomEvent('basekit:open-program',{detail:{PROGRAM_KEY:'SD_REQUIREMENT_GROUP'}}));
  window.dispatchEvent(new Event('basekit:requirement-group-selected'));
