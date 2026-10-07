@@ -2,6 +2,10 @@
 
 이 문서는 새 작업자와 GPT Work가 실제 Repository 상태를 빠르게 파악하기 위한 기준 문서다. 특정 날짜나 과거 작업 branch가 아니라 최신 `dev-pm`과 열린 PR을 기준으로 갱신한다.
 
+## 2026-10-07 SD 추가 UI 검수 반영
+
+저장/확정/삭제를 페이지 최상단 공통 버튼 영역으로 이동하고 그룹/요구사항 관리의 공통 SearchPanel inline 배치를 통일했다. 공통 FormModal Footer 슬롯을 통해 미저장 그룹 변경의 변경 버리고 이동도 하단 버튼 줄로 이동했다. build/lint, Frontend 55건, Backend 51건(46통과/5 skip), 실제 브라우저 배치 검수·console error 0. 실데이터 저장 없이 검수했다. 별도 sd-work commit/push 단위이며 [상세 검수 보고](sd-requirement-group-ui-review.md)의 추가 검수 반영 절을 따른다.
+
 ## 2026-10-07 SD 요구사항 그룹 UI 표준 재정렬
 
 sd-work에서 공통 Form Label 좌측 정렬, 공통 MasterDetail 내용 높이/전체 Empty 슬롯, 공통 Grid Small Action 표현을 보정하고 그룹 화면에 첫 행 선택·기본 접힌 SearchPanel·상단 Toolbar·공통 포함 사유 editor·Checkbox 다중 행 삭제를 적용했다. 기존 origin/dev-pm a2c6088은 이미 포함되어 있어 신규 기준 통합은 필요 없었다. 상세 파일·검증·잔여 범위는 [UI 검수 보고](sd-requirement-group-ui-review.md)를 따른다. build/lint, Frontend 55건, Backend 51건(46 통과/5 외부 DB skip), diff check 통과. 실제 브라우저는 격리 H2 memory DB에서 검수했다. 이번 단위는 sd-work commit/push로 종결하며 추가 검수는 별도 작업이다.

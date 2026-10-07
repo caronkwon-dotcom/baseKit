@@ -37,3 +37,13 @@ SD 전용 CSS, 신규 디자인 토큰, 독자 Grid/Form/Layout 없음. API/DB/m
 - 공통 Form을 사용하는 모든 개별 화면을 브라우저 전수 검수하지는 않음. 요구사항 관리와 그룹 관리 실제 검수 및 공통 회귀 테스트 통과.
 - 그룹 삭제 후 첫 그룹 선택 로직은 구현/정적 확인. 실제 제품 DB 삭제 검수는 수행하지 않음.
 - 추가 검수 수정은 다음 별도 commit/push 단위로 처리.
+
+## 추가 검수 반영 — 공통 버튼·검색·팝업 (2026-10-07)
+
+사용자 첨부 화면의 후속 지적을 별도 작업 단위로 반영했다.
+- RequirementGroupPage.tsx: 저장/확정/삭제를 PageHeader의 공통 버튼 영역으로 이동. 저장은 공통 SAVE 표현, 이름은 저장/확정/삭제로 통일. 기본정보 Toolbar에는 제목만 유지. 확정 상태의 구성 수정과 기존 enable/disable 업무 로직은 보존.
+- SearchPanel.tsx + styles.css: 공통 inline 배치 옵션 추가. Label 76px(기존 Project 폭 또는 fallback), 입력 나머지 폭, 한 열 조건, 하단 우측 초기화/조회. 신규 디자인 토큰 없음.
+- RequirementGroupPage.tsx / RequirementIntakePage.tsx: 동일 inline 검색 배치 사용. 요구사항 LIST 모드의 기존 grid 검색 배치는 유지.
+- FormModal.tsx: 기존 Footer에 선택적인 footerActions 슬롯 추가. 미저장 그룹 변경의 변경 버리고 이동을 본문에서 하단 취소/저장 후 이동과 같은 줄로 이동. 다른 변경 검토·초안 비교 팝업은 기존 공통 Footer를 이미 사용하며 유지.
+
+검증: build/lint/diff check 통과, Frontend 55건 통과, Backend 51건(46통과/5 외부 PostgreSQL 조건 skip). 5176 수정 프론트엔드에서 실제 8080 백엔드를 조회만 했다. 저장/확정/삭제 버튼 top 82px 동일, 그룹 검색 Label 76px와 입력 251.59px, 요구사항 검색 Label 76px와 입력 441.19px 측정. 팝업 변경 버리고 이동/취소/저장 후 이동은 모두 Footer에 존재하며 top 391.39px 동일. 브라우저 Console error 0. 임시 초안은 저장하지 않고 버린 뒤 기존 화면으로 이동했다. 실제 DB 쓰기/삭제 없음. 기존 번들 크기 경고 및 외부 DB 조건 skip은 유지.

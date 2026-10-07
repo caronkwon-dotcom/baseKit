@@ -1796,3 +1796,10 @@ tbody tr.active-master-row td { background: var(--brand-soft); }
 
 .multi-grid-master { display: flex; flex-direction: column; }
 .multi-grid-master > div { min-height: 0; flex: 1; }
+
+/* Shared search arrangement for a Master/Detail list pane. */
+.search-panel.search-panel--inline .search-panel-layout,
+.search-panel.search-panel--inline .search-panel-layout:has(.search-action-rail [data-display-mode="ICON_TEXT"]) { grid-template-columns: minmax(0, 1fr) 144px; align-items: stretch; gap: 8px; }
+.search-panel.search-panel--inline .search-grid { grid-template-columns: minmax(0, 1fr); }
+.search-panel.search-panel--inline .search-grid label { grid-template-columns: var(--project-label-width, 76px) minmax(0, 1fr); gap: 8px; }
+.search-panel.search-panel--inline .search-action-rail { display: flex; grid-column: 2; width: 144px; align-self: end; flex-direction: row-reverse; }

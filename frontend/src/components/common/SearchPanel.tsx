@@ -27,6 +27,7 @@ interface SearchPanelProps<T extends object> {
   rows?: SearchPanelRows;
   collapsedFieldCount?: number;
   actionDisplay?: ActionButtonDisplay;
+  layout?: 'grid' | 'inline';
 }
 
 const SEARCH_COLUMN_COUNT = 4;
@@ -45,6 +46,7 @@ export default function SearchPanel<T extends object>({
   rows = 1,
   collapsedFieldCount = SEARCH_COLUMN_COUNT,
   actionDisplay,
+  layout = 'grid',
 }: SearchPanelProps<T>) {
   const [collapsed, setCollapsed] = useState(false);
   const maxConditionCount = rows * SEARCH_COLUMN_COUNT;
@@ -70,7 +72,7 @@ export default function SearchPanel<T extends object>({
   };
 
   return (
-    <section className="search-panel" aria-label="조회 조건">
+    <section className={`search-panel${layout === 'inline' ? ' search-panel--inline' : ''}`} aria-label="조회 조건">
       <div className={`search-panel-layout search-panel-rows-${rows}${collapsed ? ' collapsed' : ''}`}>
         <div className="search-grid">
           {visibleFields.map((field) => {
