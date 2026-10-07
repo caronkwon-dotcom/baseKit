@@ -1,0 +1,276 @@
+{
+  "date": "2026-10-07",
+  "browser": "Chrome 154.0.8037.98",
+  "mode": "DESIGN-only in-memory prototype; no API/DB/LLM",
+  "checks": [
+    {
+      "name": "basic information is the default; group editing retained",
+      "result": "PASS"
+    },
+    {
+      "name": "existing direct add remains a draft without automatic save",
+      "result": "PASS"
+    },
+    {
+      "name": "tab transition preserves unsaved draft and membership",
+      "result": "PASS"
+    },
+    {
+      "name": "analysis tab has no group composition controls",
+      "result": "PASS"
+    },
+    {
+      "name": "DRAFT blocks execution with guidance",
+      "result": "PASS"
+    },
+    {
+      "name": "CONFIRMED enables execution and retains selected group",
+      "result": "PASS"
+    },
+    {
+      "name": "four independent statuses displayed",
+      "result": "PASS"
+    },
+    {
+      "name": "selected Analysis survives tab roundtrip",
+      "result": "PASS"
+    },
+    {
+      "name": "filter zero preserves detail context and Analysis",
+      "result": "PASS"
+    },
+    {
+      "name": "result area summary",
+      "result": "PASS"
+    },
+    {
+      "name": "result area business",
+      "result": "PASS"
+    },
+    {
+      "name": "result area process",
+      "result": "PASS"
+    },
+    {
+      "name": "result area layout",
+      "result": "PASS"
+    },
+    {
+      "name": "result area program",
+      "result": "PASS"
+    },
+    {
+      "name": "stored snapshot includes read-only group, revisions and design opinions",
+      "result": "PASS"
+    },
+    {
+      "name": "Snapshot dialog Escape restores focus",
+      "result": "PASS"
+    },
+    {
+      "name": "execution confirmation cancel creates no Analysis",
+      "result": "PASS"
+    },
+    {
+      "name": "request rejection preserves confirmation and creates no Analysis",
+      "result": "PASS"
+    },
+    {
+      "name": "execution adds independent RUNNING with snapshot",
+      "result": "PASS"
+    },
+    {
+      "name": "Requirement change blocks new execution, retains running snapshot",
+      "result": "PASS"
+    },
+    {
+      "name": "historical input notice displayed",
+      "result": "PASS"
+    },
+    {
+      "name": "completion requires review and does not confirm group",
+      "result": "PASS"
+    },
+    {
+      "name": "review save error preserves review-required state",
+      "result": "PASS"
+    },
+    {
+      "name": "reviewed means read acknowledgement only; original result retained",
+      "result": "PASS"
+    },
+    {
+      "name": "input or status changed during confirmation prevents execution",
+      "result": "PASS"
+    },
+    {
+      "name": "failed retry preserves failed record and creates a new independent ID",
+      "result": "PASS"
+    },
+    {
+      "name": "failure response remains a separate history entry",
+      "result": "PASS"
+    },
+    {
+      "name": "result Loading distinguished from no result",
+      "result": "PASS"
+    },
+    {
+      "name": "result Error retry preserves ID and does not execute",
+      "result": "PASS"
+    },
+    {
+      "name": "history Loading retains count-unknown state",
+      "result": "PASS"
+    },
+    {
+      "name": "history Error retry preserves entries and selected result",
+      "result": "PASS"
+    },
+    {
+      "name": "V1 comparison has distinct result-bearing Analysis pair",
+      "result": "PASS"
+    },
+    {
+      "name": "different snapshots explained in comparison",
+      "result": "PASS"
+    },
+    {
+      "name": "RUNNING and FAILED excluded from comparison",
+      "result": "PASS"
+    },
+    {
+      "name": "both comparison panels show summary",
+      "result": "PASS"
+    },
+    {
+      "name": "both comparison panels show business",
+      "result": "PASS"
+    },
+    {
+      "name": "both comparison panels show process",
+      "result": "PASS"
+    },
+    {
+      "name": "both comparison panels show layout",
+      "result": "PASS"
+    },
+    {
+      "name": "both comparison panels show program",
+      "result": "PASS"
+    },
+    {
+      "name": "switching group scopes history without cross-group results",
+      "result": "PASS"
+    },
+    {
+      "name": "returning group restores last selected Analysis",
+      "result": "PASS"
+    },
+    {
+      "name": "lost response blocks duplicate new request until status lookup",
+      "result": "PASS"
+    },
+    {
+      "name": "status reconciliation does not add another execution",
+      "result": "PASS"
+    },
+    {
+      "name": "Empty history gives distinct guidance and disables comparison",
+      "result": "PASS"
+    },
+    {
+      "name": "detail tabs support arrow keys and roving focus",
+      "result": "PASS"
+    },
+    {
+      "name": "detail tabs support End",
+      "result": "PASS"
+    },
+    {
+      "name": "result tabs support arrow-key navigation",
+      "result": "PASS"
+    },
+    {
+      "name": "native confirmation dialog traps Tab",
+      "result": "PASS"
+    },
+    {
+      "name": "confirmation Escape restores trigger",
+      "result": "PASS"
+    },
+    {
+      "name": "no outer horizontal overflow 1920",
+      "result": "PASS"
+    },
+    {
+      "name": "snapshot dialog within viewport 1920",
+      "result": "PASS"
+    },
+    {
+      "name": "no outer horizontal overflow 1440",
+      "result": "PASS"
+    },
+    {
+      "name": "snapshot dialog within viewport 1440",
+      "result": "PASS"
+    },
+    {
+      "name": "no outer horizontal overflow 1280",
+      "result": "PASS"
+    },
+    {
+      "name": "snapshot dialog within viewport 1280",
+      "result": "PASS"
+    },
+    {
+      "name": "no outer horizontal overflow 768",
+      "result": "PASS"
+    },
+    {
+      "name": "snapshot dialog within viewport 768",
+      "result": "PASS"
+    },
+    {
+      "name": "no outer horizontal overflow 320",
+      "result": "PASS"
+    },
+    {
+      "name": "snapshot dialog within viewport 320",
+      "result": "PASS"
+    },
+    {
+      "name": "narrow comparison stacks panels without outer overflow",
+      "result": "PASS"
+    },
+    {
+      "name": "comparison failure is isolated to one panel",
+      "result": "PASS"
+    },
+    {
+      "name": "comparison retry keeps pair and restores failed panel",
+      "result": "PASS"
+    },
+    {
+      "name": "empty result area distinguished from empty history",
+      "result": "PASS"
+    },
+    {
+      "name": "completed record without result offers re-query instead of review",
+      "result": "PASS"
+    },
+    {
+      "name": "long group name and content do not overflow page",
+      "result": "PASS"
+    },
+    {
+      "name": "new group returns to basic information for editing",
+      "result": "PASS"
+    },
+    {
+      "name": "no page JavaScript errors",
+      "result": "PASS"
+    }
+  ],
+  "errors": []
+}

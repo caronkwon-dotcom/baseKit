@@ -2,6 +2,13 @@
 
 이 문서는 새 작업자와 GPT Work가 실제 Repository 상태를 빠르게 파악하기 위한 기준 문서다. 특정 날짜나 과거 작업 branch가 아니라 최신 `dev-pm`과 열린 PR을 기준으로 갱신한다.
 
+## DESIGN 요구사항 그룹 분석 TAB (2026-10-07, design-work 내부 설계)
+
+- 시작 제품 기준 origin/dev-pm `a2c60889036a0275dfdef3a62b7a6df6393c1c64`, 작업지시 `618e94ce5d05a6a7fd506916025f9b7989f249e3`.
+- 기존 그룹 Prototype의 우 Detail에 기본정보/분석 TAB을 통합했다. 독립 분석 이력·입력 Snapshot 확인·5영역 조회·명시적 검토 표시·과거 입력 안내·V1 병렬 비교/예외 흐름을 DESIGN 예시로 작성했다.
+- 제품/API/DB/LLM/Program·코드 생성 변경 없음. 구현 완료로 표시하지 않는다. DESIGN 내부 산출물은 design-work에만 유지하며 dev-pm 반영/브랜치 전체 merge 대상이 아니다.
+- UX/상태/흐름/미결정 계약/SD 인계/검증: [분석 TAB 설계](design/sd-requirement-group-analysis/UX-design.md), [SD 인계안](design/sd-requirement-group-analysis/SD-implementation-handoff.md), [검증](design/sd-requirement-group-analysis/verification.md). 신규 그룹 분석 계약·공통 Detail TAB 연결점·키보드/focus는 후속 SD/COMMON 확인 대상이다.
+
 ## 프로그램관리 검색 영역 및 Grid 팝업 보완 (2026-10-05)
 
 원격 dev-pm a93c72c에서 시작했고 작업 중 추가된 최신 dev-pm 0458826 및 design-work 47e8f9a를 충돌 없이 반영했다. UI 6d486b9/42565a4. 최신 공통 FormSelect를 Grid에서도 재사용한다. 기존 프로그램관리 및 폼 변경 보존.
