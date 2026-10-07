@@ -37,8 +37,11 @@ class CompanyLlmClient implements DesignLlmClient {
                 utf8Length(systemPrompt), utf8Length(userPrompt));
 
         try {
+            SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+            factory.setConnectTimeout(10_000);
+            factory.setReadTimeout(300_000);
             ChatCompletionResponse response = RestClient.builder()
-                    .requestFactory(new SimpleClientHttpRequestFactory())
+                    .requestFactory(factory)
                     .build()
                     .post()
                     .uri(endpoint)
@@ -100,3 +103,4 @@ class CompanyLlmClient implements DesignLlmClient {
     private record Choice(Message message) {
     }
 }
+

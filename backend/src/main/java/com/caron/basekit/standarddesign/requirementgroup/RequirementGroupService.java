@@ -13,11 +13,12 @@ import java.util.*;
 public class RequirementGroupService {
  public record Member(String REQUIREMENT_ID, String HUMAN_YN, String INCLUSION_REASON, Long REVIEWED_REVISION, List<String> SOURCE_ANALYSIS_IDS) { }
  public record Save(String PROJECT_ID, String REQUIREMENT_GROUP_NAME, String DESCRIPTION, Long VERSION, String REQUEST_ID, List<Member> MEMBERS) { }
- public record Version(Long VERSION) { }
+ public record Version(Long VERSION, String PROJECT_NAME) { public Version(Long VERSION) { this(VERSION,null); } }
  private final JdbcTemplate jdbc;
  private final RequirementService requirements;
  private final ObjectMapper json;
- public RequirementGroupService(JdbcTemplate jdbc, RequirementService requirements, ObjectMapper json) { this.jdbc=jdbc; this.requirements=requirements; this.json=json; }
+ private final RequirementGroupSnapshot snapshot;
+ public RequirementGroupService(JdbcTemplate jdbc, RequirementService requirements, ObjectMapper json, RequirementGroupSnapshot snapshot) { this.jdbc=jdbc; this.requirements=requirements; this.json=json; this.snapshot=snapshot; }
  @Transactional(readOnly=true)
  public List<Map<String,Object>> list(String project, String requirementId) {
   required(project, "PROJECT_ID");
@@ -33,6 +34,7 @@ public class RequirementGroupService {
    member.put("REQUIREMENT",requirements.one(req));
    member.put("SOURCE_ANALYSIS_IDS",jdbc.queryForList("SELECT ANALYSIS_ID FROM BSDRGEVD WHERE REQUIREMENT_GROUP_ID=? AND REQUIREMENT_ID=? ORDER BY ANALYSIS_ID",String.class,id,req));
   }
+  group.put("HAS_ANALYSIS_SNAPSHOT",jdbc.queryForObject("SELECT COUNT(*) FROM BSDRGCTX WHERE REQUIREMENT_GROUP_ID=? AND GROUP_VERSION=?",Integer.class,id,group.get("VERSION"))>0);
   group.put("MEMBERS",members); group.remove("REQUEST_PAYLOAD"); return group;
  }
  @Transactional
@@ -86,7 +88,15 @@ public class RequirementGroupService {
   if(count==0) throw bad("확정할 Requirement를 포함하세요.");
   int stale=jdbc.queryForObject("SELECT COUNT(*) FROM BSDRGRQ M JOIN BSDRREQ R ON R.REQUIREMENT_ID=M.REQUIREMENT_ID WHERE M.REQUIREMENT_GROUP_ID=? AND M.REVIEWED_REVISION<>R.REQUIREMENT_REVISION",Integer.class,id);
   if(stale>0) throw conflict("검토 이후 Requirement 변경이 있습니다. 최신 내용을 검토하고 저장하세요.");
-  if(!"CONFIRMED".equals(group.get("GROUP_STATUS"))) jdbc.update("UPDATE BSDRGRP SET GROUP_STATUS='CONFIRMED',VERSION=VERSION+1,MOD_DT=CURRENT_TIMESTAMP WHERE REQUIREMENT_GROUP_ID=?",id);
+  boolean confirmed="CONFIRMED".equals(group.get("GROUP_STATUS"));
+  boolean capture=input!=null && input.PROJECT_NAME()!=null;
+  if(capture) required(input.PROJECT_NAME(),"PROJECT_NAME");
+  boolean hasSnapshot=jdbc.queryForObject("SELECT COUNT(*) FROM BSDRGCTX WHERE REQUIREMENT_GROUP_ID=? AND GROUP_VERSION=?",Integer.class,id,group.get("VERSION"))>0;
+  if(!confirmed || (capture && !hasSnapshot)) jdbc.update("UPDATE BSDRGRP SET GROUP_STATUS='CONFIRMED',VERSION=VERSION+1,MOD_DT=CURRENT_TIMESTAMP WHERE REQUIREMENT_GROUP_ID=?",id);
+  if(capture && (!confirmed || !hasSnapshot)) {
+   var saved=row(id,false);
+   snapshot.capture(id,(String)saved.get("PROJECT_ID"),input.PROJECT_NAME(),(String)saved.get("REQUIREMENT_GROUP_NAME"),(String)saved.get("DESCRIPTION"),((Number)saved.get("VERSION")).longValue());
+  }
   return get(id);
  }
  @Transactional

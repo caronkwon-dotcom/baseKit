@@ -1,3 +1,4 @@
+import type { GroupAnalysis } from './groupAnalysis.types';
 import type { Requirement } from '../requirement/requirementApi';
 export type GroupStatus = 'DRAFT' | 'CONFIRMED' | 'REVIEW_REQUIRED';
 export interface GroupMember {
@@ -6,7 +7,7 @@ export interface GroupMember {
 }
 export interface RequirementGroup {
  REQUIREMENT_GROUP_ID: string; PROJECT_ID: string; REQUIREMENT_GROUP_NAME: string; DESCRIPTION: string;
- GROUP_STATUS: GroupStatus; VERSION: number; REQUEST_ID: string; MEMBERS: GroupMember[]; MEMBER_COUNT?: number;
+ GROUP_STATUS: GroupStatus; VERSION: number; REQUEST_ID: string; MEMBERS: GroupMember[]; MEMBER_COUNT?: number; HAS_ANALYSIS_SNAPSHOT?: boolean;
 }
 export interface GroupInput { PROJECT_ID: string; REQUIREMENT_GROUP_NAME: string; DESCRIPTION: string; VERSION: number; REQUEST_ID: string; MEMBERS: Omit<GroupMember,'REQUIREMENT' | 'REVIEWED_SNAPSHOT'>[] }
 const base='/api/standard-design/requirement-groups';
@@ -22,8 +23,11 @@ export const requirementGroupApi={
  list:(project:string,req?:string)=>request<RequirementGroup[]>(`?PROJECT_ID=${encodeURIComponent(project)}${req ? `&REQUIREMENT_ID=${encodeURIComponent(req)}` : ''}`),
  get:(id:string)=>request<RequirementGroup>(`/${encodeURIComponent(id)}`),
  save:(id:string,input:GroupInput)=>request<RequirementGroup>(id ? `/${encodeURIComponent(id)}` : '',body(id ? 'PUT':'POST',input)),
- confirm:(id:string,version:number)=>request<RequirementGroup>(`/${encodeURIComponent(id)}/confirm`,body('POST',{VERSION:version})),
+ confirm:(id:string,version:number,projectName?:string)=>request<RequirementGroup>(`/${encodeURIComponent(id)}/confirm`,body('POST',{VERSION:version,PROJECT_NAME:projectName})),
  edit:(id:string,version:number)=>request<RequirementGroup>(`/${encodeURIComponent(id)}/edit`,body('POST',{VERSION:version})),
+ analyses:(id:string)=>request<GroupAnalysis[]>(`/${encodeURIComponent(id)}/analyses`),
+ analysis:(id:string,analysisId:string)=>request<GroupAnalysis>(`/${encodeURIComponent(id)}/analyses/${encodeURIComponent(analysisId)}`),
+ analyze:(id:string,version:number,requestId:string)=>request<GroupAnalysis>(`/${encodeURIComponent(id)}/analyses`,body('POST',{VERSION:version,REQUEST_ID:requestId})),
  delete:(id:string,version:number)=>request<void>(`/${encodeURIComponent(id)}?VERSION=${version}`,{method:'DELETE'}),
 };
 export const groupStatusLabels:Record<GroupStatus,string>={DRAFT:'작성중',CONFIRMED:'확정',REVIEW_REQUIRED:'재검토 필요'};
