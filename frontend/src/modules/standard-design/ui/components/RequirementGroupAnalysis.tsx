@@ -1,12 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { ActionButton, BaseKitMessage, FormModal } from '../../../../components/common';
 import { requirementGroupApi as api, type RequirementGroup } from '../../requirementgroup/requirementGroupApi';
+import { testCompanyLlm } from '../../llm/companyLlm.repository';
 import type { GroupAnalysis } from '../../requirementgroup/groupAnalysis.types';
 
 const labels={RUNNING:'분석 중',SUCCEEDED:'파싱 성공 · 검토 필요',CALL_FAILED:'호출 실패',PARSE_FAILED:'파싱 실패'};
 export default function RequirementGroupAnalysis({group,onClose}:{group:RequirementGroup;onClose:()=>void}) {
  const [runs,setRuns]=useState<GroupAnalysis[]>([]), [selected,setSelected]=useState<GroupAnalysis|null>(null);
  const [busy,setBusy]=useState(false), [error,setError]=useState('');
+ const [connection,setConnection]=useState<{content:string;elapsedMs:number;model:string}|null>(null);
+ const checkConnection=()=>void operate(async()=>{
+  setConnection(null);const started=performance.now();
+  const result=await testCompanyLlm('Reply with only OK. No explanation. /no_think');
+  if(alive.current)setConnection({content:result.CONTENT,model:result.MODEL,elapsedMs:Math.round(performance.now()-started)});
+ });
  const request=useRef<string|null>(null), running=useRef(false), alive=useRef(true);
  useEffect(()=>{
   let current=true; alive.current=true;
@@ -37,9 +44,10 @@ export default function RequirementGroupAnalysis({group,onClose}:{group:Requirem
  });
  const response=selected?.RESPONSE;
  const sections=[['businessStructure','업무 구조'],['processes','프로세스'],['screenCandidates','화면 후보'],['programCandidates','Program · 시스템 후보'],['observations','확인 필요 사항']] as const;
- return <FormModal open title="그룹 설계 분석 V0" submitting={busy} onClose={onClose} footerActions={<div className="grid-toolbar"><ActionButton actionCode="EXECUTE" label="분석 실행·요청 재확인" disabled={busy || group.GROUP_STATUS!=='CONFIRMED' || !group.HAS_ANALYSIS_SNAPSHOT || runs.some(run=>run.STATUS==='RUNNING')} onClick={execute} /><ActionButton actionCode="SEARCH" label="실행 이력 조회" disabled={busy} onClick={refresh} /></div>}>
+ return <FormModal open title="그룹 설계 분석 V0" submitting={busy} onClose={onClose} footerActions={<div className="grid-toolbar"><ActionButton actionCode="EXECUTE" label="짧은 응답 확인" disabled={busy} onClick={checkConnection} /><ActionButton actionCode="EXECUTE" label="분석 실행·요청 재확인" disabled={busy || group.GROUP_STATUS!=='CONFIRMED' || !group.HAS_ANALYSIS_SNAPSHOT || runs.some(run=>run.STATUS==='RUNNING')} onClick={execute} /><ActionButton actionCode="SEARCH" label="실행 이력 조회" disabled={busy} onClick={refresh} /></div>}>
   <p>확정된 Snapshot을 분석합니다. 모든 결과는 검토용 제안입니다.</p>
   {!group.HAS_ANALYSIS_SNAPSHOT ? <BaseKitMessage type="warn" message="확정 시점 Snapshot이 없습니다. 현재 내용을 검토하고 재확정하세요." />:null}
+  {connection ? <BaseKitMessage type="success" message={`연결 확인 응답: ${connection.content}`} detail={`${connection.model} · ${(connection.elapsedMs/1000).toFixed(1)}초 · 그룹 원문 전송 없음`} />:null}
   {error ? <BaseKitMessage type="error" message={error} />:null}
   <label>실행 이력<select aria-label="그룹 분석 실행 이력" disabled={busy} value={selected?.ANALYSIS_ID ?? ''} onChange={e=>{const id=e.target.value;if(id)void operate(async()=>{const result=await api.analysis(group.REQUIREMENT_GROUP_ID,id);if(alive.current)setSelected(result);});}}><option value="">실행 선택</option>{runs.map(run=><option key={run.ANALYSIS_ID} value={run.ANALYSIS_ID}>{run.CREATED_AT} · {labels[run.STATUS]} · {run.ANALYSIS_ID}</option>)}</select></label>
   {selected ? <><p>{labels[selected.STATUS]} · v{selected.GROUP_VERSION} · {selected.MODEL_NAME} · {selected.PROMPT_VERSION}</p>{selected.ERROR_MESSAGE ? <BaseKitMessage type="error" message={selected.ERROR_MESSAGE} />:null}
