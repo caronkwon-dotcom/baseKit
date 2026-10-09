@@ -37,8 +37,7 @@ export default function RequirementGroupAnalysis({group,onClose}:{group:Requirem
  });
  const response=selected?.RESPONSE;
  const sections=[['businessStructure','업무 구조'],['processes','프로세스'],['screenCandidates','화면 후보'],['programCandidates','Program · 시스템 후보'],['observations','확인 필요 사항']] as const;
- return <FormModal open title="그룹 설계 분석 V0" submitting={busy} onClose={onClose}>
-  <div className="grid-toolbar"><ActionButton actionCode="EXECUTE" label="분석 실행·요청 재확인" disabled={busy || group.GROUP_STATUS!=='CONFIRMED' || !group.HAS_ANALYSIS_SNAPSHOT || runs.some(run=>run.STATUS==='RUNNING')} onClick={execute} /><ActionButton actionCode="SEARCH" label="실행 이력 조회" disabled={busy} onClick={refresh} /></div>
+ return <FormModal open title="그룹 설계 분석 V0" submitting={busy} onClose={onClose} footerActions={<div className="grid-toolbar"><ActionButton actionCode="EXECUTE" label="분석 실행·요청 재확인" disabled={busy || group.GROUP_STATUS!=='CONFIRMED' || !group.HAS_ANALYSIS_SNAPSHOT || runs.some(run=>run.STATUS==='RUNNING')} onClick={execute} /><ActionButton actionCode="SEARCH" label="실행 이력 조회" disabled={busy} onClick={refresh} /></div>}>
   <p>확정된 Snapshot을 분석합니다. 모든 결과는 검토용 제안입니다.</p>
   {!group.HAS_ANALYSIS_SNAPSHOT ? <BaseKitMessage type="warn" message="확정 시점 Snapshot이 없습니다. 현재 내용을 검토하고 재확정하세요." />:null}
   {error ? <BaseKitMessage type="error" message={error} />:null}

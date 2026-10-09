@@ -2,6 +2,7 @@ package com.caron.basekit.standarddesign.requirementgroup;
 
 import com.caron.basekit.standarddesign.llm.DesignLlmClient;
 import com.caron.basekit.standarddesign.llm.LlmProperties;
+import com.caron.basekit.standarddesign.llm.LlmConnectionException;
 import com.fasterxml.jackson.databind.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -59,7 +60,7 @@ public class RequirementGroupAnalysisService {
   try { reply=llm.chat(PROMPT,start.input()); }
   catch(RuntimeException e) {
    // Never persist provider bodies, URLs or configuration values in an error.
-   finish(start.id(),"CALL_FAILED","LLM 호출에 실패했습니다. 연결 설정 및 제공자 상태를 확인하세요.");
+   finish(start.id(),"CALL_FAILED", e instanceof LlmConnectionException failure ? failure.diagnosticMessage() : "LLM 호출에 실패했습니다. 연결 설정 및 제공자 상태를 확인하세요.");
    return get(group,start.id());
   }
   // Commit the exact content BEFORE parsing; a crash here leaves recoverable RAW in RUNNING.

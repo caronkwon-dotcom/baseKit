@@ -67,6 +67,13 @@ class RequirementGroupAnalysisIntegrationTest {
   var result=run(g,"failure");assertEquals("CALL_FAILED",result.get("STATUS"));assertNull(result.get("RESPONSE_RAW_JSON"));assertFalse(result.get("ERROR_MESSAGE").toString().contains("secret"));
   run(g,"failure");verify(llm,times(1)).chat(anyString(),anyString());
  }
+ @Test void typedCallFailurePreservesSafeHttpDiagnosticAndPreviousRuns() throws Exception {
+  Group g=setup(true);
+  when(llm.chat(anyString(),anyString())).thenThrow(new com.caron.basekit.standarddesign.llm.LlmConnectionException(com.caron.basekit.standarddesign.llm.LlmConnectionException.Failure.HTTP,429,"secret provider body"));
+  var failed=run(g,"http-failure");assertEquals("CALL_FAILED",failed.get("STATUS"));assertTrue(failed.get("ERROR_MESSAGE").toString().contains("HTTP 429"));assertFalse(failed.get("ERROR_MESSAGE").toString().contains("secret"));
+  doReturn(new DesignLlmClient.LlmChatResult("test",response(g.req()))).when(llm).chat(anyString(),anyString());
+  assertEquals("SUCCEEDED",run(g,"new-attempt").get("STATUS"));assertEquals("CALL_FAILED",service.get(g.id(),failed.get("ANALYSIS_ID").toString()).get("STATUS"));
+ }
  @Test void rejectsLegacySnapshotAndStaleVersionButExplicitReconfirmationCreatesCurrentSnapshot() throws Exception {
   Group g=setup(false);
   mvc.perform(post("/api/standard-design/requirement-groups/"+g.id()+"/analyses").contentType(MediaType.APPLICATION_JSON).content(json.createObjectNode().put("VERSION",g.version()).put("REQUEST_ID","legacy").toString())).andExpect(status().isConflict());

@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.net.SocketTimeoutException;
+import org.springframework.web.client.ResourceAccessException;
+import static com.caron.basekit.standarddesign.llm.LlmConnectionException.Failure.*;
 
 @Component
 class CompanyLlmClient implements DesignLlmClient {
@@ -52,7 +55,7 @@ class CompanyLlmClient implements DesignLlmClient {
             if (response == null || response.choices() == null || response.choices().isEmpty()
                     || response.choices().getFirst().message() == null
                     || !StringUtils.hasText(response.choices().getFirst().message().content())) {
-                throw new LlmConnectionException("회사 LLM 응답 내용이 비어 있습니다.");
+                throw new LlmConnectionException(EMPTY_RESPONSE, null, "회사 LLM 응답 내용이 비어 있습니다.");
             }
             log.info("company-llm HTTP response complete responseCompleteElapsedMs={} outputBytes={} outputTokens=unavailable firstResponseByte=unavailable",
                     elapsedMillis(startedAt), utf8Length(response.choices().getFirst().message().content()));
@@ -61,14 +64,21 @@ class CompanyLlmClient implements DesignLlmClient {
             throw exception;
         } catch (RestClientResponseException exception) {
             throw new LlmConnectionException(
-                    "회사 LLM이 요청을 거부했습니다. (HTTP " + exception.getStatusCode().value() + ")"
+                    HTTP, exception.getStatusCode().value(), "회사 LLM이 요청을 거부했습니다. (HTTP " + exception.getStatusCode().value() + ")"
             );
+        } catch (ResourceAccessException exception) {
+            Throwable cause = exception;
+            boolean timedOut = false;
+            for (int depth = 0; cause != null && depth < 20; depth++, cause = cause.getCause()) {
+                if (cause instanceof SocketTimeoutException) timedOut = true;
+            }
+            throw new LlmConnectionException(timedOut ? TIMEOUT : NETWORK, null, "회사 LLM 통신에 실패했습니다.");
         } catch (RestClientException exception) {
-            throw new LlmConnectionException("회사 LLM 연결에 실패했습니다.");
+            throw new LlmConnectionException(RESPONSE_FORMAT, null, "회사 LLM 응답 형식 처리에 실패했습니다.");
         } catch (IllegalArgumentException exception) {
-            throw new LlmConnectionException("회사 LLM 연결 설정 형식을 확인해 주세요.");
+            throw new LlmConnectionException(CONFIGURATION, null, "회사 LLM 연결 설정 형식을 확인해 주세요.");
         } catch (RuntimeException exception) {
-            throw new LlmConnectionException("회사 LLM 응답 처리에 실패했습니다.");
+            throw new LlmConnectionException(RESPONSE_FORMAT, null, "회사 LLM 응답 처리에 실패했습니다.");
         }
 
     }
@@ -83,11 +93,11 @@ class CompanyLlmClient implements DesignLlmClient {
 
     private void validateConfiguration() {
         if (!properties.enabled()) {
-            throw new LlmConnectionException("회사 LLM 연동이 비활성화되어 있습니다.");
+            throw new LlmConnectionException(CONFIGURATION, null, "회사 LLM 연동이 비활성화되어 있습니다.");
         }
         if (!StringUtils.hasText(properties.baseUrl()) || !StringUtils.hasText(properties.apiKey())
                 || !StringUtils.hasText(properties.model()) || !StringUtils.hasText(properties.chatCompletionsPath())) {
-            throw new LlmConnectionException("회사 LLM 연결 설정이 완료되지 않았습니다.");
+            throw new LlmConnectionException(CONFIGURATION, null, "회사 LLM 연결 설정이 완료되지 않았습니다.");
         }
     }
 
