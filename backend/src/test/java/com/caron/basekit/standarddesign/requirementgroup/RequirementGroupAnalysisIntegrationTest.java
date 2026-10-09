@@ -41,38 +41,52 @@ class RequirementGroupAnalysisIntegrationTest {
  Map<String,Object> run(Group g,String request) { return service.execute(g.id(),new RequirementGroupAnalysisService.Execute(g.version(),request)); }
  @Test void preservesExactRawSnapshotUnknownFieldsAndPreviousRunsWithIdempotency() throws Exception {
   Group g=setup(true); String raw=" \n"+response(g.req())+"\n ";
-  when(llm.chat(anyString(),anyString())).thenReturn(new DesignLlmClient.LlmChatResult("test-model",raw));
+  when(llm.chatRaw(anyString(),anyString())).thenReturn(new DesignLlmClient.LlmChatResult("test-model",raw));
   var first=run(g,"request-1");assertEquals("SUCCEEDED",first.get("STATUS"));assertEquals(raw,first.get("RESPONSE_RAW_JSON"));assertEquals("test-model",first.get("MODEL_NAME"));
   var input=json.readTree((String)first.get("REQUEST_JSON"));assertEquals("검증 프로젝트",input.path("project").path("projectName").asText());
   assertEquals("원문\n두 번째 줄",input.path("requirements").get(0).path("description").asText());assertEquals("목록과 상세 화면 통합 검토",input.path("requirements").get(0).path("designOpinion").asText());
   assertTrue(((JsonNode)first.get("RESPONSE")).path("businessStructure").get(0).path("extra").path("kept").asBoolean());assertEquals(List.of(),first.get("WARNINGS"));
-  assertEquals(first.get("ANALYSIS_ID"),run(g,"request-1").get("ANALYSIS_ID"));verify(llm,times(1)).chat(anyString(),eq((String)first.get("REQUEST_JSON")));
+  assertEquals(first.get("ANALYSIS_ID"),run(g,"request-1").get("ANALYSIS_ID"));verify(llm,times(1)).chatRaw(anyString(),eq((String)first.get("REQUEST_JSON")));
   assertNotEquals(first.get("ANALYSIS_ID"),run(g,"request-2").get("ANALYSIS_ID"));assertEquals(2,service.list(g.id()).size());
   assertEquals(raw,jdbc.queryForObject("SELECT RESPONSE_RAW_JSON FROM BSDRGANL WHERE ANALYSIS_ID=?",String.class,first.get("ANALYSIS_ID")));
  }
  @Test void rawIsCommittedBeforeParsingAndBadJsonAndBadShapeRemainAvailable() throws Exception {
   Group g=setup(true);
   for(String raw:List.of("not JSON","{}",response(g.req())+" {}",response(g.req()).replace("\"processes\":[]","\"processes\":[\"bad\"]"))) {
-   when(llm.chat(anyString(),anyString())).thenReturn(new DesignLlmClient.LlmChatResult("test",raw));var result=run(g,UUID.randomUUID().toString());
+   when(llm.chatRaw(anyString(),anyString())).thenReturn(new DesignLlmClient.LlmChatResult("test",raw));var result=run(g,UUID.randomUUID().toString());
    assertEquals("PARSE_FAILED",result.get("STATUS"));assertEquals(raw,result.get("RESPONSE_RAW_JSON"));assertNotNull(result.get("COMPLETED_AT"));
   }
  }
  @Test void warnsOnMissingUnknownAndNonStringEvidenceWithoutInventingIt() throws Exception {
   Group g=setup(true);String raw=response("UNKNOWN").replace("\"processes\":[]","\"processes\":[{\"title\":\"missing\"},{\"evidenceRequirementIds\":[12]}]");
-  when(llm.chat(anyString(),anyString())).thenReturn(new DesignLlmClient.LlmChatResult("test",raw));var result=run(g,"bad-evidence");
+  when(llm.chatRaw(anyString(),anyString())).thenReturn(new DesignLlmClient.LlmChatResult("test",raw));var result=run(g,"bad-evidence");
   assertEquals("SUCCEEDED",result.get("STATUS"));assertEquals(3,((List<?>)result.get("WARNINGS")).size());assertEquals(raw,result.get("RESPONSE_RAW_JSON"));
  }
  @Test void callFailureIsDurableSanitizedAndNotAutomaticallyRetried() throws Exception {
-  Group g=setup(true);when(llm.chat(anyString(),anyString())).thenThrow(new RuntimeException("secret provider body"));
+  Group g=setup(true);when(llm.chatRaw(anyString(),anyString())).thenThrow(new RuntimeException("secret provider body"));
   var result=run(g,"failure");assertEquals("CALL_FAILED",result.get("STATUS"));assertNull(result.get("RESPONSE_RAW_JSON"));assertFalse(result.get("ERROR_MESSAGE").toString().contains("secret"));
-  run(g,"failure");verify(llm,times(1)).chat(anyString(),anyString());
+  run(g,"failure");verify(llm,times(1)).chatRaw(anyString(),anyString());
  }
  @Test void typedCallFailurePreservesSafeHttpDiagnosticAndPreviousRuns() throws Exception {
   Group g=setup(true);
-  when(llm.chat(anyString(),anyString())).thenThrow(new com.caron.basekit.standarddesign.llm.LlmConnectionException(com.caron.basekit.standarddesign.llm.LlmConnectionException.Failure.HTTP,429,"secret provider body"));
+  when(llm.chatRaw(anyString(),anyString())).thenThrow(new com.caron.basekit.standarddesign.llm.LlmConnectionException(com.caron.basekit.standarddesign.llm.LlmConnectionException.Failure.HTTP,429,"secret provider body"));
   var failed=run(g,"http-failure");assertEquals("CALL_FAILED",failed.get("STATUS"));assertTrue(failed.get("ERROR_MESSAGE").toString().contains("HTTP 429"));assertFalse(failed.get("ERROR_MESSAGE").toString().contains("secret"));
-  doReturn(new DesignLlmClient.LlmChatResult("test",response(g.req()))).when(llm).chat(anyString(),anyString());
+  doReturn(new DesignLlmClient.LlmChatResult("test",response(g.req()))).when(llm).chatRaw(anyString(),anyString());
   assertEquals("SUCCEEDED",run(g,"new-attempt").get("STATUS"));assertEquals("CALL_FAILED",service.get(g.id(),failed.get("ANALYSIS_ID").toString()).get("STATUS"));
+ }
+ @Test void savesWholeHttpBodyBeforeParsingEvenForInvalidEnvelopeAndHttpError() throws Exception {
+  Group g=setup(true);
+  String raw;
+  // Build a provider envelope without relying on typed response conversion.
+  var envelope=json.createObjectNode();envelope.putArray("choices").addObject().putObject("message").put("content",response(g.req()));raw=" \n"+envelope.toString()+"\n ";
+  doReturn(new DesignLlmClient.LlmChatResult("test",raw)).when(llm).chatRaw(anyString(),anyString());
+  var ok=run(g,"raw-envelope");assertEquals("SUCCEEDED",ok.get("STATUS"));assertEquals(raw,ok.get("RESPONSE_RAW_JSON"));
+  for(String invalid:List.of("not json","{\"choices\":[]}")) {
+   doReturn(new DesignLlmClient.LlmChatResult("test",invalid)).when(llm).chatRaw(anyString(),anyString());
+   var failed=run(g,UUID.randomUUID().toString());assertEquals("PARSE_FAILED",failed.get("STATUS"));assertEquals(invalid,failed.get("RESPONSE_RAW_JSON"));
+  }
+  doReturn(new DesignLlmClient.LlmChatResult("test","provider error body",429)).when(llm).chatRaw(anyString(),anyString());
+  var denied=run(g,"http-raw");assertEquals("CALL_FAILED",denied.get("STATUS"));assertEquals("provider error body",denied.get("RESPONSE_RAW_JSON"));assertTrue(denied.get("ERROR_MESSAGE").toString().contains("429"));
  }
  @Test void rejectsLegacySnapshotAndStaleVersionButExplicitReconfirmationCreatesCurrentSnapshot() throws Exception {
   Group g=setup(false);
@@ -83,7 +97,7 @@ class RequirementGroupAnalysisIntegrationTest {
  }
  @Test void immutableInputSurvivesRequirementChangeDuringCallAndRunningBlocksAnotherRequest() throws Exception {
   Group g=setup(true);var started=new CountDownLatch(1);var proceed=new CountDownLatch(1);
-  when(llm.chat(anyString(),anyString())).thenAnswer(invocation->{
+  when(llm.chatRaw(anyString(),anyString())).thenAnswer(invocation->{
    String input=invocation.getArgument(1);assertEquals(input,jdbc.queryForObject("SELECT REQUEST_JSON FROM BSDRGANL WHERE REQUIREMENT_GROUP_ID=?",String.class,g.id()));
    started.countDown();assertTrue(proceed.await(10,TimeUnit.SECONDS));return new DesignLlmClient.LlmChatResult("test",response(g.req()));
   });
@@ -95,7 +109,7 @@ class RequirementGroupAnalysisIntegrationTest {
    } finally {proceed.countDown();}
    var result=future.get(10,TimeUnit.SECONDS);assertEquals("SUCCEEDED",result.get("STATUS"));
    assertEquals("N",json.readTree((String)result.get("REQUEST_JSON")).path("requirements").get(0).path("discardedYn").asText());
-   assertEquals(1,json.readTree((String)result.get("REQUEST_JSON")).path("requirements").get(0).path("revision").asLong());verify(llm,times(1)).chat(anyString(),anyString());
+   assertEquals(1,json.readTree((String)result.get("REQUEST_JSON")).path("requirements").get(0).path("revision").asLong());verify(llm,times(1)).chatRaw(anyString(),anyString());
   }
  }
 }

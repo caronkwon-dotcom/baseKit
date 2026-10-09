@@ -47,7 +47,7 @@ export default function RequirementGroupAnalysis({group,onClose}:{group:Requirem
   {selected.WARNINGS?.length ? <section><h3>근거 검토</h3><ul>{selected.WARNINGS.map((warning,index)=><li key={index}>{warning}</li>)}</ul></section>:null}
   {response ? <><section><h3>요약</h3><p>{response.summary.text}</p></section>{sections.map(([key,title])=><section key={key}><h3>{title} ({response[key].length})</h3>{response[key].map((item,index)=><pre key={index} style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(item,null,2)}</pre>)}</section>)}</>:null}
   <details><summary>입력 Snapshot JSON</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{selected.REQUEST_JSON}</pre></details>
-  <details><summary>원본 응답 JSON</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{selected.RESPONSE_RAW_JSON ?? '응답이 없습니다.'}</pre></details></>:<p>저장된 분석 실행이 없습니다.</p>}
+  <details><summary>수신 원문 (HTTP 응답 / 기존 분석 원문)</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{selected.RESPONSE_RAW_JSON ?? '응답이 없습니다.'}</pre></details></>:<p>저장된 분석 실행이 없습니다.</p>}
  </FormModal>;
 }
 

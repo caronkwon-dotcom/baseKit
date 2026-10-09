@@ -1,7 +1,7 @@
 package com.caron.basekit.standarddesign.llm;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
@@ -27,6 +27,19 @@ class CompanyLlmClient implements DesignLlmClient {
 
     @Override
     public LlmChatResult chat(String systemPrompt, String userPrompt) {
+        var raw = chatRaw(systemPrompt, userPrompt);
+        if (raw.httpStatus() < 200 || raw.httpStatus() >= 300) throw new LlmConnectionException(HTTP, raw.httpStatus(), "회사 LLM 요청 거부");
+        try {
+            var envelope = new com.fasterxml.jackson.databind.ObjectMapper().readTree(raw.content());
+            var content = envelope.path("choices").path(0).path("message").path("content");
+            if (!content.isTextual() || !StringUtils.hasText(content.asText())) throw new LlmConnectionException(EMPTY_RESPONSE, null, "회사 LLM 응답 내용이 비어 있습니다.");
+            return new LlmChatResult(raw.model(), content.asText());
+        } catch (LlmConnectionException e) { throw e; }
+        catch (Exception e) { throw new LlmConnectionException(RESPONSE_FORMAT, null, "회사 LLM 응답 형식 처리에 실패했습니다."); }
+    }
+
+    @Override
+    public LlmChatResult chatRaw(String systemPrompt, String userPrompt) {
         validateConfiguration();
         String endpoint = properties.baseUrl().replaceAll("/+$", "")
                 + "/" + properties.chatCompletionsPath().replaceAll("^/+", "");
@@ -40,10 +53,10 @@ class CompanyLlmClient implements DesignLlmClient {
                 utf8Length(systemPrompt), utf8Length(userPrompt));
 
         try {
-            SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-            factory.setConnectTimeout(10_000);
-            factory.setReadTimeout(300_000);
-            ChatCompletionResponse response = RestClient.builder()
+            JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory(
+                    java.net.http.HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(10)).build());
+            factory.setReadTimeout(java.time.Duration.ofSeconds(300));
+            var response = RestClient.builder()
                     .requestFactory(factory)
                     .build()
                     .post()
@@ -51,15 +64,12 @@ class CompanyLlmClient implements DesignLlmClient {
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + properties.apiKey())
                     .body(request)
                     .retrieve()
-                    .body(ChatCompletionResponse.class);
-            if (response == null || response.choices() == null || response.choices().isEmpty()
-                    || response.choices().getFirst().message() == null
-                    || !StringUtils.hasText(response.choices().getFirst().message().content())) {
-                throw new LlmConnectionException(EMPTY_RESPONSE, null, "회사 LLM 응답 내용이 비어 있습니다.");
-            }
-            log.info("company-llm HTTP response complete responseCompleteElapsedMs={} outputBytes={} outputTokens=unavailable firstResponseByte=unavailable",
-                    elapsedMillis(startedAt), utf8Length(response.choices().getFirst().message().content()));
-            return new LlmChatResult(properties.model(), response.choices().getFirst().message().content());
+                    .onStatus(status -> status.isError(), (requestInfo, responseInfo) -> { })
+                    .toEntity(String.class);
+            String raw = response.getBody() == null ? "" : response.getBody();
+            log.info("company-llm HTTP response complete responseCompleteElapsedMs={} outputBytes={} httpStatus={}",
+                    elapsedMillis(startedAt), utf8Length(raw), response.getStatusCode().value());
+            return new LlmChatResult(properties.model(), raw, response.getStatusCode().value());
         } catch (LlmConnectionException exception) {
             throw exception;
         } catch (RestClientResponseException exception) {
@@ -70,7 +80,7 @@ class CompanyLlmClient implements DesignLlmClient {
             Throwable cause = exception;
             boolean timedOut = false;
             for (int depth = 0; cause != null && depth < 20; depth++, cause = cause.getCause()) {
-                if (cause instanceof SocketTimeoutException) timedOut = true;
+                if (cause instanceof SocketTimeoutException || cause instanceof java.net.http.HttpTimeoutException) timedOut = true;
             }
             throw new LlmConnectionException(timedOut ? TIMEOUT : NETWORK, null, "회사 LLM 통신에 실패했습니다.");
         } catch (RestClientException exception) {
@@ -107,10 +117,5 @@ class CompanyLlmClient implements DesignLlmClient {
     private record ChatCompletionRequest(String model, List<Message> messages, double temperature) {
     }
 
-    private record ChatCompletionResponse(List<Choice> choices) {
-    }
-
-    private record Choice(Message message) {
-    }
 }
 

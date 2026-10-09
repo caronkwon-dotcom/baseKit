@@ -26,10 +26,14 @@ class CompanyLlmClientTest {
             assertEquals("result", client.chat("system", "input").content());
             assertEquals("POST", method.get());
             status.set(401); body.set("secret provider details");
+            var rawError = client.chatRaw("system", "input");
+            assertEquals(401, rawError.httpStatus());
+            assertEquals("secret provider details", rawError.content());
             var denied = assertThrows(LlmConnectionException.class, () -> client.chat("system", "input"));
             assertTrue(denied.diagnosticMessage().contains("HTTP 401"));
             assertFalse(denied.diagnosticMessage().contains("secret"));
             status.set(200); body.set("not-json");
+            assertEquals("not-json", client.chatRaw("system", "input").content());
             assertTrue(assertThrows(LlmConnectionException.class, () -> client.chat("system", "input")).diagnosticMessage().contains("형식"));
             body.set("{\"choices\":[{\"message\":{\"content\":\"\"}}]}");
             assertTrue(assertThrows(LlmConnectionException.class, () -> client.chat("system", "input")).diagnosticMessage().contains("content"));

@@ -57,14 +57,18 @@ public class RequirementGroupAnalysisService {
   });
   if(!start.fresh()) return get(group,start.id());
   DesignLlmClient.LlmChatResult reply;
-  try { reply=llm.chat(PROMPT,start.input()); }
+  try { reply=llm.chatRaw(PROMPT,start.input()); }
   catch(RuntimeException e) {
    // Never persist provider bodies, URLs or configuration values in an error.
    finish(start.id(),"CALL_FAILED", e instanceof LlmConnectionException failure ? failure.diagnosticMessage() : "LLM 호출에 실패했습니다. 연결 설정 및 제공자 상태를 확인하세요.");
    return get(group,start.id());
   }
-  // Commit the exact content BEFORE parsing; a crash here leaves recoverable RAW in RUNNING.
+  // Commit the exact HTTP body BEFORE envelope/content parsing; a crash here leaves recoverable RAW in RUNNING.
   tx.executeWithoutResult(status->jdbc.update("UPDATE BSDRGANL SET RESPONSE_RAW_JSON=?,MODEL_NAME=? WHERE ANALYSIS_ID=?",reply.content(),reply.model(),start.id()));
+  if(reply.httpStatus()<200 || reply.httpStatus()>=300) {
+   finish(start.id(),"CALL_FAILED","LLM 서버가 요청을 거부했습니다. (HTTP "+reply.httpStatus()+")");
+   return get(group,start.id());
+  }
   try { parse(reply.content()); finish(start.id(),"SUCCEEDED",null); }
   catch(IllegalArgumentException e) { finish(start.id(),"PARSE_FAILED",e.getMessage()); }
   return get(group,start.id());
@@ -89,6 +93,11 @@ public class RequirementGroupAnalysisService {
  JsonNode parse(String raw) {
   try {
    JsonNode value=json.reader().with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readTree(raw);
+   if(value!=null && value.isObject() && value.has("choices")) {
+    var content=value.path("choices").path(0).path("message").path("content");
+    if(!content.isTextual()) throw new IllegalArgumentException();
+    value=json.reader().with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readTree(content.asText());
+   }
    if(value==null || !value.isObject() || !value.path("summary").isObject() || !value.path("summary").path("text").isTextual()) throw new IllegalArgumentException();
    for(String key:List.of("businessStructure","processes","screenCandidates","programCandidates","observations")) {
     if(!value.path(key).isArray()) throw new IllegalArgumentException();

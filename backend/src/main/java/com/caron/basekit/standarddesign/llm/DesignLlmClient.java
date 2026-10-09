@@ -1,9 +1,9 @@
 package com.caron.basekit.standarddesign.llm;
 
 public interface DesignLlmClient {
-
     LlmChatResult chat(String systemPrompt, String userPrompt);
-
-    record LlmChatResult(String model, String content) {
+    default LlmChatResult chatRaw(String systemPrompt, String userPrompt) { return chat(systemPrompt, userPrompt); }
+    record LlmChatResult(String model, String content, int httpStatus) {
+        public LlmChatResult(String model, String content) { this(model, content, 200); }
     }
 }
