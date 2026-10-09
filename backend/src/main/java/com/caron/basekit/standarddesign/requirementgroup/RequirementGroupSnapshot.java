@@ -17,7 +17,7 @@ public class RequirementGroupSnapshot {
   try {
    var input=json.createObjectNode();
    input.putObject("project").put("projectId",project).put("projectName",projectName);
-   input.putObject("analysisRequest").put("groupId",id).put("groupName",name).put("groupDescription",description);
+   input.putObject("group").put("groupId",id).put("groupName",name).put("groupDescription",description);
    var items=input.putArray("requirements");
    for(var row:jdbc.queryForList("SELECT REQUIREMENT_ID,REVIEWED_REVISION,REVIEWED_SNAPSHOT FROM BSDRGRQ WHERE REQUIREMENT_GROUP_ID=? ORDER BY REQUIREMENT_ID",id)) {
     var original=json.readTree((String)row.get("REVIEWED_SNAPSHOT"));

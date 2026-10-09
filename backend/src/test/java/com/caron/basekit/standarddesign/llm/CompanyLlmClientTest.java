@@ -11,10 +11,11 @@ class CompanyLlmClientTest {
         var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         var status = new java.util.concurrent.atomic.AtomicInteger(200);
         var body = new java.util.concurrent.atomic.AtomicReference<>("{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"result\"}}]}");
+        var requestBody = new java.util.concurrent.atomic.AtomicReference<String>();
         var method = new java.util.concurrent.atomic.AtomicReference<String>();
         server.createContext("/v1/chat/completions", exchange -> {
             method.set(exchange.getRequestMethod());
-            exchange.getRequestBody().readAllBytes();
+            requestBody.set(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
             byte[] bytes = body.get().getBytes(StandardCharsets.UTF_8);
             exchange.getResponseHeaders().set("Content-Type", "application/json");
             exchange.sendResponseHeaders(status.get(), bytes.length);
@@ -25,6 +26,11 @@ class CompanyLlmClientTest {
             var client = new CompanyLlmClient(new LlmProperties(true, "http://127.0.0.1:" + server.getAddress().getPort() + "/v1/", "test-key", "test-model", "/chat/completions"));
             assertEquals("result", client.chat("system", "input").content());
             assertEquals("POST", method.get());
+            client.chatRaw("system", "input", new DesignLlmClient.LlmChatOptions(2048, 0.2, false, 60));
+            var request = new com.fasterxml.jackson.databind.ObjectMapper().readTree(requestBody.get());
+            assertEquals(2048, request.path("max_tokens").asInt());
+            assertFalse(request.path("chat_template_kwargs").path("enable_thinking").asBoolean());
+            assertEquals(0.2, request.path("temperature").asDouble());
             status.set(401); body.set("secret provider details");
             var rawError = client.chatRaw("system", "input");
             assertEquals(401, rawError.httpStatus());

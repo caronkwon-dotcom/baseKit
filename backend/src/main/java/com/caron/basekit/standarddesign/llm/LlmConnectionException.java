@@ -8,6 +8,7 @@ public class LlmConnectionException extends RuntimeException {
     public LlmConnectionException(Failure failure, Integer httpStatus, String message) {
         super(message); this.failure = failure; this.httpStatus = httpStatus;
     }
+    public Failure failure() { return failure; }
     public String diagnosticMessage() {
         return switch (failure) {
             case CONFIGURATION -> "LLM 설정이 없거나 연동이 비활성화되어 있습니다.";

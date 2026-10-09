@@ -1661,6 +1661,9 @@ tbody tr.active-master-row td { background: var(--brand-soft); }
 }
 
 .form-modal {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 40px);
   width: min(620px, 100%);
   overflow: hidden;
   border: 1px solid var(--border-strong);
@@ -1671,6 +1674,7 @@ tbody tr.active-master-row td { background: var(--brand-soft); }
 
 .form-modal-header,
 .form-modal-footer {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1680,7 +1684,7 @@ tbody tr.active-master-row td { background: var(--brand-soft); }
 
 .form-modal-header { border-bottom: 1px solid var(--border-default); }
 .form-modal-header h2 { margin: 0; font-size: 14px; }
-.form-modal-body { padding: 14px; }
+.form-modal-body { min-height: 0; overflow-y: auto; padding: 14px; }
 .form-modal-footer { justify-content: flex-end; border-top: 1px solid var(--border-default); background: var(--surface-muted); }
 .modal-close-button { width: 28px; height: 28px; border: 0; background: transparent; color: var(--text-muted); font-size: 20px; }
 

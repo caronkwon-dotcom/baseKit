@@ -40,14 +40,20 @@ class CompanyLlmClient implements DesignLlmClient {
 
     @Override
     public LlmChatResult chatRaw(String systemPrompt, String userPrompt) {
+        return chatRaw(systemPrompt, userPrompt, new LlmChatOptions(null, 0.7, null, 300));
+    }
+
+    @Override
+    public LlmChatResult chatRaw(String systemPrompt, String userPrompt, LlmChatOptions options) {
         validateConfiguration();
         String endpoint = properties.baseUrl().replaceAll("/+$", "")
                 + "/" + properties.chatCompletionsPath().replaceAll("^/+", "");
-        ChatCompletionRequest request = new ChatCompletionRequest(
-                properties.model(),
-                List.of(new Message("system", systemPrompt), new Message("user", userPrompt)),
-                0.7
-        );
+        var request = new java.util.LinkedHashMap<String, Object>();
+        request.put("model", properties.model());
+        request.put("messages", List.of(new Message("system", systemPrompt), new Message("user", userPrompt)));
+        request.put("temperature", options.temperature() == null ? 0.7 : options.temperature());
+        if (options.maxTokens() != null) request.put("max_tokens", options.maxTokens());
+        if (options.enableThinking() != null) request.put("chat_template_kwargs", java.util.Map.of("enable_thinking", options.enableThinking()));
         long startedAt = System.nanoTime();
         log.info("company-llm HTTP request start systemPromptBytes={} userPromptBytes={} inputTokens=unavailable firstResponseByte=unavailable",
                 utf8Length(systemPrompt), utf8Length(userPrompt));
@@ -55,7 +61,7 @@ class CompanyLlmClient implements DesignLlmClient {
         try {
             JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory(
                     java.net.http.HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(10)).build());
-            factory.setReadTimeout(java.time.Duration.ofSeconds(300));
+            factory.setReadTimeout(java.time.Duration.ofSeconds(options.timeoutSeconds() == null ? 300 : options.timeoutSeconds()));
             var response = RestClient.builder()
                     .requestFactory(factory)
                     .build()
@@ -114,8 +120,6 @@ class CompanyLlmClient implements DesignLlmClient {
     private record Message(String role, String content) {
     }
 
-    private record ChatCompletionRequest(String model, List<Message> messages, double temperature) {
-    }
 
 }
 

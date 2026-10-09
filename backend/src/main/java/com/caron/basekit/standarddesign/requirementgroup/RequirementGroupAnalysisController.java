@@ -7,7 +7,7 @@ import java.util.*;
 public class RequirementGroupAnalysisController {
  private final RequirementGroupAnalysisService service;
  public RequirementGroupAnalysisController(RequirementGroupAnalysisService service) { this.service=service; }
- @PostMapping public ApiResponse<Map<String,Object>> execute(@PathVariable String group,@RequestBody RequirementGroupAnalysisService.Execute request) { return ApiResponse.success(service.execute(group,request)); }
+ @PostMapping @ResponseStatus(org.springframework.http.HttpStatus.ACCEPTED) public ApiResponse<Map<String,Object>> execute(@PathVariable String group,@RequestBody RequirementGroupAnalysisService.Execute request) { return ApiResponse.success(service.execute(group,request)); }
  @GetMapping public ApiResponse<List<Map<String,Object>>> list(@PathVariable String group) { return ApiResponse.success(service.list(group)); }
  @GetMapping("/{id}") public ApiResponse<Map<String,Object>> get(@PathVariable String group,@PathVariable String id) { return ApiResponse.success(service.get(group,id)); }
 }
