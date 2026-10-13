@@ -1,5 +1,14 @@
 # BaseKit 현재 상태와 WBS
 
+## 2026-10-13 SD 그룹 분석 흐름 및 추천 조회 수정
+
+확정 전에 DRAFT 분석·수정·재분석을 반복하고 사람이 최종 확정하는 흐름으로 정정했다. REVIEW_REQUIRED에서도 분석 가능하며 원본 변경 시 DRAFT는 유지하고 확정 이후에는 기존 재검토 전환을 유지한다. 현재 저장 버전의 불변 Snapshot과 독립 실행 이력을 보존하며 공통 BaseTabs로 기본정보/분석을 전환한다.
+
+추가 모달의 누락 원인은 독립 추천 BSDRANLS/BSDRARIT만 조회하고 그룹 분석 BSDRGANL은 조회하지 않았던 저장 모델 불일치다. 읽기 전용 analysis-sources API가 두 모델의 동일 프로젝트 실행을 projection으로 조회하며 V0 후보의 입력 근거 ID와 원문 명칭·설명을 표시한다. V16 BSDRGREV로 그룹 개요 출처를 별도 저장한다. 모달의 누적 선택 및 동일 Requirement 근거 합산을 유지한다.
+
+Frontend 56건, build/lint, Backend 62건(57통과/외부 PostgreSQL 조건 5 skip), diff check 검증. 분리 H2 memory DB + 로컬 모의 LLM의 5186/8093 브라우저에서 DRAFT 실행/재실행/이력 보존, 탭 초안 유지, 미저장 실행 제한, 실행별 원문 사유, 2실행 누적 선택 및 그룹 저장/확정/원본 근거 재조회 확인. console error 0. 운영 PostgreSQL 적용과 실제 회사 LLM 연결, 인증 Host grant는 별도 통합 검수 사항이며 이번 단위에서 수행하지 않았다. 기존 5176 실행 서버는 보존했다. 상세 변경/한계는 [분석 흐름 수정 보고](sd-group-analysis-flow-fix.md)를 따른다.
+
+
 이 문서는 새 작업자와 GPT Work가 실제 Repository 상태를 빠르게 파악하기 위한 기준 문서다. 특정 날짜나 과거 작업 branch가 아니라 최신 `dev-pm`과 열린 PR을 기준으로 갱신한다.
 
 ## 2026-10-07 SD 등록 버튼 검수 반영

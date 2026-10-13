@@ -11,13 +11,14 @@ const labels: Record<GroupAnalysisStatus,string> = {
  SUCCEEDED:'기존 분석 성공 · 검토 필요',CALL_FAILED:'기존 호출 실패',PARSE_FAILED:'기존 파싱 실패',
 };
 const succeeded=(run:GroupAnalysis)=>run.STATUS==='SUCCESS' || run.STATUS==='SUCCEEDED';
-export default function RequirementGroupAnalysis({group,onClose}:{group:RequirementGroup;onClose:()=>void}) {
+export default function RequirementGroupAnalysis({group,onClose,projectName,embedded=false,blocked=false}:{group:RequirementGroup;onClose:()=>void;projectName?:string;embedded?:boolean;blocked?:boolean}) {
  const [runs,setRuns]=useState<GroupAnalysis[]>([]), [selected,setSelected]=useState<GroupAnalysis|null>(null);
  const [busy,setBusy]=useState(false), [error,setError]=useState(''), [notice,setNotice]=useState('');
  const [connection,setConnection]=useState<{content:string;elapsedMs:number;model:string}|null>(null);
  const storageKey=`basekit:group-analysis-request:${group.REQUIREMENT_GROUP_ID}`;
  const [pendingRequest,setPendingRequest]=useState(()=>!!sessionStorage.getItem(storageKey));
  const request=useRef<string|null>(sessionStorage.getItem(storageKey));
+ const requestVersion=useRef<number>(Number(sessionStorage.getItem(`${storageKey}:version`)) || group.VERSION);
  const running=useRef(false), alive=useRef(true), selectedId=useRef('');
  const statuses=useRef(new Map<string,GroupAnalysisStatus>());
  const hasRunning=runs.some(run=>run.STATUS==='RUNNING');
@@ -55,8 +56,9 @@ export default function RequirementGroupAnalysis({group,onClose}:{group:Requirem
   if(found){request.current=null;sessionStorage.removeItem(storageKey);setPendingRequest(false);}
  });
  const execute=()=>void operate(async()=>{
-  request.current ??=crypto.randomUUID();sessionStorage.setItem(storageKey,request.current);setPendingRequest(true);
-  const result=await api.analyze(group.REQUIREMENT_GROUP_ID,group.VERSION,request.current);
+  if(!request.current) {request.current=crypto.randomUUID();requestVersion.current=group.VERSION;}
+  sessionStorage.setItem(storageKey,request.current);sessionStorage.setItem(`${storageKey}:version`,String(requestVersion.current));setPendingRequest(true);
+  const result=await api.analyze(group.REQUIREMENT_GROUP_ID,requestVersion.current,request.current,projectName);
   request.current=null;sessionStorage.removeItem(storageKey);setPendingRequest(false);if(!alive.current)return;
   selectedId.current=result.ANALYSIS_ID;setSelected(result);
   statuses.current.set(result.ANALYSIS_ID,result.STATUS);
@@ -69,15 +71,16 @@ export default function RequirementGroupAnalysis({group,onClose}:{group:Requirem
  });
  const response=selected?.RESPONSE;
  const sections=response?.businessAreas ? [['businessAreas','업무영역'],['processCandidates','프로세스 후보'],['programCandidates','Program 후보']] as const : [['businessStructure','기존 업무 구조'],['processes','기존 프로세스'],['screenCandidates','기존 화면 후보'],['programCandidates','기존 Program 후보']] as const;
- return <FormModal open title="그룹 개요 분석 V0" submitting={busy} onClose={onClose} footerActions={<div className="grid-toolbar">
+ const actions=<div className="grid-toolbar">
   <ActionButton actionCode="EXECUTE" label="짧은 응답 확인" disabled={busy} onClick={checkConnection} />
-  <ActionButton actionCode="EXECUTE" label={pendingRequest ? '실행 요청 재확인':'분석 실행'} disabled={busy || group.GROUP_STATUS!=='CONFIRMED' || !group.HAS_ANALYSIS_SNAPSHOT || hasRunning} onClick={execute} />
+  <ActionButton actionCode="EXECUTE" label={pendingRequest ? '실행 요청 재확인':'분석 실행'} disabled={busy || blocked || !group.REQUIREMENT_GROUP_ID || !group.MEMBERS.length || hasRunning} onClick={execute} />
   <ActionButton actionCode="SEARCH" label="실행 이력 조회" disabled={busy} onClick={refresh} />
- </div>}>
-  <p>확정된 요구사항 원문으로 짧은 개요를 분석합니다. 결과는 검토용 제안이며 자동 채택되지 않습니다.</p>
+ </div>;
+ const content=<>
+  <p>저장된 현재 그룹 Snapshot으로 짧은 개요를 분석합니다. 검토와 수정·재분석을 거친 뒤 기본정보에서 최종 확정하세요. 결과는 검토용 제안이며 자동 채택되지 않습니다.</p>
   {notice ? <BaseKitMessage type="info" message={notice} />:null}
   {connection ? <BaseKitMessage type="success" message={`연결 확인 응답: ${connection.content}`} detail={`${connection.model} · ${(connection.elapsedMs/1000).toFixed(1)}초 · 그룹 원문 전송 없음`} />:null}
-  {!group.HAS_ANALYSIS_SNAPSHOT ? <BaseKitMessage type="warn" message="확정 시점 Snapshot이 없습니다. 검토 후 재확정하세요." />:null}
+  {blocked ? <BaseKitMessage type="warn" message="기본정보에서 변경 내용을 저장한 후 분석을 실행하세요." />:null}
   {error ? <BaseKitMessage type="error" message={error} />:null}
   <div className="standard-form-grid"><FormField label="실행 이력" labelPosition="TOP" className="form-full-row"><select aria-label="그룹 분석 실행 이력" disabled={busy} value={selected?.ANALYSIS_ID ?? ''} onChange={e=>{const id=e.target.value;if(id)void operate(async()=>{selectedId.current=id;const result=await api.analysis(group.REQUIREMENT_GROUP_ID,id);if(alive.current)setSelected(result);});}}>
    <option value="">실행 선택</option>{runs.map(run=><option key={run.ANALYSIS_ID} value={run.ANALYSIS_ID}>{run.CREATED_AT} · {labels[run.STATUS]} · {run.ANALYSIS_ID}</option>)}
@@ -90,5 +93,6 @@ export default function RequirementGroupAnalysis({group,onClose}:{group:Requirem
    <details><summary>입력 Snapshot JSON</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{selected.REQUEST_JSON}</pre></details>
    <details><summary>수신 원문 (HTTP 응답 / 기존 분석 원문)</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{selected.RESPONSE_RAW_JSON ?? '응답 원문이 아직 없습니다.'}</pre></details>
   </>:<p>저장된 분석 실행이 없습니다.</p>}
- </FormModal>;
+ </>;
+ return embedded ? <div>{actions}{content}</div>:<FormModal open title="그룹 개요 분석 V0" submitting={busy} onClose={onClose} footerActions={actions}>{content}</FormModal>;
 }

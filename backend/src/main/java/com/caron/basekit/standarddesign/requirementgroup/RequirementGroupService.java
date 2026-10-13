@@ -18,7 +18,8 @@ public class RequirementGroupService {
  private final RequirementService requirements;
  private final ObjectMapper json;
  private final RequirementGroupSnapshot snapshot;
- public RequirementGroupService(JdbcTemplate jdbc, RequirementService requirements, ObjectMapper json, RequirementGroupSnapshot snapshot) { this.jdbc=jdbc; this.requirements=requirements; this.json=json; this.snapshot=snapshot; }
+ private final RequirementAnalysisSourceService sources;
+ public RequirementGroupService(JdbcTemplate jdbc, RequirementService requirements, ObjectMapper json, RequirementGroupSnapshot snapshot, RequirementAnalysisSourceService sources) { this.jdbc=jdbc; this.requirements=requirements; this.json=json; this.snapshot=snapshot; this.sources=sources; }
  @Transactional(readOnly=true)
  public List<Map<String,Object>> list(String project, String requirementId) {
   required(project, "PROJECT_ID");
@@ -32,7 +33,7 @@ public class RequirementGroupService {
   for(var member:members) {
    String req=(String)member.get("REQUIREMENT_ID");
    member.put("REQUIREMENT",requirements.one(req));
-   member.put("SOURCE_ANALYSIS_IDS",jdbc.queryForList("SELECT ANALYSIS_ID FROM BSDRGEVD WHERE REQUIREMENT_GROUP_ID=? AND REQUIREMENT_ID=? ORDER BY ANALYSIS_ID",String.class,id,req));
+   member.put("SOURCE_ANALYSIS_IDS",jdbc.queryForList("SELECT ANALYSIS_ID FROM BSDRGEVD WHERE REQUIREMENT_GROUP_ID=? AND REQUIREMENT_ID=? UNION SELECT ANALYSIS_ID FROM BSDRGREV WHERE REQUIREMENT_GROUP_ID=? AND REQUIREMENT_ID=? ORDER BY ANALYSIS_ID",String.class,id,req,id,req));
   }
   group.put("HAS_ANALYSIS_SNAPSHOT",jdbc.queryForObject("SELECT COUNT(*) FROM BSDRGCTX WHERE REQUIREMENT_GROUP_ID=? AND GROUP_VERSION=?",Integer.class,id,group.get("VERSION"))>0);
   group.put("MEMBERS",members); group.remove("REQUEST_PAYLOAD"); return group;
@@ -58,9 +59,9 @@ public class RequirementGroupService {
   if(!input.PROJECT_ID().equals(group.get("PROJECT_ID"))) throw bad("그룹의 프로젝트는 변경할 수 없습니다.");
   if("CONFIRMED".equals(group.get("GROUP_STATUS"))) throw conflict("확정된 그룹은 구성 수정으로 전환한 후 저장하세요.");
   Map<String,Map<String,Object>> previous=new HashMap<>(); old.forEach(m->previous.put((String)m.get("REQUIREMENT_ID"),m));
-  jdbc.update("DELETE FROM BSDRGEVD WHERE REQUIREMENT_GROUP_ID=?",id); jdbc.update("DELETE FROM BSDRGRQ WHERE REQUIREMENT_GROUP_ID=?",id);
+  jdbc.update("DELETE FROM BSDRGREV WHERE REQUIREMENT_GROUP_ID=?",id); jdbc.update("DELETE FROM BSDRGEVD WHERE REQUIREMENT_GROUP_ID=?",id); jdbc.update("DELETE FROM BSDRGRQ WHERE REQUIREMENT_GROUP_ID=?",id);
   boolean stale=members(id,input,previous);
-  String status=stale ? "REVIEW_REQUIRED" : (String)group.get("GROUP_STATUS");
+  String status=stale && !"DRAFT".equals(group.get("GROUP_STATUS")) ? "REVIEW_REQUIRED" : (String)group.get("GROUP_STATUS");
   jdbc.update("UPDATE BSDRGRP SET REQUIREMENT_GROUP_NAME=?,DESCRIPTION=?,GROUP_STATUS=?,VERSION=VERSION+1,MOD_DT=CURRENT_TIMESTAMP WHERE REQUIREMENT_GROUP_ID=?",input.REQUIREMENT_GROUP_NAME().trim(),nonnull(input.DESCRIPTION()),status,id);
   return get(id);
  }
@@ -75,8 +76,9 @@ public class RequirementGroupService {
    else throw conflict("Requirement가 변경되었습니다. 최신 내용을 확인한 후 다시 추가하거나 검토하세요.");
    jdbc.update("INSERT INTO BSDRGRQ(REQUIREMENT_GROUP_ID,PROJECT_ID,REQUIREMENT_ID,HUMAN_YN,INCLUSION_REASON,REVIEWED_REVISION,REVIEWED_SNAPSHOT) VALUES(?,?,?,?,?,?,?)",id,input.PROJECT_ID(),member.REQUIREMENT_ID(),member.HUMAN_YN(),nonnull(member.INCLUSION_REASON()),reviewed,snapshot);
    for(String analysis:member.SOURCE_ANALYSIS_IDS()) {
-    if(jdbc.queryForObject("SELECT COUNT(*) FROM BSDRARIT WHERE ANALYSIS_ID=? AND REQUIREMENT_ID=? AND PROJECT_ID=?",Integer.class,analysis,member.REQUIREMENT_ID(),input.PROJECT_ID())==0) throw bad("유효한 동일 프로젝트 추천 근거가 필요합니다.");
-    jdbc.update("INSERT INTO BSDRGEVD(REQUIREMENT_GROUP_ID,PROJECT_ID,REQUIREMENT_ID,ANALYSIS_ID) VALUES(?,?,?,?)",id,input.PROJECT_ID(),member.REQUIREMENT_ID(),analysis);
+    if(!sources.contains(analysis,input.PROJECT_ID(),member.REQUIREMENT_ID())) throw bad("유효한 동일 프로젝트 추천 근거가 필요합니다.");
+    String table=analysis.startsWith("GA-") ? "BSDRGREV":"BSDRGEVD";
+    jdbc.update("INSERT INTO "+table+"(REQUIREMENT_GROUP_ID,PROJECT_ID,REQUIREMENT_ID,ANALYSIS_ID) VALUES(?,?,?,?)",id,input.PROJECT_ID(),member.REQUIREMENT_ID(),analysis);
    }
   } return stale;
  }
@@ -109,7 +111,7 @@ public class RequirementGroupService {
  public void delete(String id, Version input) {
   var group=row(id,true); version(group,input==null ? null : input.VERSION());
   if("CONFIRMED".equals(group.get("GROUP_STATUS"))) throw conflict("확정 그룹은 구성 수정으로 전환한 후 삭제하세요.");
-  jdbc.update("DELETE FROM BSDRGEVD WHERE REQUIREMENT_GROUP_ID=?",id); jdbc.update("DELETE FROM BSDRGRQ WHERE REQUIREMENT_GROUP_ID=?",id); jdbc.update("DELETE FROM BSDRGRP WHERE REQUIREMENT_GROUP_ID=?",id);
+  jdbc.update("DELETE FROM BSDRGREV WHERE REQUIREMENT_GROUP_ID=?",id); jdbc.update("DELETE FROM BSDRGEVD WHERE REQUIREMENT_GROUP_ID=?",id); jdbc.update("DELETE FROM BSDRGRQ WHERE REQUIREMENT_GROUP_ID=?",id); jdbc.update("DELETE FROM BSDRGRP WHERE REQUIREMENT_GROUP_ID=?",id);
  }
  private Map<String,Object> row(String id, boolean lock) {
   var rows=jdbc.queryForList("SELECT * FROM BSDRGRP WHERE REQUIREMENT_GROUP_ID=?"+(lock ? " FOR UPDATE" : ""),id);

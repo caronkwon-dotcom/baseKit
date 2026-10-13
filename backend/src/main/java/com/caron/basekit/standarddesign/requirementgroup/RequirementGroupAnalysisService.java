@@ -41,7 +41,9 @@ public class RequirementGroupAnalysisService {
         """;
     private static final List<String> OVERVIEW_KEYS = List.of("businessAreas", "processCandidates", "programCandidates");
     private static final List<String> LEGACY_KEYS = List.of("businessStructure", "processes", "screenCandidates", "programCandidates", "observations");
-    public record Execute(Long VERSION, String REQUEST_ID) { }
+    public record Execute(Long VERSION, String REQUEST_ID, String PROJECT_NAME) {
+        public Execute(Long VERSION, String REQUEST_ID) { this(VERSION, REQUEST_ID, null); }
+    }
     private record Started(String id, String input, boolean fresh) { }
     private final JdbcTemplate jdbc;
     private final ObjectMapper json;
@@ -89,18 +91,26 @@ public class RequirementGroupAnalysisService {
             throw bad("VERSION과 REQUEST_ID가 필요합니다.");
         expireRunning();
         Started start = tx.execute(status -> {
+            for (String id : jdbc.queryForList("SELECT REQUIREMENT_ID FROM BSDRGRQ WHERE REQUIREMENT_GROUP_ID=? ORDER BY REQUIREMENT_ID", String.class, group))
+                jdbc.queryForList("SELECT REQUIREMENT_ID FROM BSDRREQ WHERE REQUIREMENT_ID=? FOR UPDATE", id);
             var rows = jdbc.queryForList("SELECT * FROM BSDRGRP WHERE REQUIREMENT_GROUP_ID=? FOR UPDATE", group);
             if (rows.isEmpty()) throw missing();
             var g = upper(rows.getFirst());
             var prior = jdbc.queryForList("SELECT ANALYSIS_ID,GROUP_VERSION,REQUEST_JSON FROM BSDRGANL WHERE REQUIREMENT_GROUP_ID=? AND REQUEST_ID=?", group, request.REQUEST_ID());
             if (!prior.isEmpty()) {
                 var previous = upper(prior.getFirst());
-                if (((Number) previous.get("GROUP_VERSION")).longValue() != request.VERSION()) throw conflict("같은 요청 ID에 다른 확정 버전을 사용할 수 없습니다.");
+                if (((Number) previous.get("GROUP_VERSION")).longValue() != request.VERSION()) throw conflict("같은 요청 ID에 다른 그룹 버전을 사용할 수 없습니다.");
                 return new Started((String) previous.get("ANALYSIS_ID"), (String) previous.get("REQUEST_JSON"), false);
             }
-            if (!"CONFIRMED".equals(g.get("GROUP_STATUS")) || ((Number) g.get("VERSION")).longValue() != request.VERSION()) throw conflict("최신 확정 그룹을 조회한 후 실행하세요.");
+            if (((Number) g.get("VERSION")).longValue() != request.VERSION()) throw conflict("최신 그룹을 조회한 후 실행하세요.");
+            if (jdbc.queryForObject("SELECT COUNT(*) FROM BSDRGRQ WHERE REQUIREMENT_GROUP_ID=?", Integer.class, group) == 0) throw bad("분석할 Requirement를 포함하고 저장하세요.");
             var snapshots = jdbc.queryForList("SELECT REQUEST_JSON FROM BSDRGCTX WHERE REQUIREMENT_GROUP_ID=? AND GROUP_VERSION=?", group, request.VERSION());
-            if (snapshots.isEmpty()) throw conflict("확정 시점 Snapshot이 없습니다. 현재 내용을 검토하고 재확정하세요.");
+            if (snapshots.isEmpty()) {
+                new RequirementGroupSnapshot(jdbc, json).captureCurrent(group, (String) g.get("PROJECT_ID"),
+                    request.PROJECT_NAME() == null || request.PROJECT_NAME().isBlank() ? (String) g.get("PROJECT_ID") : request.PROJECT_NAME(),
+                    (String) g.get("REQUIREMENT_GROUP_NAME"), (String) g.get("DESCRIPTION"), request.VERSION());
+                snapshots = jdbc.queryForList("SELECT REQUEST_JSON FROM BSDRGCTX WHERE REQUIREMENT_GROUP_ID=? AND GROUP_VERSION=?", group, request.VERSION());
+            }
             if (jdbc.queryForObject("SELECT COUNT(*) FROM BSDRGANL WHERE REQUIREMENT_GROUP_ID=? AND STATUS='RUNNING'", Integer.class, group) > 0) throw conflict("진행 중인 분석이 있습니다.");
             String id = "GA-" + UUID.randomUUID().toString().replace("-", "");
             String input = (String) upper(snapshots.getFirst()).get("REQUEST_JSON");

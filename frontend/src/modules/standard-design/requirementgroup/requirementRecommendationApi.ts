@@ -1,7 +1,7 @@
 export interface RequirementRecommendationItem {
   REQUIREMENT_ID: string;
   ORIGINAL_REASON: string;
-  REQUIREMENT_MOD_DT: string;
+  REQUIREMENT_MOD_DT: string | null;
 }
 export interface RequirementRecommendation {
   ANALYSIS_ID: string;
@@ -10,6 +10,15 @@ export interface RequirementRecommendation {
   ANALYSIS_BASIS: string;
   EXECUTED_AT: string;
   ITEMS: RequirementRecommendationItem[];
+}
+export const requirementAnalysisSourceApi = {
+  list: async (projectId:string):Promise<RequirementRecommendation[]> => sourceRequest(`?PROJECT_ID=${encodeURIComponent(projectId)}`),
+  get: async (id:string):Promise<RequirementRecommendation> => sourceRequest(`/${encodeURIComponent(id)}`),
+};
+async function sourceRequest<T>(path:string):Promise<T> {
+  const response=await fetch(`/api/standard-design/requirement-analysis-sources${path}`);
+  if(!response.ok) throw new Error('Analysis 근거를 조회하지 못했습니다.');
+  return (await response.json() as {DATA:T}).DATA;
 }
 export type RequirementRecommendationInput = Omit<RequirementRecommendation, 'ANALYSIS_ID'>;
 const base = '/api/standard-design/requirement-recommendations';

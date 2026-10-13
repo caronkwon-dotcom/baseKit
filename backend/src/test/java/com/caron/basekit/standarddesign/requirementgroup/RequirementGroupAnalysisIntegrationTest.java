@@ -101,6 +101,8 @@ class RequirementGroupAnalysisIntegrationTest {
   Group g=setup(true);var value=json.readTree(response("UNKNOWN"));var areas=(com.fasterxml.jackson.databind.node.ArrayNode)value.path("businessAreas");
   areas.addObject().put("name","근거 없음").put("description","").putArray("evidenceRequirementIds");
   reply(value.toString());var result=run(g,"bad-evidence");assertEquals("SUCCESS",result.get("STATUS"));assertEquals(2,((List<?>)result.get("WARNINGS")).size());
+  var source=json.readTree(mvc.perform(get("/api/standard-design/requirement-analysis-sources/"+result.get("ANALYSIS_ID"))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
+  assertEquals(0,source.path("ITEMS").size());
   areas.add(areas.get(0));areas.add(areas.get(0));reply(value.toString());assertEquals("FAILED_INVALID_JSON",run(g,"too-many").get("STATUS"));
  }
  @Test void expiredRunningCannotOverwriteTerminalStateButLateRawIsKept() throws Exception {
@@ -121,11 +123,42 @@ class RequirementGroupAnalysisIntegrationTest {
    var result=completed(g,start.get("ANALYSIS_ID").toString());assertEquals("FAILED_TIMEOUT",result.get("STATUS"));assertNull(result.get("RESPONSE_RAW_JSON"));
   }finally{shortService.close();}
  }
- @Test void rejectsMissingSnapshotAndStaleVersion() throws Exception {
+ @Test void createsCurrentSnapshotWithoutConfirmationAndRejectsStaleVersion() throws Exception {
   Group g=setup(false);
-  mvc.perform(post("/api/standard-design/requirement-groups/"+g.id()+"/analyses").contentType(MediaType.APPLICATION_JSON).content(json.createObjectNode().put("VERSION",g.version()).put("REQUEST_ID","legacy").toString())).andExpect(status().isConflict());
-  var saved=postJson("/api/standard-design/requirement-groups/"+g.id()+"/confirm",json.createObjectNode().put("VERSION",g.version()).put("PROJECT_NAME","현재 프로젝트"));
-  assertTrue(saved.path("HAS_ANALYSIS_SNAPSHOT").asBoolean());assertThrows(org.springframework.web.server.ResponseStatusException.class,()->start(g,"stale"));verifyNoInteractions(llm);
+  reply(response(g.req())); var first=run(g,"legacy"); assertEquals("SUCCESS",first.get("STATUS"));
+  var saved=postJson("/api/standard-design/requirement-groups/"+g.id()+"/edit",json.createObjectNode().put("VERSION",g.version()));
+  assertEquals("DRAFT",saved.path("GROUP_STATUS").asText());assertThrows(org.springframework.web.server.ResponseStatusException.class,()->start(g,"stale"));
+ }
+ @Test void draftReviewReanalysisAndSourceProjectionKeepOriginalEvidence() throws Exception {
+  Group confirmed=setup(true);
+  var draft=postJson("/api/standard-design/requirement-groups/"+confirmed.id()+"/edit",json.createObjectNode().put("VERSION",confirmed.version()));
+  Group g=new Group(confirmed.id(),draft.path("VERSION").asLong(),confirmed.req());
+  reply(response(g.req()));var first=run(g,"draft-one");
+  assertEquals("DRAFT",jdbc.queryForObject("SELECT GROUP_STATUS FROM BSDRGRP WHERE REQUIREMENT_GROUP_ID=?",String.class,g.id()));
+  var project=json.readTree((String)first.get("REQUEST_JSON")).path("project").path("projectId").asText();
+  var sources=json.readTree(mvc.perform(get("/api/standard-design/requirement-analysis-sources").param("PROJECT_ID",project)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
+  assertTrue(sources.size()>0);assertEquals("구매 · 구매 등록",sources.get(0).path("ITEMS").get(0).path("ORIGINAL_REASON").asText());
+  assertEquals(0,json.readTree(mvc.perform(get("/api/standard-design/requirement-analysis-sources").param("PROJECT_ID","FOREIGN")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA").size());
+  var newRequirement=postJson("/api/standard-design/requirements",json.createObjectNode().put("PROJECT_ID",project).put("REQUIREMENT_NAME","추가 구매 승인").put("REQUIREMENT_TYPE_CODE","NEW").put("DESCRIPTION","추가 원문").put("STATUS","DRAFT"));
+  var save=(com.fasterxml.jackson.databind.node.ObjectNode)draft.deepCopy();save.put("REQUIREMENT_GROUP_NAME","수정한 구매 그룹");
+  var member=((com.fasterxml.jackson.databind.node.ArrayNode)save.path("MEMBERS")).addObject().put("REQUIREMENT_ID",newRequirement.path("REQUIREMENT_ID").asText()).put("HUMAN_YN","Y").put("INCLUSION_REASON","").put("REVIEWED_REVISION",1);member.putArray("SOURCE_ANALYSIS_IDS");
+  var ids=(com.fasterxml.jackson.databind.node.ArrayNode)save.path("MEMBERS").get(0).path("SOURCE_ANALYSIS_IDS");ids.add(first.get("ANALYSIS_ID").toString());
+  var edited=json.readTree(mvc.perform(put("/api/standard-design/requirement-groups/"+g.id()).contentType(MediaType.APPLICATION_JSON).content(save.toString())).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
+  Group changed=new Group(g.id(),edited.path("VERSION").asLong(),g.req());var second=run(changed,"draft-two");
+  assertNotEquals(first.get("ANALYSIS_ID"),second.get("ANALYSIS_ID"));assertEquals(2,service.list(g.id()).size());
+  assertEquals(2,json.readTree((String)second.get("REQUEST_JSON")).path("requirements").size());
+  assertEquals(1,json.readTree((String)first.get("REQUEST_JSON")).path("requirements").size());
+  assertEquals("수정한 구매 그룹",json.readTree((String)second.get("REQUEST_JSON")).path("group").path("groupName").asText());
+  assertEquals("구매",json.readTree((String)first.get("REQUEST_JSON")).path("group").path("groupName").asText());
+  var reconfirm=postJson("/api/standard-design/requirement-groups/"+g.id()+"/confirm",json.createObjectNode().put("VERSION",changed.version()).put("PROJECT_NAME","프로젝트"));
+  assertEquals("CONFIRMED",reconfirm.path("GROUP_STATUS").asText());
+  mvc.perform(delete("/api/standard-design/requirements/"+g.req())).andExpect(status().isNoContent());
+  var review=json.readTree(mvc.perform(get("/api/standard-design/requirement-groups/"+g.id())).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
+  assertEquals("REVIEW_REQUIRED",review.path("GROUP_STATUS").asText());
+  var third=run(new Group(g.id(),review.path("VERSION").asLong(),g.req()),"review");
+  for(var original:json.readTree((String)third.get("REQUEST_JSON")).path("requirements")) if(g.req().equals(original.path("requirementId").asText())) assertEquals("Y",original.path("discardedYn").asText());
+  assertEquals(3,service.list(g.id()).size());
+  for(var reviewed:review.path("MEMBERS")) if(g.req().equals(reviewed.path("REQUIREMENT_ID").asText())) assertEquals(1,reviewed.path("SOURCE_ANALYSIS_IDS").size());
  }
  @Test void legacyResultsAndRawRemainReadable() throws Exception {
   Group g=setup(true);reply(response(g.req()));var run=run(g,"legacy-result");String id=run.get("ANALYSIS_ID").toString();

@@ -96,7 +96,7 @@ public class RequirementService {
         mapper.touch(id); invalidateGroups(id); recordRevision(one(id),event);
     }
     private void invalidateGroups(String id) {
-        jdbc.update("UPDATE BSDRGRP SET GROUP_STATUS='REVIEW_REQUIRED',VERSION=VERSION+1,MOD_DT=CURRENT_TIMESTAMP WHERE REQUIREMENT_GROUP_ID IN (SELECT REQUIREMENT_GROUP_ID FROM BSDRGRQ WHERE REQUIREMENT_ID=?)",id);
+        jdbc.update("UPDATE BSDRGRP SET GROUP_STATUS=CASE WHEN GROUP_STATUS='DRAFT' THEN 'DRAFT' ELSE 'REVIEW_REQUIRED' END,VERSION=VERSION+1,MOD_DT=CURRENT_TIMESTAMP WHERE REQUIREMENT_GROUP_ID IN (SELECT REQUIREMENT_GROUP_ID FROM BSDRGRQ WHERE REQUIREMENT_ID=?)",id);
     }
     private void recordRevision(RequirementData value,String event) {
         if(jdbc.queryForObject("SELECT COUNT(*) FROM BSDRRHIS WHERE REQUIREMENT_ID=? AND REQUIREMENT_REVISION=?",Integer.class,value.REQUIREMENT_ID(),value.REQUIREMENT_REVISION())>0) return;

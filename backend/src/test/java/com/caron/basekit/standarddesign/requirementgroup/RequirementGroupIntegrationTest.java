@@ -48,7 +48,7 @@ class RequirementGroupIntegrationTest {
   var foreign=input("OTHER",req); mvc.perform(post(BASE).contentType(MediaType.APPLICATION_JSON).content(foreign.toString())).andExpect(status().isBadRequest());
   var invalid=input.deepCopy(); invalid.put("REQUEST_ID",UUID.randomUUID().toString()); ((ArrayNode)invalid.path("MEMBERS").get(0).path("SOURCE_ANALYSIS_IDS")).add("MISSING"); mvc.perform(post(BASE).contentType(MediaType.APPLICATION_JSON).content(invalid.toString())).andExpect(status().isBadRequest());
   mvc.perform(put("/api/standard-design/requirements/"+req.path("REQUIREMENT_ID").asText()).contentType(MediaType.APPLICATION_JSON).content(reqInput(project).put("REQUIREMENT_NAME","변경됨").toString())).andExpect(status().isOk());
-  assertEquals("REVIEW_REQUIRED",getGroup(id).path("GROUP_STATUS").asText());
+  assertEquals("DRAFT",getGroup(id).path("GROUP_STATUS").asText());
   mvc.perform(post(BASE+"/"+id+"/confirm").contentType(MediaType.APPLICATION_JSON).content(version(group).toString())).andExpect(status().isConflict());
   mvc.perform(get(BASE).param("PROJECT_ID",project).param("REQUIREMENT_ID",req.path("REQUIREMENT_ID").asText())).andExpect(status().isOk()).andExpect(jsonPath("$.DATA.length()").value(1));
  }
