@@ -22,10 +22,13 @@ public class RequirementAnalysisSourceService {
   this.jdbc=jdbc; this.json=json; this.recommendations=recommendations; this.analyses=analyses;
  }
  @Transactional(readOnly=true)
- public List<Result> list(String project) {
-  var result=new ArrayList<>(recommendations.list(project));
+ public List<Result> list(String project) { return list(project,null); }
+ public List<Result> list(String project,String type) {
+  var result=new ArrayList<Result>();
+  if(type==null) result.addAll(recommendations.list(project));
   // Project lives in the immutable input, so evidence remains readable after source group deletion.
   for(String id:jdbc.queryForList("SELECT ANALYSIS_ID FROM BSDRGANL ORDER BY CREATED_AT DESC,ANALYSIS_ID",String.class)) {
+   if (type!=null && !type.equals(jdbc.queryForObject("SELECT ANALYSIS_TYPE FROM BSDRGANL WHERE ANALYSIS_ID=?",String.class,id))) continue;
    var source=get(id);
    if(project.equals(source.PROJECT_ID())) result.add(source);
   }
@@ -45,7 +48,13 @@ public class RequirementAnalysisSourceService {
    var run=analyses.get((String)row.get("REQUIREMENT_GROUP_ID"),id);
    var reasons=new LinkedHashMap<String,List<String>>();
    if(run.get("RESPONSE") instanceof JsonNode response) {
-    for(String key:List.of("businessAreas","processCandidates","programCandidates","businessStructure","processes","screenCandidates")) {
+    if ("GROUP_RECOMMENDATION".equals(run.get("ANALYSIS_TYPE"))) {
+     for (JsonNode item:response.path("recommendedRequirements")) {
+      String rid=item.path("requirementId").asText();
+      if(jdbc.queryForObject("SELECT COUNT(*) FROM BSDRREQ WHERE REQUIREMENT_ID=? AND PROJECT_ID=?",Integer.class,rid,project)>0)
+       reasons.computeIfAbsent(rid,k->new ArrayList<>()).add(item.path("reason").asText());
+     }
+    } else for(String key:List.of("businessAreas","processCandidates","programCandidates","businessStructure","processes","screenCandidates")) {
      for(JsonNode proposal:response.path(key)) {
       var evidence=proposal.path("evidenceRequirementIds"); if(!evidence.isArray()) continue;
       String reason=proposal.path("name").asText(proposal.path("title").asText())+" · "+proposal.path("description").asText(proposal.path("purpose").asText());
@@ -58,7 +67,7 @@ public class RequirementAnalysisSourceService {
     }
    }
    var items=reasons.entrySet().stream().map(e->new Item(e.getKey(),String.join("\n",e.getValue()),null)).toList();
-   return new Result(id,project,(String)row.get("REQUEST_ID"),"그룹 개요 근거 · "+input.path("group").path("groupName").asText()+" · "+run.get("STATUS"),
+   return new Result(id,project,(String)row.get("REQUEST_ID"),("GROUP_RECOMMENDATION".equals(run.get("ANALYSIS_TYPE")) ? "그룹 보완 추천 · " : "그룹 설계 근거 · ")+input.path("group").path("groupName").asText()+" · "+run.get("STATUS"),
     (OffsetDateTime)row.get("CREATED_AT"),items);
   }catch(com.fasterxml.jackson.core.JsonProcessingException e) { throw new ResponseStatusException(HttpStatus.CONFLICT,"저장된 분석 입력을 읽지 못했습니다."); }
  }

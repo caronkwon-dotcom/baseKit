@@ -27,7 +27,7 @@ export const requirementGroupApi={
  edit:(id:string,version:number)=>request<RequirementGroup>(`/${encodeURIComponent(id)}/edit`,body('POST',{VERSION:version})),
  analyses:(id:string)=>request<GroupAnalysis[]>(`/${encodeURIComponent(id)}/analyses`),
  analysis:(id:string,analysisId:string)=>request<GroupAnalysis>(`/${encodeURIComponent(id)}/analyses/${encodeURIComponent(analysisId)}`),
- analyze:(id:string,version:number,requestId:string,projectName?:string)=>request<GroupAnalysis>(`/${encodeURIComponent(id)}/analyses`,body('POST',{VERSION:version,REQUEST_ID:requestId,PROJECT_NAME:projectName})),
+ analyze:(id:string,version:number,requestId:string,projectName?:string,analysisType='GROUP_DESIGN')=>request<GroupAnalysis>(`/${encodeURIComponent(id)}/analyses`,body('POST',{VERSION:version,REQUEST_ID:requestId,PROJECT_NAME:projectName,ANALYSIS_TYPE:analysisType})),
  delete:(id:string,version:number)=>request<void>(`/${encodeURIComponent(id)}?VERSION=${version}`,{method:'DELETE'}),
 };
 export const groupStatusLabels:Record<GroupStatus,string>={DRAFT:'작성중',CONFIRMED:'확정',REVIEW_REQUIRED:'재검토 필요'};

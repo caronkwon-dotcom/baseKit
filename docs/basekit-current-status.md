@@ -1,5 +1,9 @@
 # BaseKit 현재 상태와 WBS
 
+## 2026-10-13 그룹 보완 Analysis V0
+
+그룹 밖 프로젝트 요구사항을 후보로 전달하는 GROUP_RECOMMENDATION을 추가했다. V17로 기존 GROUP_DESIGN과 구분하고 검증된 recommendedRequirements/원문 사유를 저장한다. 추가 모달은 보완 실행만 조회하며 누적 선택·사람의 저장·Analysis 근거 연결을 유지한다. 기존 설계 이력과 독립 추천 모델은 유지한다. frontend build/lint/56건, backend 64건(5 외부 DB skip) 통과. 격리 모의 LLM 브라우저에서 그룹 3→5건 저장·근거·중복 차단 확인. 실제 회사 LLM/운영 PostgreSQL과 대량 입력은 후속 검수. [계약·검증 보고](sd-group-recommendation-v0.md).
+
 ## 2026-10-13 SD 그룹 분석 흐름 및 추천 조회 수정
 
 확정 전에 DRAFT 분석·수정·재분석을 반복하고 사람이 최종 확정하는 흐름으로 정정했다. REVIEW_REQUIRED에서도 분석 가능하며 원본 변경 시 DRAFT는 유지하고 확정 이후에는 기존 재검토 전환을 유지한다. 현재 저장 버전의 불변 Snapshot과 독립 실행 이력을 보존하며 공통 BaseTabs로 기본정보/분석을 전환한다.

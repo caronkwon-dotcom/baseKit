@@ -12,7 +12,7 @@ export interface RequirementRecommendation {
   ITEMS: RequirementRecommendationItem[];
 }
 export const requirementAnalysisSourceApi = {
-  list: async (projectId:string):Promise<RequirementRecommendation[]> => sourceRequest(`?PROJECT_ID=${encodeURIComponent(projectId)}`),
+  list: async (projectId:string):Promise<RequirementRecommendation[]> => sourceRequest(`?PROJECT_ID=${encodeURIComponent(projectId)}&ANALYSIS_TYPE=GROUP_RECOMMENDATION`),
   get: async (id:string):Promise<RequirementRecommendation> => sourceRequest(`/${encodeURIComponent(id)}`),
 };
 async function sourceRequest<T>(path:string):Promise<T> {

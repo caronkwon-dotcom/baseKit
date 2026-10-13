@@ -55,6 +55,57 @@ class RequirementGroupAnalysisIntegrationTest {
   var out=json.createObjectNode();var choice=out.putArray("choices").addObject();choice.put("finish_reason",reason);choice.putObject("message").put("content",raw);
   out.putObject("usage").put("prompt_tokens",100).put("completion_tokens",50);return " \n"+out+"\n ";
  }
+ @Test void recommendsOutsideGroupAndPreservesRawAndEvidenceWhenAdded() throws Exception {
+  Group g=setup(true);
+  String project=jdbc.queryForObject("SELECT PROJECT_ID FROM BSDRGRP WHERE REQUIREMENT_GROUP_ID=?",String.class,g.id());
+  var candidates=new ArrayList<String>();
+  for(int i=0;i<7;i++) {
+   var req=postJson("/api/standard-design/requirements",json.createObjectNode().put("PROJECT_ID",project).put("REQUIREMENT_NAME","후속 처리 "+i).put("REQUIREMENT_TYPE_CODE","NEW").put("DESCRIPTION","승인 후 처리").put("PROCESS_DESCRIPTION","승인 → 후속 처리").put("STATUS","DRAFT"));
+   candidates.add(req.path("REQUIREMENT_ID").asText());
+  }
+  mvc.perform(delete("/api/standard-design/requirements/"+candidates.get(6))).andExpect(status().isNoContent());
+  // Use a 3-member draft, matching the intended iterative workflow.
+  var save=json.createObjectNode().put("PROJECT_ID",project).put("REQUIREMENT_GROUP_NAME","구매").put("DESCRIPTION","반복 보완").put("VERSION",g.version()).put("REQUEST_ID",UUID.randomUUID().toString());
+  var members=save.putArray("MEMBERS");
+  for(String id:List.of(g.req(),candidates.get(0),candidates.get(1))) {
+   var m=members.addObject().put("REQUIREMENT_ID",id).put("HUMAN_YN","Y").put("INCLUSION_REASON","").put("REVIEWED_REVISION",1); m.putArray("SOURCE_ANALYSIS_IDS");
+  }
+  postJson("/api/standard-design/requirement-groups/"+g.id()+"/edit",json.createObjectNode().put("VERSION",g.version()));
+  save.put("VERSION",g.version()+1);
+  var saved=json.readTree(mvc.perform(put("/api/standard-design/requirement-groups/"+g.id()).contentType(MediaType.APPLICATION_JSON).content(save.toString())).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
+  g=new Group(g.id(),saved.path("VERSION").asLong(),g.req());
+  var output=json.createObjectNode();var recs=output.putArray("recommendedRequirements");
+  for(String id:List.of(candidates.get(2),g.req(),"HALLUCINATION",candidates.get(2),candidates.get(6))) recs.addObject().put("requirementId",id).put("reason","승인 이후 후속 처리입니다.");
+  String raw=envelope(output.toString(),"stop");reply(raw);
+  var started=service.execute(g.id(),new RequirementGroupAnalysisService.Execute(g.version(),"recommendation",null,"GROUP_RECOMMENDATION"));
+  var done=completed(g,started.get("ANALYSIS_ID").toString());
+  assertEquals("SUCCESS",done.get("STATUS"));assertEquals(raw,done.get("RESPONSE_RAW_JSON"));
+  var input=json.readTree((String)done.get("REQUEST_JSON"));assertEquals(3,input.path("requirements").size());assertEquals(4,input.path("candidateRequirements").size());
+  var result=((JsonNode)done.get("RESPONSE")).path("recommendedRequirements");assertEquals(1,result.size());assertEquals(candidates.get(2),result.get(0).path("requirementId").asText());
+  String analysis=done.get("ANALYSIS_ID").toString();
+  var source=json.readTree(mvc.perform(get("/api/standard-design/requirement-analysis-sources/"+analysis)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
+  assertEquals("승인 이후 후속 처리입니다.",source.path("ITEMS").get(0).path("ORIGINAL_REASON").asText());
+  var histories=json.readTree(mvc.perform(get("/api/standard-design/requirement-analysis-sources").param("PROJECT_ID",project)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
+  assertTrue(histories.toString().contains(analysis));
+  save.put("VERSION",g.version()).put("REQUEST_ID",UUID.randomUUID().toString());
+  members.addObject().put("REQUIREMENT_ID",candidates.get(2)).put("HUMAN_YN","N").put("INCLUSION_REASON","").put("REVIEWED_REVISION",1).putArray("SOURCE_ANALYSIS_IDS").add(analysis);
+  var added=json.readTree(mvc.perform(put("/api/standard-design/requirement-groups/"+g.id()).contentType(MediaType.APPLICATION_JSON).content(save.toString())).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
+  assertEquals(4,added.path("MEMBERS").size());assertTrue(added.path("MEMBERS").toString().contains(analysis));assertEquals("DRAFT",added.path("GROUP_STATUS").asText());
+  assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM BSDRGREV WHERE ANALYSIS_ID=? AND REQUIREMENT_ID=?",Integer.class,analysis,candidates.get(2)));
+  members.add(members.get(3));save.put("VERSION",added.path("VERSION").asLong()).put("REQUEST_ID",UUID.randomUUID().toString());
+  mvc.perform(put("/api/standard-design/requirement-groups/"+g.id()).contentType(MediaType.APPLICATION_JSON).content(save.toString())).andExpect(status().isBadRequest());
+ }
+ @Test void recommendationLimitsAndStrictJsonAreValidated() {
+  String input="{\"requirements\":[{\"requirementId\":\"MEMBER\"}],\"candidateRequirements\":[{\"requirementId\":\"CANDIDATE\"}]}";
+  var output=json.createObjectNode();var items=output.putArray("recommendedRequirements");
+  items.addObject().put("requirementId","CANDIDATE").put("reason","짧은 이유입니다.");assertEquals(1,service.recommendationResult(output.toString(),input).path("recommendedRequirements").size());
+  ((com.fasterxml.jackson.databind.node.ObjectNode)items.get(0)).put("reason","가".repeat(201));
+  assertThrows(IllegalArgumentException.class,()->service.recommendationResult(output.toString(),input));
+  ((com.fasterxml.jackson.databind.node.ObjectNode)items.get(0)).put("reason","첫째. 둘째. 셋째.");assertThrows(IllegalArgumentException.class,()->service.recommendationResult(output.toString(),input));
+  ((com.fasterxml.jackson.databind.node.ObjectNode)items.get(0)).put("reason","짧은 이유");for(int i=0;i<5;i++)items.add(items.get(0).deepCopy());
+  assertThrows(IllegalArgumentException.class,()->service.recommendationResult(output.toString(),input));
+  assertThrows(IllegalArgumentException.class,()->service.recommendationResult("설명 "+output,input));
+ }
  @Test void returns202ImmediatelyAndIdempotencyRetainsImmutableInputDuringCall() throws Exception {
   Group g=setup(true);var called=new CountDownLatch(1);var release=new CountDownLatch(1);
   when(llm.chatRaw(anyString(),anyString(),any())).thenAnswer(invocation->{called.countDown();assertTrue(release.await(5,TimeUnit.SECONDS));return new DesignLlmClient.LlmChatResult("test",response(g.req()));});

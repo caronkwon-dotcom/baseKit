@@ -6,6 +6,6 @@ import java.util.List;
 public class RequirementAnalysisSourceController {
  private final RequirementAnalysisSourceService service;
  public RequirementAnalysisSourceController(RequirementAnalysisSourceService service) {this.service=service;}
- @GetMapping public ApiResponse<List<RequirementRecommendationService.Result>> list(@RequestParam("PROJECT_ID") String project) {return ApiResponse.success(service.list(project));}
+ @GetMapping public ApiResponse<List<RequirementRecommendationService.Result>> list(@RequestParam("PROJECT_ID") String project,@RequestParam(value="ANALYSIS_TYPE",required=false) String type) {return ApiResponse.success(service.list(project,type));}
  @GetMapping("/{id}") public ApiResponse<RequirementRecommendationService.Result> get(@PathVariable String id) {return ApiResponse.success(service.get(id));}
 }
