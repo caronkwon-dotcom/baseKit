@@ -1,5 +1,10 @@
 # BaseKit 현재 상태와 WBS
 
+## 2026-10-13 PostgreSQL Analysis 근거 조회 500 수정
+
+실제 SD PostgreSQL에서 그룹 보완 실행 SUCCESS 이후 Analysis 추가 모달 목록/상세가 500을 반환했다. RequirementAnalysisSourceService의 CREATED_AT Object 직접 캐스팅이 원인이다. PostgreSQL JDBC 비지정 조회는 java.sql.Timestamp, H2 검수는 OffsetDateTime을 반환해 기존 테스트에서 누락되었다. JDBC getObject(1, OffsetDateTime.class) 타입 지정 조회로 수정했다. 동일 PostgreSQL/실제 기존 실행 GA-b715da8ae18c42a18796bcb4108ad4e1을 별도 8105 검수 서버에서 목록/상세 HTTP 200 및 추천 5건 조회 확인. DB/데이터/프론트 변경 없음. backend 59통과/5 skip, diff check 통과. 기존 8083 서버는 실행 설정 보존을 위해 중지하지 않았으며 사용자 백엔드 재시작 후 적용된다.
+
+
 ## 2026-10-13 UUID 호환 수정 및 그룹 보완 재검증
 
 프론트 UUID 생성을 공통 createUuid로 통합했다. 격리 H2 + 모의 LLM HTTP 브라우저에서 보완 3회, 그룹 3→5건 저장, 실행 간 누적 선택, 근거 연결, 5건 재분석, 설계 회귀, 추천 중복 차단을 확인했다. RAW/독립 이력 보존 및 console error 0. frontend build/lint/61건, backend 59통과/5 skip. DB/API 변경 없음. 회사 LLM/운영 PostgreSQL은 미검증. [재검증 상세 보고](sd-group-recommendation-recheck.md).

@@ -68,7 +68,7 @@ public class RequirementAnalysisSourceService {
    }
    var items=reasons.entrySet().stream().map(e->new Item(e.getKey(),String.join("\n",e.getValue()),null)).toList();
    return new Result(id,project,(String)row.get("REQUEST_ID"),("GROUP_RECOMMENDATION".equals(run.get("ANALYSIS_TYPE")) ? "그룹 보완 추천 · " : "그룹 설계 근거 · ")+input.path("group").path("groupName").asText()+" · "+run.get("STATUS"),
-    (OffsetDateTime)row.get("CREATED_AT"),items);
+    jdbc.queryForObject("SELECT CREATED_AT FROM BSDRGANL WHERE ANALYSIS_ID=?", (rs,n)->rs.getObject(1,OffsetDateTime.class),id),items);
   }catch(com.fasterxml.jackson.core.JsonProcessingException e) { throw new ResponseStatusException(HttpStatus.CONFLICT,"저장된 분석 입력을 읽지 못했습니다."); }
  }
  public boolean contains(String id,String project,String requirement) {
