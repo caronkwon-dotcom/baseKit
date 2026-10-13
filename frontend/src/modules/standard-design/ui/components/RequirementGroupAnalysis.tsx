@@ -1,3 +1,4 @@
+import { createUuid } from '../../../../utils/uuid';
 import { useEffect, useRef, useState } from 'react';
 import { ActionButton, BaseKitMessage, FormModal } from '../../../../components/common';
 import FormField from '../../../../components/common/FormField';
@@ -57,7 +58,7 @@ export default function RequirementGroupAnalysis({group,onClose,projectName,embe
   if(found){request.current=null;sessionStorage.removeItem(storageKey);setPendingRequest(false);}
  });
  const execute=()=>void operate(async()=>{
-  if(!request.current) {request.current=crypto.randomUUID();requestVersion.current=group.VERSION;}
+  if(!request.current) {request.current=createUuid();requestVersion.current=group.VERSION;}
   sessionStorage.setItem(`${storageKey}:type`,analysisType);sessionStorage.setItem(storageKey,request.current);sessionStorage.setItem(`${storageKey}:version`,String(requestVersion.current));setPendingRequest(true);
   const result=await api.analyze(group.REQUIREMENT_GROUP_ID,requestVersion.current,request.current,projectName,analysisType);
   request.current=null;sessionStorage.removeItem(storageKey);setPendingRequest(false);if(!alive.current)return;

@@ -1,3 +1,4 @@
+import { createUuid } from '../../../../utils/uuid';
 import RequirementGroupAnalysis from '../components/RequirementGroupAnalysis';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActionButton, BaseKitMessage, BaseTabs, DataTable, FormModal, MasterDetailMultiGrid, PageHeader, SearchPanel, type DataTableColumn } from '../../../../components/common';
@@ -11,7 +12,7 @@ import { requirementAnalysisSourceApi, type RequirementRecommendation } from '..
 
 import { groupMemberRowState } from '../../requirementgroup/requirementGroupRowState';
 
-const empty=(project:string):RequirementGroup=>({REQUIREMENT_GROUP_ID:'',PROJECT_ID:project,REQUIREMENT_GROUP_NAME:'',DESCRIPTION:'',GROUP_STATUS:'DRAFT',VERSION:0,REQUEST_ID:crypto.randomUUID(),MEMBERS:[]});
+const empty=(project:string):RequirementGroup=>({REQUIREMENT_GROUP_ID:'',PROJECT_ID:project,REQUIREMENT_GROUP_NAME:'',DESCRIPTION:'',GROUP_STATUS:'DRAFT',VERSION:0,REQUEST_ID:createUuid(),MEMBERS:[]});
 const signature=(g:RequirementGroup)=>JSON.stringify(groupInput(g));
 interface Candidate { KEY:string; REQUIREMENT:Requirement; ANALYSIS_ID:string | null; ORIGINAL_REASON:string }
 export default function RequirementGroupPage() {

@@ -1,3 +1,4 @@
+import { createUuid } from '../../../../utils/uuid';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BaseKitMessage, BaseTabs, FormModal, type BaseTabDefinition, type DataTableColumn } from '../../../../components/common';
 import BaseKitDataGrid from '../../../../components/grid/BaseKitDataGrid';
@@ -12,7 +13,6 @@ interface Props { projectId: string; requirements: Requirement[]; projectMenus: 
 
 const PROGRAM_KEY = 'SD_REQUIREMENT_DESIGN';
 const layouts = ['SINGLE', 'L1R2', 'L1R1', 'L2R1'];
-const newId = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
 export default function RequirementAnalysisPanel({ projectId, requirements, projectMenus }: Props) {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
@@ -108,7 +108,7 @@ export default function RequirementAnalysisPanel({ projectId, requirements, proj
   };
 
   const start = () => run(async () => {
-    pendingAnalysisRequest.current ??= newId();
+    pendingAnalysisRequest.current ??= createUuid();
     const value = await analysisApi.create(projectId, pendingAnalysisRequest.current, input);
     pendingAnalysisRequest.current = null; pendingGenerationRequest.current = null;
     currentId.current = value.ANALYSIS_ID;
@@ -159,7 +159,7 @@ export default function RequirementAnalysisPanel({ projectId, requirements, proj
   });
   const generate = () => run(async () => {
     if (!analysis || inputBlocked || status === 'GENERATION_UNKNOWN') return;
-    const requestId = retryRequestId(generation, analysis) ?? pendingGenerationRequest.current ?? newId();
+    const requestId = retryRequestId(generation, analysis) ?? pendingGenerationRequest.current ?? createUuid();
     pendingGenerationRequest.current = requestId;
     setConfirmOpen(false);
     try {
