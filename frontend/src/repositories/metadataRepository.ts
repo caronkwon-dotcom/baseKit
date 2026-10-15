@@ -148,7 +148,8 @@ validateMetadata();
 export const metadataRepository = {
   getPrograms: () => programs.filter((program) => program.useYn === 'Y'),
   getMenus: () => menus.filter((menu) => menu.useYn === 'Y'),
-  getMenuTree: () => buildMenuTree(menus),
+  // Temporary contest briefing visibility: restore by removing this root filter.
+  getMenuTree: () => buildMenuTree(menus).filter((menu) => !['SYS', 'DEV_GUIDE'].includes(menu.menuKey)),
   getActions: () => actions,
   getMenuNameByProgram: (programKey: ProgramKey) =>
     menus.find(
