@@ -461,9 +461,8 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 
 이전 8080 dev-pm 백엔드를 최신 코드로 재시작하여 그룹 API 404 복구. PostgreSQL V13까지 migration 검증 및 5173 proxy API 200 확인. Grid CREATE 버튼 중복 React key는 sd-work a2c6088에서 1줄 수정, build/lint와 브라우저 콘솔 error 0 확인. 사용자 승인으로 수정 commit a2c6088만 로컬 dev-pm에 fast-forward 통합 완료. 5173 실제 화면 정상 빈 목록과 콘솔 error 0 재검증.
 
-## 공모전 중간 브리핑 메뉴 임시 숨김 (2026-10-15)
+## 공모전 브리핑 메뉴 원복 (2026-10-15)
 
-- metadataRepository.getMenuTree의 완성된 트리에서 SYS(시스템관리), DEV_GUIDE(개발자가이드) 루트만 제외한다. 원본 메뉴 설정, 하위 메뉴, 프로그램, 라우트, 권한과 Standard Design은 보존한다.
-- 기존 트리는 비활성 부모의 자식을 루트로 올리므로 seed useYn은 변경하지 않는다. 복구 시 getMenuTree의 임시 filter와 주석만 제거한다.
-- 기존 sd-work 사용, 최신 origin/dev-pm 751d914와 동일한 상태에서 시작. 신규 branch/worktree 없음.
-- 검증: frontend build/lint, git diff --check 통과. backend 64건 중 59 통과/5 skip/실패 0. 5176 실제 브라우저에서 두 루트 및 하위 항목 상단 미노출, Standard Design 및 기존 요구사항 그룹 화면 유지 확인. 기존 bundle 크기 경고 유지.
+- 기존 sd-work에서 임시 SYS/DEV_GUIDE 루트 필터와 주석을 제거하여 숨김 이전 메뉴 트리를 정확히 복구했다.
+- 원본 메뉴 설정, 기능, 하위 메뉴, 라우트, 권한 및 다른 1Depth 메뉴는 변경하지 않았다. 신규 branch/worktree 없음.
+- 검증: frontend build/lint 및 git diff --check 통과. backend 64건 중 59 통과/5 skip/실패 0. 5176 실제 브라우저에서 시스템관리·개발자가이드·Standard Design 1Depth 노출 확인. 메뉴 공급 코드는 숨김 직전 f2bdd6a^와 동일. 기존 bundle 크기 경고 유지. 그룹 목록 조회 실패 안내가 있어 브라우저 검증은 메뉴 노출 범위로 한정.
