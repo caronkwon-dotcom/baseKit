@@ -385,3 +385,5 @@
 .sd-analysis-table th[scope=row] { width: 130px; background: var(--surface-muted); }
 .sd-analysis-summary { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0 0 8px; }
 .sd-analysis-summary dd { margin: 0; }
+
+.sd-group-detail-workspace .project-list-detail-workspace__detail > .multi-grid-detail { flex: 1; }
