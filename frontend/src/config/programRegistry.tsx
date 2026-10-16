@@ -10,6 +10,7 @@ import { DomainManagePage } from '../features/system/domainManage';
 import { WordManagePage } from '../features/system/wordManage';
 import { TableManagePage } from '../features/system/tableManage';
 import { DocumentCenterPage } from '../features/devGuide/documentCenter';
+import { LlmFileTestPage } from '../features/devGuide/llmFileTest';
 import { applicationModules } from './moduleRegistry';
 import type { ProgramComponentMap } from '../types/adminShell';
 
@@ -27,6 +28,7 @@ const coreProgramComponents: ProgramComponentMap = {
   DOCUMENT_CENTER: () => <DocumentCenterPage />,
   DEV_SEARCH_SAMPLE_TYPE_1: () => <SearchSampleType1Page />,
   DEV_SEARCH_SAMPLE_TYPE_2: () => <SearchSampleType2Page />,
+  DEV_LLM_FILE_TEST: () => <LlmFileTestPage />,
 };
 
 const moduleProgramComponents = applicationModules.reduce<ProgramComponentMap>((components, module) => {

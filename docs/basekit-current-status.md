@@ -325,3 +325,7 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 ## Compact Business UI Density (2026-09-24, feature 검수 대기)
 
 `codex/compact-business-ui-density`는 `origin/dev-pm` `ffa806a`에서 시작한 독립 변경이다. 공통 PageHeader와 SearchPanel의 세로 여백, 검색 Control 높이(30px), Workspace 간격만 조정한다. 공통코드관리 1440×900 화면에서 PageHeader 24.8→26px, SearchPanel 55.6→41.6px, 첫 Grid 시작 위치 177.2→158.4px로 측정했다. Grid CRUD, 40:60/38:62 비율, Toolbar와 Message Area 높이는 변경하지 않았다. dev-pm에는 아직 통합되지 않았다.
+
+## LLM 파일·검색 테스트 PoC (2026-10-16, feature 검수 대기)
+
+개발자가이드 `LLM 파일·검색 테스트`(`DEV_LLM_FILE_TEST`, `/api/dev-guide/v1/llm-files`)를 추가했다. 기존 회사 LLM 설정은 chat completions만 정의하므로 회사 LLM 파일 API는 `/capabilities`가 `/files`·`/models`를 실제 probe한 결과로만 표시한다(미확인 시 지원으로 표시하지 않음). 파일 보관·검색은 **BaseKit 서버 메모리(PoC, 재시작 시 소멸, 10MB, PROJECT_ID 경계)** 대안이며 회사 LLM 기능이 아니다. 질의는 서버 키워드 검색 구간만 회사 LLM chat에 전송하고, 비교용으로 원문 전체 전송 모드를 제공한다. 실제 회사 LLM 환경에서의 측정 결과는 아직 없으며 SD 요구사항 그룹화는 구현하지 않았다.

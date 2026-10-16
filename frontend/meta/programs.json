@@ -130,5 +130,16 @@
     "modifyScope": "NONE",
     "actionCodes": ["SEARCH", "RESET", "CREATE", "DELETE", "EXCEL_DOWNLOAD", "MANUAL_VIEW"],
     "useYn": "Y"
+  },
+  {
+    "programKey": "DEV_LLM_FILE_TEST",
+    "programName": "LLM 파일·검색 테스트",
+    "componentName": "LlmFileTestPage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/dev-guide/llm-file-test",
+    "dataScope": "USER",
+    "modifyScope": "NONE",
+    "actionCodes": ["SEARCH"],
+    "useYn": "Y"
   }
 ]

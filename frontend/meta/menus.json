@@ -148,5 +148,15 @@
     "programKey": "DEV_SEARCH_SAMPLE_TYPE_2",
     "sortOrder": 2,
     "useYn": "Y"
+  },
+  {
+    "menuKey": "DEV_GUIDE.LLM_FILE_TEST",
+    "parentMenuKey": "DEV_GUIDE",
+    "menuName": "LLM 파일·검색 테스트",
+    "menuLevel": 2,
+    "menuType": "SCREEN",
+    "programKey": "DEV_LLM_FILE_TEST",
+    "sortOrder": 3,
+    "useYn": "Y"
   }
 ]

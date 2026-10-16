@@ -15,6 +15,7 @@ export const CORE_PROGRAM_KEYS = [
   'DOCUMENT_CENTER',
   'DEV_SEARCH_SAMPLE_TYPE_1',
   'DEV_SEARCH_SAMPLE_TYPE_2',
+  'DEV_LLM_FILE_TEST',
 ] as const;
 
 export type CoreProgramKey = (typeof CORE_PROGRAM_KEYS)[number];
