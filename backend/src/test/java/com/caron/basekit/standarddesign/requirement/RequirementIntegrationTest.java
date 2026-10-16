@@ -23,6 +23,28 @@ class RequirementIntegrationTest {
          "MENU_KEYS":["STANDARD_DESIGN.REQUIREMENT","STANDARD_DESIGN.WBS"],"LEGACY_SOURCE_ID":"REQ-001",
          "LEGACY_WBS_IDS":"WBS-002"}
         """;
+    @Test void emptyProjectIsIsolatedAndDiscardPreservesHistory() throws Exception {
+        String project = "SCOPE-" + java.util.UUID.randomUUID();
+        String other = "EMPTY-" + java.util.UUID.randomUUID();
+        mvc.perform(get("/api/standard-design/requirements").param("PROJECT_ID", project))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.DATA.length()").value(0));
+        String input = INPUT.replace("SDP-001", project).replace("REQ-001", project);
+        String response = mvc.perform(post("/api/standard-design/requirements").contentType(MediaType.APPLICATION_JSON).content(input))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        String id = json.readTree(response).path("DATA").path("REQUIREMENT_ID").asText();
+        mvc.perform(get("/api/standard-design/requirements").param("PROJECT_ID", project))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.DATA.length()").value(1))
+                .andExpect(jsonPath("$.DATA[0].REQUIREMENT_ID").value(id));
+        mvc.perform(get("/api/standard-design/requirements").param("PROJECT_ID", other))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.DATA.length()").value(0));
+        mvc.perform(get("/api/standard-design/requirements")) .andExpect(status().isBadRequest());
+        mvc.perform(delete("/api/standard-design/requirements/"+id)).andExpect(status().isNoContent());
+        mvc.perform(delete("/api/standard-design/requirements/"+id)).andExpect(status().isNoContent());
+        mvc.perform(get("/api/standard-design/requirements/"+id)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.DATA.DISCARDED_YN").value("Y"))
+                .andExpect(jsonPath("$.DATA.PROJECT_ID").value(project));
+    }
+
     @Test void createsUpdatesAndMigratesIdempotentlyWithAttachment() throws Exception {
         String payload = mvc.perform(post("/api/standard-design/requirements").contentType(MediaType.APPLICATION_JSON).content(INPUT))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.DATA.MENU_KEYS.length()").value(2)).andReturn().getResponse().getContentAsString();

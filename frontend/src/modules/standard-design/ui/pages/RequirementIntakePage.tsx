@@ -69,6 +69,7 @@ export default function RequirementIntakePage() {
   const [draft, setDraft] = useState<RequirementInput>(() => emptyDraft(projectId));
   const [baseline, setBaseline] = useState('');
   const [mode, setMode] = useState<ProjectWorkspaceMode>('DETAIL');
+  const [showDiscarded, setShowDiscarded] = useState(false);
   const [searchCondition, setSearchCondition] = useState(initialSearchCondition);
   const [appliedSearch, setAppliedSearch] = useState(initialSearchCondition);
   const [types, setTypes] = useState<{ CODE: string; CODE_NAME: string }[]>([]);
@@ -95,7 +96,7 @@ export default function RequirementIntakePage() {
   const dirty = baseline !== '' && JSON.stringify(draftWithMenuKeys) !== baseline;
   const pendingLegacy = useMemo(() => legacyRequirements().filter((row) => row.PROJECT_ID === projectId && !rows.some((item) => item.LEGACY_SOURCE_ID === row.REQUIREMENT_ID)), [projectId, rows]);
   const visibleRows = rows.filter((row) => {
-    if (row.PROJECT_ID !== projectId) return false;
+    if (row.PROJECT_ID !== projectId || (!showDiscarded && row.DISCARDED_YN === 'Y')) return false;
     const keyword = appliedSearch.keyword.toLowerCase();
     const menuText = row.MENU_KEYS.join(' ').toLowerCase();
     return `${row.REQUIREMENT_ID} ${row.REQUIREMENT_NAME}`.toLowerCase().includes(keyword)
@@ -250,13 +251,14 @@ export default function RequirementIntakePage() {
     <PageHeader breadcrumbs={['Standard Design', '요구사항 관리']} rightContent={<div className="standard-design-header-actions"><ProjectContextSelector onSelected={() => confirmDiscard()} /><div className="standard-design-lifecycle-actions" aria-label="요구사항 기능">
       <ActionButton display="text" actionCode="CREATE" label="등록" tone="primary" disabled={busy || !projectId} onClick={() => { if (confirmDiscard()) resetDraft(); }} />
       <ActionButton display="text" actionCode="SAVE" label="저장" tone="primary" htmlType="submit" form="requirement-detail-form" disabled={busy || !projectId} onClick={() => undefined} />
-      <ActionButton display="text" actionCode="DELETE" label="폐기" tone="danger" disabled={busy || !selectedId || selected?.DISCARDED_YN === 'Y'} onClick={() => { if (selectedId && window.confirm('선택한 요구사항을 폐기하시겠습니까? 그룹 구성과 Analysis 근거 및 첨부파일은 보존됩니다.')) void run(async () => { await requirementApi.delete(selectedId); await load(selectedId); setMessage({ type: 'success', text: '요구사항을 폐기했습니다. 포함 그룹은 재검토가 필요합니다.' }); }); }} />
+      <ActionButton display="text" actionCode="DELETE" label="폐기" tone="danger" disabled={busy || !selected || selected.DISCARDED_YN === 'Y'} onClick={() => { if (selectedId && window.confirm('선택한 요구사항을 폐기하시겠습니까? 그룹 구성과 Analysis 근거 및 첨부파일은 보존됩니다.')) void run(async () => { await requirementApi.delete(selectedId); await load(selectedId); setMessage({ type: 'success', text: '요구사항을 폐기했습니다. 포함 그룹은 재검토가 필요합니다.' }); }); }} />
     </div></div>} />
     {!projectId ? <p className="sd-project-empty-help">프로젝트 Context를 선택하세요.</p> : <div className="sd-requirement-workspace-shell">
       <ProjectListDetailWorkspace subject="요구사항" initialListWidthPercent={55} mode={mode} onModeChange={setMode}
         list={<div className="project-list-detail-workspace__list-content">
       {mode === 'LIST' || searchOpen ? <div id="requirement-inline-search" className="project-inline-search"><SearchPanel layout={mode === 'LIST' ? 'grid':'inline'} rows={1} actionDisplay="label" fields={searchFields} value={searchCondition} initialValue={initialSearchCondition} onValueChange={setSearchCondition} onSearch={setAppliedSearch} onReset={(value) => { setSearchCondition(value); setAppliedSearch(value); }} /></div> : null}
           {mode !== 'LIST' ? <div className="project-master-heading project-master-heading--search-toggle"><span /><button type="button" className="secondary-button" aria-expanded={searchOpen} aria-controls="requirement-inline-search" onClick={() => setSearchOpen((open) => !open)}>검색</button></div> : null}
+          <label><input type="checkbox" checked={showDiscarded} onChange={(event) => setShowDiscarded(event.target.checked)} /> 폐기된 요구사항 포함</label>
           <BaseKitDataGrid programKey="SD_REQUIREMENT_DESIGN" roleCode="ADMIN" title="요구사항 목록" columns={requirementColumns} rows={visibleRows} getRowKey={(row) => row.REQUIREMENT_ID} selectedRowKeys={selectedRowKeys} onSelectedRowKeysChange={setSelectedRowKeys} currentRowKey={selectedId} onRowClick={(row) => { if (confirmDiscard()) select(row); }} emptyMessage="조회 조건에 맞는 요구사항이 없습니다." loading={busy} enabledActions={[]} toolbarActions={[
             { actionCode: COMMON_ACTIONS.EXCEL_DOWNLOAD, label: 'Excel 양식', onClick: () => downloadExcelTemplate(requirementExcelColumns, 'requirement-import-template.xlsx') },
             { actionCode: COMMON_ACTIONS.EXCEL_UPLOAD, label: 'Excel 가져오기', disabled: busy, onClick: () => setExcelOpen(true) },

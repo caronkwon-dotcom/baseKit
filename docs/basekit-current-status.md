@@ -466,3 +466,10 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 - 기존 sd-work에서 임시 SYS/DEV_GUIDE 루트 필터와 주석을 제거하여 숨김 이전 메뉴 트리를 정확히 복구했다.
 - 원본 메뉴 설정, 기능, 하위 메뉴, 라우트, 권한 및 다른 1Depth 메뉴는 변경하지 않았다. 신규 branch/worktree 없음.
 - 검증: frontend build/lint 및 git diff --check 통과. backend 64건 중 59 통과/5 skip/실패 0. 5176 실제 브라우저에서 시스템관리·개발자가이드·Standard Design 1Depth 노출 확인. 메뉴 공급 코드는 숨김 직전 f2bdd6a^와 동일. 기존 bundle 크기 경고 유지. 그룹 목록 조회 실패 안내가 있어 브라우저 검증은 메뉴 노출 범위로 한정.
+
+## 요구사항 검증 fixture 격리 (2026-10-16)
+
+- 문구점 데이터 출처: 저장소 외부 UI 검증 스크립트의 SDP-002 고정 복사. 5건/전용 그룹을 DEMO-OVERVIEW-UI-20261009로 격리, 실제 22건 보존. 스키마 변경 없음.
+- 신규 프로젝트 UUID로 ID 재사용 방지, 폐기 항목 기본 숨김/포함 선택, 프로젝트 ID 누락 400, 선택 프로젝트 폐기 방어. 기존 sd-work만 사용.
+- frontend build/lint/61 tests, backend 60 pass/5 skip. 실제 새 프로젝트 0건→등록1건, API 폐기204/Y, 일반 프로젝트 문구점0 확인. 브라우저 confirm 제어 제한 및 PM 배포 미수행.
+- 상세 원인/복구 SQL/검증/제한: docs/sd-requirement-fixture-isolation.md.
