@@ -24,7 +24,14 @@ const postJson = (path: string, body: unknown) => fetch(`${BASE}${path}`, {
 
 export const fetchCapabilities = () => fetch(`${BASE}/capabilities`).then((r) => unwrap<LlmFileCapability[]>(r));
 export const fetchFiles = (projectId: string) => fetch(`${BASE}/files?PROJECT_ID=${encodeURIComponent(projectId)}`).then((r) => unwrap<LlmFileInfo[]>(r));
-export const uploadFile = (projectId: string, file: File) => {
+export const uploadFile = async (projectId: string, original: File) => {
+  let file = original;
+  if (/\.xlsx?$/i.test(original.name)) {
+    const XLSX = await import('xlsx');
+    const workbook = XLSX.read(await original.arrayBuffer(), { type: 'array' });
+    const csv = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
+    file = new File([csv], original.name.replace(/\.xlsx?$/i, '.csv'), { type: 'text/csv' });
+  }
   const form = new FormData();
   form.append('PROJECT_ID', projectId);
   form.append('FILE', file);

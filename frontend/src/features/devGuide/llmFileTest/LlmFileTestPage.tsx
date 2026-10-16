@@ -93,8 +93,8 @@ export default function LlmFileTestPage() {
         ]}
       />
 
-      <section className="document-center-toolbar">
-        <label><span>파일 선택</span><input type="file" accept=".json,.csv,.txt,.md" onChange={(e) => setPickedFile(e.target.files?.[0] ?? null)} /></label>
+      <section className="document-center-toolbar" style={{ flexWrap: 'wrap' }}>
+        <label><span>파일 선택</span><input type="file" accept=".json,.csv,.txt,.md,.xlsx,.xls" onChange={(e) => setPickedFile(e.target.files?.[0] ?? null)} /></label>
         <ActionButton actionCode="CREATE" label="업로드" display="label" tone="primary" disabled={busy || !pickedFile} onClick={() => void upload()} />
       </section>
 
@@ -115,7 +115,7 @@ export default function LlmFileTestPage() {
         ]}
       />
 
-      <section className="document-center-toolbar">
+      <section className="document-center-toolbar" style={{ flexWrap: 'wrap' }}>
         <label><span>선택 파일</span><input value={selectedFileId} readOnly placeholder="목록에서 파일 선택" /></label>
         <label><span>질문</span><input value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="예: 주문 취소 관련 요구사항" /></label>
         <label><span>검색 건수</span><input type="number" min={1} max={20} value={topK} onChange={(e) => setTopK(Number(e.target.value) || 5)} /></label>
