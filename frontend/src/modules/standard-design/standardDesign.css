@@ -387,3 +387,7 @@
 .sd-analysis-summary dd { margin: 0; }
 
 .sd-group-detail-workspace .project-list-detail-workspace__detail > .multi-grid-detail { flex: 1; }
+.sd-group-detail-workspace .program-data-grid { display: flex; height: 100%; min-height: 0; flex: 1; flex-direction: column; }
+.sd-group-detail-workspace .program-data-grid .data-section { display: flex; min-height: 0; flex: 1; flex-direction: column; }
+.sd-group-detail-workspace .program-data-grid .standard-table-wrap { min-height: 0; max-height: none; flex: 1; }
+.sd-group-detail-workspace .basekit-ag-grid { height: 100%; min-height: 180px; }
