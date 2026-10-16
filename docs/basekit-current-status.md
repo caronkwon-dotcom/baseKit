@@ -473,3 +473,10 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 - 신규 프로젝트 UUID로 ID 재사용 방지, 폐기 항목 기본 숨김/포함 선택, 프로젝트 ID 누락 400, 선택 프로젝트 폐기 방어. 기존 sd-work만 사용.
 - frontend build/lint/61 tests, backend 60 pass/5 skip. 실제 새 프로젝트 0건→등록1건, API 폐기204/Y, 일반 프로젝트 문구점0 확인. 브라우저 confirm 제어 제한 및 PM 배포 미수행.
 - 상세 원인/복구 SQL/검증/제한: docs/sd-requirement-fixture-isolation.md.
+
+## 프로젝트 선택명과 그룹 빈 상세 화면 (2026-10-16)
+
+- 프로젝트 선택란에는 프로젝트명만 표시하고 ID는 tooltip 및 선택 대화상자에서 확인한다. UUID가 이름을 밀어내던 표시 문제를 수정했다.
+- 그룹 조회 0건이면 미저장 빈 그룹 기본정보/포함 Requirement 영역을 자동으로 연다. 마지막 그룹 삭제 후에도 빈 작성 화면을 유지한다. 서버 조회 실패는 오류 안내를 유지하면서 빈 폼을 제공한다. 빈 초안은 DB에 자동 저장하지 않는다.
+- 조회 완료 후 그룹 목록의 이전 loading overlay가 남는 현상은 프로젝트/조회 완료 상태 변경 때 해당 Grid를 재생성하여 해결했다.
+- 검증: build/lint/diff-check 통과, 그룹 frontend tests 3 통과, backend 60 통과/5 skip. 실제 5176 화면에서 Basekit SD 설계 이름, 그룹 0건 안내, 우측 그룹명/설명/구성 Grid 노출 확인. DB/API 계약 변경 없음.

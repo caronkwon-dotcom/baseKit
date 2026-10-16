@@ -59,9 +59,9 @@ export default function ProjectContextSelector({ onSelected }: { onSelected?: (p
   const { project } = useProjectContext();
   const [open, setOpen] = useState(false);
   return <>
-    <button type="button" className="sd-project-context-selector" onClick={() => setOpen(true)} aria-haspopup="dialog">
+    <button type="button" className="sd-project-context-selector" onClick={() => setOpen(true)} aria-haspopup="dialog" title={project ? `${project.PROJECT_NAME} (${project.PROJECT_ID})` : '프로젝트 선택'}>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h6l2 2h10v9.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" /><path d="M3 9h18" /></svg>
-      <strong>{project ? `${project.PROJECT_ID} | ${project.PROJECT_NAME}` : '프로젝트 선택'}</strong>
+      <strong>{project ? project.PROJECT_NAME : '프로젝트 선택'}</strong>
       <span aria-hidden="true">▾</span>
     </button>
     {open ? <ProjectContextDialog onClose={() => setOpen(false)} onSelected={onSelected} /> : null}
