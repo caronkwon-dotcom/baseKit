@@ -40,7 +40,7 @@ const selectField = (key: string, label: string, options: Array<{ value: string;
 const switchField = (key: string, label: string): FieldDefinition => ({ key, label, dataType: 'STRING', controlType: 'SWITCH', displayType: 'BOOLEAN', required: true, options: [{ value: 'Y', label: '사용' }, { value: 'N', label: '미사용' }] });
 const badgeField = (key: string, label: string): FieldDefinition => ({ key, label, dataType: 'STRING', controlType: 'TEXT', displayType: 'BADGE', required: false });
 const applyGridValue = <T,>(row: T, key: string, value: string): T => ({ ...row, [key]: value });
-const statusColumn = <T extends { SOURCE_STATUS: RegistryStatus }>(key: 'SOURCE_STATUS', header: string): DataTableColumn<T> => ({ key, header, width: 112, align: 'center', fieldDefinition: badgeField(key, header), render: (row) => row.SOURCE_STATUS });
+const statusColumn = <T extends { SOURCE_STATUS: RegistryStatus }>(key: 'SOURCE_STATUS', header: string): DataTableColumn<T> => ({ key, header, width: 112, align: 'center', render: (row) => <span className={`metadata-badge ${row.SOURCE_STATUS === 'MISSING_SOURCE' ? 'warn' : 'info'}`}>{row.SOURCE_STATUS}</span> });
 
 const actionColumns: DataTableColumn<ButtonGroup>[] = [
   { key: 'GROUP_TYPE', header: '구분', width: 100, fieldDefinition: selectField('GROUP_TYPE', '구분', [{ value: 'COMMON', label: 'COMMON' }, { value: 'CUSTOM', label: 'CUSTOM' }]), render: row => row.GROUP_TYPE },
@@ -132,8 +132,8 @@ export default function ProgramManagePage() {
     return {
       PROGRAM_NAME: get('PROGRAM_NAME') ?? textField('PROGRAM_NAME', '프로그램명', true),
       DESCRIPTION: get('DESCRIPTION') ?? textField('DESCRIPTION', '설명'),
-      MODULE_CODE: get('MODULE_CODE') ?? selectField('MODULE_CODE', 'Module', []),
-      PROGRAM_TYPE_CODE: get('PROGRAM_TYPE_CODE') ?? selectField('PROGRAM_TYPE_CODE', '유형', []),
+      MODULE_CODE: { ...(get('MODULE_CODE') ?? selectField('MODULE_CODE', 'Module', [])), gridControlDisplay: 'always' as const },
+      PROGRAM_TYPE_CODE: { ...(get('PROGRAM_TYPE_CODE') ?? selectField('PROGRAM_TYPE_CODE', '유형', [])), displayType: 'TEXT' as const, gridControlDisplay: 'always' as const },
       USE_YN: switchField('USE_YN', '사용여부'),
     };
   }, [fields]);
@@ -222,22 +222,20 @@ export default function ProgramManagePage() {
   return <section className="page multi-grid-page program-registry-page">
     <PageHeader breadcrumbs={['시스템관리', '프로그램관리']} description="프로그램별 버튼 권한 그룹과 자동수집 Endpoint 연결을 관리합니다." />
     <SearchPanel rows={1} fields={searchFields} value={condition} initialValue={initial} onValueChange={setCondition} onSearch={search} onReset={search} />
-    <MasterDetailMultiGrid stacked resizable
+    <MasterDetailMultiGrid stacked resizable alignDetailToolbars
+      detailOptions={<div className="program-endpoint-controls" role="group" aria-label="Endpoint 목록 옵션">
+          <label>표시 범위 <select className="basekit-toolbar-control" aria-label="Endpoint 표시 범위" value={endpointScope} onChange={event => { setEndpointScope(event.target.value); setEndpointSelected(new Set()); }}><option value="MAPPED">선택 Program 연결</option><option value="UNMAPPED">UNMAPPED</option><option value="ALL">전체 수집 Endpoint</option></select></label>
+          <label>추가 권한 <select className="basekit-toolbar-control" aria-label="추가 버튼 권한 그룹" value={mappingGroup} onChange={event => setMappingGroup(event.target.value)} disabled={actions.dirty || saving}><option value="">Program 권한만</option>{actions.rows.filter(row => row.USE_YN === 'Y').map(row => <option key={row.__GRID_ROW_ID} value={row.GROUP_CODE}>{row.GROUP_CODE}</option>)}</select></label>
+        </div>}
       master={<BaseKitDataGrid programKey="PROGRAM_MGMT" roleCode="ADMIN" title="프로그램 목록" columns={programColumns} rows={programs.rows} loading={loading} getRowKey={row => row.__GRID_ROW_ID} getRowState={programs.getState} currentRowKey={selectedProgram?.__GRID_ROW_ID} selectedRowKeys={programSelected} onSelectedRowKeysChange={setProgramSelected} onRowClick={row => selectProgram(row.PROGRAM_KEY)} editing={{ keys: ['PROGRAM_NAME', 'DESCRIPTION', 'MODULE_CODE', 'PROGRAM_TYPE_CODE', 'USE_YN'], onChange: (row, key, value) => programs.update(row.__GRID_ROW_ID, current => applyGridValue(current, key, value)) }} toolbarActions={programToolbar} />}
       detailTop={<BaseKitDataGrid programKey="PROGRAM_MGMT" roleCode="ADMIN" title={`${selectedKey || '선택 Program'} 버튼 권한 그룹`} columns={actionColumns} rows={actions.rows} loading={detailLoading} emptyMessage={detailEmpty} getRowKey={row => row.__GRID_ROW_ID} getRowState={actions.getState} selectedRowKeys={actionSelected} onSelectedRowKeysChange={setActionSelected} editing={saving ? undefined : { keys: ['GROUP_CODE', 'GROUP_TYPE', 'GROUP_NAME', 'DESCRIPTION', 'USE_YN'], onChange: (row, key, value) => actions.update(row.__GRID_ROW_ID, current => applyGridValue(current, key, value)) }} toolbarActions={actionToolbar} />}
-      detailBottom={<div className="program-endpoint-detail">
-        <div className="program-endpoint-controls">
-          <label>표시 <select aria-label="Endpoint 표시 범위" value={endpointScope} onChange={event => { setEndpointScope(event.target.value); setEndpointSelected(new Set()); }}><option value="MAPPED">선택 Program 연결</option><option value="UNMAPPED">UNMAPPED</option><option value="ALL">전체 수집 Endpoint</option></select></label>
-          <label>추가 권한 <select aria-label="추가 버튼 권한 그룹" value={mappingGroup} onChange={event => setMappingGroup(event.target.value)} disabled={actions.dirty || saving}><option value="">Program 권한만</option>{actions.rows.filter(row => row.USE_YN === 'Y').map(row => <option key={row.__GRID_ROW_ID} value={row.GROUP_CODE}>{row.GROUP_CODE}</option>)}</select></label>
-        </div>
-        <BaseKitDataGrid programKey="PROGRAM_MGMT" roleCode="ADMIN" title={`${selectedKey || '선택 Program'} Endpoint 목록`} columns={endpointColumns} rows={visibleEndpoints} loading={detailLoading} emptyMessage={detailEmpty} getRowKey={row => row.ENDPOINT_ID} selectedRowKeys={endpointSelected} onSelectedRowKeysChange={setEndpointSelected}
+      detailBottom={<BaseKitDataGrid  programKey="PROGRAM_MGMT" roleCode="ADMIN" title={`${selectedKey || '선택 Program'} Endpoint 목록`} columns={endpointColumns} rows={visibleEndpoints} loading={detailLoading} emptyMessage={detailEmpty} getRowKey={row => row.ENDPOINT_ID} selectedRowKeys={endpointSelected} onSelectedRowKeysChange={setEndpointSelected}
           metrics={[{ label: 'UNMAPPED', value: endpoints.filter(row => row.MAPPING_STATUS === 'UNMAPPED').length, tone: 'danger' }]}
           toolbarActions={[
             { actionCode: COMMON_ACTIONS.SEARCH, label: '새로고침', disabled: !selectedProgramId || saving || actions.dirty, onClick: () => void loadDetails(selectedProgramId) },
             { actionCode: COMMON_ACTIONS.SAVE, label: 'Program 연결', disabled: !endpointSelected.size || saving || actions.dirty || detailLoading, onClick: () => void changeMapping(false) },
             { actionCode: COMMON_ACTIONS.DELETE, label: '연결해제', disabled: !endpointSelected.size || saving || actions.dirty || detailLoading, onClick: () => void changeMapping(true) },
-          ]} />
-      </div>}
+          ]} />}
       message={<BaseKitMessage type={detailError ? 'error' : message.type} message={detailError || message.text} />}
     />
   </section>;

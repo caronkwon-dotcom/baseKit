@@ -61,6 +61,23 @@ export default function AppLayout() {
     if (initialContextMissing) navigate(programByKey.HOME.routePath, { replace: true });
   }, [initialContextMissing, navigate]);
 
+  useEffect(() => {
+    const openLinkedProgram = (event: Event) => {
+      const key = (event as CustomEvent<{PROGRAM_KEY:string}>).detail?.PROGRAM_KEY;
+      const program = programByKey[key];
+      if (!program || program.useYn !== 'Y') return;
+      if (!window.dispatchEvent(new CustomEvent('basekit:before-program-change', { cancelable: true, detail: { resume: () => openLinkedProgram(event) } }))) return;
+      if (program.requiresProjectContext && !designLifecycleRepository.getSelectedProjectId()) {
+        setPendingProjectProgramKey(key); setProjectContextDialogOpen(true); return;
+      }
+      setTabs(current => current.some(tab => tab.programKey === key) ? current : [...current, {programKey:key,title:program.programName}]);
+      setActiveProgramKey(key); setActiveTopMenuKey(findTopMenuKeyByProgram(menuTree,key) ?? menuTree[0]?.menuKey ?? '');
+      navigate(program.routePath);
+    };
+    window.addEventListener('basekit:open-program',openLinkedProgram);
+    return () => window.removeEventListener('basekit:open-program',openLinkedProgram);
+  }, [menuTree,navigate]);
+
   const pinSidebar = () => { setSidebarPinned(true); setSidebarOpen(true); localStorage.setItem('basekit.navigation.sidebar-pinned', 'Y'); };
   const unpinSidebar = () => { setSidebarPinned(false); localStorage.setItem('basekit.navigation.sidebar-pinned', 'N'); };
   const selectTopMenu = (menuKey: string) => {
@@ -78,6 +95,7 @@ export default function AppLayout() {
   };
 
   const activateProgram = (programKey: ProgramKey) => {
+    if (programKey !== activeProgramKey && !window.dispatchEvent(new CustomEvent('basekit:before-program-change', { cancelable: true, detail: { resume: () => activateProgram(programKey) } }))) return;
     if (programByKey[programKey].requiresProjectContext && !designLifecycleRepository.getSelectedProjectId()) {
       setPendingProjectProgramKey(programKey);
       setProjectContextDialogOpen(true);
@@ -103,12 +121,13 @@ export default function AppLayout() {
   };
 
   const closeProgram = (programKey: ProgramKey) => {
+    if (programKey === activeProgramKey && !window.dispatchEvent(new CustomEvent('basekit:before-program-change', { cancelable: true, detail: { resume: () => closeProgram(programKey) } }))) return;
     if (programKey === 'HOME') return;
     setTabs((currentTabs) => {
       const closeIndex = currentTabs.findIndex((tab) => tab.programKey === programKey);
       const nextTabs = currentTabs.filter((tab) => tab.programKey !== programKey);
       if (programKey === activeProgramKey) {
-        activateProgram((nextTabs[Math.max(0, closeIndex - 1)] ?? homeTab).programKey);
+        activateProgramImmediately((nextTabs[Math.max(0, closeIndex - 1)] ?? homeTab).programKey);
       }
       return nextTabs;
     });
@@ -120,8 +139,9 @@ export default function AppLayout() {
   };
 
   const closeAll = () => {
+    if (!window.dispatchEvent(new CustomEvent('basekit:before-program-change', { cancelable: true, detail: { resume: closeAll } }))) return;
     setTabs([homeTab]);
-    setActiveProgramKey('HOME');
+    activateProgramImmediately('HOME');
   };
 
   const moveTab = (direction: -1 | 1) => {

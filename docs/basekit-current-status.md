@@ -1,6 +1,41 @@
 # BaseKit 현재 상태와 WBS
 
+## 2026-10-13 PostgreSQL Analysis 근거 조회 500 수정
+
+실제 SD PostgreSQL에서 그룹 보완 실행 SUCCESS 이후 Analysis 추가 모달 목록/상세가 500을 반환했다. RequirementAnalysisSourceService의 CREATED_AT Object 직접 캐스팅이 원인이다. PostgreSQL JDBC 비지정 조회는 java.sql.Timestamp, H2 검수는 OffsetDateTime을 반환해 기존 테스트에서 누락되었다. JDBC getObject(1, OffsetDateTime.class) 타입 지정 조회로 수정했다. 동일 PostgreSQL/실제 기존 실행 GA-b715da8ae18c42a18796bcb4108ad4e1을 별도 8105 검수 서버에서 목록/상세 HTTP 200 및 추천 5건 조회 확인. DB/데이터/프론트 변경 없음. backend 59통과/5 skip, diff check 통과. 기존 8083 서버는 실행 설정 보존을 위해 중지하지 않았으며 사용자 백엔드 재시작 후 적용된다.
+
+
+## 2026-10-13 UUID 호환 수정 및 그룹 보완 재검증
+
+프론트 UUID 생성을 공통 createUuid로 통합했다. 격리 H2 + 모의 LLM HTTP 브라우저에서 보완 3회, 그룹 3→5건 저장, 실행 간 누적 선택, 근거 연결, 5건 재분석, 설계 회귀, 추천 중복 차단을 확인했다. RAW/독립 이력 보존 및 console error 0. frontend build/lint/61건, backend 59통과/5 skip. DB/API 변경 없음. 회사 LLM/운영 PostgreSQL은 미검증. [재검증 상세 보고](sd-group-recommendation-recheck.md).
+
+
+## 2026-10-13 그룹 보완 Analysis V0
+
+그룹 밖 프로젝트 요구사항을 후보로 전달하는 GROUP_RECOMMENDATION을 추가했다. V17로 기존 GROUP_DESIGN과 구분하고 검증된 recommendedRequirements/원문 사유를 저장한다. 추가 모달은 보완 실행만 조회하며 누적 선택·사람의 저장·Analysis 근거 연결을 유지한다. 기존 설계 이력과 독립 추천 모델은 유지한다. frontend build/lint/56건, backend 64건(5 외부 DB skip) 통과. 격리 모의 LLM 브라우저에서 그룹 3→5건 저장·근거·중복 차단 확인. 실제 회사 LLM/운영 PostgreSQL과 대량 입력은 후속 검수. [계약·검증 보고](sd-group-recommendation-v0.md).
+
+## 2026-10-13 SD 그룹 분석 흐름 및 추천 조회 수정
+
+확정 전에 DRAFT 분석·수정·재분석을 반복하고 사람이 최종 확정하는 흐름으로 정정했다. REVIEW_REQUIRED에서도 분석 가능하며 원본 변경 시 DRAFT는 유지하고 확정 이후에는 기존 재검토 전환을 유지한다. 현재 저장 버전의 불변 Snapshot과 독립 실행 이력을 보존하며 공통 BaseTabs로 기본정보/분석을 전환한다.
+
+추가 모달의 누락 원인은 독립 추천 BSDRANLS/BSDRARIT만 조회하고 그룹 분석 BSDRGANL은 조회하지 않았던 저장 모델 불일치다. 읽기 전용 analysis-sources API가 두 모델의 동일 프로젝트 실행을 projection으로 조회하며 V0 후보의 입력 근거 ID와 원문 명칭·설명을 표시한다. V16 BSDRGREV로 그룹 개요 출처를 별도 저장한다. 모달의 누적 선택 및 동일 Requirement 근거 합산을 유지한다.
+
+Frontend 56건, build/lint, Backend 62건(57통과/외부 PostgreSQL 조건 5 skip), diff check 검증. 분리 H2 memory DB + 로컬 모의 LLM의 5186/8093 브라우저에서 DRAFT 실행/재실행/이력 보존, 탭 초안 유지, 미저장 실행 제한, 실행별 원문 사유, 2실행 누적 선택 및 그룹 저장/확정/원본 근거 재조회 확인. console error 0. 운영 PostgreSQL 적용과 실제 회사 LLM 연결, 인증 Host grant는 별도 통합 검수 사항이며 이번 단위에서 수행하지 않았다. 기존 5176 실행 서버는 보존했다. 상세 변경/한계는 [분석 흐름 수정 보고](sd-group-analysis-flow-fix.md)를 따른다.
+
+
 이 문서는 새 작업자와 GPT Work가 실제 Repository 상태를 빠르게 파악하기 위한 기준 문서다. 특정 날짜나 과거 작업 branch가 아니라 최신 `dev-pm`과 열린 PR을 기준으로 갱신한다.
+
+## 2026-10-07 SD 등록 버튼 검수 반영
+
+목록의 신규 그룹 버튼을 제거하고 페이지 상단 공통 그룹 기능 영역 첫 버튼을 등록으로 통일했다. 같은 검수 단위에서 수정/추가/삭제 예정 행을 공통 상태 스타일로 연결하고 삭제 표시 후 상단 저장에 일괄 반영하도록 조정했다. 저장은 변경 여부와 무관하게 활성화하며 처리 중/읽기전용만 비활성화한다. Frontend 56건, Backend 46통과/5 skip, build/lint 및 브라우저 검수 통과. 0건 상태에서도 표시하며 기존 초안/미저장 보호 로직을 유지한다. 별도 sd-work commit/push 단위.
+
+## 2026-10-07 SD 추가 UI 검수 반영
+
+저장/확정/삭제를 페이지 최상단 공통 버튼 영역으로 이동하고 그룹/요구사항 관리의 공통 SearchPanel inline 배치를 통일했다. 공통 FormModal Footer 슬롯을 통해 미저장 그룹 변경의 변경 버리고 이동도 하단 버튼 줄로 이동했다. build/lint, Frontend 55건, Backend 51건(46통과/5 skip), 실제 브라우저 배치 검수·console error 0. 실데이터 저장 없이 검수했다. 별도 sd-work commit/push 단위이며 [상세 검수 보고](sd-requirement-group-ui-review.md)의 추가 검수 반영 절을 따른다.
+
+## 2026-10-07 SD 요구사항 그룹 UI 표준 재정렬
+
+sd-work에서 공통 Form Label 좌측 정렬, 공통 MasterDetail 내용 높이/전체 Empty 슬롯, 공통 Grid Small Action 표현을 보정하고 그룹 화면에 첫 행 선택·기본 접힌 SearchPanel·상단 Toolbar·공통 포함 사유 editor·Checkbox 다중 행 삭제를 적용했다. 기존 origin/dev-pm a2c6088은 이미 포함되어 있어 신규 기준 통합은 필요 없었다. 상세 파일·검증·잔여 범위는 [UI 검수 보고](sd-requirement-group-ui-review.md)를 따른다. build/lint, Frontend 55건, Backend 51건(46 통과/5 외부 DB skip), diff check 통과. 실제 브라우저는 격리 H2 memory DB에서 검수했다. 이번 단위는 sd-work commit/push로 종결하며 추가 검수는 별도 작업이다.
 
 ## 1. 프로젝트 단계
 
@@ -15,6 +50,24 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 
 현재는 **Level 1: 시스템 공통 Foundation** 단계다. 초급 개발자도 가이드와 규약을 따르면 일관된 화면과 코드를 만들 수 있고, 개발자 변경에도 프로젝트 스타일이 흔들리지 않는 기반을 목표로 한다.
 
+## 2026-10-05 최종 dev-pm 통합 및 실행 검수 완료
+
+사용자 승인으로 COMMON(`a928069`), DESIGN(`f2d156e`), SD(`7233375`)의 최종 작업을 dev-pm에 통합했다. 제품 통합 커밋은 `15c3805`이며, 오늘 종결 범위에는 DESIGN 문서·검수 기록도 포함한다. 기존 COMMON과 DESIGN 제품 UI 변경은 보존했다. 이전 Copilot 작업 트리의 Excel 구현은 현행 SD와 동일하여 재적용하지 않았고, 해당 미커밋 파일과 복구용 stash는 보존했다.
+
+요구사항 목록 내용 컬럼 제거, 요구사항명 전체폭, 요구유형·상태 동일 행, 기본정보 설계 의견, AI 분석 탭 제거/구현 KEEP을 5173 실제 화면에서 확인했다. dev-pm 백엔드를 clean 재빌드·재실행하여 8080 health UP, PostgreSQL 기존 V11 및 11개 migration 검증, 요구사항 10건 조회와 DESIGN_OPINION 응답을 확인했다. 실데이터 수정·삭제는 수행하지 않았다.
+
+통합본 build/lint, Frontend 회귀 53건, Backend H2 46건(41건 통과·외부 PostgreSQL 조건 5건 skip), git diff --check 통과. 브라우저 console error 0. 검수 주소: `http://localhost:5173/baseKit/#/standard-design/requirements`. 상세 범위와 남은 미검증 사항은 [오늘 작업 종결 보고](releases/2026-10-05-dev-pm-closeout.md)를 따른다. remote push와 main 승격은 수행하지 않았다. 아래 개별 작업 기록은 당시 검증 이력이다.
+
+## DESIGN 선택 반영 운영 및 Endpoint 정렬 완료 (2026-10-05)
+
+기준 dev-pm b28dc96 → design-work 현행화. 사용자 승인한 최소 공통 옵션 슬롯·공유 Detail Toolbar track으로 Endpoint Select를 Toolbar에 통합했다. Chrome 6조합에서 header 차이 0px, 빈 목록·너비 변경 유지, build/lint 및 Backend 42건(5 skip) 통과. 기능/API/DB/권한 의미 변경 없음. 제품 UI 파일 4개만 dev-pm에 cherry-pick하며 이번 문서/검수 스크립트/측정은 DESIGN 내부 산출물로 design-work에 유지한다. 아래 이전 작업 기록은 과거 이력이다.
+
+## DESIGN 역할 정정 및 프로그램관리 UI 보정 (2026-10-05)
+
+최신 dev-pm a928069를 포함한 design-work에서 DESIGN 문서를 재검토하고 실제 UI 표현 수정 책임을 명시했다. [역할 기준](design/DESIGN-role.md), [검토 결과](design/grid-status-type-badge/DESIGN-grid-badge-review.md). 상태 compact semantic Badge, 유형 neutral label, 공통 Toolbar Select 스타일 및 긴 Title/Action 표현 보정은 직접 적용했다. API/DB/권한/업무 매핑은 유지했다.
+
+Chrome 실제 제품/fixture 검수: 1920/1440/1280 × 두 버튼 모드, row/header 32/34px·Badge 20px·Select 28px, JS 오류 0. Endpoint 옵션은 아직 Toolbar 밖이며 좌우 header 차이 36px로 미통과. [COMMON 옵션 삽입 계약 요청](design/grid-status-type-badge/COMMON-Endpoint-toolbar-request.md)을 분리했고, 공통 확장 후 DESIGN이 배치와 재검수를 마무리해야 한다. Endpoint 보정 전체 완료 판정은 보류한다. 사용자가 잔여 항목을 인지한 상태에서 design-work push 및 dev-pm merge를 승인했으며, 이번 UI 보정과 문서를 통합한다. COMMON 확장과 DESIGN 재검수는 후속 작업으로 유지한다. build/lint/Backend test(42건, 실패 0·외부 PostgreSQL 조건 5건 skip) 통과.
+
 ## 2. 코드까지 구현 완료
 - Flyway V9 리소스 충돌 로컬 수정 (2026-10-05): Maven은 `backend/src/main/resources`와 `database/migration`을 모두 classpath에 복사한다. 공유 디렉터리의 `V9__create_sd_analysis.sql`은 backend의 V10과 동일한 SQL이므로 해당 구버전 파일만 Maven 복사 대상에서 제외했다. 기존 SQL/적용 이력을 수정하지 않았으며, 로컬 PostgreSQL에서 기존 V9 검증 후 V10 신규 적용, `mvnw.cmd clean spring-boot:run` 및 8080 health `UP` 확인. Frontend build/lint, Backend test 42건(실패 0, 오류 0, 외부 PostgreSQL 조건 5건 skip), `git diff --check` 통과. 작업 브랜치 `fix/flyway-v9-resource-collision`; 사용자의 기존 V9→V10 파일 변경과 함께 유지해야 한다.
 
@@ -25,7 +78,7 @@ BaseKit은 Frontend Prototype을 기반으로 Spring REST와 실제 DB Foundatio
 - 공통 `BaseFileUpload` V1: native input/drag & drop, 다중 파일, 정책 기반 사전검증, 파일별 진행률·취소·재시도·삭제, bounded concurrency와 XHR multipart transport. Requirement Attachment에 첫 적용. [ADR-032](decisions/032-base-file-upload-component.md) · [인계 보고서](base-file-upload-v1-handoff.md)
 - Standard Design Project Menu V1: 프로젝트별 LEVEL/SINGLE 분류 방식, Project Menu CRUD REST/Flyway V7, Requirement의 별도 Project Menu 관계(BSDRRPML), 기존 시스템 MENU_KEYS 보존, Excel 진입점만 제공. 재귀 트리·Parser·AI 기능은 미구현.
 
-- Standard Design Requirement Excel Import (2026-10-05, 미커밋): 공통 Excel Import를 재사용한 요구사항 양식·검증·저장 연결. LLM 분석·설계 대상 프로그램은 미구현이며 결정 사항과 COMMON·디자인 요청은 [인계 문서](sd-requirement-llm-handoff.md). 실제 LLM·승인 DB 검증은 미완료.
+- Standard Design Requirement Excel Import (2026-10-05, dev-pm 통합 완료): 공통 Excel Import를 재사용한 요구사항 양식·검증·저장 연결. 분석 V1은 별도 구현 후 KEEP하며 후속 그룹 분석에서 재사용한다. 기존 [Excel 인계 문서](sd-requirement-llm-handoff.md)는 당시 범위 기록이며 현행 분석·화면 상태는 ADR 033과 오늘 종결 보고를 따른다. 실제 회사 LLM 검증은 미완료.
 
 Requirement Intake 검증: 신규 H2 API 통합 테스트와 Frontend build/lint 통과. 기존 전체 Backend 테스트 22건은 신규 통합 테스트 추가 전에 통과했으며 이 실행에서 연결된 Supabase PostgreSQL에 Flyway V5가 적용되었다. 추가 변경 후 전체 Backend 재실행은 외부 DB 변경 위험으로 자동 승인 검토가 거부되어 보류했고, 신규 대상 테스트만 H2로 재검증했다. 화면은 프로젝트 Context 선택 후 `요구사항 관리` 메뉴에서 확인한다.
 
@@ -371,8 +424,52 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 
 기존 columns/validateRow/mapRow/onImport 계약 유지. 파싱·반영 잠금, Preview 초기화, Header/행 오류 분리, 물리 Excel 행 번호, 선택 title/submitLabel/disabled 및 FormModal submitDisabled를 보완했다. 상세 계약과 검증은 [SD Excel COMMON 인계](sd-excel-common-handoff.md) 참고. Frontend build/lint 및 42건 테스트, 외부 DB 환경변수를 제거한 Backend 30건(5 skip)이 통과했다. SD 업무 로직·LLM Client·시스템 Program/Runtime/권한 변경은 없다. Modal focus와 실화면 SD/LLM 연결은 후속 검증 범위다.
 
-## SD 요구사항 분석 V1 (sd-work, 미커밋)
+## SD 요구사항 분석 V1 (2026-10-05, dev-pm 통합 완료)
 - 구현: Flyway V9, `standarddesign/analysis` 백엔드(분석·후보·확정·생성 API), `RequirementAnalysisPanel` 4단계 UX, STALE·버전 충돌·생성 멱등성. 결정은 `docs/decisions/033-sd-requirement-analysis-v1.md`.
 - 검증: 백엔드 전체 테스트(H2) 통과, Frontend lint/build/node test 46건 통과.
 - 미검증: 실제 회사 LLM(`COMPANY_LLM_*` 미설정), 승인 DB(PostgreSQL), 브라우저 수동 검수.
 - 후속 필수: Requirement 단위 Lock과 OWNER/LOCK OWNER 분리, `SD_*` 테이블 명칭 확정, 사용자 승인된 Program 메뉴 연결 정책.
+
+## SD V1 리뷰 보완 (B01/B02/R01/R02/R04)
+
+구현 완료·dev-pm 통합. 상세는 ADR 033 '리뷰 보완' 참조. 실제 LLM·분석 파이프라인의 PostgreSQL 통합 검증은 미완료.
+
+## 요구사항 화면 정리 인수인계 (2026-10-05, dev-pm 통합 완료)
+
+- 기존 sd / sd-work에서 Copilot 미커밋 변경을 보존하며 진행. 신규 branch/worktree 및 commit/push/merge 없음.
+- 목록 DESCRIPTION 컬럼 제거, 요구사항명 전체 폭 및 요구유형+상태 같은 줄 배치 적용.
+- 상세 AI 분석 탭과 import/렌더 연결만 제거. RequirementAnalysisPanel, backend/API/상태/테스트 구현은 KEEP하며 후속 요구사항 그룹 분석에서 재사용 예정. 신규 그룹 분석 기능은 구현하지 않음.
+- 설계 의견: 기본정보 PROCESS_DESCRIPTION 아래에 입력을 연결하고 BSDRREQ.DESIGN_OPINION 및 기존 Requirement 조회/저장 API를 최소 확장. V11은 최신 분석 스냅샷 의견을 초기값으로 이관하며 BSDAAREQ 원본은 보존. 이전 클라이언트의 누락/null 의견은 수정 시 현재 값을 유지하고 빈 문자열은 명시적 삭제로 처리. 의견 변경은 기존 MOD_DT 버전 검사에 반영됨. 향후 그룹 분석은 이 필드를 입력으로 연결할 예정이며 이번 작업에서 분석 계약은 변경하지 않음.
+- 검증: frontend build/lint 통과, 분석·Excel 단위 테스트 11건 통과, 전체 backend H2 test 프로필 42건(실행 37건 통과, 5건 skip), git diff --check 통과. 설계 의견 생성/수정/조회/목록/지우기 및 기존 클라이언트 호환 테스트 추가. 실제 브라우저 시각 검증·실제 PostgreSQL 적용·실제 LLM 검증은 미실행.
+## SD dev-pm 최신화 및 backend 재빌드 (2026-10-05)
+
+- sd-work에서 dev-pm/origin/dev-pm a928069을 fast-forward 병합. 기존 Copilot/요구사항 화면 정리 미커밋 작업은 stash 후 apply로 보존. 복구용 stash는 유지함. 신규 branch/worktree 및 push 없음.
+- Flyway 오류 원인: DB 이력 V9=공통 endpoint permission(1801662515), V10=SD 분석(-488513351)에 비해 sd 파일 번호가 달랐음. backend와 database 폴더를 V9 공통 / V10 분석 / V11 설계 의견으로 통일. 기존 V9/V10 SQL 본문 및 DB 이력은 수정하지 않음.
+- clean package + H2 test 프로필: BUILD SUCCESS, 46건 중 41건 통과/5건 skip. frontend build/lint 통과. 실제 PostgreSQL 시작 및 V11 적용은 이 검증에서 수행하지 않음.
+
+## SD 요구사항 그룹 관리 V1 (2026-10-06, sd-work 구현 완료·통합 전)
+
+- origin/dev-pm d1124d1을 기존 sd-work에 fast-forward한 기준으로 구현. 신규 branch/worktree, dev-pm 직접 개발/merge, design-work 전체 이관 없음.
+- 독립 Requirement 추천 결과 저장·조회(V12)와 그룹 master/N:M 구성/복수 Analysis 근거, Requirement 폐기·Revision 이력(V13), 그룹 CRUD/확정/재확정 API와 제품 화면 구현.
+- Requirement DELETE는 사용자 지시에 따라 폐기이며 대표 ID/첨부/메뉴 관계/그룹 구성/근거를 보존한다. 변경·폐기 시 포함 그룹 REVIEW_REQUIRED. 사용자가 영향 검토 후 구성 조정 또는 그대로 재확정.
+- 기존 BaseKit Grid/Form/Modal/Toolbar/CSS 재사용. 직접 선택+여러 추천 실행 선택을 수동 병합한다. Requirement 상세는 포함 그룹 조회/이동만 제공한다. 그룹 분석/설계·Program 생성·LLM 실행 제외.
+- Backend H2 51건 중 46건 실행 통과/5 skip, frontend 55건 통과, build/lint/diff check 통과. 격리 memory DB의 실제 브라우저에서 직접/Analysis 혼합·폐기·재검토·재확정·연관 이동·미저장 이탈 검수.
+- 실제 PostgreSQL migration/다중 서버 동시성/인증 Host endpoint grant는 별도 통합 검수. 좁은 화면은 기존 최소 폭/가로 스크롤 유지.
+- 제품 commit: foundation d9430c548898bafbce8d85457af0e015c3ca5f1f, 그룹 V1 4223a801e2875f720a49bc009086e743f5d1f950. sd-work push만 수행하며 dev-pm merge는 별도 통합 단계다.
+- 상세: docs/sd-requirement-group-v1-progress.md 및 ADR 034.
+## SD 그룹 통합 후 오류 점검 (2026-10-06)
+
+이전 8080 dev-pm 백엔드를 최신 코드로 재시작하여 그룹 API 404 복구. PostgreSQL V13까지 migration 검증 및 5173 proxy API 200 확인. Grid CREATE 버튼 중복 React key는 sd-work a2c6088에서 1줄 수정, build/lint와 브라우저 콘솔 error 0 확인. 사용자 승인으로 수정 commit a2c6088만 로컬 dev-pm에 fast-forward 통합 완료. 5173 실제 화면 정상 빈 목록과 콘솔 error 0 재검증.
+
+## 공모전 브리핑 메뉴 원복 (2026-10-15)
+
+- 기존 sd-work에서 임시 SYS/DEV_GUIDE 루트 필터와 주석을 제거하여 숨김 이전 메뉴 트리를 정확히 복구했다.
+- 원본 메뉴 설정, 기능, 하위 메뉴, 라우트, 권한 및 다른 1Depth 메뉴는 변경하지 않았다. 신규 branch/worktree 없음.
+- 검증: frontend build/lint 및 git diff --check 통과. backend 64건 중 59 통과/5 skip/실패 0. 5176 실제 브라우저에서 시스템관리·개발자가이드·Standard Design 1Depth 노출 확인. 메뉴 공급 코드는 숨김 직전 f2bdd6a^와 동일. 기존 bundle 크기 경고 유지. 그룹 목록 조회 실패 안내가 있어 브라우저 검증은 메뉴 노출 범위로 한정.
+
+## 요구사항 검증 fixture 격리 (2026-10-16)
+
+- 문구점 데이터 출처: 저장소 외부 UI 검증 스크립트의 SDP-002 고정 복사. 5건/전용 그룹을 DEMO-OVERVIEW-UI-20261009로 격리, 실제 22건 보존. 스키마 변경 없음.
+- 신규 프로젝트 UUID로 ID 재사용 방지, 폐기 항목 기본 숨김/포함 선택, 프로젝트 ID 누락 400, 선택 프로젝트 폐기 방어. 기존 sd-work만 사용.
+- frontend build/lint/61 tests, backend 60 pass/5 skip. 실제 새 프로젝트 0건→등록1건, API 폐기204/Y, 일반 프로젝트 문구점0 확인. 브라우저 confirm 제어 제한 및 PM 배포 미수행.
+- 상세 원인/복구 SQL/검증/제한: docs/sd-requirement-fixture-isolation.md.

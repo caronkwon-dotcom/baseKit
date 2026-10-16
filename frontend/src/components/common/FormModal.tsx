@@ -10,6 +10,7 @@ interface FormModalProps {
   submitTone?: 'primary' | 'danger';
   onSubmit?: () => void;
   onClose: () => void;
+  footerActions?: ReactNode;
 }
 
 export default function FormModal({
@@ -22,6 +23,7 @@ export default function FormModal({
   submitTone = 'primary',
   onSubmit,
   onClose,
+  footerActions,
 }: FormModalProps) {
   useEffect(() => {
     if (!open) return undefined;
@@ -49,6 +51,7 @@ export default function FormModal({
         </header>
         <div className="form-modal-body">{children}</div>
         <footer className="form-modal-footer">
+          {footerActions}
           <button type="button" className="secondary-button" onClick={onClose} disabled={submitting}>취소</button>
           {onSubmit ? (
             <button type="button" className={submitTone === 'danger' ? 'danger-button' : 'primary-button'} onClick={onSubmit} disabled={submitting || submitDisabled}>

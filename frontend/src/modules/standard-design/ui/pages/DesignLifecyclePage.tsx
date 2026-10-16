@@ -476,7 +476,7 @@ function LifecycleDetailPage({ view, supplement }: { view: LifecycleView; supple
     const form = new FormData(event.currentTarget);
     const status = form.get('STATUS') as DesignStatus;
     if (view === 'overview') {
-      const id = selectedId || nextId('SDP', data.projects.length);
+      const id = selectedId || getNextProjectId(data.projects);
       designLifecycleRepository.saveProject({ PROJECT_ID: id, PROJECT_NAME: String(form.get('NAME')).trim(), CUSTOMER_NAME: String(form.get('CUSTOMER_NAME')).trim(), DESCRIPTION: String(form.get('DESCRIPTION')).trim(), STATUS: status, START_DATE: String(form.get('START_DATE') ?? ''), END_DATE: String(form.get('END_DATE') ?? '') });
       if (!projectId) changeProject(id);
     }

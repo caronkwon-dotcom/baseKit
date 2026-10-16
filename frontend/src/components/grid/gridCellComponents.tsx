@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import FormSelect from '../common/FormSelect';
 import type { ICellEditorParams } from 'ag-grid-community';
 import type { FieldDefinition } from '../metadata/fieldDefinition';
 import type { GridRowState } from './gridRowState';
@@ -57,6 +58,10 @@ export function MetadataSwitch({ value, field, editable, onChange }: { value: un
   ><span /></button>;
 }
 
+export function MetadataSelect({ value, field, editable, onChange }: { value: unknown; field: FieldDefinition; editable: boolean; onChange: (value: string) => void }) {
+  return <FormSelect value={String(value ?? '')} options={field.options ?? []} onChange={onChange}
+    disabled={!editable} aria-label={field.label} className="basekit-grid-input basekit-grid-select" />;
+}
 export function StatusColorIndicator({ label, color }: { label: string; color: string }) {
   return <span className="basekit-status-indicator">
     <i className="basekit-status-indicator__dot" style={{ backgroundColor: color }} aria-hidden="true" />

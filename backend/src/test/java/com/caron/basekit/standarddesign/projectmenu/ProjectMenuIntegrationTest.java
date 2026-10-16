@@ -38,6 +38,7 @@ class ProjectMenuIntegrationTest {
         mvc.perform(put("/api/standard-design/project-menus/" + id).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"PROJECT_ID\":\"" + projectId + "\",\"MENU_ID\":\"REQ2\",\"MENU_NAME\":\"요구사항 수정\"}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.DATA.MENU_ID").value("REQ2"));
-        mvc.perform(delete("/api/standard-design/project-menus/" + id)).andExpect(status().isNoContent());
+        // Discarded Requirements retain project-menu references.
+        mvc.perform(delete("/api/standard-design/project-menus/" + id)).andExpect(status().isConflict());
     }
 }

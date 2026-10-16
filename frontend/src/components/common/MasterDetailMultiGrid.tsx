@@ -9,9 +9,13 @@ interface MasterDetailMultiGridProps {
   masterWidth?: string;
   stacked?: boolean;
   resizable?: boolean;
+  alignDetailToolbars?: boolean;
+  detailOptions?: ReactNode;
+  detailTopSizing?: 'ratio' | 'content';
+  detailEmpty?: ReactNode;
 }
 
-export default function MasterDetailMultiGrid({ master, detailTop, detailBottom, message, equalRows = false, masterWidth, stacked = false, resizable = false }: MasterDetailMultiGridProps) {
+export default function MasterDetailMultiGrid({ master, detailTop, detailBottom, message, equalRows = false, masterWidth, stacked = false, resizable = false, alignDetailToolbars = false, detailOptions, detailTopSizing = 'ratio', detailEmpty }: MasterDetailMultiGridProps) {
   const workspace = useRef<HTMLDivElement>(null);
   const bottom = useRef<HTMLDivElement>(null);
   const [topRatio, setTopRatio] = useState(60);
@@ -51,7 +55,8 @@ export default function MasterDetailMultiGrid({ master, detailTop, detailBottom,
   if (stacked && resizable) return <div className="multi-grid-workspace" style={style}>
     <div ref={workspace} className="master-detail-multi-grid resizable-stacked-grid" style={{ gridTemplateRows: `minmax(var(--multi-grid-detail-top-min-height), ${topRatio}fr) var(--multi-grid-gap) minmax(var(--multi-grid-detail-bottom-min-height), ${100-topRatio}fr)` }}>
       <div className="multi-grid-master">{master}</div>{divider('top')}
-      <div ref={bottom} className="multi-grid-detail resizable-grid-details" style={{ gridTemplateColumns: `minmax(var(--multi-grid-master-min-width), ${leftRatio}fr) var(--multi-grid-gap) minmax(var(--multi-grid-master-min-width), ${100-leftRatio}fr)` }}>
+      <div ref={bottom} className={`multi-grid-detail resizable-grid-details${alignDetailToolbars ? ' aligned-detail-toolbars' : ''}${detailOptions ? ' has-detail-options' : ''}`} style={{ gridTemplateColumns: `minmax(var(--multi-grid-master-min-width), ${leftRatio}fr) var(--multi-grid-gap) minmax(var(--multi-grid-master-min-width), ${100-leftRatio}fr)` }}>
+        {detailOptions && <><div className="multi-grid-detail-options empty" role="group" aria-label="검색 조건 없음" /><div className="multi-grid-detail-options">{detailOptions}</div></>}
         <div className="multi-grid-detail-top">{detailTop}</div>{divider('left')}<div className="multi-grid-detail-bottom">{detailBottom}</div>
       </div>
     </div><div className="multi-grid-message-area" aria-live="polite">{message}</div>
@@ -59,9 +64,9 @@ export default function MasterDetailMultiGrid({ master, detailTop, detailBottom,
   return <div className={`multi-grid-workspace${equalRows ? ' equal-detail-rows' : ''}${stacked ? ' stacked-grid-workspace' : ''}`} style={style}>
     <div className={`master-detail-multi-grid${stacked ? ' stacked-grid-layout' : ''}`}>
       <div className="multi-grid-master">{master}</div>
-      <div className="multi-grid-detail">
-        <div className="multi-grid-detail-top">{detailTop}</div>
-        <div className="multi-grid-detail-bottom">{detailBottom}</div>
+      <div className={`multi-grid-detail${detailTopSizing === 'content' ? ' content-detail-top' : ''}${detailEmpty ? ' empty-detail' : ''}`}>
+        {detailEmpty ?? <><div className="multi-grid-detail-top">{detailTop}</div>
+        <div className="multi-grid-detail-bottom">{detailBottom}</div></>}
       </div>
     </div>
     <div className="multi-grid-message-area" aria-live="polite">{message}</div>

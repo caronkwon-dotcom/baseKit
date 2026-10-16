@@ -38,6 +38,8 @@ export interface ProgramDataGridProps<T> {
   metrics?: GridMetric[];
   actionHandlers?: GridActionHandlers<T>;
   toolbarActions?: GridToolbarAction<T>[];
+  toolbarOptions?: ReactNode;
+  toolbarLayout?: 'single-row' | 'two-row';
   buttonDisplay?: ActionButtonDisplay | ActionButtonDisplayMode;
   columns: DataTableColumn<T>[];
   rows: T[];
@@ -59,6 +61,8 @@ export default function ProgramDataGrid<T>({
   metrics = [],
   actionHandlers = {},
   toolbarActions,
+  toolbarOptions,
+  toolbarLayout = 'single-row',
   buttonDisplay,
   columns,
   rows,
@@ -99,9 +103,9 @@ export default function ProgramDataGrid<T>({
 
   return (
     <section className={scrollSample ? 'program-data-grid scroll-sample' : 'program-data-grid'} aria-label={resolvedTitle}>
-      <div className="grid-toolbar">
+      <div className={`grid-toolbar${toolbarLayout === 'two-row' || toolbarOptions ? ' two-row' : ''}`}>
         <div className="grid-heading-group">
-          <h2>{resolvedTitle}</h2>
+          <h2 title={resolvedTitle}>{resolvedTitle}</h2>
           <span className="grid-total">총 <strong>{rows.length}</strong>건</span>
           {metrics.map((metric) => (
             <span key={metric.label} className={`grid-metric ${metric.tone ?? 'default'}`}>
@@ -113,7 +117,7 @@ export default function ProgramDataGrid<T>({
           {visibleToolbarActions ? visibleToolbarActions.map((action) => {
             const context = { rows, selectedRows };
             const disabled = typeof action.disabled === 'function' ? action.disabled(context) : action.disabled;
-            return <ActionButton key={action.actionCode} actionCode={action.actionCode} label={action.label} tone={action.tone} displayMode={resolvedButtonDisplay} disabled={disabled} onClick={() => action.onClick(context)} />;
+            return <ActionButton key={`${action.actionCode}:${action.label}`} actionCode={action.actionCode} label={action.label} tone={action.tone} displayMode={resolvedButtonDisplay} disabled={disabled} onClick={() => action.onClick(context)} />;
           }) : visibleActions.map((actionCode) => {
             const actionName = actionNames.get(actionCode) ?? actionCode;
             const iconOnly = actionCode === COMMON_ACTIONS.EXCEL_DOWNLOAD;
@@ -122,6 +126,7 @@ export default function ProgramDataGrid<T>({
             );
           })}
         </div>
+        {(toolbarLayout === 'two-row' || toolbarOptions) && <div className="grid-toolbar-options">{toolbarOptions}</div>}
       </div>
       {renderTable({ columns, rows, getRowKey, emptyMessage, selectedRowKeys: selectable ? selectedRowKeys : undefined, onSelectedRowKeysChange: selectable ? setSelectedRowKeys : undefined, onRowClick, getRowClassName })}
     </section>

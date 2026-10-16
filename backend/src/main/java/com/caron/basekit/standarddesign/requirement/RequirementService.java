@@ -12,11 +12,12 @@ import java.util.*;
 @Service
 public class RequirementService {
     private final RequirementMapper mapper;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
     private final ProjectMenuService projectMenuService;
     private final AttachmentUploadPolicy uploadPolicy;
     private final Path storageRoot;
-    RequirementService(RequirementMapper mapper, ProjectMenuService projectMenuService, AttachmentUploadPolicy uploadPolicy, @Value("${standard-design.requirements.storage-path:./data/requirement-attachments}") String storagePath) {
-        this.mapper = mapper; this.projectMenuService = projectMenuService;
+    RequirementService(RequirementMapper mapper, org.springframework.jdbc.core.JdbcTemplate jdbc, ProjectMenuService projectMenuService, AttachmentUploadPolicy uploadPolicy, @Value("${standard-design.requirements.storage-path:./data/requirement-attachments}") String storagePath) {
+        this.mapper = mapper; this.jdbc = jdbc; this.projectMenuService = projectMenuService;
         this.uploadPolicy = uploadPolicy;
         this.storageRoot = Path.of(storagePath).toAbsolutePath().normalize();
     }
@@ -34,8 +35,8 @@ public class RequirementService {
     }
     private RequirementData expand(RequirementRow row) {
         return new RequirementData(row.REQUIREMENT_ID(),row.PROJECT_ID(),row.REQUIREMENT_NAME(),row.REQUIREMENT_TYPE_CODE(),
-                row.DESCRIPTION(),row.PROCESS_DESCRIPTION(),row.STATUS(),row.LEGACY_WBS_IDS(),row.LEGACY_SCREEN_IDS(),
-                row.LEGACY_TABLE_IDS(),row.LEGACY_SOURCE_ID(),row.REG_DT(),row.MOD_DT(),mapper.menuKeys(row.REQUIREMENT_ID()),mapper.projectMenuIds(row.REQUIREMENT_ID()),mapper.attachments(row.REQUIREMENT_ID()));
+                row.DESCRIPTION(),row.PROCESS_DESCRIPTION(),row.DESIGN_OPINION(),row.STATUS(),row.LEGACY_WBS_IDS(),row.LEGACY_SCREEN_IDS(),
+                row.LEGACY_TABLE_IDS(),row.LEGACY_SOURCE_ID(),row.REG_DT(),row.MOD_DT(),mapper.menuKeys(row.REQUIREMENT_ID()),mapper.projectMenuIds(row.REQUIREMENT_ID()),mapper.attachments(row.REQUIREMENT_ID()),row.DISCARDED_YN(),row.REQUIREMENT_REVISION());
     }
     @Transactional
     public RequirementData create(RequirementSaveRequest request) {
@@ -47,8 +48,8 @@ public class RequirementService {
         }
         String id = "REQ-" + UUID.randomUUID().toString().substring(0, 12).toUpperCase(Locale.ROOT);
         RequirementRow row = new RequirementRow(id,request.PROJECT_ID(),request.REQUIREMENT_NAME().trim(),request.REQUIREMENT_TYPE_CODE(),
-                nonnull(request.DESCRIPTION()),nonnull(request.PROCESS_DESCRIPTION()),request.STATUS(),request.LEGACY_WBS_IDS(),
-                request.LEGACY_SCREEN_IDS(),request.LEGACY_TABLE_IDS(),request.LEGACY_SOURCE_ID(),null,null);
+                nonnull(request.DESCRIPTION()),nonnull(request.PROCESS_DESCRIPTION()),nonnull(request.DESIGN_OPINION()),request.STATUS(),request.LEGACY_WBS_IDS(),
+                request.LEGACY_SCREEN_IDS(),request.LEGACY_TABLE_IDS(),request.LEGACY_SOURCE_ID(),null,null,"N",1);
         mapper.insert(row);
         replaceMenus(id, request.MENU_KEYS());
         if (request.PROJECT_MENU_IDS() != null) projectMenuService.replaceRequirementRelations(id, request.PROJECT_MENU_IDS());
@@ -58,14 +59,18 @@ public class RequirementService {
     public RequirementData update(String id, RequirementSaveRequest request) {
         validate(request);
         projectMenuService.validateForProject(request.PROJECT_ID(), request.PROJECT_MENU_IDS());
+        jdbc.queryForList("SELECT REQUIREMENT_ID FROM BSDRREQ WHERE REQUIREMENT_ID=? FOR UPDATE", id);
         RequirementData current = one(id);
+        recordRevision(current,"BASELINE");
         if (!current.PROJECT_ID().equals(request.PROJECT_ID())) throw new IllegalArgumentException("프로젝트 ID는 변경할 수 없습니다.");
         RequirementRow row = new RequirementRow(id,current.PROJECT_ID(),request.REQUIREMENT_NAME().trim(),request.REQUIREMENT_TYPE_CODE(),
-                nonnull(request.DESCRIPTION()),nonnull(request.PROCESS_DESCRIPTION()),request.STATUS(),current.LEGACY_WBS_IDS(),
-                current.LEGACY_SCREEN_IDS(),current.LEGACY_TABLE_IDS(),current.LEGACY_SOURCE_ID(),current.REG_DT(),current.MOD_DT());
+                nonnull(request.DESCRIPTION()),nonnull(request.PROCESS_DESCRIPTION()),request.DESIGN_OPINION() == null ? current.DESIGN_OPINION() : request.DESIGN_OPINION(),request.STATUS(),current.LEGACY_WBS_IDS(),
+                current.LEGACY_SCREEN_IDS(),current.LEGACY_TABLE_IDS(),current.LEGACY_SOURCE_ID(),current.REG_DT(),current.MOD_DT(),current.DISCARDED_YN(),current.REQUIREMENT_REVISION());
         mapper.update(row);
+        invalidateGroups(id);
         replaceMenus(id, request.MENU_KEYS());
         if (request.PROJECT_MENU_IDS() != null) projectMenuService.replaceRequirementRelations(id, request.PROJECT_MENU_IDS());
+        recordRevision(one(id),"UPDATED");
         return one(id);
     }
     private void validate(RequirementSaveRequest request) {
@@ -79,15 +84,31 @@ public class RequirementService {
     }
     @Transactional
     public void delete(String id) {
+        jdbc.queryForList("SELECT REQUIREMENT_ID FROM BSDRREQ WHERE REQUIREMENT_ID=? FOR UPDATE", id);
         RequirementData current = one(id);
-        for (AttachmentData attachment : current.ATTACHMENTS()) deleteAttachment(id,attachment.ATTACHMENT_ID());
-        mapper.deleteMenus(id);
-        mapper.deleteProjectMenuRelations(id);
-        mapper.delete(id);
+        if ("Y".equals(current.DISCARDED_YN())) return;
+        recordRevision(current,"BASELINE");
+        mapper.discard(id);
+        invalidateGroups(id);
+        recordRevision(one(id),"DISCARDED");
+    }
+    private void touchRequirement(String id,String event) {
+        mapper.touch(id); invalidateGroups(id); recordRevision(one(id),event);
+    }
+    private void invalidateGroups(String id) {
+        jdbc.update("UPDATE BSDRGRP SET GROUP_STATUS=CASE WHEN GROUP_STATUS='DRAFT' THEN 'DRAFT' ELSE 'REVIEW_REQUIRED' END,VERSION=VERSION+1,MOD_DT=CURRENT_TIMESTAMP WHERE REQUIREMENT_GROUP_ID IN (SELECT REQUIREMENT_GROUP_ID FROM BSDRGRQ WHERE REQUIREMENT_ID=?)",id);
+    }
+    private void recordRevision(RequirementData value,String event) {
+        if(jdbc.queryForObject("SELECT COUNT(*) FROM BSDRRHIS WHERE REQUIREMENT_ID=? AND REQUIREMENT_REVISION=?",Integer.class,value.REQUIREMENT_ID(),value.REQUIREMENT_REVISION())>0) return;
+        try {
+            String snapshot=new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules().writeValueAsString(value);
+            jdbc.update("INSERT INTO BSDRRHIS(REQUIREMENT_ID,REQUIREMENT_REVISION,EVENT_TYPE,SNAPSHOT) VALUES(?,?,?,?)",value.REQUIREMENT_ID(),value.REQUIREMENT_REVISION(),event,snapshot);
+        } catch(com.fasterxml.jackson.core.JsonProcessingException e) { throw new IllegalStateException(e); }
     }
     @Transactional
     public AttachmentData upload(String requirementId, MultipartFile file) throws IOException {
-        one(requirementId);
+        jdbc.queryForList("SELECT REQUIREMENT_ID FROM BSDRREQ WHERE REQUIREMENT_ID=? FOR UPDATE",requirementId);
+        recordRevision(one(requirementId),"BASELINE");
         String suppliedName = Optional.ofNullable(file.getOriginalFilename()).orElse("file").replace('\\','/');
         String original = suppliedName.substring(suppliedName.lastIndexOf('/')+1);
         if (original.isBlank() || original.length() > 255) throw new IllegalArgumentException("파일 이름을 확인해 주세요.");
@@ -104,6 +125,7 @@ public class RequirementService {
             uploadPolicy.validateContent(target, ext);
             AttachmentData row = new AttachmentData("ATT-"+UUID.randomUUID().toString(),requirementId,original,key,ext,mime,file.getSize(),null,"NOT_ANALYZED");
             mapper.insertAttachment(row);
+            touchRequirement(requirementId,"ATTACHMENT_ADDED");
             return mapper.attachment(row.ATTACHMENT_ID());
         } catch (IOException | RuntimeException e) { Files.deleteIfExists(target); throw e; }
     }
@@ -119,8 +141,11 @@ public class RequirementService {
     }
     @Transactional
     public void deleteAttachment(String requirementId,String id) {
+        jdbc.queryForList("SELECT REQUIREMENT_ID FROM BSDRREQ WHERE REQUIREMENT_ID=? FOR UPDATE",requirementId);
+        recordRevision(one(requirementId),"BASELINE");
         AttachmentData row = attachment(requirementId,id);
         mapper.deleteAttachment(id);
+        touchRequirement(requirementId,"ATTACHMENT_REMOVED");
         try { Files.deleteIfExists(storageRoot.resolve(row.STORAGE_KEY())); } catch (IOException e) { throw new IllegalStateException("첨부파일 삭제에 실패했습니다.",e); }
     }
     private static String nonnull(String value) { return value == null ? "" : value; }

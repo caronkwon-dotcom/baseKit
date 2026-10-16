@@ -27,8 +27,10 @@ test('search combines trimmed case-insensitive names with status and preserves s
   assert.equal(filterProjects(rows, {PROJECT_NAME: 'missing', CUSTOMER_NAME: '', STATUS: ''}).length, 0);
 });
 test('new IDs do not overwrite remaining records after deletion or fresh repository additions', () => {
-  assert.equal(getNextProjectId([source, {...source, PROJECT_ID: 'SDP-010'}]), 'SDP-011');
-  assert.equal(getNextProjectId([]), 'SDP-001');
+  const ids = Array.from({length: 100}, () => getNextProjectId([]));
+  assert.equal(new Set(ids).size, ids.length);
+  for (const id of ids) assert.match(id, /^SDP-[0-9a-f-]{36}$/);
+  assert.notEqual(getNextProjectId([source]), source.PROJECT_ID);
 });
 test('splitter reserves its 12px and both pane minima including narrow containers', () => {
   assert.equal(getBoundedListWidth(30, 1440), 30);

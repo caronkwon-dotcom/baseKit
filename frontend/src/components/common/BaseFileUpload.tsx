@@ -1,3 +1,4 @@
+import { createUuid } from '../../utils/uuid';
 import { useEffect, useRef, useState, type DragEvent, type KeyboardEvent } from 'react';
 import type { UploadOperation, UploadProgress } from '../../services/uploadTransport';
 import './baseFileUpload.css';
@@ -92,7 +93,7 @@ export default function BaseFileUpload<T>({ files, policy, disabled = false, mul
       else if (files.length + next.filter((item) => item.status !== 'CANCELED').length >= policy.maxFiles) issue = `첨부파일은 최대 ${policy.maxFiles}개입니다.`;
       if (issue) { onError?.(issue); continue; }
       seen.add(signature);
-      next.push({ id: crypto.randomUUID(), file, status: 'QUEUED', progress: { loaded: 0, total: file.size, percent: 0 }, error: '' });
+      next.push({ id: createUuid(), file, status: 'QUEUED', progress: { loaded: 0, total: file.size, percent: 0 }, error: '' });
     }
     setQueue(next);
     pump();

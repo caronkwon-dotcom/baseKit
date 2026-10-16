@@ -11,7 +11,8 @@ interface RequirementMapper {
     RequirementRow findLegacy(@Param("PROJECT_ID") String projectId, @Param("LEGACY_SOURCE_ID") String legacyId);
     int insert(RequirementRow row);
     int update(RequirementRow row);
-    int delete(@Param("REQUIREMENT_ID") String id);
+    int touch(@Param("REQUIREMENT_ID") String id);
+    int discard(@Param("REQUIREMENT_ID") String id);
     List<String> menuKeys(@Param("REQUIREMENT_ID") String id);
     int insertMenu(@Param("REQUIREMENT_ID") String id, @Param("MENU_KEY") String menuKey);
     int deleteMenus(@Param("REQUIREMENT_ID") String id);

@@ -1,0 +1,75 @@
+{
+  "sha": "ec70dc7811b21da4fa0ba82a51d15f3a076a2b5d",
+  "transport": "All API responses intercepted with fixtures. Product frontend is unmodified; no actual LLM or database.",
+  "steps": [
+    "1. 요구사항 준비",
+    "2. 분석",
+    "3. 결과 검토",
+    "4. 확정·생성"
+  ],
+  "tabs": [
+    "요약",
+    "업무메뉴·역할·액션",
+    "프로세스",
+    "Layout 추천",
+    "SD 프로그램 후보"
+  ],
+  "initialCandidateSelected": false,
+  "initialConfirmDisabled": true,
+  "immediateAfterOpinionChange": {
+    "generateEnabled": true,
+    "candidateEnabled": true
+  },
+  "afterStaleResponse": {
+    "staleNotice": true,
+    "candidateDisabled": true,
+    "confirmDisabled": true,
+    "generateDisabled": true
+  },
+  "reanalysis": {
+    "versionTwo": true,
+    "candidateSelected": false,
+    "confirmDisabled": true
+  },
+  "inputCheckFailure": {
+    "generateEnabled": true,
+    "staleVisible": false
+  },
+  "emptySelection": {
+    "inputCalls": 0,
+    "staleVisible": false,
+    "candidateEnabled": true
+  },
+  "unknownGeneration": {
+    "generateEnabled": true,
+    "queryVisible": true
+  },
+  "modalFocus": {
+    "activeRole": "<button type=\"button\" class=\"secondary-button\">편집</button>",
+    "focusedInsideDialog": false
+  },
+  "edited": {
+    "badge": true,
+    "generationDisabled": true,
+    "originalVisible": true
+  },
+  "css": {
+    "candidateGridUsed": 0,
+    "candidateRawTables": 2,
+    "sourceVisibleInSummary": false
+  },
+  "analyzing": {
+    "activeStep": "2. 분석",
+    "inputsLocked": true,
+    "progressPercentVisible": false
+  },
+  "generated": {
+    "candidateDisabled": true,
+    "generateDisabled": true
+  },
+  "mobile": {
+    "scrollWidth": 1280,
+    "viewport": 320
+  },
+  "pageErrors": []
+}

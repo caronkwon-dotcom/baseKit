@@ -1,3 +1,4 @@
+import { createUuid } from '../../../../utils/uuid.ts';
 import type { DesignProject, DesignStatus } from '../../design-lifecycle/designLifecycle.types';
 
 export type ProjectSearchCondition = {
@@ -90,12 +91,11 @@ export function getAppliedSearchDescription(condition: ProjectSearchCondition) {
 }
 
 export function getNextProjectId(projects: DesignProject[]) {
-  const maxProjectNumber = projects.reduce((maximum, project) => {
-    const match = /^SDP-(\d+)$/.exec(project.PROJECT_ID);
-    return match ? Math.max(maximum, Number(match[1])) : maximum;
-  }, 0);
-
-  return `SDP-${String(maxProjectNumber + 1).padStart(3, '0')}`;
+  // Project metadata is browser-local, but requirements are shared by the server.
+  // A local sequence can reuse another browser's (or a deleted project's) ID.
+  let id: string;
+  do { id = `SDP-${createUuid()}`; } while (projects.some((project) => project.PROJECT_ID === id));
+  return id;
 }
 
 export function isProjectDraftDirty(editor: ProjectEditor | null) {
