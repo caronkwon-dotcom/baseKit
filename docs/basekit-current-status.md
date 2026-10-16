@@ -473,3 +473,7 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 - 신규 프로젝트 UUID로 ID 재사용 방지, 폐기 항목 기본 숨김/포함 선택, 프로젝트 ID 누락 400, 선택 프로젝트 폐기 방어. 기존 sd-work만 사용.
 - frontend build/lint/61 tests, backend 60 pass/5 skip. 실제 새 프로젝트 0건→등록1건, API 폐기204/Y, 일반 프로젝트 문구점0 확인. 브라우저 confirm 제어 제한 및 PM 배포 미수행.
 - 상세 원인/복구 SQL/검증/제한: docs/sd-requirement-fixture-isolation.md.
+
+## LLM 파일·검색 테스트 PoC (2026-10-16, feature 검수 대기)
+
+개발자가이드 `LLM 파일·검색 테스트`(`DEV_LLM_FILE_TEST`, `/api/dev-guide/v1/llm-files`)를 추가했다. 기존 회사 LLM 설정은 chat completions만 정의하므로 회사 LLM 파일 API는 `/capabilities`가 `/files`·`/models`를 실제 probe한 결과로만 표시한다(미확인 시 지원으로 표시하지 않음). 파일 보관·검색은 **BaseKit 서버 메모리(PoC, 재시작 시 소멸, 10MB, PROJECT_ID 경계)** 대안이며 회사 LLM 기능이 아니다. 질의는 서버 키워드 검색 구간만 회사 LLM chat에 전송하고, 비교용으로 원문 전체 전송 모드를 제공한다. 실제 회사 LLM 환경에서의 측정 결과는 아직 없으며 SD 요구사항 그룹화는 구현하지 않았다.
