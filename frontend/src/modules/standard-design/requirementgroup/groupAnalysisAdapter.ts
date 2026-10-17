@@ -2,6 +2,7 @@ import type { GroupAnalysis } from './groupAnalysis.types';
 
 /** SD-owned display contract; not COMMON viewer Props or a selection/save DTO. */
 export interface GroupAnalysisDisplay {
+ VIEWER_RESULT: unknown;
  SCHEMA_VERSION: 1;
  ANALYSIS_ID: string;
  ANALYSIS_TYPE: string;
@@ -35,13 +36,16 @@ export function adaptGroupAnalysis(run: AnalysisInput): GroupAnalysisDisplay {
  // Recommendation raw HTTP content is unvalidated and must never become selectable/display recommendations.
  let response: unknown = success ? run.RESPONSE : undefined;
  if (success && response == null) {
-  response = parse(recommendation ? run.RESPONSE_VALIDATED_JSON : run.RESPONSE_RAW_JSON);
+  const raw = recommendation ? run.RESPONSE_VALIDATED_JSON : run.RESPONSE_RAW_JSON;
+  response = parse(raw) ?? (recommendation ? undefined : raw);
   const envelope = object(response);
   if (!recommendation && envelope && Array.isArray(envelope.choices)) {
    const message = object(object(envelope.choices[0])?.message);
-   response = parse(text(message?.content));
+   const content = text(message?.content);
+   response = parse(content) ?? content;
   }
  }
+ if (typeof response === 'string') response = parse(response) ?? response;
  const result = object(response);
  if (success && !result) warnings.push('표시할 결과가 없습니다. 상세 조회 결과와 원문을 확인하세요.');
  const sections: GroupAnalysisDisplay['SECTIONS'] = [];
@@ -86,7 +90,17 @@ export function adaptGroupAnalysis(run: AnalysisInput): GroupAnalysisDisplay {
    else warnings.push('observations: 항목 형식을 확인하세요.');
   }
  }
+ const viewerResult = result ? {
+  ...(text(object(result.summary)?.text) || text(result.summary) ? {summary: text(object(result.summary)?.text) || text(result.summary)} : {}),
+  ...Object.fromEntries(sections.filter(section=>section.ITEMS.length).map(section=>[section.TITLE, {
+   카드: section.ITEMS.map(item=>({title:item.TITLE, 설명:item.DESCRIPTION, 근거:item.EVIDENCE_REQUIREMENT_IDS.join(', ') || '확인 필요'})),
+  }])),
+  ...(recommendations.length ? {추천요구사항: {카드: recommendations.map(item=>({title:item.REQUIREMENT_ID, 추천사유:item.REASON}))}} : {}),
+  ...(observations.length ? {확인필요사항: {목록:observations}} : {}),
+  evidence: [...new Set(sections.flatMap(section=>section.ITEMS.flatMap(item=>item.EVIDENCE_REQUIREMENT_IDS)))],
+ } : typeof response === 'string' && response.trim() ? response : {};
  return {
+  VIEWER_RESULT: viewerResult,
   SCHEMA_VERSION: 1, ANALYSIS_ID: text(run.ANALYSIS_ID), ANALYSIS_TYPE: text(run.ANALYSIS_TYPE) || 'GROUP_DESIGN',
   STATUS: text(run.STATUS), GROUP_VERSION: typeof run.GROUP_VERSION === 'number' && Number.isFinite(run.GROUP_VERSION) ? run.GROUP_VERSION : null,
   SUMMARY: recommendation ? '' : text(object(result?.summary)?.text) || text(result?.summary),

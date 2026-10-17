@@ -48,3 +48,36 @@ test('invalid recommendation fields are warned and never coerced into IDs or rea
  const out=adaptGroupAnalysis({STATUS:'SUCCESS',ANALYSIS_TYPE:'GROUP_RECOMMENDATION',WARNINGS:['server warning',3],RESPONSE:{recommendedRequirements:[null,{requirementId:3,reason:{}},{requirementId:'R',reason:' '}]}});
  assert.deepEqual(out.RECOMMENDATIONS,[]);assert.equal(out.WARNINGS.length,4);
 });
+
+
+// Exercise the actual SD display projection through COMMON's rendering model.
+import { buildLlmResultModel } from '../src/components/common/llmResultModel.ts';
+test('SD projection renders COMMON summary, sections, cards and evidence without mutating source',()=>{
+ const run=design({summary:{text:'설계 요약'},businessAreas:[{name:'주문',description:'주문 처리',evidenceRequirementIds:['R1']}],observations:['검토 필요']});
+ const before=JSON.stringify(run);
+ const model=buildLlmResultModel(adaptGroupAnalysis(run).VIEWER_RESULT);
+ assert.equal(model.status,'structured');
+ assert.ok(model.blocks.some(b=>b.type==='summary' && b.body==='설계 요약'));
+ assert.ok(model.blocks.some(b=>b.type==='section' && b.heading==='업무영역'));
+ assert.ok(model.blocks.some(b=>b.type==='cards' && b.cards[0].title==='주문' && b.cards[0].fields.some(f=>f.label==='근거' && f.value==='R1')));
+ assert.ok(model.evidence.some(e=>e.id==='R1'));
+ assert.equal(JSON.stringify(run),before);
+});
+test('validated recommendation cards preserve reason and never fall back to unvalidated raw',()=>{
+ const run={STATUS:'SUCCESS',ANALYSIS_TYPE:'GROUP_RECOMMENDATION',RESPONSE:{recommendedRequirements:[{requirementId:'R2',reason:' 원본 추천 사유 '}]}};
+ const model=buildLlmResultModel(adaptGroupAnalysis(run).VIEWER_RESULT);
+ assert.ok(model.blocks.some(b=>b.type==='cards' && b.cards[0].title==='R2' && b.cards[0].fields.some(f=>f.value===' 원본 추천 사유 ')));
+ assert.equal(buildLlmResultModel(adaptGroupAnalysis({...run,RESPONSE:undefined,RESPONSE_RAW_JSON:JSON.stringify(run.RESPONSE)}).VIEWER_RESULT).status,'empty');
+});
+test('text, malformed JSON, empty and unsuccessful results are safe in COMMON',()=>{
+ for(const raw of ['일반 텍스트','{"summary":']) {
+  const display=adaptGroupAnalysis({...design(undefined),RESPONSE_RAW_JSON:raw});
+  const model=buildLlmResultModel(display.VIEWER_RESULT);
+  assert.equal(model.status,'text');assert.equal(model.text,raw);assert.ok(display.WARNINGS.length);
+ }
+ for(const RESPONSE of [null,{}, {recommendedRequirements:[]}]) assert.equal(buildLlmResultModel(adaptGroupAnalysis(design(RESPONSE)).VIEWER_RESULT).status,'empty');
+ for(const STATUS of ['RUNNING','FAILED_INVALID_JSON','FAILED_TRUNCATED']) {
+  const display=adaptGroupAnalysis({...design({summary:'partial'}),STATUS});
+  assert.equal(buildLlmResultModel(display.VIEWER_RESULT,{loading:STATUS==='RUNNING'}).status,STATUS==='RUNNING' ? 'loading':'empty');
+ }
+});

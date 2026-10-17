@@ -1,5 +1,11 @@
 # BaseKit 현재 상태와 WBS
 
+## 2026-10-17 SD 분석 탭 COMMON 뷰어 연동
+
+요구사항그룹관리의 상세/실행/이력 조회 결과를 adaptGroupAnalysis → LlmResultViewer로 연결했다. SD 표시 projection으로 요약·섹션·카드·근거를 구성하며 COMMON 소스, DB, 분석 실행/추천 선택/그룹 상태 API는 변경하지 않았다. 원본 JSON/Snapshot 상세 보존, 비검증 추천 RAW 복구 금지, 텍스트·파싱 실패 경고·빈 결과·실행 중 처리를 검증했다.
+
+build/lint 및 frontend 85건 통과(추가 통합 3건), backend 68건 중 63 통과/외부 조건 5 skip, 실패 0. 기존 xlsx import 및 대형 chunk 경고 유지. 실제 5176/8083의 SDP-001 → 반품프로세스 → 분석에서 저장된 추천 GA-fa9941eacc7e4f04b32b26e996b7ef22(3건), 설계 GA-cdd0ab6b40e849d99326bdbdfb1e5f7d(요약/후보/근거)를 브라우저 확인했다. 새 LLM 호출·업무 데이터 저장은 수행하지 않았다. 스크린샷 확인은 완료했으나 도구의 파일 쓰기 EPERM으로 이미지 파일 저장은 미완료다. 사람 수정/확정 후 설계 DB 반영은 범위 밖이다.
+
 ## 2026-10-17 SD 그룹 분석 표시 Adapter
 
 GROUP_DESIGN 최신/기존 구조와 GROUP_RECOMMENDATION 검증 결과를 SD 내부 표시 모델로 변환하는 순수 Adapter를 추가했다. 원문·입력 Snapshot을 보존하고 누락 필드/잘린 JSON/잘못된 타입을 경고로 방어한다. 그룹 상태·실행 이력·추천 선택 API와 UI는 유지했다. COMMON Props 확정 후 연결 및 SD UI 최종 통합은 남아 있다. [SD 데이터 계약](sd-group-analysis-adapter.md). Frontend 67건(Adapter 6건 포함), build/lint 통과. Backend 65건 중 60통과/외부 조건 5 skip, 실패 0. 기존 build 대형 chunk 경고만 존재. DB/COMMON/최종 UI 수정과 브라우저 통합 검수는 수행하지 않았다.

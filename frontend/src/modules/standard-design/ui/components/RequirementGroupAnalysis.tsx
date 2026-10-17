@@ -1,3 +1,5 @@
+import LlmResultViewer from '../../../../components/common/LlmResultViewer';
+import { adaptGroupAnalysis } from '../../requirementgroup/groupAnalysisAdapter';
 import { createUuid } from '../../../../utils/uuid';
 import { useEffect, useRef, useState } from 'react';
 import { ActionButton, BaseKitMessage, FormModal } from '../../../../components/common';
@@ -71,8 +73,7 @@ export default function RequirementGroupAnalysis({group,onClose,projectName,embe
   setConnection(null);const started=performance.now();const result=await testCompanyLlm('Reply with only OK. No explanation. /no_think');
   if(alive.current)setConnection({content:result.CONTENT,model:result.MODEL,elapsedMs:Math.round(performance.now()-started)});
  });
- const response=selected?.RESPONSE;
- const sections=response?.businessAreas ? [['businessAreas','업무영역'],['processCandidates','프로세스 후보'],['programCandidates','Program 후보']] as const : [['businessStructure','기존 업무 구조'],['processes','기존 프로세스'],['screenCandidates','기존 화면 후보'],['programCandidates','기존 Program 후보']] as const;
+ const display=selected ? adaptGroupAnalysis(selected):null;
  const actions=<div className="grid-toolbar">
   <ActionButton actionCode="EXECUTE" label="짧은 응답 확인" disabled={busy} onClick={checkConnection} />
   <select aria-label="분석 유형" value={analysisType} disabled={busy || pendingRequest} onChange={e=>setAnalysisType(e.target.value)}><option value="GROUP_RECOMMENDATION">그룹 보완 Analysis</option><option value="GROUP_DESIGN">그룹 설계 Analysis</option></select>
@@ -91,9 +92,9 @@ export default function RequirementGroupAnalysis({group,onClose,projectName,embe
   {selected ? <><p>{labels[selected.STATUS]} · v{selected.GROUP_VERSION} · {selected.MODEL_NAME} · {selected.PROMPT_VERSION}{selected.ELAPSED_MS!=null ? ` · ${(selected.ELAPSED_MS/1000).toFixed(1)}초`:''}</p>
    {selected.ERROR_MESSAGE ? <BaseKitMessage type="error" message={selected.ERROR_MESSAGE} />:null}
    {selected.STATUS==='RUNNING' ? <BaseKitMessage type="info" message="분석 중입니다. 창을 닫고 다른 작업을 계속할 수 있습니다. 완료 상태는 자동 조회합니다." />:null}
-   {selected.WARNINGS?.length ? <section><h3>근거 검토</h3><ul>{selected.WARNINGS.map((warning,index)=><li key={index}>{warning}</li>)}</ul></section>:null}
-   {response?.recommendedRequirements ? <section><h3>추천 요구사항 ({response.recommendedRequirements.length})</h3>{response.recommendedRequirements.map(item=><div key={item.requirementId}><strong>{item.requirementId}</strong><p>{item.reason}</p></div>)}{!response.recommendedRequirements.length ? <p>추천 결과가 없습니다.</p>:null}</section>:null}
-   {response && !response.recommendedRequirements ? <><section><h3>요약</h3><p>{response.summary?.text}</p></section>{sections.map(([key,title])=><section key={key}><h3>{title} ({response[key]?.length ?? 0})</h3>{response[key]?.map((item,index)=><div key={index}><strong>{String(item.name ?? item.title ?? `후보 ${index+1}`)}</strong><p>{String(item.description ?? item.purpose ?? '')}</p><p>근거: {Array.isArray(item.evidenceRequirementIds) ? item.evidenceRequirementIds.join(', '):'확인 필요'}</p></div>)}</section>)}<section><h3>확인 필요 사항</h3><ul>{response.observations?.map((item,index)=><li key={index}>{typeof item==='string' ? item:JSON.stringify(item)}</li>)}</ul></section></>:null}
+   {display?.WARNINGS.length ? <section><h3>근거 검토</h3><ul>{display.WARNINGS.map((warning,index)=><li key={index}>{warning}</li>)}</ul></section>:null}
+   <LlmResultViewer key={selected.ANALYSIS_ID} result={display?.VIEWER_RESULT} loading={selected.STATUS==='RUNNING'} title={selected.ANALYSIS_TYPE==='GROUP_RECOMMENDATION' ? '추천 요구사항':'그룹 설계 분석'} sourceLabel="저장된 분석 결과" showRaw={false} />
+   {display?.SOURCE.RESPONSE_JSON ? <details><summary>분석 결과 JSON</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{display.SOURCE.RESPONSE_JSON}</pre></details>:null}
    <details><summary>입력 Snapshot JSON</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{selected.REQUEST_JSON}</pre></details>
    <details><summary>수신 원문 (HTTP 응답 / 기존 분석 원문)</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{selected.RESPONSE_RAW_JSON ?? '응답 원문이 아직 없습니다.'}</pre></details>
   </>:<p>저장된 분석 실행이 없습니다.</p>}
