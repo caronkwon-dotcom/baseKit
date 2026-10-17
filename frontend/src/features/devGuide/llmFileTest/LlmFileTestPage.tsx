@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import ActionButton from '../../../components/common/ActionButton';
 import BaseKitMessage from '../../../components/common/BaseKitMessage';
 import DataTable from '../../../components/common/DataTable';
+import LlmResultViewer from '../../../components/common/LlmResultViewer';
 import PageHeader from '../../../components/common/PageHeader';
 import {
   fetchCapabilities, fetchFiles, queryFile, searchFile, uploadFile,
@@ -138,7 +139,7 @@ export default function LlmFileTestPage() {
 
       <div className="data-section">
         <h2>LLM 응답</h2>
-        <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{answer || '응답 없음'}</pre>
+        <LlmResultViewer result={answer} loading={busy} title="LLM 응답" sourceLabel="회사 LLM" />
       </div>
 
       <DataTable
