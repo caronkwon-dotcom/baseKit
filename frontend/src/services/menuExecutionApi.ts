@@ -6,7 +6,7 @@ export interface MenuExecutionSetting {
 async function request<T>(path = '', init?: RequestInit): Promise<T> {
   const response = await fetch(`/api/core/menu-execution-settings${path}`, { credentials: 'same-origin', ...init });
   const payload = await response.json().catch(() => ({})) as { DATA: T; MESSAGE?: string };
-  if (response.status === 401 || response.status === 403) throw new Error('메뉴 설정 인증·권한을 확인하세요. COMMON 로컬 테스트 환경은 테스트 로그인 후 새로고침하세요.');
+  if (response.status === 401 || response.status === 403) throw new Error('메뉴 설정 권한과 서버 실행 환경을 확인하세요.');
   if (!response.ok) throw new Error(payload.MESSAGE || '메뉴 실행 설정을 처리하지 못했습니다. 서버 연결을 확인하세요.');
   return payload.DATA;
 }

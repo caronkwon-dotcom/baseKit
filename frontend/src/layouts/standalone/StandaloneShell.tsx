@@ -38,7 +38,7 @@ export default function StandaloneShell() {
     fetch(`/api/core/window-access?${new URLSearchParams({ MENU_ID: menuId, PROGRAM_KEY: programKey })}`, {
       credentials: 'same-origin', signal: abort.signal,
     }).then(async response => {
-      if (!response.ok) throw new Error('독립 창 접근이 거부되었습니다. Host 인증 및 실행 설정을 확인하세요.');
+      if (!response.ok) throw new Error('독립 창 실행 설정·권한·서버 실행 환경을 확인하세요.');
       const data: Access = await response.json();
       if (data.MENU_ID !== menuId || data.EXECUTION_TYPE !== 'WINDOW' || !['BASEKIT', 'LINEAR'].includes(data.DESIGN_TYPE)) throw new Error('실행 설정을 확인할 수 없습니다.');
       setResult({ route, access: data });

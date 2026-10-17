@@ -28,7 +28,8 @@ public class WindowAccessController {
         var setting=settings.find(menuId);
         if (!"WINDOW".equals(setting.EXECUTION_TYPE())) deny();
         var provider=providers.getIfAvailable();
-        // Every WINDOW entry requires an authenticated principal and an explicit program grant.
+        // TODO common login: unify INNER/WINDOW authentication and grants. No anonymous production access.
+        if (provider==null && policy.developmentEnvironment() && request.getUserPrincipal()==null) return setting;
         if (provider==null || request.getUserPrincipal()==null) {
             deny();
         } else if (!provider.hasProgram(request,programKey)) deny();

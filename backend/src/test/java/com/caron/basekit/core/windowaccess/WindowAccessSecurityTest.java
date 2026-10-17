@@ -35,6 +35,8 @@ class WindowAccessSecurityTest {
         assertThrows(ResponseStatusException.class,()->controller.check("ROOT","P",request));
         when(providers.getIfAvailable()).thenReturn(null);
         assertThrows(ResponseStatusException.class,()->controller.check("ROOT","P",request));
+        request.setUserPrincipal(null);
+        assertEquals("LINEAR",controller.check("ROOT","P",request).DESIGN_TYPE());
         env.setActiveProfiles("dev","production");
         assertThrows(ResponseStatusException.class,()->controller.check("ROOT","P",request));
     }

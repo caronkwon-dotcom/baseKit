@@ -1,4 +1,12 @@
 # BaseKit 현재 상태와 WBS
+## 2026-10-18 COMMON 로그인 없는 1Depth 실행 복구
+
+WINDOW/메뉴 실행 설정에만 추가된 Host Principal 요구와 LocalTestAuthProvider 때문에 로그인 없는 COMMON에서 403 및 독립 창 접근 차단이 발생했다. 임시 테스트 Provider·로그인 UI/안내를 제거하고 local/dev/test에서 실제 Provider와 Principal이 모두 없는 경우 기존 INNER와 같은 개발 실행을 허용했다. 실제 Provider의 프로그램/SAVE 검사, 원본 소속·WINDOW 설정 확인, prod/production 및 비개발 배포 차단은 유지한다. 컨트롤러 TODO와 ADR-035에 공통 로그인 시 INNER/WINDOW 정책 통합 경계를 명시했다. 신규 인증/SSO/DB/SD 화면 개발 없음.
+
+실제 Edge 5174→8081의 local,common loopback 및 격리 H2 memory DB에서 1Depth SD 선택·WINDOW/LINEAR 저장·새로고침 조회·하위 읽기 전용 상속, SD 전용 창 ID 재사용, WBS 동일 창 전환, BASEKIT/LINEAR 셸 적용 확인. 시스템관리 INNER/BASEKIT 기본값 및 사용자관리 MDI 유지 확인. 개발자가이드 3Depth 검색 샘플 WINDOW 실행→2Depth 문서센터 동일 창 전환, INNER 복귀 후 독립 URL 차단 확인. 최종 검수 설정 SD WINDOW/LINEAR, SYS·DEV_GUIDE INNER/BASEKIT. memory 검수 설정은 서버 종료 시 소멸하며 실제 PostgreSQL·운영 배포는 미수행.
+
+build/lint 및 frontend 90건 통과. backend:test 및 clean test 75건(70 통과, 외부 DB 조건 5 skip) 통과. diff check 통과. 기존 .env-check-tmp.txt 보존. common-work 유지, 원격 dev-pm 63bcb8e 확인만 수행, 신규 branch/worktree/merge/TASK/PLAN 없음.
+
 ## 2026-10-17 COMMON 메뉴 실행 회귀 수정
 
 설정 API 장애 때 AppLayout의 executionSettingsReady가 false로 남아 모든 프로그램 실행을 차단했다. COMMON 5174의 실제 설정 요청은 HTTP 403(Host 인증 연결 필요), 사용자 로그는 백엔드 ECONNREFUSED였다. 준비 상태의 전역 차단을 제거하여 로딩/장애/미설정에서 원본 JSON·Manifest의 INNER/BASEKIT을 유지한다. 재조회 중에는 마지막 정상 설정을 보존하고 오래된 응답은 무시한다. WINDOW는 정상 수신한 명시 설정만 적용하며 서버 권한 정책은 변경하지 않았다. 잘못된 성공 응답도 검증하여 거부한다.

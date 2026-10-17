@@ -54,7 +54,7 @@ export default function MenuManagePage() {
       {selectedMenu && draft ? <div>
         <p>{selectedMenu.menuName} ({selectedMenu.menuKey}) · 프로그램: {selectedMenu.programKey ?? '-'}</p>
         <p>설정 기준: {draft.MENU_ID}{!editable && ' · 하위 메뉴는 1Depth 설정을 상속합니다.'}</p>
-        {!loaded && <p role="alert">설정을 조회하지 못해 편집·저장이 잠겨 있습니다. 표시된 기본값은 저장값이 아닙니다. 권한·서버 연결을 확인하거나 COMMON 로컬 테스트 로그인 후 새로고침하세요. <a href="/api/core/local-test-auth">로컬 테스트 로그인</a></p>}
+        {!loaded && <p role="alert">설정을 조회하지 못해 편집·저장이 잠겨 있습니다. 표시된 기본값은 저장값이 아닙니다. 권한·서버 연결과 개발 실행 프로필을 확인하세요.</p>}
         <fieldset disabled={!editable || !loaded || saving}>
           <label htmlFor="executionType">실행 유형</label>
           <select id="executionType" value={draft.EXECUTION_TYPE} onChange={event => setDraft({ ...draft, EXECUTION_TYPE: event.target.value as MenuExecutionSetting['EXECUTION_TYPE'] })}>
