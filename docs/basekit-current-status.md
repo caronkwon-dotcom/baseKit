@@ -499,3 +499,7 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 - 그룹관리 범위에 기존 height:100%, flex 및 최소 그리드 높이 180px 규칙을 동일하게 복구했다. 공통 그리드 기본 크기와 다른 화면은 변경하지 않는다.
 - 실제 5176 화면에서 목록/상세 영역 하단 638px 대비 양쪽 그리드 하단 637px(테두리 1px) 정렬 확인. 접기/펼치기 및 40% 비율 유지 확인. build/lint/diff-check 통과.
 - backend 60 통과/5 skip, 실패 0.
+
+## LLM 파일·검색 테스트 PoC (2026-10-16, feature 검수 대기)
+
+개발자가이드 `LLM 파일·검색 테스트`(`DEV_LLM_FILE_TEST`, `/api/dev-guide/v1/llm-files`)를 추가했다. 기존 회사 LLM 설정은 chat completions만 정의하므로 회사 LLM 파일 API는 `/capabilities`가 `/files`·`/models`를 실제 probe한 결과로만 표시한다(미확인 시 지원으로 표시하지 않음). 파일 보관·검색은 **BaseKit 서버 메모리(PoC, 재시작 시 소멸, 10MB, PROJECT_ID 경계)** 대안이며 회사 LLM 기능이 아니다. 질의는 서버 키워드 검색 구간만 회사 LLM chat에 전송하고, 비교용으로 원문 전체 전송 모드를 제공한다. 실제 회사 LLM 환경에서의 측정 결과는 아직 없으며 SD 요구사항 그룹화는 구현하지 않았다.

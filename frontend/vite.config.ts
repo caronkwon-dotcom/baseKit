@@ -184,6 +184,7 @@ export default defineConfig(({ mode }) => {
         '/api/health': backendUrl,
         '/api/core': backendUrl,
         '/api/standard-design': backendUrl,
+        '/api/dev-guide': backendUrl,
         '/actuator': backendUrl,
         '/v3/api-docs': backendUrl,
         '/swagger-ui': backendUrl,
