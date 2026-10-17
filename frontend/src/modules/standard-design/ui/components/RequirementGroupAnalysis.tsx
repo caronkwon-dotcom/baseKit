@@ -1,4 +1,5 @@
-import LlmResultViewer from '../../../../components/common/LlmResultViewer';
+import GroupAnalysisReport from './GroupAnalysisReport';
+import './groupAnalysis.css';
 import { adaptGroupAnalysis } from '../../requirementgroup/groupAnalysisAdapter';
 import { createUuid } from '../../../../utils/uuid';
 import { useEffect, useRef, useState } from 'react';
@@ -74,30 +75,34 @@ export default function RequirementGroupAnalysis({group,onClose,projectName,embe
   if(alive.current)setConnection({content:result.CONTENT,model:result.MODEL,elapsedMs:Math.round(performance.now()-started)});
  });
  const display=selected ? adaptGroupAnalysis(selected):null;
- const actions=<div className="grid-toolbar">
-  <ActionButton actionCode="EXECUTE" label="짧은 응답 확인" disabled={busy} onClick={checkConnection} />
-  <select aria-label="분석 유형" value={analysisType} disabled={busy || pendingRequest} onChange={e=>setAnalysisType(e.target.value)}><option value="GROUP_RECOMMENDATION">그룹 보완 Analysis</option><option value="GROUP_DESIGN">그룹 설계 Analysis</option></select>
+ const actions=<div className="sd-analysis-controls">
+
+  <label>분석 유형<select aria-label="분석 유형" value={analysisType} disabled={busy || pendingRequest} onChange={e=>setAnalysisType(e.target.value)}><option value="GROUP_RECOMMENDATION">그룹 보완 · 요구사항 추천</option><option value="GROUP_DESIGN">그룹 설계 · 업무 구조 제안</option></select></label>
   <ActionButton actionCode="EXECUTE" label={pendingRequest ? '실행 요청 재확인':'분석 실행'} disabled={busy || blocked || !group.REQUIREMENT_GROUP_ID || !group.MEMBERS.length || hasRunning} onClick={execute} />
-  <ActionButton actionCode="SEARCH" label="실행 이력 조회" disabled={busy} onClick={refresh} />
+
  </div>;
  const content=<>
-  <p>그룹 보완은 프로젝트의 미포함 요구사항을 추천하고, 그룹 설계는 현재 그룹의 개요를 제안합니다. 추천 항목은 기본정보의 Analysis 추천 결과에서 선택하여 추가하세요. 검토와 수정·재분석을 거친 뒤 기본정보에서 최종 확정하세요. 결과는 검토용 제안이며 자동 채택되지 않습니다.</p>
+  <p className="sd-analysis-help">{analysisType === 'GROUP_RECOMMENDATION' ? '현재 그룹에 추가할 요구사항과 추천 사유를 검토합니다.' : '현재 그룹의 업무영역·프로세스·프로그램 후보를 검토합니다.'} 결과를 검토한 후 기본정보에서 반영하세요.</p>
   {notice ? <BaseKitMessage type="info" message={notice} />:null}
-  {connection ? <BaseKitMessage type="success" message={`연결 확인 응답: ${connection.content}`} detail={`${connection.model} · ${(connection.elapsedMs/1000).toFixed(1)}초 · 그룹 원문 전송 없음`} />:null}
+
   {blocked ? <BaseKitMessage type="warn" message="기본정보에서 변경 내용을 저장한 후 분석을 실행하세요." />:null}
   {error ? <BaseKitMessage type="error" message={error} />:null}
-  <div className="standard-form-grid"><FormField label="실행 이력" labelPosition="TOP" className="form-full-row"><select aria-label="그룹 분석 실행 이력" disabled={busy} value={selected?.ANALYSIS_ID ?? ''} onChange={e=>{const id=e.target.value;if(id)void operate(async()=>{selectedId.current=id;const result=await api.analysis(group.REQUIREMENT_GROUP_ID,id);if(alive.current)setSelected(result);});}}>
-   <option value="">실행 선택</option>{runs.map(run=><option key={run.ANALYSIS_ID} value={run.ANALYSIS_ID}>{run.ANALYSIS_TYPE==='GROUP_RECOMMENDATION' ? '그룹 보완':'그룹 설계'} · {run.CREATED_AT} · {labels[run.STATUS]} · {run.ANALYSIS_ID}</option>)}
-  </select></FormField></div>
-  {selected ? <><p>{labels[selected.STATUS]} · v{selected.GROUP_VERSION} · {selected.MODEL_NAME} · {selected.PROMPT_VERSION}{selected.ELAPSED_MS!=null ? ` · ${(selected.ELAPSED_MS/1000).toFixed(1)}초`:''}</p>
+  <div className="sd-analysis-controls"><FormField label="실행 이력" labelPosition="TOP" className="sd-analysis-history"><select aria-label="그룹 분석 실행 이력" disabled={busy} value={selected?.ANALYSIS_ID ?? ''} onChange={e=>{const id=e.target.value;if(id)void operate(async()=>{selectedId.current=id;const result=await api.analysis(group.REQUIREMENT_GROUP_ID,id);if(alive.current)setSelected(result);});}}>
+   <option value="">실행 선택</option>{runs.map(run=><option key={run.ANALYSIS_ID} value={run.ANALYSIS_ID}>{run.ANALYSIS_TYPE==='GROUP_RECOMMENDATION' ? '그룹 보완':'그룹 설계'} · {new Date(run.CREATED_AT).toLocaleString('ko-KR')} · {labels[run.STATUS]} · v{run.GROUP_VERSION}</option>)}
+  </select></FormField><ActionButton actionCode="SEARCH" label="이력 새로고침" disabled={busy} onClick={refresh} /></div>
+  {selected ? <><p className="sd-analysis-help">{labels[selected.STATUS]} · 그룹 버전 {selected.GROUP_VERSION}{selected.ELAPSED_MS!=null ? ` · ${(selected.ELAPSED_MS/1000).toFixed(1)}초`:''}</p>
    {selected.ERROR_MESSAGE ? <BaseKitMessage type="error" message={selected.ERROR_MESSAGE} />:null}
    {selected.STATUS==='RUNNING' ? <BaseKitMessage type="info" message="분석 중입니다. 창을 닫고 다른 작업을 계속할 수 있습니다. 완료 상태는 자동 조회합니다." />:null}
    {display?.WARNINGS.length ? <section><h3>근거 검토</h3><ul>{display.WARNINGS.map((warning,index)=><li key={index}>{warning}</li>)}</ul></section>:null}
-   <LlmResultViewer key={selected.ANALYSIS_ID} result={display?.VIEWER_RESULT} loading={selected.STATUS==='RUNNING'} title={selected.ANALYSIS_TYPE==='GROUP_RECOMMENDATION' ? '추천 요구사항':'그룹 설계 분석'} sourceLabel="저장된 분석 결과" showRaw={false} />
+   {display ? <GroupAnalysisReport display={display} loading={selected.STATUS==='RUNNING'} title={`${group.REQUIREMENT_GROUP_NAME} · ${selected.ANALYSIS_TYPE==='GROUP_RECOMMENDATION' ? '요구사항 추천':'그룹 설계'}`} /> : null}
+   <details className="sd-analysis-technical"><summary>분석 원본 및 실행 정보</summary><p>{selected.ANALYSIS_ID} · {selected.MODEL_NAME} · {selected.PROMPT_VERSION}</p>
    {display?.SOURCE.RESPONSE_JSON ? <details><summary>분석 결과 JSON</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{display.SOURCE.RESPONSE_JSON}</pre></details>:null}
    <details><summary>입력 Snapshot JSON</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{selected.REQUEST_JSON}</pre></details>
    <details><summary>수신 원문 (HTTP 응답 / 기존 분석 원문)</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{selected.RESPONSE_RAW_JSON ?? '응답 원문이 아직 없습니다.'}</pre></details>
-  </>:<p>저장된 분석 실행이 없습니다.</p>}
+   </details>
+  </>:<p>저장된 분석 실행이 없습니다. 분석 유형을 선택하고 실행하세요.</p>}
  </>;
- return embedded ? <div>{actions}{content}</div>:<FormModal open title="그룹 Analysis V0" submitting={busy} onClose={onClose} footerActions={actions}>{content}</FormModal>;
+ const diagnostics=<details className="sd-analysis-technical"><summary>연결 진단</summary><p>그룹 원문을 전송하지 않는 짧은 응답 테스트입니다.</p><ActionButton actionCode="EXECUTE" label="짧은 응답 확인" disabled={busy} onClick={checkConnection} />{connection ? <BaseKitMessage type="success" message={`연결 확인 응답: ${connection.content}`} detail={`${connection.model} · ${(connection.elapsedMs/1000).toFixed(1)}초`} /> : null}</details>;
+ const body=<div className="sd-group-analysis">{actions}{content}{diagnostics}</div>;
+ return embedded ? body : <FormModal open title="그룹 분석" submitting={busy} onClose={onClose}>{body}</FormModal>;
 }

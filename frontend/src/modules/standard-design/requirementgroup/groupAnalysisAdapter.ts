@@ -82,11 +82,15 @@ export function adaptGroupAnalysis(run: AnalysisInput): GroupAnalysisDisplay {
   });
  }
  const observations: string[] = [];
+ // Render observation values as prose; unknown keys stay available in the preserved source.
+ const observationText = (value: unknown): string[] => typeof value === 'string' ? [value]
+  : Array.isArray(value) ? value.flatMap(observationText)
+  : object(value) ? Object.values(object(value)!).flatMap(observationText) : [];
  if (result?.observations != null) {
   if (!Array.isArray(result.observations)) warnings.push('observations: 배열 형식을 확인하세요.');
   else for (const item of result.observations) {
    if (typeof item === 'string') observations.push(item);
-   else if (object(item)) observations.push(JSON.stringify(item));
+   else if (object(item)) observations.push(...observationText(item));
    else warnings.push('observations: 항목 형식을 확인하세요.');
   }
  }

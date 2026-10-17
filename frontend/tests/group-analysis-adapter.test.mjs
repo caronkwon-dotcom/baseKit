@@ -16,7 +16,7 @@ test('legacy direct and HTTP envelope JSON map all available sections without ch
  const response={summary:'legacy',businessStructure:[{title:'old',purpose:'purpose'}],processes:[],screenCandidates:[],businessAreas:[],observations:[{note:'check'}]};
  for(const raw of [JSON.stringify(response),JSON.stringify({choices:[{message:{content:JSON.stringify(response)}}]})]) {
   const out=adaptGroupAnalysis({...design(undefined),RESPONSE_RAW_JSON:raw});
-  assert.equal(out.SUMMARY,'legacy');assert.equal(out.SECTIONS.length,4);assert.equal(out.SECTIONS[1].ITEMS[0].TITLE,'old');assert.deepEqual(out.OBSERVATIONS,['{"note":"check"}']);
+  assert.equal(out.SUMMARY,'legacy');assert.equal(out.SECTIONS.length,4);assert.equal(out.SECTIONS[1].ITEMS[0].TITLE,'old');assert.deepEqual(out.OBSERVATIONS,['check']);
  }
 });
 test('recommendations use validated API data and retain exact reasons and order',()=>{
@@ -80,4 +80,13 @@ test('text, malformed JSON, empty and unsuccessful results are safe in COMMON',(
   const display=adaptGroupAnalysis({...design({summary:'partial'}),STATUS});
   assert.equal(buildLlmResultModel(display.VIEWER_RESULT,{loading:STATUS==='RUNNING'}).status,STATUS==='RUNNING' ? 'loading':'empty');
  }
+});
+
+test('observation objects show readable values and preserve developer keys only in source',()=>{
+ const response={observations:[{note:'검토 필요',details:{reason:'근거 부족'},internalCounter:3}]};
+ const before=JSON.stringify(response);
+ const out=adaptGroupAnalysis(design(response));
+ assert.deepEqual(out.OBSERVATIONS,['검토 필요','근거 부족']);
+ assert.equal(out.SOURCE.RESPONSE_JSON,before);
+ assert.equal(JSON.stringify(response),before);
 });
