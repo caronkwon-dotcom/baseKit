@@ -1,0 +1,7 @@
+.standalone-shell { --standalone-bg: #f3f5f8; --standalone-surface: #fff; --standalone-border: #dce1e8; --standalone-text: #202938; --standalone-accent: #2563eb; min-height: 100vh; background: var(--standalone-bg); color: var(--standalone-text); }
+.standalone-shell--linear { --standalone-bg: #f7f7f9; --standalone-surface: #fcfcfd; --standalone-border: #e4e4e9; --standalone-text: #262630; --standalone-accent: #6659cf; font-family: Inter, sans-serif; }
+.standalone-shell .standalone-shell__header { display: flex; align-items: center; gap: 24px; padding: 18px 24px; background: var(--standalone-surface); border-bottom: 1px solid var(--standalone-border); }
+.standalone-shell .standalone-shell__navigation { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 24px; border-bottom: 1px solid var(--standalone-border); }
+.standalone-shell .standalone-shell__navigation button { border: 1px solid var(--standalone-border); border-radius: 6px; padding: 8px 12px; background: var(--standalone-surface); color: var(--standalone-text); cursor: pointer; }
+.standalone-shell .standalone-shell__navigation button[aria-current="page"] { background: var(--standalone-accent); color: white; }
+.standalone-shell .standalone-shell__content { padding: 20px 24px; }

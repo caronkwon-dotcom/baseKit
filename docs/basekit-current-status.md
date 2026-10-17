@@ -1,4 +1,9 @@
 # BaseKit 현재 상태와 WBS
+## 2026-10-17 COMMON 1Depth 실행 설정·독립 셸
+
+common-work에서 기존 JSON/Module Manifest를 원본으로 유지하고 V18 BSMEXCFG의 1Depth 실행 설정을 runtime에 결합했다. 하위 상속 및 기본 INNER/BASEKIT, 메뉴관리 저장, WINDOW 고정 창 재사용, 독립 URL과 BASEKIT/LINEAR 셸을 구현했다. 운영은 Host Principal/Provider 및 일반 API Endpoint 매핑 부재 시 차단한다. 개발 WINDOW 우회는 dev/local + 명시적 opt-in에만 적용한다. 실제 Host 인증 인프라는 미구현 상태이며 운영 통합이 필요하다.
+
+파일 소유권을 나눈 A/B/C 병렬 구현 후 통합 검증했다. frontend build/lint/82 tests 통과, backend 75건 중 70 pass/5 외부 DB skip, 실패 0. 별도 H2 memory/포트 브라우저에서 저장·상속·MDI·창 재사용·두 디자인·새로고침·직접 URL 거부 확인. 실제 PostgreSQL/운영 Host는 미검증. [ADR 035](decisions/035-menu-execution-and-standalone-shell.md), [검증 상세](common-menu-execution-verification.md). dev-pm merge/운영 배포는 수행하지 않는다.
 
 ## 2026-10-13 PostgreSQL Analysis 근거 조회 500 수정
 

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { listMenuExecutionSettings, type MenuExecutionSetting } from '../services/menuExecutionApi';
+import { launchStandaloneWindow, resolveMenuExecution } from '../runtime/menuExecution';
 import Header from '../components/Header';
 import MdiTabs from '../components/MdiTabs';
 import Sidebar from '../components/Sidebar';
@@ -26,6 +28,23 @@ export default function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const menuTree = useMemo(() => metadataRepository.getMenuTree(), []);
+  const [executionSettings, setExecutionSettings] = useState<MenuExecutionSetting[]>([]);
+  const [executionSettingsReady, setExecutionSettingsReady] = useState(false);
+  const [executionMessage, setExecutionMessage] = useState('');
+  useEffect(() => {
+    let disposed = false;
+    const load = () => {
+      setExecutionSettingsReady(false);
+      void listMenuExecutionSettings().then(settings => {
+        if (!disposed) { setExecutionSettings(settings); setExecutionSettingsReady(true); setExecutionMessage(''); }
+      }).catch(() => {
+        if (!disposed) setExecutionMessage('메뉴 실행 설정을 불러오지 못했습니다. 화면을 새로고침해 다시 시도해 주세요.');
+      });
+    };
+    load();
+    window.addEventListener('basekit:menu-execution-settings-changed', load);
+    return () => { disposed = true; window.removeEventListener('basekit:menu-execution-settings-changed', load); };
+  }, []);
   const initialProgramKey = findProgramKeyByRoutePath(location.pathname);
   const initialContextMissing = Boolean(programByKey[initialProgramKey].requiresProjectContext && !designLifecycleRepository.getSelectedProjectId());
   const [activeTopMenuKey, setActiveTopMenuKey] = useState(() =>
@@ -66,6 +85,12 @@ export default function AppLayout() {
       const key = (event as CustomEvent<{PROGRAM_KEY:string}>).detail?.PROGRAM_KEY;
       const program = programByKey[key];
       if (!program || program.useYn !== 'Y') return;
+      if (!executionSettingsReady) { setExecutionMessage('메뉴 실행 설정을 확인한 후 다시 선택해 주세요.'); return; }
+      const execution = resolveMenuExecution(menuTree, key, executionSettings);
+      if (execution?.EXECUTION_TYPE === 'WINDOW') {
+        setExecutionMessage(launchStandaloneWindow(execution.MENU_ID, key) ? '' : '팝업이 차단되었습니다. 이 사이트의 팝업을 허용한 후 메뉴를 다시 선택해 주세요.');
+        return;
+      }
       if (!window.dispatchEvent(new CustomEvent('basekit:before-program-change', { cancelable: true, detail: { resume: () => openLinkedProgram(event) } }))) return;
       if (program.requiresProjectContext && !designLifecycleRepository.getSelectedProjectId()) {
         setPendingProjectProgramKey(key); setProjectContextDialogOpen(true); return;
@@ -76,7 +101,7 @@ export default function AppLayout() {
     };
     window.addEventListener('basekit:open-program',openLinkedProgram);
     return () => window.removeEventListener('basekit:open-program',openLinkedProgram);
-  }, [menuTree,navigate]);
+  }, [menuTree,navigate,executionSettings,executionSettingsReady]);
 
   const pinSidebar = () => { setSidebarPinned(true); setSidebarOpen(true); localStorage.setItem('basekit.navigation.sidebar-pinned', 'Y'); };
   const unpinSidebar = () => { setSidebarPinned(false); localStorage.setItem('basekit.navigation.sidebar-pinned', 'N'); };
@@ -105,6 +130,14 @@ export default function AppLayout() {
   };
 
   const openProgram = (programKey: ProgramKey) => {
+    if (!executionSettingsReady) { setExecutionMessage('메뉴 실행 설정을 확인한 후 다시 선택해 주세요.'); return; }
+    const execution = resolveMenuExecution(menuTree, programKey, executionSettings, activeTopMenuKey);
+    if (execution?.EXECUTION_TYPE === 'WINDOW') {
+      setExecutionMessage(launchStandaloneWindow(execution.MENU_ID, programKey) ? '' : '팝업이 차단되었습니다. 이 사이트의 팝업을 허용한 후 메뉴를 다시 선택해 주세요.');
+      setFloatingMenuOpen(false);
+      if (!sidebarPinned) setSidebarOpen(false);
+      return;
+    }
     if (programByKey[programKey].requiresProjectContext && !designLifecycleRepository.getSelectedProjectId()) {
       setPendingProjectProgramKey(programKey);
       setProjectContextDialogOpen(true);
@@ -152,6 +185,7 @@ export default function AppLayout() {
 
   return (
     <div className="app-shell">
+      {executionMessage ? <div role="alert">{executionMessage}</div> : null}
       <Header topMenus={menuTree} activeTopMenuKey={activeTopMenuKey}
         sidebarOpen={sidebarOpen} onSelectTopMenu={selectTopMenu}
         onToggleSidebar={() => setSidebarOpen((open) => !open)}
@@ -193,12 +227,7 @@ export default function AppLayout() {
           const pending = pendingProjectProgramKey;
           setProjectContextDialogOpen(false);
           setPendingProjectProgramKey(null);
-          if (pending) {
-            const program = programByKey[pending];
-            setTabs((currentTabs) => currentTabs.some((tab) => tab.programKey === pending)
-              ? currentTabs : [...currentTabs, { programKey: pending, title: program.programName }]);
-            activateProgramImmediately(pending);
-          }
+          if (pending) openProgram(pending);
         }} /> : null}
     </div>
   );

@@ -1,0 +1,39 @@
+[
+  {
+    "MENU_ID": "SYS",
+    "PROGRAM_KEYS": [
+      "USER_MGMT",
+      "COMMON_CODE_MGMT",
+      "MENU_MGMT",
+      "PROGRAM_MGMT",
+      "TABLE_MGMT",
+      "TERM_CURATION",
+      "WORD_MGMT",
+      "DOMAIN_MGMT"
+    ]
+  },
+  {
+    "MENU_ID": "DEV_GUIDE",
+    "PROGRAM_KEYS": [
+      "DOCUMENT_CENTER",
+      "DEV_SEARCH_SAMPLE_TYPE_1",
+      "DEV_SEARCH_SAMPLE_TYPE_2",
+      "LYT_L1R2",
+      "DEV_LLM_FILE_TEST"
+    ]
+  },
+  {
+    "MENU_ID": "STANDARD_DESIGN",
+    "PROGRAM_KEYS": [
+      "SD_REQUIREMENT_GROUP",
+      "SD_PROJECT_MGMT",
+      "SD_WBS_DESIGN",
+      "SD_PROJECT_MENU",
+      "SD_REQUIREMENT_DESIGN",
+      "SD_CUSTOMER_STANDARD",
+      "SD_SCREEN_DESIGN",
+      "SD_DATABASE_DESIGN",
+      "SD_TERM_GLOSSARY"
+    ]
+  }
+]
