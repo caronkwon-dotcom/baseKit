@@ -1,5 +1,10 @@
 # BaseKit 현재 상태와 WBS
 
+## 2026-10-17 SD 그룹 분석 표시 Adapter
+
+GROUP_DESIGN 최신/기존 구조와 GROUP_RECOMMENDATION 검증 결과를 SD 내부 표시 모델로 변환하는 순수 Adapter를 추가했다. 원문·입력 Snapshot을 보존하고 누락 필드/잘린 JSON/잘못된 타입을 경고로 방어한다. 그룹 상태·실행 이력·추천 선택 API와 UI는 유지했다. COMMON Props 확정 후 연결 및 SD UI 최종 통합은 남아 있다. [SD 데이터 계약](sd-group-analysis-adapter.md). Frontend 67건(Adapter 6건 포함), build/lint 통과. Backend 65건 중 60통과/외부 조건 5 skip, 실패 0. 기존 build 대형 chunk 경고만 존재. DB/COMMON/최종 UI 수정과 브라우저 통합 검수는 수행하지 않았다.
+
+
 ## 2026-10-13 PostgreSQL Analysis 근거 조회 500 수정
 
 실제 SD PostgreSQL에서 그룹 보완 실행 SUCCESS 이후 Analysis 추가 모달 목록/상세가 500을 반환했다. RequirementAnalysisSourceService의 CREATED_AT Object 직접 캐스팅이 원인이다. PostgreSQL JDBC 비지정 조회는 java.sql.Timestamp, H2 검수는 OffsetDateTime을 반환해 기존 테스트에서 누락되었다. JDBC getObject(1, OffsetDateTime.class) 타입 지정 조회로 수정했다. 동일 PostgreSQL/실제 기존 실행 GA-b715da8ae18c42a18796bcb4108ad4e1을 별도 8105 검수 서버에서 목록/상세 HTTP 200 및 추천 5건 조회 확인. DB/데이터/프론트 변경 없음. backend 59통과/5 skip, diff check 통과. 기존 8083 서버는 실행 설정 보존을 위해 중지하지 않았으며 사용자 백엔드 재시작 후 적용된다.
