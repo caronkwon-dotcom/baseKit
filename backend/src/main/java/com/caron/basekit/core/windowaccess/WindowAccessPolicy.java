@@ -11,6 +11,6 @@ public class WindowAccessPolicy {
     public boolean developmentEnvironment() {
         var profiles = Arrays.asList(environment.getActiveProfiles());
         return !profiles.contains("prod") && !profiles.contains("production")
-                && (profiles.contains("dev") || profiles.contains("local") || profiles.contains("test"));
+                && (profiles.contains("common") || profiles.contains("dev") || profiles.contains("local") || profiles.contains("test"));
     }
 }

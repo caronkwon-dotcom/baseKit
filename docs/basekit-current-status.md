@@ -1,4 +1,10 @@
 # BaseKit 현재 상태와 WBS
+## 2026-10-18 COMMON 단독 프로필 1Depth 실행 복구
+
+로그인 없는 개발환경 판정에 common 프로필이 누락되어 실제 5174→8081 common 단독 실행에서 Host 인증 403이 발생했다. common을 개발환경으로 인정하여 기존 1Depth INNER/WINDOW 설정 조회·저장과 독립 창 검사를 로그인 없이 지원한다. local 프로필 추가 및 datasource 변경 없음. Host 인증 연동은 사용자 결정에 따라 2차 사업으로 유보하며 기존 prod/production 제한과 원본 소속·WINDOW 설정 검사를 유지한다.
+
+common 단독 프로필의 격리 H2 통합 검증에서 설정 저장·조회와 WINDOW 접근 성공, INNER 복귀 후 독립 접근 거부를 확인했다. backend 75건 중 70 통과/외부 PostgreSQL 5 skip, build/lint 통과. 실제 PostgreSQL DDL/DML 및 기존 서버 재시작은 수행하지 않았다. 기존 서버 시작 이벤트에 EndpointCollector 기록 및 분석 상태 UPDATE가 있어 DB 무변경 제약상 실행 반영은 보류한다. 기존 .env-check-tmp.txt 보존.
+
 ## 2026-10-18 COMMON 로그인 없는 1Depth 실행 복구
 
 WINDOW/메뉴 실행 설정에만 추가된 Host Principal 요구와 LocalTestAuthProvider 때문에 로그인 없는 COMMON에서 403 및 독립 창 접근 차단이 발생했다. 임시 테스트 Provider·로그인 UI/안내를 제거하고 local/dev/test에서 실제 Provider와 Principal이 모두 없는 경우 기존 INNER와 같은 개발 실행을 허용했다. 실제 Provider의 프로그램/SAVE 검사, 원본 소속·WINDOW 설정 확인, prod/production 및 비개발 배포 차단은 유지한다. 컨트롤러 TODO와 ADR-035에 공통 로그인 시 INNER/WINDOW 정책 통합 경계를 명시했다. 신규 인증/SSO/DB/SD 화면 개발 없음.

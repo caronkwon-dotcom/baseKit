@@ -37,7 +37,12 @@ class WindowAccessSecurityTest {
         assertThrows(ResponseStatusException.class,()->controller.check("ROOT","P",request));
         request.setUserPrincipal(null);
         assertEquals("LINEAR",controller.check("ROOT","P",request).DESIGN_TYPE());
-        env.setActiveProfiles("dev","production");
+        env.setActiveProfiles("common");
+        assertEquals("LINEAR",controller.check("ROOT","P",request).DESIGN_TYPE());
+        when(settings.find("ROOT")).thenReturn(new MenuExecutionSetting("ROOT","INNER","BASEKIT"));
+        assertThrows(ResponseStatusException.class,()->controller.check("ROOT","P",request));
+        when(settings.find("ROOT")).thenReturn(new MenuExecutionSetting("ROOT","WINDOW","LINEAR"));
+        env.setActiveProfiles("common","production");
         assertThrows(ResponseStatusException.class,()->controller.check("ROOT","P",request));
     }
 }
