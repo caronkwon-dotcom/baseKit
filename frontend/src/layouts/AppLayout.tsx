@@ -29,16 +29,16 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const menuTree = useMemo(() => metadataRepository.getMenuTree(), []);
   const [executionSettings, setExecutionSettings] = useState<MenuExecutionSetting[]>([]);
-  const [executionSettingsReady, setExecutionSettingsReady] = useState(false);
   const [executionMessage, setExecutionMessage] = useState('');
   useEffect(() => {
     let disposed = false;
+    let revision = 0;
     const load = () => {
-      setExecutionSettingsReady(false);
+      const requestRevision = ++revision;
       void listMenuExecutionSettings().then(settings => {
-        if (!disposed) { setExecutionSettings(settings); setExecutionSettingsReady(true); setExecutionMessage(''); }
+        if (!disposed && requestRevision === revision) { setExecutionSettings(settings); setExecutionMessage(''); }
       }).catch(() => {
-        if (!disposed) setExecutionMessage('메뉴 실행 설정을 불러오지 못했습니다. 화면을 새로고침해 다시 시도해 주세요.');
+        if (!disposed && requestRevision === revision) setExecutionMessage('메뉴 실행 설정을 불러오지 못해 기본 INNER/BASEKIT 또는 마지막 확인 설정으로 실행합니다. 새로고침하면 다시 조회합니다.');
       });
     };
     load();
@@ -85,7 +85,6 @@ export default function AppLayout() {
       const key = (event as CustomEvent<{PROGRAM_KEY:string}>).detail?.PROGRAM_KEY;
       const program = programByKey[key];
       if (!program || program.useYn !== 'Y') return;
-      if (!executionSettingsReady) { setExecutionMessage('메뉴 실행 설정을 확인한 후 다시 선택해 주세요.'); return; }
       const execution = resolveMenuExecution(menuTree, key, executionSettings);
       if (execution?.EXECUTION_TYPE === 'WINDOW') {
         setExecutionMessage(launchStandaloneWindow(execution.MENU_ID, key) ? '' : '팝업이 차단되었습니다. 이 사이트의 팝업을 허용한 후 메뉴를 다시 선택해 주세요.');
@@ -101,7 +100,7 @@ export default function AppLayout() {
     };
     window.addEventListener('basekit:open-program',openLinkedProgram);
     return () => window.removeEventListener('basekit:open-program',openLinkedProgram);
-  }, [menuTree,navigate,executionSettings,executionSettingsReady]);
+  }, [menuTree,navigate,executionSettings]);
 
   const pinSidebar = () => { setSidebarPinned(true); setSidebarOpen(true); localStorage.setItem('basekit.navigation.sidebar-pinned', 'Y'); };
   const unpinSidebar = () => { setSidebarPinned(false); localStorage.setItem('basekit.navigation.sidebar-pinned', 'N'); };
@@ -130,7 +129,6 @@ export default function AppLayout() {
   };
 
   const openProgram = (programKey: ProgramKey) => {
-    if (!executionSettingsReady) { setExecutionMessage('메뉴 실행 설정을 확인한 후 다시 선택해 주세요.'); return; }
     const execution = resolveMenuExecution(menuTree, programKey, executionSettings, activeTopMenuKey);
     if (execution?.EXECUTION_TYPE === 'WINDOW') {
       setExecutionMessage(launchStandaloneWindow(execution.MENU_ID, programKey) ? '' : '팝업이 차단되었습니다. 이 사이트의 팝업을 허용한 후 메뉴를 다시 선택해 주세요.');
@@ -185,7 +183,7 @@ export default function AppLayout() {
 
   return (
     <div className="app-shell">
-      {executionMessage ? <div role="alert">{executionMessage}</div> : null}
+      {executionMessage ? <div role="status">{executionMessage}</div> : null}
       <Header topMenus={menuTree} activeTopMenuKey={activeTopMenuKey}
         sidebarOpen={sidebarOpen} onSelectTopMenu={selectTopMenu}
         onToggleSidebar={() => setSidebarOpen((open) => !open)}

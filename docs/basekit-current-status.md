@@ -1,4 +1,12 @@
 # BaseKit 현재 상태와 WBS
+## 2026-10-17 COMMON 메뉴 실행 회귀 수정
+
+설정 API 장애 때 AppLayout의 executionSettingsReady가 false로 남아 모든 프로그램 실행을 차단했다. COMMON 5174의 실제 설정 요청은 HTTP 403(Host 인증 연결 필요), 사용자 로그는 백엔드 ECONNREFUSED였다. 준비 상태의 전역 차단을 제거하여 로딩/장애/미설정에서 원본 JSON·Manifest의 INNER/BASEKIT을 유지한다. 재조회 중에는 마지막 정상 설정을 보존하고 오래된 응답은 무시한다. WINDOW는 정상 수신한 명시 설정만 적용하며 서버 권한 정책은 변경하지 않았다. 잘못된 성공 응답도 검증하여 거부한다.
+
+실제 Edge 5174에서 설정 실패 안내를 표시한 채 시스템관리 사용자관리, 개발자가이드 검색 샘플, Standard Design 프로젝트 화면 실행 확인. 격리 H2 8095/프런트 5185에서 V18 및 미설정 기본값, 메뉴관리 WINDOW 저장, LINEAR/BASEKIT 독립 셸, 동일 창 재사용, 새로고침 확인. 기존 8081의 인증 없는 WINDOW 요청은 HTTP 403 유지. 기존 DB 및 서버는 변경하지 않았다. 실제 PostgreSQL 마이그레이션과 운영 Host 연결은 미검증이다.
+
+build/lint, 프런트 87건, 백엔드 75건(70 통과/5 외부 DB skip), diff check 통과. 클릭 및 연결 프로그램의 로딩/실패 회귀와 재조회 실패 시 기존 WINDOW 보존 테스트 포함. common-work에서 기존 .env-check-tmp.txt 보존. CURRENT.md 부재이며 사용자 직접 지시에 따라 별도 TASK/PLAN 승인 없이 수행했다. 원격 dev-pm은 기존 기준 63bcb8e로 확인했고 통합하지 않았다.
+
 ## 2026-10-17 COMMON 1Depth 실행 설정·독립 셸
 
 common-work에서 기존 JSON/Module Manifest를 원본으로 유지하고 V18 BSMEXCFG의 1Depth 실행 설정을 runtime에 결합했다. 하위 상속 및 기본 INNER/BASEKIT, 메뉴관리 저장, WINDOW 고정 창 재사용, 독립 URL과 BASEKIT/LINEAR 셸을 구현했다. 운영은 Host Principal/Provider 및 일반 API Endpoint 매핑 부재 시 차단한다. 개발 WINDOW 우회는 dev/local + 명시적 opt-in에만 적용한다. 실제 Host 인증 인프라는 미구현 상태이며 운영 통합이 필요하다.

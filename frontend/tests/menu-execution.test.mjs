@@ -34,3 +34,35 @@ test('reuses fixed module name across programs and reports popup rejection', () 
 test('window policy exceptions report a blocked launch', () => {
  assert.equal(launchStandaloneWindow('SD','P',{location:{href:'https://example.com/'},open(){throw new Error('blocked');}}),false);
 });
+
+import { listMenuExecutionSettings } from '../src/services/menuExecutionApi.ts';
+
+test('settings failures reject safely and leave legacy INNER defaults usable', async (t) => {
+ for (const status of [403, 404, 500, 503]) {
+  t.mock.method(globalThis, 'fetch', async () => new Response(JSON.stringify({MESSAGE:'unavailable'}), {status}));
+  await assert.rejects(listMenuExecutionSettings);
+  assert.equal(resolveMenuExecution(tree,'P',[]).EXECUTION_TYPE,'INNER');
+  t.mock.restoreAll();
+ }
+ t.mock.method(globalThis, 'fetch', async () => { throw new TypeError('ECONNREFUSED'); });
+ await assert.rejects(listMenuExecutionSettings);
+ assert.equal(resolveMenuExecution(tree,'C',[]).DESIGN_TYPE,'BASEKIT');
+});
+
+test('malformed successful responses cannot enable WINDOW or break menu resolution', async (t) => {
+ for (const payload of [{}, {DATA:null}, {DATA:{}}, {DATA:[null]}, {DATA:[{MENU_ID:'SD',EXECUTION_TYPE:'WINDOW'}]}]) {
+  t.mock.method(globalThis, 'fetch', async () => new Response(JSON.stringify(payload)));
+  await assert.rejects(listMenuExecutionSettings);
+  t.mock.restoreAll();
+ }
+});
+
+test('empty response defaults INNER, explicit WINDOW remains scoped to its root', async (t) => {
+ t.mock.method(globalThis, 'fetch', async () => new Response(JSON.stringify({DATA:[]})));
+ assert.equal(resolveMenuExecution(tree,'P',await listMenuExecutionSettings()).EXECUTION_TYPE,'INNER');
+ t.mock.restoreAll();
+ t.mock.method(globalThis, 'fetch', async () => new Response(JSON.stringify({DATA:[{MENU_ID:'SD',EXECUTION_TYPE:'WINDOW',DESIGN_TYPE:'LINEAR'}]})));
+ const settings=await listMenuExecutionSettings();
+ assert.equal(resolveMenuExecution(tree,'P',settings).EXECUTION_TYPE,'WINDOW');
+ assert.equal(resolveMenuExecution(tree,'C',settings).EXECUTION_TYPE,'INNER');
+});
