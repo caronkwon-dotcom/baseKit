@@ -45,24 +45,29 @@ class MenuExecutionIntegrationTest {
    var service=new MenuExecutionService(new JdbcTemplate(db),catalog);
    var environment=new org.springframework.mock.env.MockEnvironment();
    environment.setActiveProfiles("test");
-   var providers=new org.springframework.beans.factory.support.StaticListableBeanFactory().getBeanProvider(com.caron.basekit.core.endpoint.EndpointPermissionProvider.class);
+   var beans=new org.springframework.beans.factory.support.StaticListableBeanFactory();
+   var provider=org.mockito.Mockito.mock(com.caron.basekit.core.endpoint.EndpointPermissionProvider.class);
+   org.mockito.Mockito.when(provider.hasProgram(org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.eq("MENU_MGMT"))).thenReturn(true);
+   org.mockito.Mockito.when(provider.hasButtonGroup(org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.eq("MENU_MGMT"),org.mockito.ArgumentMatchers.eq("SAVE"))).thenReturn(true);
+   beans.addBean("host",provider);
+   var providers=beans.getBeanProvider(com.caron.basekit.core.endpoint.EndpointPermissionProvider.class);
    var mvc=MockMvcBuilders.standaloneSetup(new MenuExecutionController(service, providers, new com.caron.basekit.core.windowaccess.WindowAccessPolicy(environment))).setControllerAdvice(new GlobalExceptionHandler()).build();
    String root=catalog.rootIds().getFirst();
-   mvc.perform(get("/api/core/menu-execution-settings"))
+   mvc.perform(get("/api/core/menu-execution-settings").principal(() -> "user"))
     .andExpect(status().isOk()).andExpect(jsonPath("$.DATA[0].EXECUTION_TYPE").value("INNER"))
     .andExpect(jsonPath("$.DATA[0].DESIGN_TYPE").value("BASEKIT"));
-   mvc.perform(put("/api/core/menu-execution-settings/"+root).contentType(MediaType.APPLICATION_JSON).content("{\"EXECUTION_TYPE\":\"WINDOW\",\"DESIGN_TYPE\":\"LINEAR\"}"))
+   mvc.perform(put("/api/core/menu-execution-settings/"+root).principal(() -> "user").contentType(MediaType.APPLICATION_JSON).content("{\"EXECUTION_TYPE\":\"WINDOW\",\"DESIGN_TYPE\":\"LINEAR\"}"))
     .andExpect(status().isOk()).andExpect(jsonPath("$.DATA.MENU_ID").value(root));
    assertEquals("WINDOW", service.find(root).EXECUTION_TYPE());
    assertEquals("LINEAR", service.find(root).DESIGN_TYPE());
-   mvc.perform(put("/api/core/menu-execution-settings/"+root).contentType(MediaType.APPLICATION_JSON).content("{\"EXECUTION_TYPE\":\"INNER\",\"DESIGN_TYPE\":\"BASEKIT\"}"))
+   mvc.perform(put("/api/core/menu-execution-settings/"+root).principal(() -> "user").contentType(MediaType.APPLICATION_JSON).content("{\"EXECUTION_TYPE\":\"INNER\",\"DESIGN_TYPE\":\"BASEKIT\"}"))
     .andExpect(status().isOk());
    assertEquals("INNER", service.find(root).EXECUTION_TYPE());
-   mvc.perform(put("/api/core/menu-execution-settings/SYS.USER").contentType(MediaType.APPLICATION_JSON).content("{\"EXECUTION_TYPE\":\"WINDOW\",\"DESIGN_TYPE\":\"LINEAR\"}"))
+   mvc.perform(put("/api/core/menu-execution-settings/SYS.USER").principal(() -> "user").contentType(MediaType.APPLICATION_JSON).content("{\"EXECUTION_TYPE\":\"WINDOW\",\"DESIGN_TYPE\":\"LINEAR\"}"))
     .andExpect(status().isBadRequest());
-   mvc.perform(put("/api/core/menu-execution-settings/"+root).contentType(MediaType.APPLICATION_JSON).content("{\"EXECUTION_TYPE\":\"SHELL\",\"DESIGN_TYPE\":\"LINEAR\"}"))
+   mvc.perform(put("/api/core/menu-execution-settings/"+root).principal(() -> "user").contentType(MediaType.APPLICATION_JSON).content("{\"EXECUTION_TYPE\":\"SHELL\",\"DESIGN_TYPE\":\"LINEAR\"}"))
     .andExpect(status().isBadRequest());
-   mvc.perform(put("/api/core/menu-execution-settings/"+root).contentType(MediaType.APPLICATION_JSON).content("{\"DESIGN_TYPE\":\"LINEAR\"}"))
+   mvc.perform(put("/api/core/menu-execution-settings/"+root).principal(() -> "user").contentType(MediaType.APPLICATION_JSON).content("{\"DESIGN_TYPE\":\"LINEAR\"}"))
     .andExpect(status().isBadRequest());
    assertFalse(catalog.containsProgram("SYS", "SD_PROJECT_MGMT"));
    assertTrue(catalog.containsProgram("SYS", "USER_MGMT"));

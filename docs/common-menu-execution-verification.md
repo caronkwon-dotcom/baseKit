@@ -1,5 +1,7 @@
 # COMMON 메뉴 실행 설정 검증 (2026-10-17)
 
+> 이 문서는 최초 구현 당시의 검수 이력이다. 익명 개발 우회 정책은 폐기되었으며 현재 인증·실행 절차와 재검수 결과는 [COMMON 로컬 테스트 인증](common-local-test-auth.md)이 우선한다.
+
 ## 구현
 
 - A: core/menuexecution, V18 양쪽 migration, 메뉴관리 UI, menuExecutionApi, 카탈로그 생성 스크립트 및 서버 테스트.

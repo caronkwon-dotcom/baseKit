@@ -178,7 +178,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port,
       strictPort: true,
-      host: '0.0.0.0',
+      host: mode === 'common' ? '127.0.0.1' : '0.0.0.0',
       allowedHosts: ['.app.github.dev'],
       proxy: {
         '/api/health': backendUrl,

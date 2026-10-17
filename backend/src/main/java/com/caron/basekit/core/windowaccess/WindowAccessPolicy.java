@@ -13,9 +13,4 @@ public class WindowAccessPolicy {
         return !profiles.contains("prod") && !profiles.contains("production")
                 && (profiles.contains("dev") || profiles.contains("local") || profiles.contains("test"));
     }
-    public boolean developmentWindowBypass() {
-        var profiles = Arrays.asList(environment.getActiveProfiles());
-        return developmentEnvironment() && (profiles.contains("dev") || profiles.contains("local"))
-                && environment.getProperty("basekit.window.allow-unauthenticated-development", Boolean.class, false);
-    }
 }

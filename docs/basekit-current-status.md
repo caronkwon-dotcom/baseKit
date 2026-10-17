@@ -490,3 +490,7 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 ## LLM 파일·검색 테스트 PoC (2026-10-16, feature 검수 대기)
 
 개발자가이드 `LLM 파일·검색 테스트`(`DEV_LLM_FILE_TEST`, `/api/dev-guide/v1/llm-files`)를 추가했다. 기존 회사 LLM 설정은 chat completions만 정의하므로 회사 LLM 파일 API는 `/capabilities`가 `/files`·`/models`를 실제 probe한 결과로만 표시한다(미확인 시 지원으로 표시하지 않음). 파일 보관·검색은 **BaseKit 서버 메모리(PoC, 재시작 시 소멸, 10MB, PROJECT_ID 경계)** 대안이며 회사 LLM 기능이 아니다. 질의는 서버 키워드 검색 구간만 회사 LLM chat에 전송하고, 비교용으로 원문 전체 전송 모드를 제공한다. 실제 회사 LLM 환경에서의 측정 결과는 아직 없으며 SD 요구사항 그룹화는 구현하지 않았다.
+
+## COMMON 로컬 테스트 인증 및 메뉴 편집 복구 (2026-10-17, common-work)
+
+실제 Host 전체 연동은 공모전 이후로 보류했다. 명시적 opt-in·32자 이상 자격·local,common 전용·127.0.0.1:8081 바인딩을 강제하는 COMMON_REVIEWER 세션 Provider를 구현했다. 메뉴 설정 MENU_MGMT × SAVE와 DOCUMENT_CENTER/LYT_L1R2 실행만 허용하며 업무 API는 차단한다. 익명 WINDOW/설정 우회를 제거하고 행 선택을 API 성공과 분리했다. 실제 5174/8081 격리 H2 브라우저에서 저장·상속·INNER MDI·WINDOW 재사용·두 셸·새로고침·직접 URL 및 권한 거부를 확인했다. 운영 Host/PostgreSQL 적용은 미완료다. 실행 절차와 상세 경계는 [로컬 테스트 인증](common-local-test-auth.md)을 따른다.

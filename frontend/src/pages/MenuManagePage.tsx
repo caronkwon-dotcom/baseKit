@@ -25,7 +25,7 @@ export default function MenuManagePage() {
   const [message, setMessage] = useState('');
   useEffect(() => {
     let active = true;
-    listMenuExecutionSettings().then(rows => { if (active) { setSettings(rows); setLoaded(true); } })
+    listMenuExecutionSettings().then(rows => { if (active) { setSettings(rows); setDraft(current => current ? rows.find(row => row.MENU_ID === current.MENU_ID) ?? current : null); setLoaded(true); } })
       .catch((error: unknown) => { if (active) setMessage(error instanceof Error ? error.message : '조회 실패'); });
     return () => { active = false; };
   }, []);
@@ -49,11 +49,12 @@ export default function MenuManagePage() {
   const editable = selectedMenu?.menuLevel === 1 && selectedMenu.parentMenuKey === null;
   return <section className="page">
     <PageHeader breadcrumbs={['시스템관리', '메뉴관리']} description="메뉴 구조는 JSON/Module Manifest를 따르며, 1Depth 실행 설정만 저장합니다." />
-    <DataTable title="메뉴 목록" columns={menuColumns} rows={menus} getRowKey={menu => menu.menuKey} onRowClick={!loaded || saving ? undefined : selectMenu} />
+    <DataTable title="메뉴 목록" columns={menuColumns} rows={menus} getRowKey={menu => menu.menuKey} onRowClick={saving ? undefined : selectMenu} />
     <div className="detail-section"><h2>메뉴 실행 설정</h2>
       {selectedMenu && draft ? <div>
         <p>{selectedMenu.menuName} ({selectedMenu.menuKey}) · 프로그램: {selectedMenu.programKey ?? '-'}</p>
         <p>설정 기준: {draft.MENU_ID}{!editable && ' · 하위 메뉴는 1Depth 설정을 상속합니다.'}</p>
+        {!loaded && <p role="alert">설정을 조회하지 못해 편집·저장이 잠겨 있습니다. 표시된 기본값은 저장값이 아닙니다. 권한·서버 연결을 확인하거나 COMMON 로컬 테스트 로그인 후 새로고침하세요. <a href="/api/core/local-test-auth">로컬 테스트 로그인</a></p>}
         <fieldset disabled={!editable || !loaded || saving}>
           <label htmlFor="executionType">실행 유형</label>
           <select id="executionType" value={draft.EXECUTION_TYPE} onChange={event => setDraft({ ...draft, EXECUTION_TYPE: event.target.value as MenuExecutionSetting['EXECUTION_TYPE'] })}>

@@ -29,8 +29,8 @@ public class MenuExecutionController {
  private void authorize(HttpServletRequest request, boolean write) {
   var provider=providers.getIfAvailable();
   if(provider==null || request.getUserPrincipal()==null) {
-   if(!policy.developmentEnvironment()) deny();
-  } else if(write && !provider.hasProgram(request,"MENU_MGMT")) deny();
+   deny();
+  } else if(!provider.hasProgram(request,"MENU_MGMT") || (write && !provider.hasButtonGroup(request,"MENU_MGMT","SAVE"))) deny();
  }
  private static void deny() { throw new ResponseStatusException(HttpStatus.FORBIDDEN,"메뉴 설정 접근 권한이 없습니다."); }
 }

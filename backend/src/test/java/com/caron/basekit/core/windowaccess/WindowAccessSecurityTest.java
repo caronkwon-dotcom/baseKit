@@ -11,17 +11,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class WindowAccessSecurityTest {
-    @Test void bypassRequiresExplicitDevelopmentAndCannotLeakIntoProduction() {
-        var env=new MockEnvironment().withProperty("basekit.window.allow-unauthenticated-development","true");
-        var policy=new WindowAccessPolicy(env);
-        assertFalse(policy.developmentWindowBypass());
-        env.setActiveProfiles("test"); assertFalse(policy.developmentWindowBypass());
-        env.setActiveProfiles("dev"); assertTrue(policy.developmentWindowBypass());
-        env.setActiveProfiles("dev","prod"); assertFalse(policy.developmentWindowBypass());
-        env.setActiveProfiles("local","production"); assertFalse(policy.developmentEnvironment());
-        env.setActiveProfiles("local"); env.setProperty("basekit.window.allow-unauthenticated-development","false");
-        assertFalse(policy.developmentWindowBypass());
-    }
     @Test void serverValidatesMembershipSettingPrincipalAndTrustedGrant() {
         var catalog=mock(MenuExecutionCatalog.class);
         var settings=mock(MenuExecutionService.class);
@@ -45,7 +34,7 @@ class WindowAccessSecurityTest {
         when(host.hasProgram(request,"P")).thenReturn(false);
         assertThrows(ResponseStatusException.class,()->controller.check("ROOT","P",request));
         when(providers.getIfAvailable()).thenReturn(null);
-        assertEquals("WINDOW",controller.check("ROOT","P",request).EXECUTION_TYPE());
+        assertThrows(ResponseStatusException.class,()->controller.check("ROOT","P",request));
         env.setActiveProfiles("dev","production");
         assertThrows(ResponseStatusException.class,()->controller.check("ROOT","P",request));
     }

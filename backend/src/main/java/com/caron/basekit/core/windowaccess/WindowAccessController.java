@@ -28,9 +28,9 @@ public class WindowAccessController {
         var setting=settings.find(menuId);
         if (!"WINDOW".equals(setting.EXECUTION_TYPE())) deny();
         var provider=providers.getIfAvailable();
-        // Dev bypass covers missing Host integration only, never an explicit Host denial.
+        // Every WINDOW entry requires an authenticated principal and an explicit program grant.
         if (provider==null || request.getUserPrincipal()==null) {
-            if (!policy.developmentWindowBypass()) deny();
+            deny();
         } else if (!provider.hasProgram(request,programKey)) deny();
         return setting;
     }
