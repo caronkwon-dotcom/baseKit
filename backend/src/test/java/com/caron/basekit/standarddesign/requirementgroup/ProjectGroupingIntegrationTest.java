@@ -39,7 +39,7 @@ class ProjectGroupingIntegrationTest {
     String raw(String rid) {return "{\"GROUPS\":[{\"TITLE\":\"구매\",\"REASON\":\"주문 업무\",\"MEMBERS\":[{\"REQUIREMENT_ID\":\""+rid+"\",\"REASON\":\"주문 원문\"},{\"REQUIREMENT_ID\":\"HALLUCINATED\",\"REASON\":\"invalid\"}]}],\"UNCLASSIFIED\":[]}";}
     @Test void completeCoverageImmutableRawDraftPersistenceAndIdempotentRegistration() throws Exception {
         String project=project();var a=requirement(project,"주문");var b=requirement(project,"배송");var removed=requirement(project,"폐기");
-        mvc.perform(delete("/api/standard-design/requirements/"+removed.path("REQUIREMENT_ID").asText())).andExpect(status().isNoContent());
+        mvc.perform(delete("/api/standard-design/requirements/"+removed.path("REQUIREMENT_ID").asText()).contentType(MediaType.APPLICATION_JSON).content("{\"REASON\":\"검토 후 폐기\"}")).andExpect(status().isNoContent());
         String raw=raw(a.path("REQUIREMENT_ID").asText());reply(raw);
         var run=service.start(project,"same-request");String id=run.get("ANALYSIS_ID").toString();run=waitFor(project,id);
         assertEquals("SUCCESS",run.get("STATUS"));assertEquals(2,((JsonNode)run.get("INPUT")).size());
@@ -69,7 +69,7 @@ class ProjectGroupingIntegrationTest {
         var invalid=draft.deepCopy();((ObjectNode)invalid.path("GROUPS").get(0).path("MEMBERS").get(0)).put("REQUIREMENT_ID","foreign");
         assertThrows(org.springframework.web.server.ResponseStatusException.class,()->service.save(project,id,1L,invalid));
         ((ObjectNode)draft.path("GROUPS").get(0)).put("REVIEW_STATUS","APPROVED");service.save(project,id,1L,draft);
-        mvc.perform(delete("/api/standard-design/requirements/"+req.path("REQUIREMENT_ID").asText())).andExpect(status().isNoContent());
+        mvc.perform(delete("/api/standard-design/requirements/"+req.path("REQUIREMENT_ID").asText()).contentType(MediaType.APPLICATION_JSON).content("{\"REASON\":\"검토 후 폐기\"}")).andExpect(status().isNoContent());
         assertThrows(org.springframework.web.server.ResponseStatusException.class,()->service.register(project,id,2L,List.of(gid)));
         assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM BSDRGRP WHERE PROJECT_ID=?",Integer.class,project));
     }

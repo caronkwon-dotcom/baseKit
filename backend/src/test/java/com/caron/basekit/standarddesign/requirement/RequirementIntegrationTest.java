@@ -38,8 +38,8 @@ class RequirementIntegrationTest {
         mvc.perform(get("/api/standard-design/requirements").param("PROJECT_ID", other))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.DATA.length()").value(0));
         mvc.perform(get("/api/standard-design/requirements")) .andExpect(status().isBadRequest());
-        mvc.perform(delete("/api/standard-design/requirements/"+id)).andExpect(status().isNoContent());
-        mvc.perform(delete("/api/standard-design/requirements/"+id)).andExpect(status().isNoContent());
+        mvc.perform(delete("/api/standard-design/requirements/"+id).contentType(MediaType.APPLICATION_JSON).content("{\"REASON\":\"검토 후 폐기\"}")).andExpect(status().isNoContent());
+        mvc.perform(delete("/api/standard-design/requirements/"+id).contentType(MediaType.APPLICATION_JSON).content("{\"REASON\":\"검토 후 폐기\"}")).andExpect(status().isNoContent());
         mvc.perform(get("/api/standard-design/requirements/"+id)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.DATA.DISCARDED_YN").value("Y"))
                 .andExpect(jsonPath("$.DATA.PROJECT_ID").value(project));
@@ -67,7 +67,7 @@ class RequirementIntegrationTest {
         mvc.perform(delete("/api/standard-design/requirements/"+id+"/attachments/"+attachmentId)).andExpect(status().isNoContent());
         String preservedUpload=mvc.perform(multipart("/api/standard-design/requirements/"+id+"/attachments").file(file)).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
         String preservedId=json.readTree(preservedUpload).path("DATA").path("ATTACHMENT_ID").asText();
-        mvc.perform(delete("/api/standard-design/requirements/"+id)).andExpect(status().isNoContent());
+        mvc.perform(delete("/api/standard-design/requirements/"+id).contentType(MediaType.APPLICATION_JSON).content("{\"REASON\":\"검토 후 폐기\"}")).andExpect(status().isNoContent());
         mvc.perform(get("/api/standard-design/requirements/"+id+"/attachments/"+preservedId+"/file")).andExpect(status().isOk()).andExpect(content().bytes(png));
         mvc.perform(get("/api/standard-design/requirements/"+id)).andExpect(status().isOk()).andExpect(jsonPath("$.DATA.DISCARDED_YN").value("Y"));
     }
@@ -93,6 +93,6 @@ class RequirementIntegrationTest {
         mvc.perform(put("/api/standard-design/requirements/" + id).contentType(MediaType.APPLICATION_JSON)
                 .content(withOpinion.replace("초기 설계 의견", "")))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.DATA.DESIGN_OPINION").value(""));
-        mvc.perform(delete("/api/standard-design/requirements/" + id)).andExpect(status().isNoContent());
+        mvc.perform(delete("/api/standard-design/requirements/" + id).contentType(MediaType.APPLICATION_JSON).content("{\"REASON\":\"검토 후 폐기\"}")).andExpect(status().isNoContent());
     }
 }

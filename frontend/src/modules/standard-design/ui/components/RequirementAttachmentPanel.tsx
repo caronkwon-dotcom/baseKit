@@ -6,6 +6,8 @@ import { uploadRequirementAttachment } from '../../requirement/requirementUpload
 
 interface RequirementAttachmentPanelProps {
   requirementId: string;
+  readOnly?: boolean;
+  change?: { REVISION: number; VERSION: number };
   attachments: RequirementAttachment[];
   onUploaded: (file: RequirementAttachment) => void;
   onDeleted: (id: string) => void;
@@ -13,7 +15,7 @@ interface RequirementAttachmentPanelProps {
 }
 interface Preview { url: string; name: string; download?: boolean }
 
-export default function RequirementAttachmentPanel({ requirementId, attachments, onUploaded, onDeleted, onError }: RequirementAttachmentPanelProps) {
+export default function RequirementAttachmentPanel({ requirementId, readOnly = false, change, attachments, onUploaded, onDeleted, onError }: RequirementAttachmentPanelProps) {
   const [policy, setPolicy] = useState<BaseUploadPolicy | null>(null);
   const [preview, setPreview] = useState<Preview | null>(null);
   useEffect(() => {
@@ -40,9 +42,9 @@ export default function RequirementAttachmentPanel({ requirementId, attachments,
     <div className="sd-requirement-file-layout">
       <div className="sd-requirement-file-list">
         <BaseFileUpload key={requirementId} files={attachments.map((file) => ({ id: file.ATTACHMENT_ID, name: file.ORIGINAL_FILE_NAME, size: file.FILE_SIZE, mimeType: file.MIME_TYPE }))}
-          policy={policy} disabled={!requirementId} concurrency={2}
-          onUpload={(file, progress) => uploadRequirementAttachment(requirementId, file, progress)}
-          onUploaded={onUploaded} onDelete={(id) => requirementApi.deleteFile(requirementId, id)}
+          policy={policy} multiple={!change} disabled={!requirementId || readOnly} concurrency={1}
+          onUpload={(file, progress) => uploadRequirementAttachment(requirementId, file, progress, change)}
+          onUploaded={onUploaded} onDelete={(id) => requirementApi.deleteFile(requirementId, id, change)}
           onDeleted={(id) => { if (preview?.url === requirementApi.fileUrl(requirementId, id)) setPreview(null); onDeleted(id); }}
           onPreview={showSaved} onPreviewLocal={showLocal} onError={onError} />
       </div>

@@ -1,3 +1,4 @@
+import FormModal from '../../../../components/common/FormModal';
 import ProjectGroupingWorkspace from '../components/ProjectGroupingWorkspace';
 import FormSelect from '../../../../components/common/FormSelect';
 import RequiredFieldsNotice from '../../../../components/common/RequiredFieldsNotice';
@@ -14,7 +15,7 @@ import ProjectContextSelector from '../components/ProjectContextSelector';
 import RequirementAttachmentPanel from '../components/RequirementAttachmentPanel';
 import IncludedRequirementGroups from '../components/IncludedRequirementGroups';
 import { useProjectContext } from '../components/useProjectContext';
-import { requirementApi, type Requirement, type RequirementInput } from '../../requirement/requirementApi';
+import { requirementApi, type Requirement, type RequirementInput, type RequirementRevisions } from '../../requirement/requirementApi';
 import { projectMenuApi, type ProjectMenu } from '../../projectmenu/projectMenuApi';
 import { createRequirementExcelMapper, createRequirementExcelValidator, planRequirementImport, requirementExcelColumns, requirementImportKey } from '../../requirement/requirementExcel';
 
@@ -68,6 +69,10 @@ export default function RequirementIntakePage() {
   const [groupingOpen, setGroupingOpen] = useState(false);
   const [rows, setRows] = useState<Requirement[]>([]);
   const [selectedId, setSelectedId] = useState('');
+  const [revisionAction, setRevisionAction] = useState<'change' | 'discard' | 'confirm' | 'cancel' | null>(null);
+  const [actionReason, setActionReason] = useState('');
+  const [revisions, setRevisions] = useState<RequirementRevisions | null>(null);
+  const selectionRequest = useRef(0);
   const [draft, setDraft] = useState<RequirementInput>(() => emptyDraft(projectId));
   const [baseline, setBaseline] = useState('');
   const [mode, setMode] = useState<ProjectWorkspaceMode>('DETAIL');
@@ -93,6 +98,9 @@ export default function RequirementIntakePage() {
   const replaceMenuRelations = menuRelations.replace;
   const menuRelationRows = menuRelations.rows;
   const selected = rows.find((row) => row.PROJECT_ID === projectId && row.REQUIREMENT_ID === selectedId);
+  const matchingRevisions = revisions?.CURRENT.REQUIREMENT_ID === selectedId ? revisions : null;
+  const changeDraft = matchingRevisions?.DRAFT;
+  const readOnly = !!selectedId && (selected?.DISCARDED_YN === 'Y' || !matchingRevisions || (!changeDraft && matchingRevisions.READ_ONLY));
   const projectMenuIds = menuRelationRows.filter((row) => menuRelations.getState(row) !== 'DELETED').map((row) => row.PROJECT_MENU_ID).filter((id) => !id.startsWith('NEW_'));
   const draftWithMenuKeys = { ...draft, MENU_KEYS: legacyMenuKeys, PROJECT_MENU_IDS: projectMenuIds };
   const dirty = baseline !== '' && JSON.stringify(draftWithMenuKeys) !== baseline;
@@ -108,11 +116,19 @@ export default function RequirementIntakePage() {
   });
   const confirmDiscard = () => !dirty || window.confirm('저장하지 않은 변경사항이 있습니다. 변경사항을 버리시겠습니까?');
   const reportAttachmentError = useCallback((text: string) => setMessage({ type: 'error', text }), []);
-  const select = (row: Requirement) => {
+  const fill = (row: Requirement) => {
     const value: RequirementInput = { PROJECT_ID: row.PROJECT_ID, REQUIREMENT_NAME: row.REQUIREMENT_NAME, REQUIREMENT_TYPE_CODE: row.REQUIREMENT_TYPE_CODE, DESCRIPTION: row.DESCRIPTION, PROCESS_DESCRIPTION: row.PROCESS_DESCRIPTION, DESIGN_OPINION: row.DESIGN_OPINION ?? '', STATUS: row.STATUS, MENU_KEYS: row.MENU_KEYS, PROJECT_MENU_IDS: row.PROJECT_MENU_IDS ?? [] };
     setValidationAttempted(false); setSelectedId(row.REQUIREMENT_ID); setSelectedRowKeys(new Set([row.REQUIREMENT_ID])); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); setMenuRelationSelected(new Set());
     setLegacyMenuKeys(row.MENU_KEYS);
     replaceMenuRelations(row.PROJECT_MENU_IDS.map((id) => { const item = projectMenus.find((menu) => menu.PROJECT_MENU_ID === id); return item ? { PROJECT_MENU_ID: item.PROJECT_MENU_ID, MENU_ID: item.MENU_ID, MENU_NAME: item.MENU_NAME, LEVEL1_MENU_ID: item.LEVEL1_MENU_ID } : { PROJECT_MENU_ID: id, MENU_ID: id, MENU_NAME: '프로젝트 메뉴를 찾을 수 없음', LEVEL1_MENU_ID: null }; }));
+  };
+  const select = (row: Requirement) => {
+    fill(row); setRevisions(null);
+    const sequence = ++selectionRequest.current;
+    void requirementApi.revisions(row.REQUIREMENT_ID).then((state) => {
+      if (sequence !== selectionRequest.current) return;
+      setRevisions(state); if (state.DRAFT) fill(state.DRAFT.CONTENT);
+    }).catch((error: Error) => { if (sequence === selectionRequest.current) setMessage({ type: 'error', text: error.message }); });
   };
   const load = async (id = '') => {
     if (!projectId) { setRows([]); return; }
@@ -122,7 +138,7 @@ export default function RequirementIntakePage() {
   useEffect(() => {
     let current = true;
     if (!projectId) return () => { current = false; };
-    Promise.all([requirementApi.list(projectId), projectMenuApi.list(projectId)]).then(([items, menuPage]) => { if (current) { setRows(items); setProjectMenus(menuPage.ITEMS); setSelectedId(''); setSelectedRowKeys(new Set()); setMenuRelationSelected(new Set()); setLegacyMenuKeys([]); replaceMenuRelations([]); const value = emptyDraft(projectId); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); } })
+    Promise.all([requirementApi.list(projectId), projectMenuApi.list(projectId)]).then(([items, menuPage]) => { if (current) { selectionRequest.current += 1; setRevisions(null); setRows(items); setProjectMenus(menuPage.ITEMS); setSelectedId(''); setSelectedRowKeys(new Set()); setMenuRelationSelected(new Set()); setLegacyMenuKeys([]); replaceMenuRelations([]); const value = emptyDraft(projectId); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); } })
       .catch((error: Error) => { if (current) setMessage({ type: 'error', text: error.message }); });
     return () => { current = false; };
   }, [projectId, replaceMenuRelations]);
@@ -143,7 +159,7 @@ export default function RequirementIntakePage() {
   useEffect(() => { if (!dirty) return; const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; }; window.addEventListener('beforeunload', warn); return () => window.removeEventListener('beforeunload', warn); }, [dirty]);
   const update = <K extends keyof RequirementInput>(key: K, value: RequirementInput[K]) => setDraft((previous) => ({ ...previous, [key]: value }));
   const run = async (work: () => Promise<void>) => { setBusy(true); try { await work(); } catch (error) { setMessage({ type: 'error', text: error instanceof Error ? error.message : '작업을 완료하지 못했습니다.' }); } finally { setBusy(false); } };
-  const resetDraft = () => { setValidationAttempted(false); setSelectedId(''); setSelectedRowKeys(new Set()); setMenuRelationSelected(new Set()); setLegacyMenuKeys([]); replaceMenuRelations([]); const value = emptyDraft(projectId); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); };
+  const resetDraft = () => { selectionRequest.current += 1; setRevisions(null); setValidationAttempted(false); setSelectedId(''); setSelectedRowKeys(new Set()); setMenuRelationSelected(new Set()); setLegacyMenuKeys([]); replaceMenuRelations([]); const value = emptyDraft(projectId); setDraft(value); setBaseline(JSON.stringify(value)); setActiveTab('basic'); };
   const excelContext = { projectId, types, statuses, projectMenus };
   const importedKeys = useRef(new Set<string>());
   const importRequirements = async (items: RequirementInput[]) => {
@@ -165,11 +181,12 @@ export default function RequirementIntakePage() {
   };
   const save = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (readOnly) return;
     setValidationAttempted(true);
     if (draft.PROJECT_ID !== projectId) { setMessage({ type: 'warn', text: '프로젝트 변경이 완료된 후 다시 저장하세요.' }); return; }
     if (!draft.REQUIREMENT_NAME.trim()) { setMessage({ type: 'warn', text: '요구사항명을 입력하세요.' }); return; }
     if (!draft.DESCRIPTION.trim()) { setMessage({ type: 'warn', text: '요구사항 내용을 입력하세요.' }); return; }
-    void run(async () => { const payload = { ...draft, MENU_KEYS: legacyMenuKeys, PROJECT_MENU_IDS: projectMenuIds }; const saved = selectedId ? await requirementApi.update(selectedId, payload) : await requirementApi.create(payload); await load(saved.REQUIREMENT_ID); setMessage({ type: 'success', text: '요구사항을 저장했습니다.' }); });
+    void run(async () => { const payload = { ...draft, MENU_KEYS: legacyMenuKeys, PROJECT_MENU_IDS: projectMenuIds }; if (changeDraft) { await requirementApi.saveChange(selectedId, changeDraft.REQUIREMENT_REVISION, changeDraft.VERSION, payload); await load(selectedId); } else { const saved = selectedId ? await requirementApi.update(selectedId, payload) : await requirementApi.create(payload); await load(saved.REQUIREMENT_ID); } setMessage({ type: 'success', text: '요구사항을 저장했습니다.' }); });
   };
   const migrate = () => void run(async () => {
     let count = 0;
@@ -208,16 +225,16 @@ export default function RequirementIntakePage() {
   ], []);
   const filteredProjectMenus = projectMenus.filter((menu) => !menuRelationRows.some((row) => row.PROJECT_MENU_ID === menu.PROJECT_MENU_ID)
     && (!projectMenuSearch.trim() || `${menu.MENU_ID} ${menu.MENU_NAME}`.toLocaleLowerCase().includes(projectMenuSearch.trim().toLocaleLowerCase())));
-  const basicInfo: ReactNode = <div className="standard-form-layout standard-design-project-fields standard-design-project-fields--long-text">
+  const basicInfo: ReactNode = <fieldset disabled={readOnly || busy} style={{ border: 0, padding: 0, margin: 0 }}><div className="standard-form-layout standard-design-project-fields standard-design-project-fields--long-text">
     <FormField error={fieldErrors.name} errorId="requirement-name-error" label="요구사항명" required labelPosition="TOP" className="standard-design-project-description"><MaxLengthField error={fieldErrors.name} errorId="requirement-name-error" required maxLength={200} value={draft.REQUIREMENT_NAME} onChange={(value) => update('REQUIREMENT_NAME', value)} /></FormField>
     <FormField label="요구 유형"><FormSelect value={draft.REQUIREMENT_TYPE_CODE} onChange={value => update('REQUIREMENT_TYPE_CODE', value)} options={types.map(code => ({ value: code.CODE, label: code.CODE_NAME }))} /></FormField>
     <FormField label="상태"><FormSelect value={draft.STATUS} onChange={value => update('STATUS', value)} options={statuses.map(code => ({ value: code.CODE, label: code.CODE_NAME }))} /></FormField>
     <FormField error={fieldErrors.description} errorId="requirement-description-error" label="요구사항 내용" required labelPosition="TOP" className="standard-design-project-description"><MaxLengthField error={fieldErrors.description} errorId="requirement-description-error" required multiline rows={8} maxLength={4000} value={draft.DESCRIPTION} onChange={(value) => update('DESCRIPTION', value)} /></FormField>
     <FormField label="프로세스 설명" labelPosition="TOP" className="standard-design-project-description"><MaxLengthField multiline rows={8} maxLength={4000} value={draft.PROCESS_DESCRIPTION} onChange={(value) => update('PROCESS_DESCRIPTION', value)} /></FormField>
     <FormField label="설계 의견" labelPosition="TOP" className="standard-design-project-description"><MaxLengthField multiline rows={6} maxLength={10000} value={draft.DESIGN_OPINION ?? ''} onChange={(value) => update('DESIGN_OPINION', value)} /></FormField>
-  </div>;
-  const attachmentTab: ReactNode = <RequirementAttachmentPanel requirementId={selectedId} attachments={selected?.ATTACHMENTS ?? []} onUploaded={(file) => { void load(selectedId); setMessage({ type: 'success', text: `${file.ORIGINAL_FILE_NAME}을(를) 업로드했습니다.` }); }} onDeleted={() => { void load(selectedId); setMessage({ type: 'success', text: '첨부파일을 삭제했습니다.' }); }} onError={reportAttachmentError} />;
-  const menuTab: ReactNode = <section className="sd-requirement-menu-tab" aria-label="관련 메뉴">
+  </div></fieldset>;
+  const attachmentTab: ReactNode = <RequirementAttachmentPanel key={`${selectedId}:${changeDraft?.VERSION ?? selected?.MOD_DT ?? ''}`} readOnly={readOnly || busy || dirty} change={changeDraft ? { REVISION: changeDraft.REQUIREMENT_REVISION, VERSION: changeDraft.VERSION } : undefined} requirementId={selectedId} attachments={changeDraft?.CONTENT.ATTACHMENTS ?? selected?.ATTACHMENTS ?? []} onUploaded={(file) => { void load(selectedId); setMessage({ type: 'success', text: `${file.ORIGINAL_FILE_NAME}을(를) 업로드했습니다.` }); }} onDeleted={() => { void load(selectedId); setMessage({ type: 'success', text: '첨부파일을 삭제했습니다.' }); }} onError={reportAttachmentError} />;
+  const menuTab: ReactNode = <fieldset disabled={readOnly || busy} style={{ border: 0, padding: 0, margin: 0 }}><section className="sd-requirement-menu-tab" aria-label="관련 메뉴">
     <div className="sd-requirement-section-heading"><h2>관련 Project Menu</h2><span>현재 프로젝트의 Project Menu를 요구사항에 연결합니다. 기존 시스템 메뉴 키 관계는 보존됩니다.</span></div>
     <div className="sd-requirement-menu-picker"><input aria-label="Project Menu 검색" value={projectMenuSearch} placeholder="Project Menu ID 또는 메뉴명" onChange={(event) => setProjectMenuSearch(event.target.value)} /><select aria-label="Project Menu 선택" value="" onChange={(event) => addProjectMenu(event.target.value)}><option value="">메뉴를 선택하세요</option>{filteredProjectMenus.map((menu) => <option key={menu.PROJECT_MENU_ID} value={menu.PROJECT_MENU_ID}>{menu.MENU_NAME} ({menu.MENU_ID})</option>)}</select><span>{filteredProjectMenus.length}건</span></div>
     {legacyMenuKeys.length ? <div className="sd-requirement-legacy-menu-note">기존 시스템 메뉴 관계: {legacyMenuKeys.join(', ')} (자동 삭제하지 않음)</div> : null}
@@ -230,7 +247,7 @@ export default function RequirementIntakePage() {
         { actionCode: 'DELETE', label: '행삭제', tone: 'danger', disabled: menuRelationSelected.size === 0, onClick: () => { menuRelations.remove(menuRelationSelected); setMenuRelationSelected(new Set()); } },
       ]}
     />
-  </section>;
+  </section></fieldset>;
   // KEEP: RequirementAnalysisPanel and analysis backend/API/state/tests are preserved for the future requirement group analysis menu.
   const relatedTab: ReactNode = <section className="base-tab-placeholder" aria-label="연관정보 준비 영역">
     <h3>연관정보</h3>
@@ -238,9 +255,23 @@ export default function RequirementIntakePage() {
     <p>요구사항 관계와 설계 Traceability를 표시할 준비 영역입니다. 현재는 별도 관계 데이터를 저장하지 않습니다.</p>
     <div className="base-tab-placeholder__grid"><div className="base-tab-placeholder"><h3>Requirement 관계</h3><p>{selectedId ? '저장된 관계 데이터가 없습니다.' : '요구사항을 저장하면 관계를 확인할 수 있습니다.'}</p></div><div className="base-tab-placeholder"><h3>설계 Traceability</h3><p>Requirement → WBS → Screen → Table 연결은 후속 설계 단계에서 관리됩니다.</p></div></div>
   </section>;
-  const historyTab: ReactNode = <section className="base-tab-placeholder" aria-label="변경이력 준비 영역">
-    <h3>변경이력</h3>
-    <p>회의·협의·결정에 따른 변경 기록은 별도 History 기능으로 연결할 예정입니다.</p>
+  const comparisonLabels = { REQUIREMENT_NAME: '요구사항명', REQUIREMENT_TYPE_CODE: '요구 유형', DESCRIPTION: '요구사항 내용', PROCESS_DESCRIPTION: '프로세스 설명', DESIGN_OPINION: '설계 의견', STATUS: '상태', MENU_KEYS: '관련 메뉴', PROJECT_MENU_IDS: '프로젝트 메뉴', ATTACHMENTS: '첨부파일' };
+  const comparisonText = (value: unknown) => Array.isArray(value) ? value.map(item => typeof item === 'object' && item !== null && 'ORIGINAL_FILE_NAME' in item ? String(item.ORIGINAL_FILE_NAME) : String(item)).join(', ') : String(value ?? '');
+  const changeStateLabels: Record<string, string> = { DRAFT: '작성중', CONFIRMED: '변경 확정', CANCELLED: '변경 취소' };
+  const historyLabels: Record<string, string> = { BASELINE: '이전 내용 보존', UPDATED: '저장', ATTACHMENT_ADDED: '첨부 추가', ATTACHMENT_REMOVED: '첨부 제외', CHANGE_CONFIRMED: '변경 확정', DISCARDED: '폐기' };
+  const comparisonFields = ['REQUIREMENT_NAME', 'REQUIREMENT_TYPE_CODE', 'DESCRIPTION', 'PROCESS_DESCRIPTION', 'DESIGN_OPINION', 'STATUS', 'MENU_KEYS', 'PROJECT_MENU_IDS', 'ATTACHMENTS'] as const;
+  const historyTab: ReactNode = <section className="base-tab-placeholder" aria-label="변경이력">
+    <h3>변경이력 · 현행 Rev {selected?.REQUIREMENT_REVISION ?? '-'}</h3>
+    {matchingRevisions?.DISCARD ? <p>폐기: {matchingRevisions.DISCARD.DISCARD_REASON} · {matchingRevisions.DISCARD.DISCARDED_BY} · {matchingRevisions.DISCARD.DISCARDED_AT}</p> : null}
+    {matchingRevisions?.CHANGES.map((entry) => {
+      const before = matchingRevisions.HISTORY.find(item => item.REQUIREMENT_REVISION === entry.BASE_REVISION)?.CONTENT;
+      return <details key={entry.REQUIREMENT_REVISION}><summary>Rev {entry.REQUIREMENT_REVISION} · {changeStateLabels[entry.CHANGE_STATE] ?? entry.CHANGE_STATE} · {entry.CHANGE_REASON} · {entry.CREATED_BY} · {entry.CREATED_AT}</summary>
+        <table><thead><tr><th>항목</th><th>변경 전 · Rev {entry.BASE_REVISION}</th><th>변경 후 · Rev {entry.REQUIREMENT_REVISION}</th></tr></thead><tbody>{comparisonFields.filter(key => JSON.stringify(before?.[key]) !== JSON.stringify(entry.CONTENT[key])).map(key => <tr key={key}><th>{comparisonLabels[key]}</th><td style={{ whiteSpace: 'pre-wrap' }}>{comparisonText(before?.[key])}</td><td style={{ whiteSpace: 'pre-wrap' }}>{comparisonText(entry.CONTENT[key])}</td></tr>)}</tbody></table>
+        <RequirementAttachmentPanel readOnly requirementId={selectedId} attachments={entry.CONTENT.ATTACHMENTS} onUploaded={() => undefined} onDeleted={() => undefined} onError={reportAttachmentError} />
+      </details>;
+    })}
+    {matchingRevisions?.HISTORY.map(entry => <details key={entry.REQUIREMENT_REVISION}><summary>Rev {entry.REQUIREMENT_REVISION} · {historyLabels[entry.EVENT_TYPE] ?? entry.EVENT_TYPE}</summary><p>{entry.CONTENT.REQUIREMENT_NAME}</p><p style={{ whiteSpace: 'pre-wrap' }}>{entry.CONTENT.DESCRIPTION}</p><RequirementAttachmentPanel readOnly requirementId={selectedId} attachments={entry.CONTENT.ATTACHMENTS} onUploaded={() => undefined} onDeleted={() => undefined} onError={reportAttachmentError} /></details>)}
+    {!selectedId ? <p>요구사항을 선택하세요.</p> : null}
   </section>;
   const tabs: BaseTabDefinition[] = [
     { id: 'basic', label: '기본정보', content: basicInfo },
@@ -255,9 +286,22 @@ export default function RequirementIntakePage() {
     <PageHeader breadcrumbs={['Standard Design', '요구사항 관리']} rightContent={<div className="standard-design-header-actions"><ProjectContextSelector onSelected={() => confirmDiscard()} /><div className="standard-design-lifecycle-actions" aria-label="요구사항 기능">
       <ActionButton display="label" actionCode="SAVE" label="✨ AI 그룹핑" disabled={busy || !projectId} onClick={() => setGroupingOpen(true)} />
       <ActionButton display="text" actionCode="CREATE" label="등록" tone="primary" disabled={busy || !projectId} onClick={() => { if (confirmDiscard()) resetDraft(); }} />
-      <ActionButton display="text" actionCode="SAVE" label="저장" tone="primary" htmlType="submit" form="requirement-detail-form" disabled={busy || !projectId} onClick={() => undefined} />
-      <ActionButton display="text" actionCode="DELETE" label="폐기" tone="danger" disabled={busy || !selected || selected.DISCARDED_YN === 'Y'} onClick={() => { if (selectedId && window.confirm('선택한 요구사항을 폐기하시겠습니까? 그룹 구성과 Analysis 근거 및 첨부파일은 보존됩니다.')) void run(async () => { await requirementApi.delete(selectedId); await load(selectedId); setMessage({ type: 'success', text: '요구사항을 폐기했습니다. 포함 그룹은 재검토가 필요합니다.' }); }); }} />
+      <ActionButton display="text" actionCode="SAVE" label="저장" tone="primary" htmlType="submit" form="requirement-detail-form" disabled={busy || !projectId || readOnly} onClick={() => undefined} />
+      <ActionButton display="text" actionCode="SAVE" label="변경" disabled={busy || !selected || !!changeDraft || !matchingRevisions || selected.DISCARDED_YN === 'Y'} onClick={() => { if (confirmDiscard()) { setActionReason(''); setRevisionAction('change'); } }} />
+      {changeDraft ? <><ActionButton display="text" actionCode="SAVE" label="변경 확정" disabled={busy || dirty} onClick={() => setRevisionAction('confirm')} /><ActionButton display="text" actionCode="DELETE" label="변경 취소" disabled={busy} onClick={() => setRevisionAction('cancel')} /></> : null}
+      <ActionButton display="text" actionCode="DELETE" label="폐기" tone="danger" disabled={busy || !selected || selected.DISCARDED_YN === 'Y'} onClick={() => { setActionReason(''); setRevisionAction('discard'); }} />
     </div></div>} />
+    <FormModal open={revisionAction !== null} title={revisionAction === 'change' ? '요구사항 변경' : revisionAction === 'discard' ? '요구사항 폐기' : revisionAction === 'confirm' ? '변경 확정' : '변경 취소'} submitLabel={revisionAction === 'change' ? '변경 초안 생성' : revisionAction === 'discard' ? '폐기' : revisionAction === 'confirm' ? '변경 확정' : '변경 취소'} submitTone={revisionAction === 'discard' || revisionAction === 'cancel' ? 'danger' : 'primary'} submitting={busy} submitDisabled={(revisionAction === 'change' || revisionAction === 'discard') && !actionReason.trim()} onClose={() => setRevisionAction(null)} onSubmit={() => { void run(async () => {
+      if (revisionAction === 'change') await requirementApi.beginChange(selectedId, actionReason);
+      else if (revisionAction === 'discard') await requirementApi.delete(selectedId, actionReason);
+      else if (revisionAction === 'confirm' && changeDraft) await requirementApi.confirmChange(selectedId, changeDraft.REQUIREMENT_REVISION, changeDraft.VERSION);
+      else if (revisionAction === 'cancel' && changeDraft) await requirementApi.cancelChange(selectedId, changeDraft.REQUIREMENT_REVISION, changeDraft.VERSION);
+      else return;
+      const completed = revisionAction; await load(selectedId); setRevisionAction(null);
+      setMessage({ type: 'success', text: completed === 'change' ? '변경 초안을 생성했습니다. 확정 전까지 현행은 유지됩니다.' : completed === 'confirm' ? '변경을 확정했습니다. 연결 그룹의 검토가 필요합니다.' : completed === 'cancel' ? '변경을 취소했습니다. 기존 현행을 유지합니다.' : '요구사항 전체를 폐기했습니다. 기존 근거는 보존되며 연결 그룹의 검토가 필요합니다.' });
+    }); }}>
+      {revisionAction === 'change' || revisionAction === 'discard' ? <FormField label={revisionAction === 'change' ? '변경 사유' : '폐기 사유'} required><textarea aria-label={revisionAction === 'change' ? '변경 사유' : '폐기 사유'} rows={4} maxLength={2000} value={actionReason} onChange={event => setActionReason(event.target.value)} /></FormField> : <p>{revisionAction === 'confirm' ? '저장한 변경을 현행으로 확정합니다. 연결 그룹은 재검토가 필요합니다.' : '변경 초안을 취소하고 기존 현행을 유지합니다. 저장하지 않은 변경도 취소됩니다.'}</p>}
+    </FormModal>
     {!projectId ? <p className="sd-project-empty-help">프로젝트 Context를 선택하세요.</p> : <div className="sd-requirement-workspace-shell">
       <ProjectListDetailWorkspace subject="요구사항" initialListWidthPercent={55} mode={mode} onModeChange={setMode}
         list={<div className="project-list-detail-workspace__list-content">
@@ -270,7 +314,7 @@ export default function RequirementIntakePage() {
           ]} />
           <ExcelImportDialog open={excelOpen} columns={requirementExcelColumns} validateRow={createRequirementExcelValidator(excelContext)} mapRow={createRequirementExcelMapper(excelContext)} onImport={importRequirements} onClose={() => { importedKeys.current.clear(); setExcelOpen(false); }} />
         </div>}
-        detail={<div className="sd-requirement-detail"><form noValidate id="requirement-detail-form" className="standard-design-lifecycle-form standard-design-project-form" onSubmit={save}><div><div className="standard-design-project-detail-heading"><h2>{selectedId ? '요구사항 상세' + (selected?.DISCARDED_YN === 'Y' ? ' · 폐기됨' : '') : '신규 요구사항'}</h2><dl className="standard-design-project-id"><div><dt>ID</dt><dd>{selectedId || '신규 저장 시 생성'}</dd></div></dl></div><RequiredFieldsNotice /></div><BaseTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} ariaLabel="요구사항 상세" /></form></div>}
+        detail={<div className="sd-requirement-detail"><form noValidate id="requirement-detail-form" className="standard-design-lifecycle-form standard-design-project-form" onSubmit={save}><div><div className="standard-design-project-detail-heading"><h2>{selectedId ? '요구사항 상세' + (selected?.DISCARDED_YN === 'Y' ? ' · 폐기됨' : '') : '신규 요구사항'}</h2><dl className="standard-design-project-id"><div><dt>ID</dt><dd>{selectedId || '신규 저장 시 생성'}{selectedId ? ` · 현행 Rev ${selected?.REQUIREMENT_REVISION} ${changeDraft ? `→ Rev ${changeDraft.REQUIREMENT_REVISION} 작성중` : readOnly ? '· 읽기전용' : '· 편집 가능'}` : ''}</dd></div></dl></div><RequiredFieldsNotice /></div><BaseTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} ariaLabel="요구사항 상세" /></form></div>}
       />
       <div className="sd-requirement-message-area" aria-live="polite">
         {message ? <BaseKitMessage type={message.type} message={message.text} dismissible onDismiss={() => setMessage(null)} /> : null}

@@ -31,7 +31,7 @@ class ProjectMenuIntegrationTest {
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.DATA.PROJECT_MENU_IDS.length()").value(1)).andReturn().getResponse().getContentAsString();
         String requirementId = json.readTree(requirement).path("DATA").path("REQUIREMENT_ID").asText();
         mvc.perform(delete("/api/standard-design/project-menus/" + id)).andExpect(status().isConflict());
-        mvc.perform(delete("/api/standard-design/requirements/" + requirementId)).andExpect(status().isNoContent());
+        mvc.perform(delete("/api/standard-design/requirements/" + requirementId).contentType(MediaType.APPLICATION_JSON).content("{\"REASON\":\"검토 후 폐기\"}")).andExpect(status().isNoContent());
         mvc.perform(put("/api/standard-design/project-menus/mode").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"PROJECT_ID\":\"" + projectId + "\",\"MENU_MANAGEMENT_MODE\":\"SINGLE\"}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.DATA.MENU_MANAGEMENT_MODE").value("SINGLE"));

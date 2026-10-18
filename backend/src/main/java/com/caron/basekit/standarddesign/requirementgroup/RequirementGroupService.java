@@ -71,6 +71,7 @@ public class RequirementGroupService {
    var req=requirements.one(member.REQUIREMENT_ID());
    if(!req.PROJECT_ID().equals(input.PROJECT_ID())) throw bad("다른 프로젝트 Requirement는 포함할 수 없습니다.");
    long reviewed=member.REVIEWED_REVISION(); var prior=previous.get(member.REQUIREMENT_ID()); String snapshot;
+   if("Y".equals(req.DISCARDED_YN()) && prior==null) throw bad("폐기 요구사항은 새 그룹에 포함할 수 없습니다.");
    if(reviewed==req.REQUIREMENT_REVISION()) snapshot=encode(req);
    else if(prior!=null && reviewed==((Number)prior.get("REVIEWED_REVISION")).longValue()) { snapshot=(String)prior.get("REVIEWED_SNAPSHOT"); stale=true; }
    else throw conflict("Requirement가 변경되었습니다. 최신 내용을 확인한 후 다시 추가하거나 검토하세요.");

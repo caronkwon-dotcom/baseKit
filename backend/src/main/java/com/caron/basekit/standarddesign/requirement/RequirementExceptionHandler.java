@@ -12,6 +12,7 @@ import java.util.NoSuchElementException;
 
 @RestControllerAdvice(assignableTypes=RequirementController.class) @Order(Ordered.HIGHEST_PRECEDENCE)
 class RequirementExceptionHandler {
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class) ResponseEntity<ErrorResponse> conflict(org.springframework.web.server.ResponseStatusException e) { return ResponseEntity.status(e.getStatusCode()).body(ErrorResponse.of("REQUIREMENT_CONFLICT",e.getReason())); }
     @ExceptionHandler(NoSuchElementException.class) ResponseEntity<ErrorResponse> missing(NoSuchElementException e) { return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.of("REQUIREMENT_NOT_FOUND",e.getMessage())); }
     @ExceptionHandler(IllegalArgumentException.class) ResponseEntity<ErrorResponse> bad(IllegalArgumentException e) { return ResponseEntity.badRequest().body(ErrorResponse.of("REQUIREMENT_INVALID",e.getMessage())); }
     @ExceptionHandler(HttpMessageNotReadableException.class) ResponseEntity<ErrorResponse> malformed(HttpMessageNotReadableException e) { return ResponseEntity.badRequest().body(ErrorResponse.of("REQUIREMENT_INVALID","요청 형식을 확인해 주세요.")); }

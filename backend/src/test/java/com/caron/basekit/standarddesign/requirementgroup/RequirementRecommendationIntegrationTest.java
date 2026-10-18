@@ -44,12 +44,12 @@ class RequirementRecommendationIntegrationTest {
         String original = payload(project, request, id, "첫 실행의 원본 사유");
         String first = save(original);
         assertEquals(first, save(original));
-        mvc.perform(delete("/api/standard-design/requirements/"+id)).andExpect(status().isNoContent());
+        mvc.perform(delete("/api/standard-design/requirements/"+id).contentType(MediaType.APPLICATION_JSON).content("{\"REASON\":\"검토 후 폐기\"}")).andExpect(status().isNoContent());
         mvc.perform(get("/api/standard-design/requirements/"+id)).andExpect(status().isOk());
-        String second = save(payload(project, UUID.randomUUID().toString(), id, "다른 실행의 원본 사유"));
-        assertNotEquals(first, second);
+        mvc.perform(post(BASE).contentType(MediaType.APPLICATION_JSON).content(payload(project, UUID.randomUUID().toString(), id, "다른 실행의 원본 사유"))).andExpect(status().isBadRequest());
+        assertEquals(first,save(original));
         mvc.perform(get(BASE+"/"+first)).andExpect(status().isOk()).andExpect(jsonPath("$.DATA.ITEMS[0].ORIGINAL_REASON").value("첫 실행의 원본 사유"));
-        mvc.perform(get(BASE).param("PROJECT_ID",project)).andExpect(status().isOk()).andExpect(jsonPath("$.DATA.length()").value(2));
+        mvc.perform(get(BASE).param("PROJECT_ID",project)).andExpect(status().isOk()).andExpect(jsonPath("$.DATA.length()").value(1));
         mvc.perform(post(BASE).contentType(MediaType.APPLICATION_JSON).content(original.replace("첫 실행의 원본 사유", "덮어쓰기"))).andExpect(status().isConflict());
         mvc.perform(put(BASE+"/"+first).contentType(MediaType.APPLICATION_JSON).content(original)).andExpect(status().isMethodNotAllowed());
     }
