@@ -1,7 +1,7 @@
 # ADR 036: SD 요구사항 Revision·폐기·첨부 이력
 
 - 일자: 2026-10-18
-- 상태: 사용자 정책 승인, SD 구현·격리 검증, 공유 PostgreSQL 적용 전
+- 상태: 사용자 정책 승인, SD 구현·실제 개발 PostgreSQL V21 적용/검증 완료
 - 작업 환경: sd / sd-work. dev-pm 통합과 COMMON 반영은 검수 후 별도 단계.
 
 ## 결정
@@ -29,4 +29,4 @@
 
 V21은 세 테이블 추가 및 기존 현행 첨부 연결 INSERT만 수행하며, 기존 migration 수정/clean/repair/DB 초기화가 없다. Maven이 database/migration을 기존 Flyway 리소스와 합치므로 중복 파일을 만들지 않는다.
 
-공유 PostgreSQL과 기존 서버에는 이번 변경을 적용하지 않았다. 새 코드는 V21이 필요하므로 검수 후 dev-pm을 통해 COMMON과 쓰기 경로를 함께 전환해야 한다. 새 빌드로 기존 PostgreSQL 서버를 시작하면 Flyway가 V21을 적용하므로 적용 단계에서 별도로 실행한다. 구버전 COMMON 쓰기 경로의 정책 우회는 통합/전환 때 해소할 배포 과제이며 SD 개발 중단 사유로 삼지 않는다. PostgreSQL V21 실적용과 운영 Host 권한은 미검증이다.
+개발 PostgreSQL localhost:5432/basekit에 V21 성공 이력 및 정상 Flyway validate/migrate를 확인했다. 실제 PostgreSQL 롤백 통합 테스트와 별도 SD 서버/Edge 화면 검수를 완료했다. 구버전 COMMON 기동/생성/저장 호환성을 확인했으나 Revision 정책을 우회할 수 있으므로 dev-pm 검토/병합 후 COMMON·SD를 동일 새 빌드로 전환·재기동해야 한다. 기존 8083은 보존했으며 새 프로세스 8098에서 검수했다. 운영 Host 권한은 미검증이다. 상세 결과는 [PostgreSQL 검증 기록](../sd-revision-postgres-verification.md)을 따른다.

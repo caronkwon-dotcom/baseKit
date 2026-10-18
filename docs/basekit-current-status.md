@@ -1,4 +1,11 @@
 # BaseKit 현재 상태와 WBS
+## 2026-10-18 SD Revision 실제 개발 PostgreSQL 검증 완료
+
+개발 PostgreSQL localhost:5432/basekit의 V21 성공 이력 및 정상 Flyway validate/migrate 확인. 현재 코드 8098/Edge 5188에서 Revision 초안 생성·저장·확정·취소, 첨부 ID/저장 키 승계·미리보기, 전체 논리 폐기·감사 이력, 그룹 REVIEW_REQUIRED/기존 검토 근거 보존 검증 완료. JDBC 변경 뒤 MyBatis 같은 세션의 오래된 projection 조회를 findOne flushCache로 최소 보완했다.
+
+실제 PostgreSQL 롤백 통합 6건 포함 전체 backend 95건(89통과/조건6skip), frontend102/build/lint/diff 통과. V21 적용 후 기준과 최종 기존 SD 30개 테이블 전체 행 해시/건수 동일. 기존 요구사항161·그룹12·프로젝트 그룹핑2·그룹 분석39 및 관련 근거 보존. V21 적용 직전 전체 행 해시는 미수집이다. 전용 REV-REVIEW-20261018의 테스트 요구사항2건은 논리 폐기, 그룹1건/첨부1개/이력은 검증 근거로 보존한다.
+
+COMMON 구버전 8099 기동/조회/생성/저장 성공. 구버전 쓰기는 Revision 정책을 우회할 수 있어 dev-pm PM 검토·병합 후 COMMON/SD 동일 새 빌드 전환·재기동 필요. 기존 SD8083은 신규 Revision 조회500, 새8098은200이며 원래 프로세스는 보존했다. dev-pm 직접 통합 없음. 상세 [실제 PostgreSQL 검증 기록](sd-revision-postgres-verification.md). 아래 이전 '적용 전' 항목은 당시 이력이다.
 ## 2026-10-18 SD 요구사항 Revision·폐기·첨부 이력
 
 기존 sd-work에 변경 사유 필수의 작성중 Revision/저장/확정/취소, 실제 참조 기반 직접 수정 잠금, 버전별 첨부 연결, 전체 요구사항 폐기 감사, 그룹 REVIEW_REQUIRED 및 기존 근거 보존, 이력 비교 UI를 구현했다. 공통 UI 변경 없이 기존 FormModal/첨부 미리보기를 재사용했다. V21은 추가 테이블과 현행 첨부 연결만 만들며 기존 업로드·그룹·AI snapshot은 수정하지 않는다. 상세 정책/적용 경계는 [ADR 036](decisions/036-sd-requirement-revision-lifecycle.md).
