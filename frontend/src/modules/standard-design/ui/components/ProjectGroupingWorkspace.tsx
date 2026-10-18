@@ -1,0 +1,72 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActionButton, BaseKitMessage } from '../../../../components/common';
+import { projectGroupingApi as api, reconcileDraft, type GroupingDraft, type GroupingGroup, type GroupingHistory, type GroupingRun } from '../../projectgrouping/projectGroupingApi';
+import './projectGrouping.css';
+
+const statusText = (value: string) => ({ RUNNING: '분석 중', SUCCESS: '검토 가능', FAILED: '분석 실패', FAILED_TIMEOUT: '시간 초과' })[value] || value;
+export default function ProjectGroupingWorkspace({ projectId, count, onBack }: { projectId: string; count: number; onBack: () => void }) {
+  const [history, setHistory] = useState<GroupingHistory[]>([]);
+  const [run, setRun] = useState<GroupingRun | null>(null);
+  const [draft, setDraft] = useState<GroupingDraft | null>(null);
+  const [view, setView] = useState<'list' | 'cards'>('list');
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [selected, setSelected] = useState<string[]>([]);
+  const [mergeTarget, setMergeTarget] = useState('');
+  const [split, setSplit] = useState<Record<string, string[]>>({});
+  const [editing, setEditing] = useState('');
+  const requestId = useRef<string | null>(null);
+  const alive = useRef(true);
+  const dirty = JSON.stringify(draft) !== JSON.stringify(run?.DRAFT ?? null);
+  const apply = useCallback((next: GroupingRun) => { if (!alive.current) return; setRun(next); setDraft(next.DRAFT); setSelected([]); setEditing(''); }, []);
+  const refreshHistory = useCallback(async () => { const result = await api.history(projectId); if (alive.current) setHistory(result); return result; }, [projectId]);
+  const work = async (task: () => Promise<void>) => { setBusy(true); setMessage(''); try { await task(); } catch (error) { if (alive.current) setMessage(error instanceof Error ? error.message : '요청을 처리하지 못했습니다.'); } finally { if (alive.current) setBusy(false); } };
+  useEffect(() => {
+    alive.current = true;
+    void refreshHistory().then(async items => { if (items[0]) apply(await api.get(projectId, items[0].ANALYSIS_ID)); }).catch(error => { if (alive.current) setMessage(String(error)); });
+    return () => { alive.current = false; };
+  }, [projectId, refreshHistory, apply]);
+  useEffect(() => {
+    if (run?.STATUS !== 'RUNNING') return;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      void api.get(projectId, run.ANALYSIS_ID).then(next => { if (!cancelled) apply(next); }).catch(error => { if (!cancelled) setMessage(`${String(error)} 이력에서 다시 조회할 수 있습니다.`); });
+    }, 2000);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [projectId, run, apply]);
+  useEffect(() => { if (!dirty) return; const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; }; window.addEventListener('beforeunload', warn); return () => window.removeEventListener('beforeunload', warn); }, [dirty]);
+  const leave = () => !dirty || window.confirm('저장하지 않은 그룹핑 변경이 있습니다. 이동하시겠습니까?');
+  const change = (next: GroupingDraft) => { if (run) { setDraft(reconcileDraft(next, run.INPUT)); setSelected(previous => previous.filter(id => next.GROUPS.some(g => g.GROUP_ID === id && g.REVIEW_STATUS === 'APPROVED' && g.MEMBERS.length))); } };
+  const editGroup = (id: string, update: Partial<GroupingGroup>) => { if (draft) change({ ...draft, GROUPS: draft.GROUPS.map(g => g.GROUP_ID === id ? { ...g, ...update, REVIEW_STATUS: update.REVIEW_STATUS ?? 'DRAFT' } : g) }); };
+  const registered = new Set(run?.REGISTERED.map(g => g.DRAFT_GROUP_ID));
+  const name = (id: string) => run?.INPUT.find(r => r.REQUIREMENT_ID === id)?.REQUIREMENT_NAME || id;
+  const assign = (id: string, target: string, source?: string, copy = false) => {
+    if (!draft || !target) return;
+    change({ ...draft, GROUPS: draft.GROUPS.map(g => {
+      if (g.GROUP_ID === target && !g.MEMBERS.some(m => m.REQUIREMENT_ID === id)) return { ...g, REVIEW_STATUS: 'DRAFT', MEMBERS: [...g.MEMBERS, { REQUIREMENT_ID: id, REASON: '사용자 검토로 배치' }] };
+      if (!copy && g.GROUP_ID === source) return { ...g, REVIEW_STATUS: 'DRAFT', MEMBERS: g.MEMBERS.filter(m => m.REQUIREMENT_ID !== id) };
+      return g;
+    }) });
+  };
+  const targets = draft?.GROUPS.filter(g => !registered.has(g.GROUP_ID)) ?? [];
+  const renderGroup = (g: GroupingGroup, index: number) => {
+    const locked = registered.has(g.GROUP_ID);
+    return <article key={g.GROUP_ID} className="pg-group">
+      <header><span className="pg-number">{String(index + 1).padStart(2, '0')}</span><div className="pg-group-title"><h3>{g.TITLE}</h3><span>{g.MEMBERS.length}건 · {locked ? '그룹관리 등록됨 · 초안' : ({ DRAFT: '검토 전', APPROVED: '검토 승인', HOLD: '보류' })[g.REVIEW_STATUS]}</span></div><label className="pg-select"><input type="checkbox" aria-label={`${g.TITLE} 등록 선택`} disabled={busy || locked || g.REVIEW_STATUS !== 'APPROVED' || !g.MEMBERS.length} checked={selected.includes(g.GROUP_ID)} onChange={event => setSelected(previous => event.target.checked ? [...previous, g.GROUP_ID] : previous.filter(id => id !== g.GROUP_ID))} />등록 대상</label></header>
+      <p className="pg-reason">{g.REASON || '그룹의 추천 이유를 입력해 주세요.'}</p>
+      <div className="pg-members">{g.MEMBERS.map(m => <div key={m.REQUIREMENT_ID} className="pg-member"><div><small>{m.REQUIREMENT_ID}</small><strong>{name(m.REQUIREMENT_ID)}</strong>{m.REASON && <p>{m.REASON}</p>}</div>{editing === g.GROUP_ID && !locked && <div className="pg-member-actions"><label><input type="checkbox" checked={(split[g.GROUP_ID] ?? []).includes(m.REQUIREMENT_ID)} onChange={event => setSplit(previous => ({ ...previous, [g.GROUP_ID]: event.target.checked ? [...(previous[g.GROUP_ID] ?? []), m.REQUIREMENT_ID] : (previous[g.GROUP_ID] ?? []).filter(id => id !== m.REQUIREMENT_ID) }))} />분리</label><select aria-label={`${name(m.REQUIREMENT_ID)} 이동`} value="" onChange={event => assign(m.REQUIREMENT_ID, event.target.value, g.GROUP_ID)}><option value="">그룹으로 이동</option>{targets.filter(t => t.GROUP_ID !== g.GROUP_ID).map(t => <option key={t.GROUP_ID} value={t.GROUP_ID}>{t.TITLE}</option>)}</select><button type="button" onClick={() => editGroup(g.GROUP_ID, { MEMBERS: g.MEMBERS.filter(v => v.REQUIREMENT_ID !== m.REQUIREMENT_ID) })}>제외</button></div>}</div>)}</div>
+      {!locked && <footer><button type="button" disabled={busy} onClick={() => setEditing(editing === g.GROUP_ID ? '' : g.GROUP_ID)}>{editing === g.GROUP_ID ? '편집 닫기' : '그룹 편집'}</button><span className="pg-spacer"/><button type="button" disabled={busy} aria-pressed={g.REVIEW_STATUS === 'HOLD'} onClick={() => editGroup(g.GROUP_ID, { REVIEW_STATUS: 'HOLD' })}>보류</button><button type="button" disabled={busy || !g.MEMBERS.length} aria-pressed={g.REVIEW_STATUS === 'APPROVED'} onClick={() => editGroup(g.GROUP_ID, { REVIEW_STATUS: 'APPROVED' })}>검토 승인</button></footer>}
+      {editing === g.GROUP_ID && !locked && <fieldset disabled={busy} className="pg-editor"><legend>그룹 편집</legend><label>그룹명<input maxLength={200} value={g.TITLE} onChange={event => editGroup(g.GROUP_ID, { TITLE: event.target.value })}/></label><label>추천 이유<textarea rows={3} value={g.REASON} onChange={event => editGroup(g.GROUP_ID, { REASON: event.target.value })}/></label><label>요구사항 추가<select value="" onChange={event => assign(event.target.value, g.GROUP_ID, undefined, true)}><option value="">요구사항 선택 · 다른 그룹과 중복 포함 가능</option>{run?.INPUT.filter(r => !g.MEMBERS.some(m => m.REQUIREMENT_ID === r.REQUIREMENT_ID)).map(r => <option key={r.REQUIREMENT_ID} value={r.REQUIREMENT_ID}>{r.REQUIREMENT_NAME}</option>)}</select></label><label>합칠 대상<select value={mergeTarget} onChange={event => setMergeTarget(event.target.value)}><option value="">대상 그룹 선택</option>{targets.filter(t => t.GROUP_ID !== g.GROUP_ID).map(t => <option key={t.GROUP_ID} value={t.GROUP_ID}>{t.TITLE}</option>)}</select></label><div className="pg-controls"><button type="button" disabled={!mergeTarget || mergeTarget === g.GROUP_ID} onClick={() => { if (!draft) return; const target = draft.GROUPS.find(t => t.GROUP_ID === mergeTarget); if (!target) return; const members = [...target.MEMBERS, ...g.MEMBERS.filter(m => !target.MEMBERS.some(t => t.REQUIREMENT_ID === m.REQUIREMENT_ID))]; change({ ...draft, GROUPS: draft.GROUPS.filter(t => t.GROUP_ID !== g.GROUP_ID).map(t => t.GROUP_ID === mergeTarget ? { ...t, MEMBERS: members, REASON: `${t.REASON}\n${g.REASON}`, REVIEW_STATUS: 'DRAFT' } : t) }); setEditing(''); }}>대상 그룹으로 합치기</button><button type="button" disabled={!(split[g.GROUP_ID]?.length) || split[g.GROUP_ID].length >= g.MEMBERS.length} onClick={() => { if (!draft) return; const ids = new Set(split[g.GROUP_ID]); change({ ...draft, GROUPS: [...draft.GROUPS.map(t => t.GROUP_ID === g.GROUP_ID ? { ...t, MEMBERS: t.MEMBERS.filter(m => !ids.has(m.REQUIREMENT_ID)), REVIEW_STATUS: 'DRAFT' as const } : t), { ...g, GROUP_ID: crypto.randomUUID(), TITLE: `${g.TITLE.slice(0, 195)} 분리`, REVIEW_STATUS: 'DRAFT', MEMBERS: g.MEMBERS.filter(m => ids.has(m.REQUIREMENT_ID)) }] }); setSplit({}); }}>선택 요구사항을 새 그룹으로 분리</button></div></fieldset>}
+    </article>;
+  };
+  return <section className="pg-workspace" aria-label="요구사항 그룹핑 분석 워크스페이스">
+    <div className="pg-topline"><span>STANDARD DESIGN / REQUIREMENTS</span><button type="button" disabled={busy} onClick={() => { if (leave()) onBack(); }}>← 목록으로</button></div>
+    <div className="pg-heading"><div><h1>요구사항 그룹핑 초안</h1><p>AI 추천 그룹을 검토하고 확정할 수 있습니다</p></div><ActionButton display="label" actionCode="SAVE" label={run ? '다시 분석' : '분석 실행'} tone="primary" disabled={busy || run?.STATUS === 'RUNNING'} onClick={() => { if (!leave()) return; void work(async () => { requestId.current ??= crypto.randomUUID(); const next = await api.start(projectId, requestId.current); requestId.current = null; apply(next); await refreshHistory(); }); }}/></div>
+    <div className="pg-history"><label>분석 이력<select aria-label="분석 이력" disabled={busy} value={run?.ANALYSIS_ID || ''} onChange={event => { const id = event.target.value; if (id && leave()) void work(async () => apply(await api.get(projectId, id))); }}><option value="">분석 이력 선택</option>{history.map(h => <option key={h.ANALYSIS_ID} value={h.ANALYSIS_ID}>{new Date(h.CREATED_AT).toLocaleString('ko-KR')} · {statusText(h.STATUS)}</option>)}</select></label><button type="button" disabled={busy} onClick={() => { if (leave()) void work(async () => { await refreshHistory(); if (run) apply(await api.get(projectId, run.ANALYSIS_ID)); }); }}>새로고침</button><span role="status">{run ? statusText(run.STATUS) : '분석 대기'}{dirty ? ' · 저장하지 않은 변경' : ''}</span></div>
+    <dl className="pg-kpis"><div><dt>분석 대상</dt><dd>{run?.INPUT.length ?? count}<small>건</small></dd></div><div><dt>추천 그룹</dt><dd>{draft?.GROUPS.length ?? 0}<small>개</small></dd></div><div><dt>미분류</dt><dd>{draft?.UNCLASSIFIED.length ?? 0}<small>건</small></dd></div></dl>
+    {message && <BaseKitMessage type="error" message={message}/>}{run?.ERROR_MESSAGE && <BaseKitMessage type="warn" message={run.ERROR_MESSAGE}/>}
+    {run?.STATUS === 'RUNNING' && <div className="pg-empty" role="status"><h3>프로젝트 전체 요구사항을 분석하고 있습니다</h3><p>입력량에 따라 나누어 분석합니다. 최대 10분 후 종료되며 이력에서 결과를 다시 확인할 수 있습니다.</p></div>}
+    <div className="pg-section-heading"><h2>추천 그룹 초안</h2><div className="pg-view" role="group" aria-label="보기 방식"><button type="button" aria-pressed={view === 'list'} onClick={() => setView('list')}>목록</button><button type="button" aria-pressed={view === 'cards'} onClick={() => setView('cards')}>카드</button></div></div>
+    {draft ? <><div className={`pg-groups pg-groups--${view}`}>{draft.GROUPS.map(renderGroup)}</div><section className="pg-unclassified"><div className="pg-section-heading"><h2>미분류 요구사항 <small>{draft.UNCLASSIFIED.length}건</small></h2><button type="button" disabled={busy} onClick={() => change({ ...draft, GROUPS: [...draft.GROUPS, { GROUP_ID: crypto.randomUUID(), TITLE: '새 그룹', REASON: '사용자 검토로 구성', MEMBERS: [], REVIEW_STATUS: 'DRAFT' }] })}>+ 그룹 추가</button></div>{draft.UNCLASSIFIED.length ? draft.UNCLASSIFIED.map(m => <div className="pg-member" key={m.REQUIREMENT_ID}><div><small>{m.REQUIREMENT_ID}</small><strong>{name(m.REQUIREMENT_ID)}</strong><p>{m.REASON}</p></div><select disabled={busy} aria-label={`${name(m.REQUIREMENT_ID)} 배치`} value="" onChange={event => assign(m.REQUIREMENT_ID, event.target.value)}><option value="">그룹에 배치</option>{targets.map(g => <option key={g.GROUP_ID} value={g.GROUP_ID}>{g.TITLE}</option>)}</select></div>) : <p>모든 요구사항이 그룹에 배치되었습니다.</p>}</section><div className="pg-savebar"><div><strong>승인한 그룹만 그룹관리에 등록됩니다</strong><p>등록 상태는 초안이며, 최종 확정은 그룹관리에서 진행합니다.</p></div><div className="pg-controls"><button type="button" disabled={busy} onClick={() => setSelected(draft.GROUPS.filter(g => g.REVIEW_STATUS === 'APPROVED' && g.MEMBERS.length && !registered.has(g.GROUP_ID)).map(g => g.GROUP_ID))}>승인 그룹 전체 선택</button><ActionButton display="text" actionCode="SAVE" label="초안 저장" disabled={busy || !dirty} onClick={() => void work(async () => { if (run) apply(await api.save(projectId, run, draft)); })}/><ActionButton display="text" actionCode="SAVE" label={`선택 ${selected.length}개 등록`} tone="primary" disabled={busy || !selected.length} onClick={() => void work(async () => { if (!run) return; const saved = dirty ? await api.save(projectId, run, draft) : run; if (dirty) apply(saved); const next = await api.register(projectId, saved, selected); apply(next); await refreshHistory(); })}/></div></div></> : run?.STATUS !== 'RUNNING' && <div className="pg-empty"><h3>요구사항을 함께 살펴볼 준비가 되었습니다</h3><p>분석을 실행하면 현재 프로젝트의 저장된 전체 유효 요구사항을 바탕으로 그룹 초안을 추천합니다.</p><p>원본 요구사항과 기존 그룹은 그대로 보존됩니다.</p></div>}
+  </section>;
+}

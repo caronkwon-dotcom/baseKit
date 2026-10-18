@@ -1,4 +1,10 @@
 # BaseKit 현재 상태와 WBS
+## 2026-10-18 SD 프로젝트 전체 요구사항 AI 그룹핑
+
+요구사항 관리의 전체 분석 워크스페이스, 목록/2열 카드, 편집·이동·추가·제외·합치기·나누기·미분류 배치·승인/보류·서버 초안/이력을 구현했다. PROJECT_GROUPING은 기존 그룹 분석과 분리하고 V19에 입력 snapshot/분할 RAW/사용자 초안/등록 근거를 보존한다. 승인한 선택 그룹만 기존 그룹관리 DRAFT로 생성하며 등록 중복·요구사항 변경·버전 충돌을 차단한다.
+
+실제 회사 LLM + PostgreSQL에서 22건→추천 6그룹/미분류0 초안 생성. 실제 PostgreSQL DRAFT 등록/구성/근거/멱등 검증은 롤백하여 기존 요구사항22건·그룹1건 snapshot 동일 확인. frontend102 통과, backend81건 중75통과/조건6skip 및 PostgreSQL opt-in1통과, build/lint/diff 통과. 실제 Edge 목록/카드·편집 공유·재진입·상세 선택과 분할55→55 확인. sd 단독 프로필의 기존 Host 판정 때문에 인증 수정 없이 dev,sd로 8083 실행. 운영 Host/대규모 부하/좁은 화면은 미검증. [상세 계약과 검증](sd-project-grouping.md).
+
 ## 2026-10-18 PostgreSQL 단일 개발 DB 및 프로젝트 조회 복구
 
 최신 dev-pm 병합 이후 COMMON 5174→8081과 SD 5176→8083 모두 common/sd 프로필로 로컬 PostgreSQL 5432에 연결되어 동일 프로젝트 요구사항을 조회했다. 화면에서 SDP-001만 보인 원인은 프로젝트 컨텍스트가 localStorage의 초기 mock SDP-001만 사용하고, PostgreSQL 요구사항의 실제 PROJECT_ID 집합을 가져오지 않았기 때문이다. BSDRREQ의 distinct PROJECT_ID를 읽기 전용으로 제공하는 프로젝트 참조 API와 컨텍스트 선택기 연동을 추가했다. 프로젝트 기본정보 테이블은 현재 DB migration에 없어 프로젝트 ID 외 이름·고객 정보는 브라우저에 저장된 기존 메타데이터만 표시하며, 새 ID는 ID 자체를 이름으로 보여준다.
