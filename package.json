@@ -12,6 +12,6 @@
     "preview": "npm run preview --prefix frontend",
     "backend:test": "node scripts/generate-menu-execution-catalog.mjs --check && node scripts/run-backend-maven.mjs test",
     "backend:run": "node scripts/run-backend-maven.mjs spring-boot:run",
-    "backend:run:local": "node scripts/run-backend-maven.mjs -Plocal spring-boot:run -Dspring-boot.run.profiles=local"
+    "backend:run:local": "node scripts/run-backend-maven.mjs spring-boot:run -Dspring-boot.run.profiles=local,common"
   }
 }

@@ -8,4 +8,4 @@
 - WINDOW는 등록된 1Depth와 프로그램 소속 및 저장된 WINDOW 설정을 서버에서 확인한다.
 - TODO: 공통 로그인 구현 때 INNER/WINDOW에 동일한 인증·권한 정책을 연결한다. 이 개발 경로를 운영 인증으로 사용하지 않는다.
 
-COMMON 실행: npm run dev:common 및 node scripts/run-backend-maven.mjs -Plocal spring-boot:run -Dspring-boot.run.profiles=local,common. 개발 검수 서버는 127.0.0.1에 바인딩한다. DB 구조 확대 없이 기존 V18 실행 설정을 사용한다.
+COMMON 실행: npm run dev:common 및 node scripts/run-backend-maven.mjs spring-boot:run -Dspring-boot.run.profiles=local,common. 개발 검수 서버는 127.0.0.1에 바인딩한다. DB 구조 확대 없이 기존 V18 실행 설정을 사용한다.

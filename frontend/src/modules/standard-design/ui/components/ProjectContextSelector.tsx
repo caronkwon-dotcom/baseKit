@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DataTable, { type DataTableColumn } from '../../../../components/common/DataTable';
 import FormModal from '../../../../components/common/FormModal';
 import SearchPanel, { type SearchFieldConfig } from '../../../../components/common/SearchPanel';
@@ -37,10 +37,26 @@ export function ProjectContextDialog({
 }: ProjectContextDialogProps) {
   const [condition, setCondition] = useState(() => ({ ...initialCondition }));
   const [applied, setApplied] = useState(() => ({ ...initialCondition }));
-  const rows = filterProjects(designLifecycleRepository.getData().projects, applied);
+  const [databaseProjectIds, setDatabaseProjectIds] = useState<string[]>([]);
+  useEffect(() => {
+    let active = true;
+    fetch('/api/standard-design/projects')
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error('프로젝트 목록 조회 실패')))
+      .then((result: { DATA?: { PROJECT_ID: string }[] }) => {
+        if (active) setDatabaseProjectIds((result.DATA ?? []).map((project) => project.PROJECT_ID));
+      })
+      .catch(() => { if (active) setDatabaseProjectIds([]); });
+    return () => { active = false; };
+  }, []);
+  const storedProjects = designLifecycleRepository.getData().projects;
+  const databaseProjects = databaseProjectIds.map((projectId): DesignProject => storedProjects.find((project) => project.PROJECT_ID === projectId)
+    ?? { PROJECT_ID: projectId, PROJECT_NAME: projectId, CUSTOMER_NAME: '', DESCRIPTION: '', STATUS: 'DRAFT', START_DATE: '', END_DATE: '' });
+  const projects = [...storedProjects.filter((project) => databaseProjectIds.length === 0 || databaseProjectIds.includes(project.PROJECT_ID)), ...databaseProjects.filter((project) => !storedProjects.some((stored) => stored.PROJECT_ID === project.PROJECT_ID))];
+  const rows = filterProjects(projects, applied);
   const select = (next: DesignProject) => {
     const accepted = onSelected?.(next, { condition: { ...applied }, rows: rows.map((row) => ({ ...row })) });
     if (accepted === false) return;
+    if (!storedProjects.some((project) => project.PROJECT_ID === next.PROJECT_ID)) designLifecycleRepository.saveProject(next);
     designLifecycleRepository.setSelectedProjectId(next.PROJECT_ID);
     onClose();
   };

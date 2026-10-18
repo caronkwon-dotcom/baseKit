@@ -1,4 +1,10 @@
 # BaseKit 현재 상태와 WBS
+## 2026-10-18 PostgreSQL 단일 개발 DB 및 프로젝트 조회 복구
+
+최신 dev-pm 병합 이후 COMMON 5174→8081과 SD 5176→8083 모두 common/sd 프로필로 로컬 PostgreSQL 5432에 연결되어 동일 프로젝트 요구사항을 조회했다. 화면에서 SDP-001만 보인 원인은 프로젝트 컨텍스트가 localStorage의 초기 mock SDP-001만 사용하고, PostgreSQL 요구사항의 실제 PROJECT_ID 집합을 가져오지 않았기 때문이다. BSDRREQ의 distinct PROJECT_ID를 읽기 전용으로 제공하는 프로젝트 참조 API와 컨텍스트 선택기 연동을 추가했다. 프로젝트 기본정보 테이블은 현재 DB migration에 없어 프로젝트 ID 외 이름·고객 정보는 브라우저에 저장된 기존 메타데이터만 표시하며, 새 ID는 ID 자체를 이름으로 보여준다.
+
+local 실행 profile의 H2 파일 URL, Maven 런타임 H2 프로필, H2 전용 실행 문구를 제거하고 backend:run:local도 PostgreSQL common 설정을 쓰도록 정리했다. 테스트용 H2는 격리 단위·통합 검증에만 남겼다. 실제 DB migration이나 DML을 실행하지 않았고, 실행 서버 재시작 시 기존 ApplicationReady 작업이 DB를 기록할 수 있어 live 서버 재시작은 수행하지 않았다.
+
 ## 2026-10-18 COMMON 단독 프로필 1Depth 실행 복구
 
 로그인 없는 개발환경 판정에 common 프로필이 누락되어 실제 5174→8081 common 단독 실행에서 Host 인증 403이 발생했다. common을 개발환경으로 인정하여 기존 1Depth INNER/WINDOW 설정 조회·저장과 독립 창 검사를 로그인 없이 지원한다. local 프로필 추가 및 datasource 변경 없음. Host 인증 연동은 사용자 결정에 따라 2차 사업으로 유보하며 기존 prod/production 제한과 원본 소속·WINDOW 설정 검사를 유지한다.

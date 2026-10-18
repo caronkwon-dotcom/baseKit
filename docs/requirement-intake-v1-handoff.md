@@ -58,7 +58,7 @@ Spring REST → Service → MyBatis를 사용하고 JPA Entity로 DDL을 검증�
 - 기존 전체 Backend 테스트: 신규 테스트 추가 전 22건 통과. 이 실행에서 환경에 설정된 Supabase PostgreSQL에 Flyway V5가 적용되었다. 이후 전체 재실행은 외부 공유 DB 변경 위험으로 자동 승인 검토가 거부되었다. 최종 코드의 신규 대상 테스트는 H2에서 통과했다.
 - `git diff --check`: 통과.
 
-화면 확인: `npm run backend:run:local`과 `npm run dev`를 실행하고 프로젝트 Context를 선택한 다음 `Standard Design > 요구사항 관리`를 연다. 새 요구사항 저장, 복수 메뉴 선택, 파일 업로드 및 이미지 선택, Splitter Drag/접기/펼치기를 확인한다. 같은 브라우저에 이전 요구사항 저장 데이터가 있으면 이관 안내와 실행 버튼이 표시된다.
+화면 확인: `npm run backend:run:local`과 `npm run dev`를 실행 (로컬 PostgreSQL 필요)하고 프로젝트 Context를 선택한 다음 `Standard Design > 요구사항 관리`를 연다. 새 요구사항 저장, 복수 메뉴 선택, 파일 업로드 및 이미지 선택, Splitter Drag/접기/펼치기를 확인한다. 같은 브라우저에 이전 요구사항 저장 데이터가 있으면 이관 안내와 실행 버튼이 표시된다.
 
 ## 7. 호환성과 후속 확장
 

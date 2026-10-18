@@ -133,7 +133,7 @@ Backend 개발 서버 실행:
 npm run backend:run
 ```
 
-로컬 PC에서 PostgreSQL 없이 Spring Boot 기동을 확인할 때:
+로컬 PC에서 PostgreSQL 개발 설정으로 Spring Boot를 실행할 때:
 
 ```bash
 npm run backend:run:local
@@ -141,7 +141,7 @@ npm run backend:run:local
 
 - Java 21만 설치하면 Repository의 Maven Wrapper가 Maven을 자동으로 준비합니다.
 - `backend:run`은 PostgreSQL(`localhost:5432/basekit`)을 사용하는 표준 통합 실행입니다.
-- `backend:run:local`은 H2 파일 DB를 사용하는 단일 개발자용 스모크 실행입니다. PostgreSQL 통합검증을 대체하지 않습니다.
+- `backend:run:local`도 PostgreSQL(`localhost:5432/basekit`)을 사용하며, PostgreSQL이 실행 중이어야 합니다.
 - 외부 PostgreSQL/Supabase 연결은 `.env.example` 형식의 `BASEKIT_DB_*` 환경변수를 로컬 환경에만 설정합니다.
 
 Backend 테스트:
@@ -175,10 +175,10 @@ Backend는 해당 profile 이름을 전달합니다 (아래 common을 dev-pm/des
 npm run backend:run -- -Dspring-boot.run.profiles=common
 ```
 
-H2 로컬 DB를 사용할 때는 Maven local 옵션과 Spring local profile을 함께 지정합니다.
+로컬 개발 profile은 PostgreSQL 연결을 그대로 사용합니다.
 
 ```bash
-node scripts/run-backend-maven.mjs -Plocal spring-boot:run -Dspring-boot.run.profiles=local,common
+node scripts/run-backend-maven.mjs spring-boot:run -Dspring-boot.run.profiles=local,common
 ```
 
 포트 profile은 `server.port`만 설정하며 기존 PostgreSQL/환경변수 설정을 그대로 사용합니다. `local`, `codespace` 등 환경 profile과 조합할 수 있습니다. 포트 profile은 한 번에 하나만 선택합니다. Spring의 `SERVER_PORT`/명령행 옵션은 명시적 override로 우선합니다.
