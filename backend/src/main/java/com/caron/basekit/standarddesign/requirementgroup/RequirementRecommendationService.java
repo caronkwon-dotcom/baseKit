@@ -57,7 +57,7 @@ public class RequirementRecommendationService {
         }
         // Deterministic locks protect references from concurrent Requirement updates/deletes.
         for (String id : ids.stream().sorted().toList()) {
-            var rows = jdbc.queryForList("SELECT PROJECT_ID FROM BSDRREQ WHERE REQUIREMENT_ID=? FOR UPDATE", id);
+            var rows = jdbc.queryForList("SELECT PROJECT_ID,DISCARDED_YN FROM BSDRREQ WHERE REQUIREMENT_ID=? FOR UPDATE", id);
             if (rows.isEmpty() || !request.PROJECT_ID().equals(rows.getFirst().get("PROJECT_ID")))
                 throw invalid("추천 항목은 존재하는 동일 프로젝트 Requirement여야 합니다.");
         }
@@ -68,6 +68,7 @@ public class RequirementRecommendationService {
             if (!same(result, request)) throw new ResponseStatusException(HttpStatus.CONFLICT, "같은 REQUEST_ID에 다른 결과를 저장할 수 없습니다.");
             return result;
         }
+        for (String requirementId : ids) if("Y".equals(jdbc.queryForObject("SELECT DISCARDED_YN FROM BSDRREQ WHERE REQUIREMENT_ID=?",String.class,requirementId))) throw invalid("폐기 요구사항은 신규 추천 대상에 포함할 수 없습니다.");
         String id = "RAN-" + UUID.randomUUID().toString().replace("-", "");
         jdbc.update("INSERT INTO BSDRANLS(ANALYSIS_ID,PROJECT_ID,REQUEST_ID,ANALYSIS_BASIS,EXECUTED_AT) VALUES (?,?,?,?,?)",
                 id, request.PROJECT_ID(), request.REQUEST_ID(), request.ANALYSIS_BASIS(), request.EXECUTED_AT().truncatedTo(java.time.temporal.ChronoUnit.MICROS));

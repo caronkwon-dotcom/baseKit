@@ -32,23 +32,26 @@ class RequirementGroupIntegrationTest {
   JsonNode g2=callPost(BASE,input(project,req)); String id1=g1.path("REQUIREMENT_GROUP_ID").asText(), id2=g2.path("REQUIREMENT_GROUP_ID").asText();
   g1=callPost(BASE+"/"+id1+"/confirm",version(g1)); g2=callPost(BASE+"/"+id2+"/confirm",version(g2));
   input.put("VERSION",g1.path("VERSION").asLong()); mvc.perform(put(BASE+"/"+id1).contentType(MediaType.APPLICATION_JSON).content(input.toString())).andExpect(status().isConflict());
-  mvc.perform(delete("/api/standard-design/requirements/"+rid)).andExpect(status().isNoContent());
+  mvc.perform(delete("/api/standard-design/requirements/"+rid).contentType(MediaType.APPLICATION_JSON).content("{\"REASON\":\"검토 후 폐기\"}")).andExpect(status().isNoContent());
   JsonNode changed=json.readTree(mvc.perform(get("/api/standard-design/requirements/"+rid)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA"); assertEquals("Y",changed.path("DISCARDED_YN").asText());
   g1=getGroup(id1); g2=getGroup(id2); assertEquals("REVIEW_REQUIRED",g1.path("GROUP_STATUS").asText()); assertEquals("REVIEW_REQUIRED",g2.path("GROUP_STATUS").asText()); assertEquals(1,g1.path("MEMBERS").size()); assertEquals(2,g1.path("MEMBERS").get(0).path("SOURCE_ANALYSIS_IDS").size());
-  mvc.perform(post(BASE+"/"+id1+"/confirm").contentType(MediaType.APPLICATION_JSON).content(version(g1).toString())).andExpect(status().isConflict());
+  // Explicit group save/reconfirmation is the human review; discard retains its content revision.
   input.put("VERSION",g1.path("VERSION").asLong()); ((ObjectNode)input.path("MEMBERS").get(0)).put("REVIEWED_REVISION",changed.path("REQUIREMENT_REVISION").asLong());
   g1=json.readTree(mvc.perform(put(BASE+"/"+id1).contentType(MediaType.APPLICATION_JSON).content(input.toString())).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
   g1=callPost(BASE+"/"+id1+"/confirm",version(g1)); assertEquals("CONFIRMED",g1.path("GROUP_STATUS").asText()); assertEquals(2,g1.path("MEMBERS").get(0).path("SOURCE_ANALYSIS_IDS").size());
-  assertEquals(2,jdbc.queryForObject("SELECT COUNT(*) FROM BSDRRHIS WHERE REQUIREMENT_ID=?",Integer.class,rid));
-  long revision=changed.path("REQUIREMENT_REVISION").asLong(); mvc.perform(delete("/api/standard-design/requirements/"+rid)).andExpect(status().isNoContent()); assertEquals(revision,jdbc.queryForObject("SELECT REQUIREMENT_REVISION FROM BSDRREQ WHERE REQUIREMENT_ID=?",Long.class,rid));
+  assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM BSDRRHIS WHERE REQUIREMENT_ID=?",Integer.class,rid));
+  long revision=changed.path("REQUIREMENT_REVISION").asLong(); mvc.perform(delete("/api/standard-design/requirements/"+rid).contentType(MediaType.APPLICATION_JSON).content("{\"REASON\":\"검토 후 폐기\"}")).andExpect(status().isNoContent()); assertEquals(revision,jdbc.queryForObject("SELECT REQUIREMENT_REVISION FROM BSDRREQ WHERE REQUIREMENT_ID=?",Long.class,rid));
  }
  @Test void updateReopensDraftAndConfirmedGroupsAndRejectsStaleVersionAndInvalidReferences() throws Exception {
   String project="GRP-"+UUID.randomUUID().toString().substring(0,8); JsonNode req=req(project); var input=input(project,req); JsonNode group=callPost(BASE,input); String id=group.path("REQUIREMENT_GROUP_ID").asText();
   var duplicate=input.deepCopy(); ((ArrayNode)duplicate.path("MEMBERS")).add(duplicate.path("MEMBERS").get(0).deepCopy()); mvc.perform(post(BASE).contentType(MediaType.APPLICATION_JSON).content(duplicate.toString())).andExpect(status().isBadRequest());
   var foreign=input("OTHER",req); mvc.perform(post(BASE).contentType(MediaType.APPLICATION_JSON).content(foreign.toString())).andExpect(status().isBadRequest());
   var invalid=input.deepCopy(); invalid.put("REQUEST_ID",UUID.randomUUID().toString()); ((ArrayNode)invalid.path("MEMBERS").get(0).path("SOURCE_ANALYSIS_IDS")).add("MISSING"); mvc.perform(post(BASE).contentType(MediaType.APPLICATION_JSON).content(invalid.toString())).andExpect(status().isBadRequest());
-  mvc.perform(put("/api/standard-design/requirements/"+req.path("REQUIREMENT_ID").asText()).contentType(MediaType.APPLICATION_JSON).content(reqInput(project).put("REQUIREMENT_NAME","변경됨").toString())).andExpect(status().isOk());
-  assertEquals("DRAFT",getGroup(id).path("GROUP_STATUS").asText());
+  String rid=req.path("REQUIREMENT_ID").asText();
+  mvc.perform(put("/api/standard-design/requirements/"+rid).contentType(MediaType.APPLICATION_JSON).content(reqInput(project).put("REQUIREMENT_NAME","변경됨").toString())).andExpect(status().isConflict());
+  var change=callPost("/api/standard-design/requirements/"+rid+"/changes",json.createObjectNode().put("REASON","검토 변경"));
+  callPost("/api/standard-design/requirements/"+rid+"/changes/confirm",json.createObjectNode().put("REVISION",change.path("REQUIREMENT_REVISION").asLong()).put("VERSION",change.path("VERSION").asLong()));
+  assertEquals("REVIEW_REQUIRED",getGroup(id).path("GROUP_STATUS").asText());
   mvc.perform(post(BASE+"/"+id+"/confirm").contentType(MediaType.APPLICATION_JSON).content(version(group).toString())).andExpect(status().isConflict());
   mvc.perform(get(BASE).param("PROJECT_ID",project).param("REQUIREMENT_ID",req.path("REQUIREMENT_ID").asText())).andExpect(status().isOk()).andExpect(jsonPath("$.DATA.length()").value(1));
  }

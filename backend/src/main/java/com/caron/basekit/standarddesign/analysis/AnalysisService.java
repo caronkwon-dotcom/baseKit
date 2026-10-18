@@ -88,9 +88,12 @@ public class AnalysisService {
         String version = inputVersion(snaps, req.OVERALL_OPINION());
         try {
             tx.executeWithoutResult(s -> {
+                lockInputs(req.REQUIREMENTS());
+                var locked=snapshots(req.PROJECT_ID(),req.REQUIREMENTS());
+                if(!version.equals(inputVersion(locked,req.OVERALL_OPINION()))) throw new AnalysisException(HttpStatus.CONFLICT,"REQUIREMENT_VERSION_CONFLICT","분석 입력이 변경되었습니다.");
                 jdbc.update("INSERT INTO BSDAANLS(ANALYSIS_ID,PROJECT_ID,REQUEST_ID,ACTIVE_REQUEST_ID,INPUT_VERSION,RESULT_VERSION,ANALYSIS_STATUS,OVERALL_OPINION) VALUES (?,?,?,?,?,0,'ANALYZING',?)",
                         analysisId, req.PROJECT_ID(), req.REQUEST_ID(), token, version, req.OVERALL_OPINION());
-                writeSnapshots(analysisId, version, snaps);
+                writeSnapshots(analysisId, version, locked);
             });
         } catch (org.springframework.dao.DuplicateKeyException e) {
             return view(jdbc.queryForObject("SELECT ANALYSIS_ID FROM BSDAANLS WHERE PROJECT_ID=? AND REQUEST_ID=?", String.class, req.PROJECT_ID(), req.REQUEST_ID()));
@@ -107,11 +110,14 @@ public class AnalysisService {
         String token = UUID.randomUUID().toString();
         String version = inputVersion(snaps, input.OVERALL_OPINION());
         tx.executeWithoutResult(s -> {
+            lockInputs(input.REQUIREMENTS());
+            var locked=snapshots((String)a.get("PROJECT_ID"),input.REQUIREMENTS());
+            if(!version.equals(inputVersion(locked,input.OVERALL_OPINION()))) throw new AnalysisException(HttpStatus.CONFLICT,"REQUIREMENT_VERSION_CONFLICT","분석 입력이 변경되었습니다.");
             int n = jdbc.update("UPDATE BSDAANLS SET ANALYSIS_STATUS='ANALYZING', ACTIVE_REQUEST_ID=?, INPUT_VERSION=?, OVERALL_OPINION=?, ERROR_CODE=NULL, UPDATED_AT=CURRENT_TIMESTAMP WHERE ANALYSIS_ID=? AND ANALYSIS_STATUS=?",
                     token, version, input.OVERALL_OPINION(), id, status);
             if (n == 0) throw new AnalysisException(HttpStatus.CONFLICT, "ANALYSIS_NOT_RETRYABLE", "다른 요청이 먼저 처리되었습니다.");
             jdbc.update("DELETE FROM BSDAAREQ WHERE ANALYSIS_ID=?", id);
-            writeSnapshots(id, version, snaps);
+            writeSnapshots(id, version, locked);
         });
         launch(id, token);
         return view(id);
@@ -461,6 +467,10 @@ public class AnalysisService {
 
     private record Snapshot(RequirementData data, String opinion) { }
 
+    private void lockInputs(List<RequirementInput> inputs) {
+        inputs.stream().map(RequirementInput::REQUIREMENT_ID).distinct().sorted().forEach(id->jdbc.queryForList("SELECT REQUIREMENT_ID FROM BSDRREQ WHERE REQUIREMENT_ID=? FOR UPDATE",id));
+    }
+
     private List<Snapshot> snapshots(String projectId, List<RequirementInput> inputs) {
         if (inputs == null || inputs.isEmpty()) throw bad("분석할 요구사항을 1개 이상 선택하세요.");
         Set<String> seen = new HashSet<>();
@@ -470,6 +480,7 @@ public class AnalysisService {
             RequirementData d;
             try { d = requirements.one(in.REQUIREMENT_ID()); }
             catch (NoSuchElementException e) { throw new AnalysisException(HttpStatus.NOT_FOUND, "REQUIREMENT_NOT_FOUND", "요구사항을 찾을 수 없습니다: " + in.REQUIREMENT_ID()); }
+            if ("Y".equals(d.DISCARDED_YN())) throw bad("폐기된 요구사항은 신규 분석할 수 없습니다.");
             if (!projectId.equals(d.PROJECT_ID())) throw bad("다른 Project의 요구사항은 분석할 수 없습니다.");
             if (blank(in.MOD_DT())) throw bad("요구사항 MOD_DT가 필요합니다.");
             Instant client;

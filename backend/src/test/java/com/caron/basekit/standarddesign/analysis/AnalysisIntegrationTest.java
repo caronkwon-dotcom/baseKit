@@ -150,7 +150,12 @@ class AnalysisIntegrationTest {
         assertThat(fetch(id).path("ANALYSIS_STATUS").asText()).isEqualTo("CONFIRMED");
 
         String update = REQ.formatted("A4-변경", "AN-" + UUID.randomUUID());
-        mvc.perform(put("/api/standard-design/requirements/" + req.path("REQUIREMENT_ID").asText()).contentType(MediaType.APPLICATION_JSON).content(update)).andExpect(status().isOk());
+        String rid=req.path("REQUIREMENT_ID").asText();
+        mvc.perform(put("/api/standard-design/requirements/" + rid).contentType(MediaType.APPLICATION_JSON).content(update)).andExpect(status().isConflict());
+        JsonNode change=om.readTree(mvc.perform(post("/api/standard-design/requirements/"+rid+"/changes").contentType(MediaType.APPLICATION_JSON).content("{\"REASON\":\"요건 변경\"}")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
+        String command="{\"REVISION\":"+change.path("REQUIREMENT_REVISION").asLong()+",\"VERSION\":"+change.path("VERSION").asLong()+",\"CONTENT\":"+update+"}";
+        change=om.readTree(mvc.perform(put("/api/standard-design/requirements/"+rid+"/changes").contentType(MediaType.APPLICATION_JSON).content(command)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
+        mvc.perform(post("/api/standard-design/requirements/"+rid+"/changes/confirm").contentType(MediaType.APPLICATION_JSON).content("{\"REVISION\":"+change.path("REQUIREMENT_REVISION").asLong()+",\"VERSION\":"+change.path("VERSION").asLong()+"}")).andExpect(status().isOk());
         JsonNode stale = fetch(id);
         assertThat(stale.path("ANALYSIS_STATUS").asText()).isEqualTo("STALE");
         assertThat(stale.path("CANDIDATES")).hasSize(2);

@@ -114,6 +114,7 @@ public class RequirementGroupAnalysisService {
                 if (((Number) previous.get("GROUP_VERSION")).longValue() != request.VERSION()) throw conflict("같은 요청 ID에 다른 그룹 버전을 사용할 수 없습니다.");
                 return new Started((String) previous.get("ANALYSIS_ID"), (String) previous.get("REQUEST_JSON"), false, type);
             }
+            if(jdbc.queryForObject("SELECT COUNT(*) FROM BSDRGRQ M JOIN BSDRREQ R ON R.REQUIREMENT_ID=M.REQUIREMENT_ID WHERE M.REQUIREMENT_GROUP_ID=? AND R.DISCARDED_YN='Y'",Integer.class,group)>0) throw conflict("폐기 요구사항을 포함한 그룹입니다. 구성을 검토한 후 분석하세요.");
             if (((Number) g.get("VERSION")).longValue() != request.VERSION()) throw conflict("최신 그룹을 조회한 후 실행하세요.");
             if (jdbc.queryForObject("SELECT COUNT(*) FROM BSDRGRQ WHERE REQUIREMENT_GROUP_ID=?", Integer.class, group) == 0) throw bad("분석할 Requirement를 포함하고 저장하세요.");
             var snapshots = jdbc.queryForList("SELECT REQUEST_JSON FROM BSDRGCTX WHERE REQUIREMENT_GROUP_ID=? AND GROUP_VERSION=?", group, request.VERSION());
