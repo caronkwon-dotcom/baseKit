@@ -38,6 +38,8 @@ export type RequirementInput = Pick<Requirement, 'PROJECT_ID' | 'REQUIREMENT_NAM
   LEGACY_SCREEN_IDS?: string;
   LEGACY_TABLE_IDS?: string;
 };
+export interface RequirementChange { REQUIREMENT_REVISION: number; BASE_REVISION: number; VERSION: number; CHANGE_STATE: string; CHANGE_REASON: string; CREATED_BY: string; CREATED_AT: string; UPDATED_AT: string; CONTENT: Requirement }
+export interface RequirementRevisions { CURRENT: Requirement; READ_ONLY: boolean; DRAFT: RequirementChange | null; HISTORY: { REQUIREMENT_REVISION: number; EVENT_TYPE: string; CONTENT: Requirement }[]; CHANGES: RequirementChange[]; DISCARD: { DISCARD_REASON: string; DISCARDED_BY: string; DISCARDED_AT: string } | null }
 const base = '/api/standard-design/requirements';
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${base}${path}`, init);
@@ -48,13 +50,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (response.status === 204) return undefined as T;
   return (await response.json() as { DATA: T }).DATA;
 }
-const json = (method: string, body: RequirementInput): RequestInit => ({ method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+const json = (method: string, body: unknown): RequestInit => ({ method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 export const requirementApi = {
   list: (projectId: string) => request<Requirement[]>(`?PROJECT_ID=${encodeURIComponent(projectId)}`),
   create: (body: RequirementInput) => request<Requirement>('', json('POST', body)),
   update: (id: string, body: RequirementInput) => request<Requirement>(`/${encodeURIComponent(id)}`, json('PUT', body)),
-  delete: (id: string) => request<void>(`/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  delete: (id: string, reason: string) => request<void>(`/${encodeURIComponent(id)}`, json('DELETE', { REASON: reason })),
+  revisions: (id: string) => request<RequirementRevisions>(`/${encodeURIComponent(id)}/revisions`),
+  beginChange: (id: string, reason: string) => request<RequirementChange>(`/${encodeURIComponent(id)}/changes`, json('POST', { REASON: reason })),
+  saveChange: (id: string, revision: number, version: number, content: RequirementInput) => request<RequirementChange>(`/${encodeURIComponent(id)}/changes`, json('PUT', { REVISION: revision, VERSION: version, CONTENT: content })),
+  confirmChange: (id: string, revision: number, version: number) => request<Requirement>(`/${encodeURIComponent(id)}/changes/confirm`, json('POST', { REVISION: revision, VERSION: version })),
+  cancelChange: (id: string, revision: number, version: number) => request<void>(`/${encodeURIComponent(id)}/changes/cancel`, json('POST', { REVISION: revision, VERSION: version })),
   uploadPolicy: () => request<RequirementUploadPolicy>('/attachments/policy'),
   fileUrl: (id: string, attachmentId: string) => `${base}/${encodeURIComponent(id)}/attachments/${encodeURIComponent(attachmentId)}/file`,
-  deleteFile: (id: string, attachmentId: string) => request<void>(`/${encodeURIComponent(id)}/attachments/${encodeURIComponent(attachmentId)}`, { method: 'DELETE' }),
+  deleteFile: (id: string, attachmentId: string, change?: { REVISION: number; VERSION: number }) => request<void>(`/${encodeURIComponent(id)}/attachments/${encodeURIComponent(attachmentId)}${change ? `?REVISION=${change.REVISION}&VERSION=${change.VERSION}` : ''}`, { method: 'DELETE' }),
 };

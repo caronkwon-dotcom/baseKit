@@ -1,4 +1,25 @@
 # BaseKit 현재 상태와 WBS
+## 2026-10-18 SD Revision 실제 개발 PostgreSQL 검증 완료
+
+개발 PostgreSQL localhost:5432/basekit의 V21 성공 이력 및 정상 Flyway validate/migrate 확인. 현재 코드 8098/Edge 5188에서 Revision 초안 생성·저장·확정·취소, 첨부 ID/저장 키 승계·미리보기, 전체 논리 폐기·감사 이력, 그룹 REVIEW_REQUIRED/기존 검토 근거 보존 검증 완료. JDBC 변경 뒤 MyBatis 같은 세션의 오래된 projection 조회를 findOne flushCache로 최소 보완했다.
+
+실제 PostgreSQL 롤백 통합 6건 포함 전체 backend 95건(89통과/조건6skip), frontend102/build/lint/diff 통과. V21 적용 후 기준과 최종 기존 SD 30개 테이블 전체 행 해시/건수 동일. 기존 요구사항161·그룹12·프로젝트 그룹핑2·그룹 분석39 및 관련 근거 보존. V21 적용 직전 전체 행 해시는 미수집이다. 전용 REV-REVIEW-20261018의 테스트 요구사항2건은 논리 폐기, 그룹1건/첨부1개/이력은 검증 근거로 보존한다.
+
+COMMON 구버전 8099 기동/조회/생성/저장 성공. 구버전 쓰기는 Revision 정책을 우회할 수 있어 dev-pm PM 검토·병합 후 COMMON/SD 동일 새 빌드 전환·재기동 필요. 기존 SD8083은 신규 Revision 조회500, 새8098은200이며 원래 프로세스는 보존했다. dev-pm 직접 통합 없음. 상세 [실제 PostgreSQL 검증 기록](sd-revision-postgres-verification.md). 아래 이전 '적용 전' 항목은 당시 이력이다.
+## 2026-10-18 SD 요구사항 Revision·폐기·첨부 이력
+
+기존 sd-work에 변경 사유 필수의 작성중 Revision/저장/확정/취소, 실제 참조 기반 직접 수정 잠금, 버전별 첨부 연결, 전체 요구사항 폐기 감사, 그룹 REVIEW_REQUIRED 및 기존 근거 보존, 이력 비교 UI를 구현했다. 공통 UI 변경 없이 기존 FormModal/첨부 미리보기를 재사용했다. V21은 추가 테이블과 현행 첨부 연결만 만들며 기존 업로드·그룹·AI snapshot은 수정하지 않는다. 상세 정책/적용 경계는 [ADR 036](decisions/036-sd-requirement-revision-lifecycle.md).
+
+격리 H2 전체 backend 87건(81 통과/외부 DB 6 skip), 추가 업그레이드·HTTP 검증을 포함한 Revision 통합 8건 통과. frontend 102건, build/lint 통과. 실제 별도 5187→8097 H2 화면에서 초안 생성/저장→현행 Rev 1 유지→Rev 2 확정→Rev 3 취소→전체 폐기, 사유/이력 비교/첨부 미리보기/읽기전용을 검증했다. 그룹 멤버1건과 검토 Rev1 snapshot 원문은 유지, 상태만 REVIEW_REQUIRED 확인. 공유 PostgreSQL은 읽기 전용으로 V20, 요구사항161·그룹12·이력12·첨부0·프로젝트 그룹핑2건이 작업 전후 동일함을 확인했다.
+
+공유 PostgreSQL V21 적용, 기존 서버 재시작, dev-pm/COMMON 통합은 수행하지 않았다. PostgreSQL 실적용 및 운영 Host 검수는 후속 단계다. 취소/제외된 파일도 근거 보존을 위해 실체를 삭제하지 않는다.
+
+## 2026-10-18 SD 프로젝트 전체 요구사항 AI 그룹핑
+
+요구사항 관리의 전체 분석 워크스페이스, 목록/2열 카드, 편집·이동·추가·제외·합치기·나누기·미분류 배치·승인/보류·서버 초안/이력을 구현했다. PROJECT_GROUPING은 기존 그룹 분석과 분리하고 V19에 입력 snapshot/분할 RAW/사용자 초안/등록 근거를 보존한다. 승인한 선택 그룹만 기존 그룹관리 DRAFT로 생성하며 등록 중복·요구사항 변경·버전 충돌을 차단한다.
+
+실제 회사 LLM + PostgreSQL에서 22건→추천 6그룹/미분류0 초안 생성. 실제 PostgreSQL DRAFT 등록/구성/근거/멱등 검증은 롤백하여 기존 요구사항22건·그룹1건 snapshot 동일 확인. frontend102 통과, backend81건 중75통과/조건6skip 및 PostgreSQL opt-in1통과, build/lint/diff 통과. 실제 Edge 목록/카드·편집 공유·재진입·상세 선택과 분할55→55 확인. sd 단독 프로필의 기존 Host 판정 때문에 인증 수정 없이 dev,sd로 8083 실행. 운영 Host/대규모 부하/좁은 화면은 미검증. [상세 계약과 검증](sd-project-grouping.md).
+
 ## 2026-10-18 PostgreSQL 단일 개발 DB 및 프로젝트 조회 복구
 
 최신 dev-pm 병합 이후 COMMON 5174→8081과 SD 5176→8083 모두 common/sd 프로필로 로컬 PostgreSQL 5432에 연결되어 동일 프로젝트 요구사항을 조회했다. 화면에서 SDP-001만 보인 원인은 프로젝트 컨텍스트가 localStorage의 초기 mock SDP-001만 사용하고, PostgreSQL 요구사항의 실제 PROJECT_ID 집합을 가져오지 않았기 때문이다. BSDRREQ의 distinct PROJECT_ID를 읽기 전용으로 제공하는 프로젝트 참조 API와 컨텍스트 선택기 연동을 추가했다. 프로젝트 기본정보 테이블은 현재 DB migration에 없어 프로젝트 ID 외 이름·고객 정보는 브라우저에 저장된 기존 메타데이터만 표시하며, 새 ID는 ID 자체를 이름으로 보여준다.

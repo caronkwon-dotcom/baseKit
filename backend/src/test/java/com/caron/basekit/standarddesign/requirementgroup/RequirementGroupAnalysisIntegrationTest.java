@@ -63,7 +63,7 @@ class RequirementGroupAnalysisIntegrationTest {
    var req=postJson("/api/standard-design/requirements",json.createObjectNode().put("PROJECT_ID",project).put("REQUIREMENT_NAME","후속 처리 "+i).put("REQUIREMENT_TYPE_CODE","NEW").put("DESCRIPTION","승인 후 처리").put("PROCESS_DESCRIPTION","승인 → 후속 처리").put("STATUS","DRAFT"));
    candidates.add(req.path("REQUIREMENT_ID").asText());
   }
-  mvc.perform(delete("/api/standard-design/requirements/"+candidates.get(6))).andExpect(status().isNoContent());
+  mvc.perform(delete("/api/standard-design/requirements/"+candidates.get(6)).contentType(MediaType.APPLICATION_JSON).content("{\"REASON\":\"검토 후 폐기\"}")).andExpect(status().isNoContent());
   // Use a 3-member draft, matching the intended iterative workflow.
   var save=json.createObjectNode().put("PROJECT_ID",project).put("REQUIREMENT_GROUP_NAME","구매").put("DESCRIPTION","반복 보완").put("VERSION",g.version()).put("REQUEST_ID",UUID.randomUUID().toString());
   var members=save.putArray("MEMBERS");
@@ -116,7 +116,7 @@ class RequirementGroupAnalysisIntegrationTest {
    assertTrue(TimeUnit.NANOSECONDS.toMillis(System.nanoTime()-before)<1000);assertEquals("RUNNING",result.path("STATUS").asText());assertTrue(called.await(2,TimeUnit.SECONDS));
    assertEquals(id,start(g,"async").get("ANALYSIS_ID"));assertThrows(org.springframework.web.server.ResponseStatusException.class,()->start(g,"different"));
    var input=json.readTree(result.path("REQUEST_JSON").asText());assertEquals(g.id(),input.path("group").path("groupId").asText());
-   mvc.perform(delete("/api/standard-design/requirements/"+g.req())).andExpect(status().isNoContent());
+   mvc.perform(delete("/api/standard-design/requirements/"+g.req()).contentType(MediaType.APPLICATION_JSON).content("{\"REASON\":\"검토 후 폐기\"}")).andExpect(status().isNoContent());
   }finally{release.countDown();}
   var done=completed(g,id);assertEquals("SUCCESS",done.get("STATUS"));assertEquals(1,json.readTree((String)done.get("REQUEST_JSON")).path("requirements").get(0).path("revision").asLong());
   assertEquals("N",json.readTree((String)done.get("REQUEST_JSON")).path("requirements").get(0).path("discardedYn").asText());
@@ -203,12 +203,11 @@ class RequirementGroupAnalysisIntegrationTest {
   assertEquals("구매",json.readTree((String)first.get("REQUEST_JSON")).path("group").path("groupName").asText());
   var reconfirm=postJson("/api/standard-design/requirement-groups/"+g.id()+"/confirm",json.createObjectNode().put("VERSION",changed.version()).put("PROJECT_NAME","프로젝트"));
   assertEquals("CONFIRMED",reconfirm.path("GROUP_STATUS").asText());
-  mvc.perform(delete("/api/standard-design/requirements/"+g.req())).andExpect(status().isNoContent());
+  mvc.perform(delete("/api/standard-design/requirements/"+g.req()).contentType(MediaType.APPLICATION_JSON).content("{\"REASON\":\"검토 후 폐기\"}")).andExpect(status().isNoContent());
   var review=json.readTree(mvc.perform(get("/api/standard-design/requirement-groups/"+g.id())).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
   assertEquals("REVIEW_REQUIRED",review.path("GROUP_STATUS").asText());
-  var third=run(new Group(g.id(),review.path("VERSION").asLong(),g.req()),"review");
-  for(var original:json.readTree((String)third.get("REQUEST_JSON")).path("requirements")) if(g.req().equals(original.path("requirementId").asText())) assertEquals("Y",original.path("discardedYn").asText());
-  assertEquals(3,service.list(g.id()).size());
+  assertThrows(org.springframework.web.server.ResponseStatusException.class,()->run(new Group(g.id(),review.path("VERSION").asLong(),g.req()),"review"));
+  assertEquals(2,service.list(g.id()).size());
   for(var reviewed:review.path("MEMBERS")) if(g.req().equals(reviewed.path("REQUIREMENT_ID").asText())) assertEquals(1,reviewed.path("SOURCE_ANALYSIS_IDS").size());
  }
  @Test void legacyResultsAndRawRemainReadable() throws Exception {
