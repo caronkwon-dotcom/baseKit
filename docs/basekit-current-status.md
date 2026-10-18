@@ -1,4 +1,12 @@
 # BaseKit 현재 상태와 WBS
+## 2026-10-18 독립 AI 메뉴 빌더 UI 프로토타입
+
+PR #35 병합 확인 후 기존 sd-work를 origin/dev-pm 75f0d19로 fast-forward 동기화했다. 독립 경로 `/baseKit/#/standard-design/prototypes/menu-builder`에서 예시 메뉴 13건의 트리 드래그 정렬·부모 변경·자손 동반, 최대3Depth/자기·후손 이동 차단, 보조 이동 버튼, 이름·설명·유형 편집, Undo/Redo, 초기화와 명시적 브라우저 로컬 저장을 제공한다. 기존 SD 토큰을 사용하며 모바일에서는 상세 패널을 아래로 배치한다. DB/API/AI 호출과 실제 메뉴 등록은 연결하지 않았고 기존 메뉴관리·요구사항·Revision 소스는 수정하지 않았다.
+
+실행: SD 디렉토리에서 `npm run dev:sd -- --host 127.0.0.1 --port 5192`, 위 경로로 접속한다. 백엔드 실행 불필요. 저장은 현재 origin의 localStorage 전용 키이며 서버 저장이 아니다. Undo 이력은 현재 화면 세션에만 보존된다.
+
+검증: frontend108/108(추가6건, 300메뉴 계층 이동 포함), build/lint 통과(기존 xlsx/chunk 경고). backend:test95건 중83통과/외부조건12skip, 격리 H2 사용. 실제 Edge에서 이름 변경/Undo/Redo/브라우저 저장 후 새로고침, 자손 동반 DnD 정렬·부모 변경,4Depth·후손 아래 드롭 차단, 보조 들여쓰기/내어쓰기, 초기화 확인. 390px 가로 넘침 없음, 콘솔 error0. 수백 메뉴의 실제 브라우저 부하·보조기기 낭독은 미검증. commit/push/후속PR 생성은 미수행, 기존 미추적 backend/data/ 보존.
+
 ## 2026-10-18 SD Revision 실제 개발 PostgreSQL 검증 완료
 
 개발 PostgreSQL localhost:5432/basekit의 V21 성공 이력 및 정상 Flyway validate/migrate 확인. 현재 코드 8098/Edge 5188에서 Revision 초안 생성·저장·확정·취소, 첨부 ID/저장 키 승계·미리보기, 전체 논리 폐기·감사 이력, 그룹 REVIEW_REQUIRED/기존 검토 근거 보존 검증 완료. JDBC 변경 뒤 MyBatis 같은 세션의 오래된 projection 조회를 findOne flushCache로 최소 보완했다.
