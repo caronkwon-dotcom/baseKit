@@ -55,6 +55,15 @@ class RequirementGroupAnalysisIntegrationTest {
   var out=json.createObjectNode();var choice=out.putArray("choices").addObject();choice.put("finish_reason",reason);choice.putObject("message").put("content",raw);
   out.putObject("usage").put("prompt_tokens",100).put("completion_tokens",50);return " \n"+out+"\n ";
  }
+ @Test @org.springframework.transaction.annotation.Transactional
+ void menuDraftListingDoesNotExpireAnalysisOrChangeHistory() throws Exception {
+  Group g=setup(true);
+  String id="GA-readonly-"+UUID.randomUUID().toString().substring(0,8);
+  jdbc.update("INSERT INTO BSDRGANL(ANALYSIS_ID,REQUIREMENT_GROUP_ID,GROUP_VERSION,REQUEST_ID,REQUEST_JSON,MODEL_NAME,PROMPT_VERSION,STATUS,DEADLINE_AT) VALUES(?,?,?,?,?,?,?,'RUNNING',?)",id,g.id(),g.version(),id,"{}","test","test",OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(5));
+  String before=jdbc.queryForMap("SELECT * FROM BSDRGANL WHERE ANALYSIS_ID=?",id).toString();
+  mvc.perform(get("/api/standard-design/requirement-groups/"+g.id()+"/analyses/menu-draft")).andExpect(status().isOk()).andExpect(jsonPath("$.DATA[0].STATUS").value("RUNNING"));
+  assertEquals(before,jdbc.queryForMap("SELECT * FROM BSDRGANL WHERE ANALYSIS_ID=?",id).toString());
+ }
  @Test void recommendsOutsideGroupAndPreservesRawAndEvidenceWhenAdded() throws Exception {
   Group g=setup(true);
   String project=jdbc.queryForObject("SELECT PROJECT_ID FROM BSDRGRP WHERE REQUIREMENT_GROUP_ID=?",String.class,g.id());

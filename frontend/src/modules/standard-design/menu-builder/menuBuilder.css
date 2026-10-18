@@ -62,3 +62,6 @@
 @media(max-width: 650px) { .mb-workspace { padding: 18px 14px; } .mb-breadcrumb { flex-wrap: wrap; margin-bottom: 24px; } .mb-local { margin-left: 0; } .mb-columns { grid-template-columns: 1fr; } .mb-tree-panel { padding-right: 0; } .mb-editor { border-left: 0; border-top: 1px solid var(--border-default); padding-left: 0; } .mb-dirty { margin-left: 0; } .mb-summary { gap: 13px; } .mb-toolbar span { display: none; } }
 .mb-grip { touch-action: none; user-select: none; cursor: grab; padding: 7px 2px; }
 body:has(.mb-workspace), #root:has(.mb-workspace) { min-width: 0; }
+
+.mb-source { min-height: 0; padding-bottom: 16px; }
+.mb-evidence p { white-space: pre-line; overflow-wrap: anywhere; }

@@ -191,6 +191,11 @@ public class RequirementGroupAnalysisService {
 
     public List<Map<String, Object>> list(String group) {
         expireRunning();
+        return listForMenuDraft(group);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<Map<String, Object>> listForMenuDraft(String group) {
         return jdbc.queryForList("SELECT ANALYSIS_TYPE,ANALYSIS_ID,REQUIREMENT_GROUP_ID,GROUP_VERSION,REQUEST_ID,MODEL_NAME,PROMPT_VERSION,STATUS,ERROR_MESSAGE,CREATED_AT,COMPLETED_AT,HTTP_STATUS,FINISH_REASON,INPUT_TOKENS,OUTPUT_TOKENS,ELAPSED_MS FROM BSDRGANL WHERE REQUIREMENT_GROUP_ID=? ORDER BY CREATED_AT DESC,ANALYSIS_ID DESC", group).stream().map(this::upper).toList();
     }
 

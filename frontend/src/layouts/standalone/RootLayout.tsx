@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom';
-import MenuBuilderPage from '../../modules/standard-design/menu-builder/MenuBuilderPage';
+import MenuBuilderPage from '../../modules/standard-design/menu-builder/AnalysisMenuBuilderPage';
 import AppLayout from '../AppLayout';
 import StandaloneShell from './StandaloneShell';
 
