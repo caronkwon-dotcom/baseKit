@@ -54,6 +54,7 @@ public class ProjectGroupingService {
         expire(project);var result=row(project,id,false);
         result.put("INPUT",read((String)result.remove("REQUEST_JSON")));
         Object draft=result.remove("DRAFT_JSON");result.put("DRAFT",draft==null?null:read(draft.toString()));
+        Object aiDraft=result.remove("AI_DRAFT_JSON");result.put("AI_DRAFT",aiDraft==null?null:read(aiDraft.toString()));
         result.put("REGISTERED",jdbc.queryForList("SELECT DRAFT_GROUP_ID,REQUIREMENT_GROUP_ID FROM BSDPGLNK WHERE ANALYSIS_ID=?",id).stream().map(this::upper).toList());
         return result;
     }
@@ -113,7 +114,7 @@ public class ProjectGroupingService {
                 }
                 unknown.addAll((ArrayNode)normalized.path("UNCLASSIFIED"));
             }
-            jdbc.update("UPDATE BSDPGANL SET DRAFT_JSON=?,STATUS='SUCCESS',VERSION=1,COMPLETED_AT=CURRENT_TIMESTAMP WHERE ANALYSIS_ID=? AND STATUS='RUNNING'",encode(output),id);
+            jdbc.update("UPDATE BSDPGANL SET AI_DRAFT_JSON=?,DRAFT_JSON=?,STATUS='SUCCESS',VERSION=1,COMPLETED_AT=CURRENT_TIMESTAMP WHERE ANALYSIS_ID=? AND STATUS='RUNNING'",encode(output),encode(output),id);
         } catch(Exception e) { fail(id,"분석을 완료하지 못했습니다. 연결 설정 또는 응답 형식을 확인한 후 다시 실행하세요."); }
         finally { running.remove(id); }
     }
