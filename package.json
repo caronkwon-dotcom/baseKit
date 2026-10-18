@@ -7,10 +7,10 @@
     "dev:common": "npm run dev --prefix frontend -- --mode common",
     "dev:design": "npm run dev --prefix frontend -- --mode design",
     "dev:sd": "npm run dev --prefix frontend -- --mode sd",
-    "build": "npm run build --prefix frontend",
+    "build": "node scripts/generate-menu-execution-catalog.mjs --check && npm run build --prefix frontend",
     "lint": "npm run lint --prefix frontend",
     "preview": "npm run preview --prefix frontend",
-    "backend:test": "node scripts/run-backend-maven.mjs test",
+    "backend:test": "node scripts/generate-menu-execution-catalog.mjs --check && node scripts/run-backend-maven.mjs test",
     "backend:run": "node scripts/run-backend-maven.mjs spring-boot:run",
     "backend:run:local": "node scripts/run-backend-maven.mjs -Plocal spring-boot:run -Dspring-boot.run.profiles=local"
   }

@@ -1,4 +1,31 @@
 # BaseKit 현재 상태와 WBS
+## 2026-10-18 COMMON 단독 프로필 1Depth 실행 복구
+
+로그인 없는 개발환경 판정에 common 프로필이 누락되어 실제 5174→8081 common 단독 실행에서 Host 인증 403이 발생했다. common을 개발환경으로 인정하여 기존 1Depth INNER/WINDOW 설정 조회·저장과 독립 창 검사를 로그인 없이 지원한다. local 프로필 추가 및 datasource 변경 없음. Host 인증 연동은 사용자 결정에 따라 2차 사업으로 유보하며 기존 prod/production 제한과 원본 소속·WINDOW 설정 검사를 유지한다.
+
+common 단독 프로필의 격리 H2 통합 검증에서 설정 저장·조회와 WINDOW 접근 성공, INNER 복귀 후 독립 접근 거부를 확인했다. backend 75건 중 70 통과/외부 PostgreSQL 5 skip, build/lint 통과. 실제 PostgreSQL DDL/DML 및 기존 서버 재시작은 수행하지 않았다. 기존 서버 시작 이벤트에 EndpointCollector 기록 및 분석 상태 UPDATE가 있어 DB 무변경 제약상 실행 반영은 보류한다. 기존 .env-check-tmp.txt 보존.
+
+## 2026-10-18 COMMON 로그인 없는 1Depth 실행 복구
+
+WINDOW/메뉴 실행 설정에만 추가된 Host Principal 요구와 LocalTestAuthProvider 때문에 로그인 없는 COMMON에서 403 및 독립 창 접근 차단이 발생했다. 임시 테스트 Provider·로그인 UI/안내를 제거하고 local/dev/test에서 실제 Provider와 Principal이 모두 없는 경우 기존 INNER와 같은 개발 실행을 허용했다. 실제 Provider의 프로그램/SAVE 검사, 원본 소속·WINDOW 설정 확인, prod/production 및 비개발 배포 차단은 유지한다. 컨트롤러 TODO와 ADR-035에 공통 로그인 시 INNER/WINDOW 정책 통합 경계를 명시했다. 신규 인증/SSO/DB/SD 화면 개발 없음.
+
+실제 Edge 5174→8081의 local,common loopback 및 격리 H2 memory DB에서 1Depth SD 선택·WINDOW/LINEAR 저장·새로고침 조회·하위 읽기 전용 상속, SD 전용 창 ID 재사용, WBS 동일 창 전환, BASEKIT/LINEAR 셸 적용 확인. 시스템관리 INNER/BASEKIT 기본값 및 사용자관리 MDI 유지 확인. 개발자가이드 3Depth 검색 샘플 WINDOW 실행→2Depth 문서센터 동일 창 전환, INNER 복귀 후 독립 URL 차단 확인. 최종 검수 설정 SD WINDOW/LINEAR, SYS·DEV_GUIDE INNER/BASEKIT. memory 검수 설정은 서버 종료 시 소멸하며 실제 PostgreSQL·운영 배포는 미수행.
+
+build/lint 및 frontend 90건 통과. backend:test 및 clean test 75건(70 통과, 외부 DB 조건 5 skip) 통과. diff check 통과. 기존 .env-check-tmp.txt 보존. common-work 유지, 원격 dev-pm 63bcb8e 확인만 수행, 신규 branch/worktree/merge/TASK/PLAN 없음.
+
+## 2026-10-17 COMMON 메뉴 실행 회귀 수정
+
+설정 API 장애 때 AppLayout의 executionSettingsReady가 false로 남아 모든 프로그램 실행을 차단했다. COMMON 5174의 실제 설정 요청은 HTTP 403(Host 인증 연결 필요), 사용자 로그는 백엔드 ECONNREFUSED였다. 준비 상태의 전역 차단을 제거하여 로딩/장애/미설정에서 원본 JSON·Manifest의 INNER/BASEKIT을 유지한다. 재조회 중에는 마지막 정상 설정을 보존하고 오래된 응답은 무시한다. WINDOW는 정상 수신한 명시 설정만 적용하며 서버 권한 정책은 변경하지 않았다. 잘못된 성공 응답도 검증하여 거부한다.
+
+실제 Edge 5174에서 설정 실패 안내를 표시한 채 시스템관리 사용자관리, 개발자가이드 검색 샘플, Standard Design 프로젝트 화면 실행 확인. 격리 H2 8095/프런트 5185에서 V18 및 미설정 기본값, 메뉴관리 WINDOW 저장, LINEAR/BASEKIT 독립 셸, 동일 창 재사용, 새로고침 확인. 기존 8081의 인증 없는 WINDOW 요청은 HTTP 403 유지. 기존 DB 및 서버는 변경하지 않았다. 실제 PostgreSQL 마이그레이션과 운영 Host 연결은 미검증이다.
+
+build/lint, 프런트 87건, 백엔드 75건(70 통과/5 외부 DB skip), diff check 통과. 클릭 및 연결 프로그램의 로딩/실패 회귀와 재조회 실패 시 기존 WINDOW 보존 테스트 포함. common-work에서 기존 .env-check-tmp.txt 보존. CURRENT.md 부재이며 사용자 직접 지시에 따라 별도 TASK/PLAN 승인 없이 수행했다. 원격 dev-pm은 기존 기준 63bcb8e로 확인했고 통합하지 않았다.
+
+## 2026-10-17 COMMON 1Depth 실행 설정·독립 셸
+
+common-work에서 기존 JSON/Module Manifest를 원본으로 유지하고 V18 BSMEXCFG의 1Depth 실행 설정을 runtime에 결합했다. 하위 상속 및 기본 INNER/BASEKIT, 메뉴관리 저장, WINDOW 고정 창 재사용, 독립 URL과 BASEKIT/LINEAR 셸을 구현했다. 운영은 Host Principal/Provider 및 일반 API Endpoint 매핑 부재 시 차단한다. 개발 WINDOW 우회는 dev/local + 명시적 opt-in에만 적용한다. 실제 Host 인증 인프라는 미구현 상태이며 운영 통합이 필요하다.
+
+파일 소유권을 나눈 A/B/C 병렬 구현 후 통합 검증했다. frontend build/lint/82 tests 통과, backend 75건 중 70 pass/5 외부 DB skip, 실패 0. 별도 H2 memory/포트 브라우저에서 저장·상속·MDI·창 재사용·두 디자인·새로고침·직접 URL 거부 확인. 실제 PostgreSQL/운영 Host는 미검증. [ADR 035](decisions/035-menu-execution-and-standalone-shell.md), [검증 상세](common-menu-execution-verification.md). dev-pm merge/운영 배포는 수행하지 않는다.
 
 ## 2026-10-17 SD 분석 탭 문서형 보고서 UX
 
@@ -515,3 +542,7 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 ## LLM 파일·검색 테스트 PoC (2026-10-16, feature 검수 대기)
 
 개발자가이드 `LLM 파일·검색 테스트`(`DEV_LLM_FILE_TEST`, `/api/dev-guide/v1/llm-files`)를 추가했다. 기존 회사 LLM 설정은 chat completions만 정의하므로 회사 LLM 파일 API는 `/capabilities`가 `/files`·`/models`를 실제 probe한 결과로만 표시한다(미확인 시 지원으로 표시하지 않음). 파일 보관·검색은 **BaseKit 서버 메모리(PoC, 재시작 시 소멸, 10MB, PROJECT_ID 경계)** 대안이며 회사 LLM 기능이 아니다. 질의는 서버 키워드 검색 구간만 회사 LLM chat에 전송하고, 비교용으로 원문 전체 전송 모드를 제공한다. 실제 회사 LLM 환경에서의 측정 결과는 아직 없으며 SD 요구사항 그룹화는 구현하지 않았다.
+
+## COMMON 로컬 테스트 인증 및 메뉴 편집 복구 (2026-10-17, common-work)
+
+실제 Host 전체 연동은 공모전 이후로 보류했다. 명시적 opt-in·32자 이상 자격·local,common 전용·127.0.0.1:8081 바인딩을 강제하는 COMMON_REVIEWER 세션 Provider를 구현했다. 메뉴 설정 MENU_MGMT × SAVE와 DOCUMENT_CENTER/LYT_L1R2 실행만 허용하며 업무 API는 차단한다. 익명 WINDOW/설정 우회를 제거하고 행 선택을 API 성공과 분리했다. 실제 5174/8081 격리 H2 브라우저에서 저장·상속·INNER MDI·WINDOW 재사용·두 셸·새로고침·직접 URL 및 권한 거부를 확인했다. 운영 Host/PostgreSQL 적용은 미완료다. 실행 절차와 상세 경계는 [로컬 테스트 인증](common-local-test-auth.md)을 따른다.
