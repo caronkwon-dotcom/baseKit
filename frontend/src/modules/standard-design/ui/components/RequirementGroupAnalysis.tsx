@@ -103,6 +103,6 @@ export default function RequirementGroupAnalysis({group,onClose,projectName,embe
   </>:<p>저장된 분석 실행이 없습니다. 분석 유형을 선택하고 실행하세요.</p>}
  </>;
  const diagnostics=<details className="sd-analysis-technical"><summary>연결 진단</summary><p>그룹 원문을 전송하지 않는 짧은 응답 테스트입니다.</p><ActionButton actionCode="EXECUTE" label="짧은 응답 확인" disabled={busy} onClick={checkConnection} />{connection ? <BaseKitMessage type="success" message={`연결 확인 응답: ${connection.content}`} detail={`${connection.model} · ${(connection.elapsedMs/1000).toFixed(1)}초`} /> : null}</details>;
- const body=<div className="sd-group-analysis"><a href={`/baseKit/#/standard-design/prototypes/menu-builder?project=${encodeURIComponent(group.PROJECT_ID)}`} target="_blank" rel="noreferrer">AI 메뉴 초안 열기 (분석 결과 참고 · 미확정)</a>{actions}{content}{diagnostics}</div>;
+ const body=<div className="sd-group-analysis"><div className="sd-menu-design-entry"><a className="action-button primary" href={`/baseKit/#/standard-design/prototypes/menu-builder?project=${encodeURIComponent(group.PROJECT_ID)}`} target="_blank" rel="noreferrer">AI 메뉴 초안 열기 · 메뉴 설계 ↗</a><p className="sd-analysis-help">현재 프로젝트의 그룹 분석 후보를 메뉴 설계에서 구성·편집합니다. 새 창으로 열리며 메뉴 확정·DB 등록은 수행하지 않습니다.</p></div>{actions}{content}{diagnostics}</div>;
  return embedded ? body : <FormModal open title="그룹 분석" submitting={busy} onClose={onClose}>{body}</FormModal>;
 }

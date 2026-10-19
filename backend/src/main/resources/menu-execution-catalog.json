@@ -25,6 +25,7 @@
   {
     "MENU_ID": "STANDARD_DESIGN",
     "PROGRAM_KEYS": [
+      "SD_MENU_DESIGN",
       "SD_REQUIREMENT_GROUP",
       "SD_PROJECT_MGMT",
       "SD_WBS_DESIGN",

@@ -7,6 +7,7 @@ import ScreenDesignPage from './ui/pages/ScreenDesignPage';
 import TermGlossaryPage from './ui/pages/TermGlossaryPage';
 import ProjectMenuPage from './ui/pages/ProjectMenuPage';
 import RequirementGroupPage from './ui/pages/RequirementGroupPage';
+import AnalysisMenuBuilderPage from './menu-builder/AnalysisMenuBuilderPage';
 import './standardDesign.css';
 
 const MODULE_ID = 'standard-design';
@@ -17,6 +18,7 @@ const STANDARD_DESIGN_ACTIONS = {
 const standardDesignModule: ApplicationModule = {
   id: MODULE_ID,
   programs: [
+    { programKey: 'SD_MENU_DESIGN', programName: '메뉴 설계', componentName: 'AnalysisMenuBuilderPage', screenType: 'GRID_DETAIL', routePath: '/standard-design/prototypes/menu-builder', dataScope: 'COMPANY', modifyScope: 'NONE', actionCodes: [COMMON_ACTIONS.SEARCH], useYn: 'Y' },
     { programKey: 'SD_REQUIREMENT_GROUP', programName: '요구사항 그룹 관리', componentName: 'RequirementGroupPage', screenType: 'GRID_DETAIL', routePath: '/standard-design/requirement-groups', requiresProjectContext: true, dataScope: 'COMPANY', modifyScope: 'ROLE', actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE, COMMON_ACTIONS.APPROVE], useYn: 'Y' },
     {
       programKey: 'SD_PROJECT_MGMT',
@@ -43,7 +45,7 @@ const standardDesignModule: ApplicationModule = {
     },
     {
       programKey: 'SD_PROJECT_MENU',
-      programName: 'Project Menu',
+      programName: '프로젝트 메뉴관리',
       componentName: 'StandardDesignProjectMenuPage',
       screenType: 'GRID_DETAIL',
       routePath: '/standard-design/project-menus',
@@ -113,6 +115,7 @@ const standardDesignModule: ApplicationModule = {
     },
   ],
   menus: [
+    { menuKey: 'STANDARD_DESIGN.MENU_DESIGN', parentMenuKey: 'STANDARD_DESIGN', menuName: '메뉴 설계', menuLevel: 2, menuType: 'SCREEN', programKey: 'SD_MENU_DESIGN', sortOrder: 4.6, useYn: 'Y' },
     { menuKey: 'STANDARD_DESIGN.REQUIREMENT_GROUP', parentMenuKey: 'STANDARD_DESIGN', menuName: '요구사항 그룹 관리', menuLevel: 2, menuType: 'SCREEN', programKey: 'SD_REQUIREMENT_GROUP', sortOrder: 4.5, useYn: 'Y' },
     {
       menuKey: 'STANDARD_DESIGN',
@@ -147,7 +150,7 @@ const standardDesignModule: ApplicationModule = {
     {
       menuKey: 'STANDARD_DESIGN.PROJECT_MENU',
       parentMenuKey: 'STANDARD_DESIGN',
-      menuName: 'Project Menu',
+      menuName: '프로젝트 메뉴관리',
       menuLevel: 2,
       menuType: 'SCREEN',
       programKey: 'SD_PROJECT_MENU',
@@ -181,7 +184,7 @@ const standardDesignModule: ApplicationModule = {
       menuLevel: 2,
       menuType: 'SCREEN',
       programKey: 'SD_SCREEN_DESIGN',
-      sortOrder: 6,
+      sortOrder: 4.7,
       useYn: 'Y',
     },
     {
@@ -209,6 +212,7 @@ const standardDesignModule: ApplicationModule = {
     { actionCode: STANDARD_DESIGN_ACTIONS.DESIGN_VALIDATE, actionName: '설계검증', auditYn: 'Y' },
   ],
   permissions: [
+    { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_MENU_DESIGN', ACTION_CODE: COMMON_ACTIONS.SEARCH, ALLOW_YN: 'Y' },
     ...([COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE, COMMON_ACTIONS.APPROVE] as const).map(action => ({ ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_REQUIREMENT_GROUP', ACTION_CODE: action, ALLOW_YN: 'Y' as const })),
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_PROJECT_MGMT', ACTION_CODE: COMMON_ACTIONS.SEARCH, ALLOW_YN: 'Y' },
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_PROJECT_MGMT', ACTION_CODE: COMMON_ACTIONS.CREATE, ALLOW_YN: 'Y' },
@@ -242,6 +246,7 @@ const standardDesignModule: ApplicationModule = {
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_TERM_GLOSSARY', ACTION_CODE: COMMON_ACTIONS.SEARCH, ALLOW_YN: 'Y' },
   ],
   components: {
+    SD_MENU_DESIGN: AnalysisMenuBuilderPage,
     SD_REQUIREMENT_GROUP: () => <RequirementGroupPage />,
     SD_PROJECT_MGMT: () => <DesignLifecyclePage view="overview" />,
     SD_PROJECT_MENU: ProjectMenuPage,

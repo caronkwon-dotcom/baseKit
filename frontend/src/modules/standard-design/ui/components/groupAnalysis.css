@@ -24,3 +24,5 @@
 .sd-analysis-history select { width: 100%; min-width: 0; }
 .sd-analysis-flow { margin: 8px 0; padding-left: 24px; }
 .sd-analysis-flow li { padding: 4px 0 8px 8px; border-left: 2px solid var(--border-default); white-space: pre-wrap; }
+.sd-menu-design-entry { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-block: 12px; }
+.sd-menu-design-entry a { text-decoration: none; }
