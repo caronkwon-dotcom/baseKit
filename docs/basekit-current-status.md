@@ -1,5 +1,11 @@
 # BaseKit 현재 상태와 WBS
 
+## 2026-10-20 AI 그룹핑 진입을 요구사항 그룹관리로 이동
+
+요구사항관리의 AI 그룹핑 버튼과 연결 래퍼를 요구사항 그룹관리 상단으로 옮겼다. 기존 ProjectGroupingWorkspace를 재사용하며 현재 프로젝트의 폐기되지 않은 요구사항 수를 전달한다. 그룹관리 로딩 완료 후 진입하고, 프로젝트가 바뀌면 이전 프로젝트의 그룹핑 화면을 숨긴다. 복귀 문구를 '요구사항 그룹관리로'로 변경하고 복귀 시 그룹 목록·요구사항을 다시 조회한다. 기존 그룹 상세 편집 상태는 마운트한 채 보존한다. 그룹핑 분석·초안 저장·검토·등록 API는 변경하지 않았다.
+
+프런트119/119, build/lint/diff 통과. backend90건 중78통과·외부조건12skip. 실제 Edge5176에서 Basekit SD 설계 프로젝트의 그룹관리 → AI 그룹핑 → 기존 이력(요구사항22건·추천5개) 조회 → 그룹관리 복귀와 요구사항관리의 버튼 제거를 확인했다. 신규 AI 호출이나 실제 등록·저장은 검증에서 수행하지 않았다. backend/data 보존, dev-pm 직접 통합 없음.
+
 ## 2026-10-20 Host 확인 제거 · 로그인 시 재설계
 
 사용자 결정으로 임시 Host 확인을 제거했다. `/api/core/window-access`와 WindowAccessController/Policy, EndpointPermissionProvider 및 MVC 실행 차단 interceptor를 삭제하고 메뉴 실행 설정 API의 Host/Principal 필수 조건도 제거했다. 다음 명시적 사용자 지시 전까지 Host 확인을 다시 추가하지 않는다. 로그인 구현 시 INNER/WINDOW/API 인증·권한을 새로 설계한다. Program–Endpoint·버튼 그룹 메타데이터, 순수 판정 규칙, 메뉴 설정의 루트/enum 검증은 유지한다. 현재는 로그인·서버 권한 집행 완료 상태가 아니다.

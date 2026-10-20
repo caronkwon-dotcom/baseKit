@@ -1,5 +1,4 @@
 import FormModal from '../../../../components/common/FormModal';
-import ProjectGroupingWorkspace from '../components/ProjectGroupingWorkspace';
 import FormSelect from '../../../../components/common/FormSelect';
 import RequiredFieldsNotice from '../../../../components/common/RequiredFieldsNotice';
 import FormField from '../../../../components/common/FormField';
@@ -66,7 +65,6 @@ function MaxLengthField({ value, maxLength, onChange, multiline = false, rows, r
 
 export default function RequirementIntakePage() {
   const { projectId } = useProjectContext();
-  const [groupingOpen, setGroupingOpen] = useState(false);
   const [rows, setRows] = useState<Requirement[]>([]);
   const [selectedId, setSelectedId] = useState('');
   const [revisionAction, setRevisionAction] = useState<'change' | 'discard' | 'confirm' | 'cancel' | null>(null);
@@ -281,10 +279,7 @@ export default function RequirementIntakePage() {
     { id: 'related', label: '연관정보', content: relatedTab },
   ];
   return <div className="page standard-design-page standard-design-project-page sd-requirement-page" style={{ position: 'relative' }}>
-    {groupingOpen && projectId ? <ProjectGroupingWorkspace key={projectId} projectId={projectId} count={rows.filter(row => row.DISCARDED_YN !== 'Y').length} onBack={() => setGroupingOpen(false)} /> : null}
-    <div style={{ display: 'contents', visibility: groupingOpen ? 'hidden' : undefined }} inert={groupingOpen} aria-hidden={groupingOpen}>
     <PageHeader breadcrumbs={['Standard Design', '요구사항 관리']} rightContent={<div className="standard-design-header-actions"><ProjectContextSelector onSelected={() => confirmDiscard()} /><div className="standard-design-lifecycle-actions" aria-label="요구사항 기능">
-      <ActionButton display="label" actionCode="SAVE" label="✨ AI 그룹핑" disabled={busy || !projectId} onClick={() => setGroupingOpen(true)} />
       <ActionButton display="text" actionCode="CREATE" label="등록" tone="primary" disabled={busy || !projectId} onClick={() => { if (confirmDiscard()) resetDraft(); }} />
       <ActionButton display="text" actionCode="SAVE" label="저장" tone="primary" htmlType="submit" form="requirement-detail-form" disabled={busy || !projectId || readOnly} onClick={() => undefined} />
       <ActionButton display="text" actionCode="SAVE" label="변경" disabled={busy || !selected || !!changeDraft || !matchingRevisions || selected.DISCARDED_YN === 'Y'} onClick={() => { if (confirmDiscard()) { setActionReason(''); setRevisionAction('change'); } }} />
@@ -320,6 +315,5 @@ export default function RequirementIntakePage() {
         {message ? <BaseKitMessage type={message.type} message={message.text} dismissible onDismiss={() => setMessage(null)} /> : null}
       </div>
     </div>}
-    </div>
   </div>;
 }
