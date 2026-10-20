@@ -1,19 +1,23 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { designLifecycleRepository } from '../design-lifecycle/designLifecycle.repository';
 import MenuBuilderPage from './MenuBuilderPage';
 import { loadAnalysisDraft } from './loadAnalysisDraft';
 import type { MenuNode } from './menuBuilder';
 export default function AnalysisMenuBuilderPage() {
- const [searchParams,setSearchParams] = useSearchParams();
+ const [searchParams] = useSearchParams();
+ const { pathname } = useLocation();
+ const navigate = useNavigate();
  const [projects,setProjects] = useState<{PROJECT_ID:string;PROJECT_NAME:string}[]>([]);
  const [project,setProject] = useState(() => searchParams.get('project') ?? designLifecycleRepository.getSelectedProjectId());
  useEffect(() => {
   if ((searchParams.get('project') ?? '') === project) return;
   const next = new URLSearchParams(searchParams);
   if (project) next.set('project', project); else next.delete('project');
-  setSearchParams(next, { replace: true });
- }, [project, searchParams, setSearchParams]);
+  // MDI can mount this component before its route navigation commits.
+  // Always write the query against the builder route, never the previous screen.
+  navigate({ pathname: pathname.startsWith('/window/') ? pathname : '/standard-design/prototypes/menu-builder', search: next.toString() }, { replace: true });
+ }, [project, searchParams, navigate, pathname]);
  const [error,setError] = useState('');
  const [busy,setBusy] = useState(false);
  const [pending,setPending] = useState<(() => void) | null>(null);

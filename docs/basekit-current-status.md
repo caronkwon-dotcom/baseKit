@@ -1,5 +1,13 @@
 # BaseKit 현재 상태와 WBS
 
+## 2026-10-20 Host 확인 제거 · 로그인 시 재설계
+
+사용자 결정으로 임시 Host 확인을 제거했다. `/api/core/window-access`와 WindowAccessController/Policy, EndpointPermissionProvider 및 MVC 실행 차단 interceptor를 삭제하고 메뉴 실행 설정 API의 Host/Principal 필수 조건도 제거했다. 다음 명시적 사용자 지시 전까지 Host 확인을 다시 추가하지 않는다. 로그인 구현 시 INNER/WINDOW/API 인증·권한을 새로 설계한다. Program–Endpoint·버튼 그룹 메타데이터, 순수 판정 규칙, 메뉴 설정의 루트/enum 검증은 유지한다. 현재는 로그인·서버 권한 집행 완료 상태가 아니다.
+
+Window는 등록된 루트·프로그램·활성 컴포넌트를 확인해 즉시 렌더링한다. 기존 BASEKIT/LINEAR 디자인은 설정 목록에서 읽고 조회 실패 시 BASEKIT으로 표시하며 진입을 차단하지 않는다. 메뉴 빌더의 프로젝트 쿼리가 MDI 이전 경로에 붙는 최초 마운트 경합도 수정했다. 실제 Edge localhost:5176에서 좌측 메뉴 → 기존 빌더 URL과 Window URL 모두 Host 확인 없이 표시되고 project=SDP-001이 전달되는 것을 확인했다. 당시 연결 백엔드는 프로젝트 조회가 실패해 실제 후보 재생성은 미검증이며, 프런트 진입 검증과 API 격리 테스트를 구분한다. 기존 DB·backend/data는 변경하지 않았다. PR #36은 이미 병합되었고 이번 변경은 같은 sd-work의 새 PR로 검토한다.
+
+검증: 프런트 119/119, build/lint/diff 통과. 백엔드 clean test 90건 중78통과·외부조건12skip, 실패0. 제거된 Host 강제 검사 전용 테스트6건을 제외했으며 common+production 혼합 프로필에서도 설정 조회/저장·공통 API가 Host 확인 없이 처리되는 회귀 테스트를 유지했다. 프런트는 설정 대기/실패 중 즉시 렌더링·LINEAR 디자인·잘못된 경로 차단·INNER 최초 진입 경합을 검증한다. 제한 환경의 Java attach 파이프 오류로 첫 실행은 중단하고 제한 밖에서 동일한 격리 H2 테스트를 재실행해 통과했다.
+
 ## 2026-10-18 SD 메뉴 설계 정식 진입
 
 SD Module Manifest에 메뉴 설계(SD_MENU_DESIGN)를 등록했다. 좌측 순서는 요구사항 관리 → 요구사항 그룹 관리 → 메뉴 설계 → 기존 화면 설계이며 프로젝트 메뉴관리는 별도 유지한다. 기존 독립 `/standard-design/prototypes/menu-builder` 경로와 같은 컴포넌트를 사용한다. INNER는 기존 독립 경로, WINDOW는 기존 Shell의 `/window/STANDARD_DESIGN/SD_MENU_DESIGN`으로 실행된다. project 쿼리를 우선하고 없으면 선택된 SD 프로젝트를 전달하며, 컨텍스트가 없으면 빌더에서 선택한다. 그룹 분석의 새 창 링크는 같은 독립 경로에 해당 그룹의 PROJECT_ID를 전달하고 읽기 쉬운 액션으로 표시한다. 메뉴 설계는 브라우저 초안 편집이며 실제 메뉴 확정·등록은 미연결이다. COMMON 인증/권한/실행 설정 코드는 변경하지 않았다. 새 Manifest 항목에 필요한 생성 카탈로그만 갱신했다.

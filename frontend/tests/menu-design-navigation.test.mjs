@@ -22,13 +22,13 @@ test('SD manifest orders requirement, group, menu design and existing screen des
  const catalog=JSON.parse(readFileSync(new URL('../../backend/src/main/resources/menu-execution-catalog.json',import.meta.url)));
  assert.ok(catalog.find(m=>m.MENU_ID==='STANDARD_DESIGN').PROGRAM_KEYS.includes('SD_MENU_DESIGN'));
 });
-function page(query,context) {
+function page(query,context,pathname='/window/STANDARD_DESIGN/SD_MENU_DESIGN') {
  const effects=[], updates=[];
  const params=new URLSearchParams(query);
  const Page=load('menu-builder/AnalysisMenuBuilderPage.tsx',id=>{
   if(id==='react')return {useState:v=>[typeof v==='function'?v():v,()=>{}],useEffect:fn=>effects.push(fn)};
   if(id==='react/jsx-runtime')return jsx;
-  if(id==='react-router-dom')return {useSearchParams:()=>[params,(next,options)=>updates.push([next.toString(),options])]};
+  if(id==='react-router-dom')return {useSearchParams:()=>[params],useLocation:()=>({pathname}),useNavigate:()=> (next,options)=>updates.push([next,options])};
   if(id.includes('designLifecycle.repository'))return {designLifecycleRepository:{getSelectedProjectId:()=>context}};
   return {__esModule:true,default:()=>null};
  });
@@ -37,8 +37,15 @@ function page(query,context) {
 }
 test('menu design carries selected context into query, preserves Window and other query parameters',()=>{
  const {updates}=page('layout=linear','SDP-001');
- assert.equal(updates[0][0],'layout=linear&project=SDP-001');
+ assert.equal(updates[0][0].search,'layout=linear&project=SDP-001');
+ assert.equal(updates[0][0].pathname,'/window/STANDARD_DESIGN/SD_MENU_DESIGN');
  assert.equal(updates[0][1].replace,true);
+});
+
+test('INNER first mount writes context against builder route instead of the previous MDI screen',()=>{
+ const {updates}=page('','SDP-001','/');
+ assert.equal(updates[0][0].pathname,'/standard-design/prototypes/menu-builder');
+ assert.equal(updates[0][0].search,'project=SDP-001');
 });
 test('explicit group project wins over selected context; absent context leaves project selection available',()=>{
  assert.equal(page('project=SDP-002','SDP-001').updates.length,0);

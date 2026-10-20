@@ -13,42 +13,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 class MenuExecutionIntegrationTest {
- @Test void productionCannotReadOrSaveWithoutTrustedHost() throws Exception {
-  var service=org.mockito.Mockito.mock(MenuExecutionService.class);
-  var environment=new org.springframework.mock.env.MockEnvironment();
-  environment.setActiveProfiles("production", "dev");
-  var beans=new org.springframework.beans.factory.support.StaticListableBeanFactory();
-  var providers=beans.getBeanProvider(com.caron.basekit.core.endpoint.EndpointPermissionProvider.class);
-  var mvc=MockMvcBuilders.standaloneSetup(new MenuExecutionController(service,providers,new com.caron.basekit.core.windowaccess.WindowAccessPolicy(environment)))
-   .setControllerAdvice(new GlobalExceptionHandler()).build();
-  mvc.perform(get("/api/core/menu-execution-settings")).andExpect(status().isForbidden());
-  mvc.perform(put("/api/core/menu-execution-settings/SYS").principal(() -> "user").contentType(MediaType.APPLICATION_JSON).content("{\"EXECUTION_TYPE\":\"WINDOW\",\"DESIGN_TYPE\":\"LINEAR\"}"))
-   .andExpect(status().isForbidden());
-  org.mockito.Mockito.verifyNoInteractions(service);
- }
- @Test void hostDenialCannotBeOverriddenByDevelopmentProfile() throws Exception {
-  var service=org.mockito.Mockito.mock(MenuExecutionService.class);
-  var environment=new org.springframework.mock.env.MockEnvironment(); environment.setActiveProfiles("dev");
-  var provider=org.mockito.Mockito.mock(com.caron.basekit.core.endpoint.EndpointPermissionProvider.class);
-  var beans=new org.springframework.beans.factory.support.StaticListableBeanFactory(); beans.addBean("host",provider);
-  var mvc=MockMvcBuilders.standaloneSetup(new MenuExecutionController(service,beans.getBeanProvider(com.caron.basekit.core.endpoint.EndpointPermissionProvider.class),new com.caron.basekit.core.windowaccess.WindowAccessPolicy(environment)))
-   .setControllerAdvice(new GlobalExceptionHandler()).build();
-  mvc.perform(put("/api/core/menu-execution-settings/SYS").principal(() -> "user").contentType(MediaType.APPLICATION_JSON).content("{\"EXECUTION_TYPE\":\"WINDOW\",\"DESIGN_TYPE\":\"LINEAR\"}"))
-   .andExpect(status().isForbidden());
-  org.mockito.Mockito.verifyNoInteractions(service);
- }
  @Test void defaultsPersistAndRejectNonRootAndInvalidEnums() throws Exception {
   var db=new EmbeddedDatabaseBuilder().generateUniqueName(true).setType(EmbeddedDatabaseType.H2).build();
   try {
    new ResourceDatabasePopulator(new ClassPathResource("db/migration/V18__menu_execution_settings.sql")).execute(db);
    var catalog=new MenuExecutionCatalog(new ObjectMapper());
    var service=new MenuExecutionService(new JdbcTemplate(db),catalog);
-   var environment=new org.springframework.mock.env.MockEnvironment();
-   environment.setActiveProfiles("common");
-   var beans=new org.springframework.beans.factory.support.StaticListableBeanFactory();
-   // COMMON runs without a Host provider or principal during first-phase development.
-   var providers=beans.getBeanProvider(com.caron.basekit.core.endpoint.EndpointPermissionProvider.class);
-   var mvc=MockMvcBuilders.standaloneSetup(new MenuExecutionController(service, providers, new com.caron.basekit.core.windowaccess.WindowAccessPolicy(environment))).setControllerAdvice(new GlobalExceptionHandler()).build();
+   var mvc=MockMvcBuilders.standaloneSetup(new MenuExecutionController(service)).setControllerAdvice(new GlobalExceptionHandler()).build();
    String root=catalog.rootIds().getFirst();
    mvc.perform(get("/api/core/menu-execution-settings"))
     .andExpect(status().isOk()).andExpect(jsonPath("$.DATA[0].EXECUTION_TYPE").value("INNER"))

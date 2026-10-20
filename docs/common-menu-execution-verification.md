@@ -1,6 +1,6 @@
 # COMMON 메뉴 실행 설정 검증 (2026-10-17)
 
-> 이 문서는 최초 구현 당시의 검수 이력이다. 익명 개발 우회 정책은 폐기되었으며 현재 인증·실행 절차와 재검수 결과는 [COMMON 로컬 테스트 인증](common-local-test-auth.md)이 우선한다.
+> 2026-10-20 사용자 지시로 Host 확인 및 Window 접근 확인 API를 제거했다. 아래 Host/Principal 차단 검증은 과거 이력이며 현행 구현을 뜻하지 않는다. 다음 명시적 사용자 지시 전까지 재도입하지 않는다. 현재 정책은 [ADR-035](decisions/035-menu-execution-and-standalone-shell.md)와 [로그인 구현 전 실행 정책](common-local-test-auth.md)을 따른다.
 
 ## 구현
 
