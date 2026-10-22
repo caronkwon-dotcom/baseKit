@@ -90,3 +90,71 @@ ProjectGroupingService.start는 RequirementService.list의 전체 RequirementDat
 ## 2026-10-22 Compact Review Mode 후속
 
 AI 그룹핑-2에서 전환 버튼을 추천 그룹 초안 제목 줄 오른쪽으로 이동하고 본문 위 별도 행을 제거했다. 실제 본문 폭의 30:70 grid로 설정하고 목록은 그룹 제목·건수만 작게 표시한다. 요구사항 상세는 기본 접힘, 제목 13px bold·본문 12~13px, 등록 체크 20px 및 주요 버튼 높이는 유지한다. 공통 분석·이력·등록 로직 변경 없음. 실제 Edge 전체 화면에서 본문1745px/좌520.5px/우1214.5px(정확히30:70), 그룹6개·요구사항7건 렌더/열림0건 확인. 전체 화면 캡처는 사용자 산출물 grouping-review2-compact-full.jpg. build/lint/diff 통과. 공통 셸 하단 고정 등록 바 때문에 한 화면에 요구사항7개 중 일부는 스크롤해야 볼 수 있다.
+# Issue #38 — supplied HTML port, PR #39
+
+2026-10-22 · G:/CARON/basekit/sd · sd-work
+
+Implementation and automated/regression checks completed; final HTML-versus-React browser visual acceptance remains pending.
+
+## Reference verified
+
+Read the entire user-supplied ai-grouping-design-v2.html from the attachment returned by read_thread:
+C:/Users/권현수/AppData/Local/Temp/codex-file-preview-oLfG4G/ai-grouping-design-v2.html
+SHA256: 9912781BF8B45E4EB1F0D6E68004BD152800584117AD39F003E4F4D3DC73EBC0
+The Downloads copy matches exactly. A copy is preserved alongside this report.
+
+The browser security policy rejected observing the existing file:// reference tab. No workaround was attempted. Consequently there is no reference browser screenshot or completed side-by-side browser comparison, and this change must not be described as fully visually accepted.
+
+## HTML to React mapping
+
+| HTML | React review2 |
+|---|---|
+| CSS colors | Scoped --pg2-* tokens: #eef2f7 background, #1b2a3f ink, #1f5fd1 blue, #eaf1fd reason/selection |
+| 1560px document / 380px list / 16px gap | Same maximum document width, fixed maximum list width, gap and 900px stacking breakpoint |
+| Group navigation | Sticky numbered list, selected blue stripe, real REVIEW_STATUS and registration indicators |
+| Detail title / AI reason | 23px heading; 34px blue star icon; exact stored AI_DRAFT/DRAFT REASON |
+| Requirement expansion cards | 10px radius, 13px/16px summary padding, 15px text, 1.85 body line height, full and individual expansion |
+| Additional real source content | DESCRIPTION, PROCESS_DESCRIPTION, DESIGN_OPINION and member REASON retained as distinct sections; line breaks preserved |
+| KPI/progress | Existing counts plus actual selected count; meter only counts non-DRAFT review states, explicitly displays numerator/denominator and approved/hold counts; no synthetic AI processing percentage |
+| Global header/title/breadcrumb/toolbar/buttons | Existing product shell and existing button styling/contracts retained; mock global elements not imported |
+
+The static HTML has only one synthetic description paragraph. The real card includes all four required source fields; this intentionally increases expanded-card height. Full requirement IDs are visible inside the open card; compact summary IDs use ellipsis because actual IDs are longer than sample IDs. Default collapsed behavior is retained. Existing group edit/hold/approve controls stay in the existing footer, rather than duplicating mock controls at the top. Existing save/register remains in the existing bottom bar.
+
+Not added: mock status filters, generated descriptions/tags, sample data, new per-requirement move selector, extra save/register actions, previous/next buttons, fake completion or server state. Existing product editing/move/approval/hold/register functions remain unchanged.
+
+## Browser checks
+
+Actual Edge on localhost:5176, persisted analysis with 22 requirements / 6 groups / 0 unclassified.
+- 1920x1080: 380px sticky list, 16px gap, 15px body; overview and all four source sections captured.
+- 1440x900: 380px list, detail fits, content overflow 0; screenshot captured.
+- 390x844: final result width326px, left32px/right358px, single column, content overflow0. Existing shared shell remains min-width1280 and has page-level horizontal scrolling; shared CSS was not changed.
+- Original renders 6 groups; review renders and expands 7 requirement cards. Separate screenshots saved.
+- Real history changed to older run and back; comparison shows changed5/added1/removed0.
+- review2: group switching, bulk open7, Enter closes one leaving6, bulk close, selection enables existing register action; selection cleared. Four real source fields verified in browser, including Excel Import process text. Console errors0.
+- No real DB save, registration, confirmation, or new AI analysis executed. Save/register version behavior verified only through isolated existing tests.
+
+## Verification
+
+Frontend126/126; build; lint; git diff --check passed. Backend90 total,78 passed/12 external-condition skipped/0 failures, H2 test profile. Existing xlsx dynamic import and chunk-size warnings remain.
+
+## Git and scope
+
+Start: a618b024fc3cd1a5e90b4ad5f96370c34c5862df. origin/dev-pm546ed6f55626800b7240f34dfd7c928701f5e122 already ancestor of HEAD; fetch succeeded, no integration performed.
+PR39 confirmed OPEN/Draft, unmerged, sd-work -> dev-pm.
+CURRENT.md absent; no replacement TASK/ROLE was invented. Direct current user instructions govern this port.
+Product SHA: 52d8443a67ea79816b69cf12e872513bd7c7cc88
+Four product/test files only: ProjectGroupingReview2.tsx, projectGroupingReview2.css, ProjectGroupingWorkspace.tsx (review2 class/KPI/selection props only), project-grouping-review.test.mjs.
+Original/review components, shared CSS, ActionButton, backend/API and backend/data unchanged. backend/data remains untracked. No branch/worktree creation, merge, dev-pm edit or push.
+
+PR: https://github.com/caronkwon-dotcom/baseKit/pull/39
+URL: http://localhost:5176/baseKit/#/standard-design/requirement-groups?grouping=review2
+
+Screenshots in the report output directory:
+review2-1920x1080.jpg
+review2-detail-1920.jpg
+review2-1440x900.jpg
+review2-390.jpg
+original-regression.jpg
+review-regression.jpg
+
+Remaining acceptance: reference HTML browser screenshot and side-by-side visual review. Provide a reference screenshot or a permitted browser-accessible reference to complete that check.

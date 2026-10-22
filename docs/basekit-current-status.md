@@ -1,5 +1,10 @@
 # BaseKit 현재 상태와 WBS
 
+## 2026-10-22 사용자 HTML 기준 review2 이식 — 최종 시각 인수 보류
+
+첨부 ai-grouping-design-v2.html 전체 소스/해시 확인 후 review2를 해당 토큰·380px sticky 목록·16px 간격·15px 문서형 본문·블루 AI 근거로 교체했다. 업무 프로세스·설계 의견·개별 포함 사유를 원문과 함께 유지한다. 실제 기존 검토 상태·등록 선택만 연결하며 공통 셸/버튼/원본/기존 검토/backend는 보존했다. 제품 SHA52d8443. 프런트126/126·build/lint/diff, H2 backend78통과/12skip. Edge1920/1440/390 및 이력/비교/선택/펼침 회귀 확인. 실제 DB 저장/등록/확정 없음. file:// 기준본 브라우저 접근은 보안 정책으로 차단되어 HTML 대 React 나란히 시각 비교는 미완료이며 완료 인수로 표시하지 않는다. 공통 셸 최소 폭1280은 유지. PR39 Draft·PM 병합 전. 상세 sd-ai-grouping-content-review.md.
+
+
 ## 2026-10-22 AI 그룹핑-2 별도 디자인 시안
 
 review2 전용 컴포넌트/CSS와 URL 분기를 추가했다. 기존 original/review 본문·공통 CSS 불변. 30:70 압축 목록, 네이비/블루·굵은 제목, 20px 등록 체크, 사유 강조, 독립 요구사항 컨테이너/흰색 4항목 상세, 전체/개별 다중 펼침 제공. Workspace는 선택적 버전 표기만 추가하며 기존 동작 불변. 프런트126/126·build/lint/diff, 백엔드78통과/12skip. 실제 Edge 세 URL/그룹·이력·비교·등록 선택/키보드/390px 검수. 본문 넘침0, 기존 공통 셸 전체 가로 스크롤은 보존 조건으로 유지. 실제 DB 쓰기/새 AI 호출/실확정 없음. 상세 sd-ai-grouping-content-review.md. sd-work, PR #39 후속, dev-pm 통합 없음.
