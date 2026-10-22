@@ -2,6 +2,8 @@ import ProjectListDetailWorkspace, { type ProjectWorkspaceMode } from '../compon
 import { createUuid } from '../../../../utils/uuid';
 import RequirementGroupAnalysis from '../components/RequirementGroupAnalysis';
 import ProjectGroupingWorkspace from '../components/ProjectGroupingWorkspace';
+import ProjectGroupingReview from '../components/ProjectGroupingReview';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActionButton, BaseKitMessage, BaseTabs, DataTable, FormModal, PageHeader, SearchPanel, type DataTableColumn } from '../../../../components/common';
 import FormField from '../../../../components/common/FormField';
@@ -20,7 +22,10 @@ interface Candidate { KEY:string; REQUIREMENT:Requirement; ANALYSIS_ID:string | 
 export default function RequirementGroupPage() {
  const {projectId,project}=useProjectContext();
  const [groupAnalysisOpen,setGroupAnalysisOpen]=useState(false);
+ const location = useLocation(), navigate = useNavigate();
+ const groupingVersion = new URLSearchParams(location.search).get('grouping');
  const [groupingOpen,setGroupingOpen]=useState(false);
+ const GroupingWorkspace = groupingVersion === 'review' ? ProjectGroupingReview : ProjectGroupingWorkspace;
  const [workspaceMode,setWorkspaceMode]=useState<ProjectWorkspaceMode>('DETAIL');
  const [groups,setGroups]=useState<RequirementGroup[]>([]), [requirements,setRequirements]=useState<Requirement[]>([]);
  const [draft,setDraft]=useState<RequirementGroup|null>(null), [baseline,setBaseline]=useState('');
@@ -37,7 +42,7 @@ export default function RequirementGroupPage() {
  const activeProject=useRef(projectId), operation=useRef(0), running=useRef(false), allowLeave=useRef(false), modalFocus=useRef<HTMLElement|null>(null);
  const dirty=!!draft && (signature(draft)!==baseline || deletedMembers.length>0);
  const loaded=loadedProject===projectId;
- const showGrouping=groupingOpen && loaded && !!projectId;
+ const showGrouping=(groupingOpen || groupingVersion === 'review' || groupingVersion === 'original') && loaded && !!projectId;
  const readonly=!draft || draft.PROJECT_ID!==projectId || draft.GROUP_STATUS==='CONFIRMED';
  const accept=useCallback((g:RequirementGroup)=>{if(g.PROJECT_ID!==activeProject.current)return;setDraft(g);setDeletedMembers([]);setSelectedMemberKeys(new Set());setBaseline(signature(g));if(g.REQUIREMENT_GROUP_ID)sessionStorage.setItem('basekit:requirement-group-target',JSON.stringify({PROJECT_ID:g.PROJECT_ID,REQUIREMENT_GROUP_ID:g.REQUIREMENT_GROUP_ID}));},[]);
  const refreshLists=async()=>{const [gs,rs]=await Promise.all([api.list(projectId),requirementApi.list(projectId)]);if(activeProject.current===projectId){setGroups(gs);setRequirements(rs);setLoadedProject(projectId);return gs;}return [];};
@@ -143,7 +148,7 @@ export default function RequirementGroupPage() {
  const oldImpact=impact?.REVIEWED_SNAPSHOT ? JSON.parse(impact.REVIEWED_SNAPSHOT) as Requirement : null;
  const nextImpact=impact ? current(impact):null;
  return <div className="page standard-design-page standard-design-lifecycle-page multi-grid-page" style={{position:'relative'}}>
-  {showGrouping ? <ProjectGroupingWorkspace key={projectId} projectId={projectId} count={requirements.filter(row=>row.DISCARDED_YN!=='Y').length} onBack={()=>{setGroupingOpen(false);void run(async()=>{await refreshLists();});}} />:null}
+  {showGrouping ? <GroupingWorkspace key={`${projectId}:${groupingVersion}`} projectId={projectId} count={requirements.filter(row=>row.DISCARDED_YN!=='Y').length} onBack={()=>{setGroupingOpen(false);const params=new URLSearchParams(location.search);params.delete('grouping');navigate({pathname:location.pathname,search:params.toString()},{replace:true});void run(async()=>{await refreshLists();});}} />:null}
   <div style={{display:'contents',visibility:showGrouping ? 'hidden':undefined}} inert={showGrouping} aria-hidden={showGrouping}>
   <PageHeader breadcrumbs={['Standard Design','요구사항 그룹 관리']} rightContent={<div className="standard-design-header-actions"><ProjectContextSelector onSelected={()=>{if(busy)return false;return !dirty || window.confirm('현재 그룹 초안을 버리고 프로젝트를 변경할까요?');}} /><ActionButton actionCode="SEARCH" label="최신 조회·초안 비교" disabled={busy || !projectId} onClick={refresh} /><div className="standard-design-lifecycle-actions" aria-label="그룹 기능"><ActionButton display="label" actionCode="SAVE" label="✨ AI 그룹핑" disabled={busy || !projectId || !loaded} onClick={()=>setGroupingOpen(true)} /><ActionButton display="text" tone="primary" actionCode="CREATE" label="등록" disabled={busy || !projectId || !loaded} onClick={()=>requestLeave(()=>{const g=empty(projectId);accept(g);setBaseline('');})} />{draft?.PROJECT_ID===projectId ? <><ActionButton display="text" tone="primary" actionCode="SAVE" label="저장" disabled={readonly || busy} onClick={()=>void run(save)} /><ActionButton actionCode="APPROVE" label={draft.GROUP_STATUS==='REVIEW_REQUIRED' || (draft.GROUP_STATUS==='CONFIRMED' && !draft.HAS_ANALYSIS_SNAPSHOT) ? '재확정':'확정'} disabled={busy || dirty || !draft.REQUIREMENT_GROUP_ID || !draft.MEMBERS.length || (readonly && !!draft.HAS_ANALYSIS_SNAPSHOT) || !project?.PROJECT_NAME || draft.MEMBERS.some(m=>m.REVIEWED_REVISION!==current(m)?.REQUIREMENT_REVISION)} onClick={()=>void run(async()=>{const saved=await api.confirm(draft.REQUIREMENT_GROUP_ID,draft.VERSION,project?.PROJECT_NAME);accept(await api.get(saved.REQUIREMENT_GROUP_ID));await refreshLists();setMessage({type:'success',text:'현재 검토 기준으로 확정했습니다.'});})} /><ActionButton display="text" actionCode="EXECUTE" label="그룹 분석" disabled={busy || !draft.REQUIREMENT_GROUP_ID} onClick={()=>setGroupAnalysisOpen(true)} />{readonly ? <ActionButton actionCode="UPDATE" label="구성 수정" disabled={busy} onClick={()=>void run(async()=>{accept(await api.edit(draft.REQUIREMENT_GROUP_ID,draft.VERSION));await refreshLists();})} />:null}<ActionButton display="text" tone="danger" actionCode="DELETE" label="삭제" disabled={busy || readonly || !draft.REQUIREMENT_GROUP_ID} onClick={()=>{if(window.confirm('그룹을 삭제할까요? 원본 Requirement와 Analysis는 보존됩니다.'))void run(async()=>{await api.delete(draft.REQUIREMENT_GROUP_ID,draft.VERSION);if(activeProject.current!==projectId)return;sessionStorage.removeItem('basekit:requirement-group-target');setDraft(null);setDeletedMembers([]);setBaseline('');const remaining=await refreshLists();if(remaining.length)await select(remaining[0].REQUIREMENT_GROUP_ID);else accept(empty(projectId));});}} /></>:null}</div></div>} />
   {!projectId ? <p>프로젝트 Context를 선택하세요.</p>:<div className="multi-grid-workspace sd-group-detail-workspace">
