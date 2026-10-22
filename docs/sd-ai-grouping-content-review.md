@@ -72,3 +72,18 @@ ProjectGroupingService.start는 RequirementService.list의 전체 RequirementDat
 요구사항 1건마다 얇은 테두리/간격으로 경계를 표시하고 내부 원문·업무 프로세스·설계 의견·포함 사유는 옅은 배경/여백/구분선으로 구분했다. 별도 중첩 카드는 추가하지 않았다. 포함 요구사항 제목 오른쪽에 전체 펼치기/접기를 두고 개별 details와 같은 그룹 단위 UI 상태로 제어한다. 다른 그룹으로 이동하면 모두 접히며, 같은 그룹 재선택은 유지한다. 분석 이력 전환 시 기존 Results key로 초기화한다. 업무 DTO/원문/이력/등록·확정 로직은 불변이다.
 
 검증: frontend123/123(공유 요구사항이 있는 두 그룹 전환, 개별/전체 혼합, 동일 그룹 재선택 포함), build/lint/diff 통과. backend90건 중78통과/12skip/실패0. 실제 Edge5176에서 개별2행, 전체7행, 개별1행 접어6행 유지, 전체접기0행, 그룹 이동/복귀0행 확인. 키보드 Enter와 마우스 전체 버튼 확인. 390px 본문326px/하위 넘침0 확인. 화면 전용 UI 조작만 수행했으며 dirty 없음, 서버 저장/등록/확정 없음. 기존 공통 셸 최소 폭에 의한 페이지 가로 스크롤 제한은 유지된다.
+
+## 2026-10-22 AI 그룹핑-2 독립 시안
+
+- 시작: sd-work 5a139ca, origin/dev-pm 546ed6f. fetch 성공, PR #39 OPEN/Draft, sd-work → dev-pm. 기존 backend/data/ 미추적 보존. 다른 미병합 PR 코드 혼입 없음. origin/dev-pm 동기화/신규 branch/worktree/병합 없음.
+- URL: /baseKit/#/standard-design/requirement-groups?grouping=review2. 기존 grouping=original / grouping=review 보존. 프로젝트 Context 선택 필요.
+- ProjectGroupingReview2.tsx와 projectGroupingReview2.css 독립 추가. .pg-review2 안에서만 색/굵기/간격/본문 버튼·체크를 디자인. 기존 Review/OriginalResults/공통 CSS 파일 불변. RequirementGroupPage에 review2 분기 추가. Workspace는 선택적 resultLabel로 버전 문구만 주입하며 기존 기본 표기/이력/분석/권한/저장/등록 동작 불변. 공통 TITLE/Breadcrumb/메뉴/탭/툴바/ActionButton 불변.
+- 30:70, 목록 그룹명17px·상세20px·본문15px, 네이비 제목/블루 선택선/명확한 카운트. 반복 결측 설명을 목록에서 제거하고 상단 빈 그룹 설명 섹션 없음. 20px native 체크와 전체 클릭 label, 그룹핑 사유 옅은 블루 영역. 요구사항별 테두리/굵은 제목/흰색 내부 네 항목·구분선. 펼침 버튼36px, 모바일44px. 원문/개행 및 AI_DRAFT(이전 이력 DRAFT) REASON·INPUT 원문·MEMBERS.REASON만 사용. 새 설명/근거 생성 없음.
+- 프런트126/126, build/lint/diff 통과. 기존 xlsx/chunk 경고 유지. 백엔드90건 중78통과/12조건skip/실패0, 격리 H2. 세 버전 승인→save(version1)→register(version2), 원본 불변·그룹별 전체/개별 펼침 회귀 포함.
+- 실제 Edge5176 세 URL 조회/스크린샷. review2 그룹 선택·전환 초기화, 전체7→개별접기6→전체접기0→Enter 다중2행, 등록 체크→등록 버튼 활성화→해제, 이력 선택/기등록 잠금, 비교 변경5/추가1 확인. 기존 original 비교/등록 체크, review 전체7/접기/그룹전환/비교 확인. focus 3px, 콘솔error0.
+- 390×844: 세로배치, 본문326px·하위 넘침0·본문15px·체크20px. 전용 모바일 버튼44px. 공통 셸 기존 최소 폭에 따른 페이지 전체 가로 스크롤은 공통 영역 변경 금지로 유지. viewport 검수 후 복원.
+- 실제 DB 저장/등록/최종 확정/새 AI 실행은 하지 않았다. 최종 확정은 기존 백엔드 회귀로 검증하며 브라우저 실확정은 미실행. dirty 없는 상태로 선택 해제 완료.
+- 스크린샷: 그룹핑2 desktop/detail/mobile, original, review. 사용자 채팅 outputs에 저장. PM 승인 전 병합 금지, Draft 유지.
+
+그룹핑-2 제품 반영 대상 SHA: b65af36241c616e5cddc811486c12ac122dc32ac.
+
