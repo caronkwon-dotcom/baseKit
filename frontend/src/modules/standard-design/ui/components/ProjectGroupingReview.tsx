@@ -13,22 +13,22 @@ function ReviewResults({ run, draft, view, renderGroup }: GroupingResultProps) {
   const active = draft.GROUPS.find(group => group.GROUP_ID === activeId) ?? draft.GROUPS[0];
   return <div className={`pg-review pg-review--${view}`}>
     <nav className="pg-review-list" aria-label="추천 그룹 목록">
-      {draft.GROUPS.map((group, index) => <button type="button" key={group.GROUP_ID} aria-current={active?.GROUP_ID === group.GROUP_ID ? 'true' : undefined} onClick={() => setActiveId(group.GROUP_ID)}>
-        <span>{String(index + 1).padStart(2, '0')} · {group.MEMBERS.length}건</span>
-        <strong>{group.TITLE}</strong><p>{group.REASON || empty}</p>
+      {draft.GROUPS.map((group) => <button type="button" key={group.GROUP_ID} aria-current={active?.GROUP_ID === group.GROUP_ID ? 'true' : undefined} onClick={() => setActiveId(group.GROUP_ID)}>
+        <span className="pg-review-count">요구사항 {group.MEMBERS.length}건</span>
+        <strong>{group.TITLE}</strong><p>{empty}</p>
       </button>)}
       {!draft.GROUPS.length && <p>추천 그룹이 없습니다.</p>}
     </nav>
     <section className="pg-review-detail" aria-label="선택 그룹 상세">
       {active ? renderGroup(active, draft.GROUPS.indexOf(active), {
         reason: <><div className="pg-review-description"><h4>그룹 설명</h4><p>{empty}</p></div>
-          <section className="pg-review-reason"><h4>AI 그룹핑 사유</h4><p>{(run.AI_DRAFT ?? run.DRAFT)?.GROUPS.find(group => group.GROUP_ID === active.GROUP_ID)?.REASON || empty}</p></section>
-          <h4>포함 요구사항 · {active.MEMBERS.length}건</h4></>,
+          <section className="pg-review-reason"><h4>AI가 이 그룹으로 묶은 이유</h4><p>{(run.AI_DRAFT ?? run.DRAFT)?.GROUPS.find(group => group.GROUP_ID === active.GROUP_ID)?.REASON || empty}</p></section>
+          <h4 className="pg-review-members-heading">포함 요구사항 · {active.MEMBERS.length}건</h4></>,
         member: (id, reason) => {
           const requirement = requirements.get(id);
           const input = run.INPUT.find(item => item.REQUIREMENT_ID === id);
           return <details className="pg-review-row" key={run.ANALYSIS_ID + ':' + id}>
-            <summary><small>{id} · 분석 기준 v{input?.REQUIREMENT_REVISION}</small><strong>{input?.REQUIREMENT_NAME || id}</strong><span>상세 보기</span></summary>
+            <summary><small>{id} · 분석 기준 v{input?.REQUIREMENT_REVISION}</small><strong>{input?.REQUIREMENT_NAME || id}</strong><span className="pg-review-disclosure"><span className="pg-review-expand">펼치기</span><span className="pg-review-collapse">접기</span><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg></span></summary>
             <div className="pg-review-fields">
               <dl><div><dt>요구사항 내용</dt><dd>{requirement?.DESCRIPTION || empty}</dd></div>
                 <div><dt>업무 프로세스</dt><dd>{requirement?.PROCESS_DESCRIPTION || empty}</dd></div>
