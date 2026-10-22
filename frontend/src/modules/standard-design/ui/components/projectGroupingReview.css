@@ -20,12 +20,15 @@
 .pg-review-description { margin-bottom:22px; }
 .pg-review-reason { background:#f3f6fa; border-left:3px solid #315987; padding:18px 20px; margin:0 0 28px; }
 .pg-review-reason h4 { color:#23466f; }
-.pg-review-detail .pg-review-members-heading { font-size:16px; margin:0; padding-bottom:12px; border-bottom:1px solid var(--border-default); }
-.pg-review-detail .pg-members { padding:0; background:transparent; border-radius:0; }
-.pg-review-detail .pg-member { padding:0; flex-wrap:wrap; gap:0; }
+.pg-review-detail .pg-review-members-heading { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin:0 0 14px; }
+.pg-review-members-heading h4 { font-size:16px; margin:0; }
+.pg-review-expand-controls { display:flex; flex-wrap:wrap; gap:6px; }
+.pg-review .pg-review-expand-controls button { font-size:12px; padding:6px 9px; color:#285c9b; }
+.pg-review-detail .pg-members { display:grid; gap:12px; padding:0; background:transparent; border-radius:0; }
+.pg-review-detail .pg-member { padding:0; flex-wrap:wrap; gap:0; border:1px solid var(--border-default); border-radius:6px; background:var(--surface-panel); overflow:hidden; }
 .pg-review-detail .pg-member > div:first-child { width:100%; }
 .pg-review-row { min-width:0; }
-.pg-review-row summary { padding:16px 4px; cursor:pointer; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px 16px; align-items:center; list-style:none; }
+.pg-review-row summary { padding:16px; cursor:pointer; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px 16px; align-items:center; list-style:none; }
 .pg-review-row summary::-webkit-details-marker { display:none; }
 .pg-review-row summary:hover { background:#f7f9fc; }
 .pg-review-row summary small { grid-column:1; margin:0; font-size:11px; line-height:1.5; color:var(--text-secondary); }
@@ -35,9 +38,11 @@
 .pg-review-row .pg-review-collapse, .pg-review-row[open] .pg-review-expand { display:none; }
 .pg-review-row[open] .pg-review-collapse { display:inline; }
 .pg-review-row[open] .pg-review-disclosure svg { transform:rotate(180deg); }
-.pg-review-fields { padding:0 4px 8px; background:transparent; }
+.pg-review-fields { padding:0 16px 8px; background:#f8fafc; border-top:1px solid var(--border-default); }
 .pg-review-fields dl { margin:0; }
-.pg-review-fields dl > div { padding:16px 0; border-top:1px solid var(--border-default); }
+.pg-review-fields dl > div { padding:16px 0; border-bottom:1px solid var(--border-default); }
+.pg-review-fields dl > div:last-child { border-bottom:0; }
+.pg-review-fields dl > div:first-child { padding-top:18px; }
 .pg-review-fields dt { font-weight:600; font-size:14px; line-height:1.5; color:#23466f; margin-bottom:8px; }
 .pg-review-fields dd { margin:0; font-size:14px; line-height:1.7; white-space:pre-wrap; overflow-wrap:anywhere; color:var(--text-primary); max-width:85ch; }
 .pg-review :focus-visible { outline:2px solid #2563b8; outline-offset:-2px; }

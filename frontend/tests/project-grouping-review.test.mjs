@@ -5,9 +5,10 @@ import vm from 'node:vm';
 import ts from 'typescript';
 import { compareGroupingRuns, reconcileDraft } from '../src/modules/standard-design/projectgrouping/projectGroupingApi.ts';
 
-function harness(review = false) {
+function harness(review = false, multipleGroups = false) {
  const group={GROUP_ID:'g1',TITLE:'검증 그룹',REASON:'AI 원본 근거',REVIEW_STATUS:'DRAFT',MEMBERS:[{REQUIREMENT_ID:'r1',REASON:'개별 근거'},{REQUIREMENT_ID:'r2',REASON:''}]};
  const run={ANALYSIS_ID:'a1',STATUS:'SUCCESS',VERSION:1,CREATED_AT:'2026-10-20T00:00:00Z',INPUT:[{REQUIREMENT_ID:'r1',REQUIREMENT_NAME:'요구사항1',REQUIREMENT_REVISION:2,DESCRIPTION:'분석 당시 원문\n두 번째 줄',PROCESS_DESCRIPTION:'업무 순서',DESIGN_OPINION:'검토 의견'},{REQUIREMENT_ID:'r2',REQUIREMENT_NAME:'요구사항2',REQUIREMENT_REVISION:1}],DRAFT:{GROUPS:[group],UNCLASSIFIED:[]},AI_DRAFT:{GROUPS:[structuredClone(group)],UNCLASSIFIED:[]},REGISTERED:[]};
+ if(multipleGroups)run.DRAFT.GROUPS.push({...structuredClone(group),GROUP_ID:'g2',TITLE:'다른 그룹'});
  const previous={...structuredClone(run),ANALYSIS_ID:'a0'};
  previous.AI_DRAFT.GROUPS[0].REASON='이전 근거';
  const calls=[];
@@ -56,4 +57,24 @@ for(const review of [false,true])test((review?'review':'original')+' preserves c
  assert.equal(h.calls[0][2],1);assert.equal(h.calls[1][2],2);assert.deepEqual(h.calls[1][3],['g1']);
  assert.equal(h.run.DRAFT.GROUPS[0].REVIEW_STATUS,'DRAFT');
  assert.ok(h.text(h.render()).includes('그룹관리 등록됨'));
+});
+
+test('review individual and bulk expansion stays local and resets across groups including shared members',async()=>{
+ const h=harness(true,true);await h.ready();
+ const rows=()=>h.nodes().filter(n=>n.type==='details');
+ const toggle=index=>{let prevented=false;h.nodes().filter(n=>n.type==='summary')[index].props.onClick({preventDefault(){prevented=true;}});assert.equal(prevented,true);h.render();};
+ assert.deepEqual(rows().map(n=>n.props.open),[false,false]);
+ toggle(0);assert.deepEqual(rows().map(n=>n.props.open),[true,false]);
+ toggle(1);assert.deepEqual(rows().map(n=>n.props.open),[true,true]);
+ toggle(0);assert.deepEqual(rows().map(n=>n.props.open),[false,true]);
+ h.button('전체 펼치기').props.onClick();h.render();assert.deepEqual(rows().map(n=>n.props.open),[true,true]);
+ toggle(0);assert.deepEqual(rows().map(n=>n.props.open),[false,true]);
+ h.button('전체 접기').props.onClick();h.render();assert.deepEqual(rows().map(n=>n.props.open),[false,false]);
+ h.button('전체 펼치기').props.onClick();h.render();
+ const nav=()=>h.nodes().filter(n=>n.type==='button'&&Object.hasOwn(n.props,'aria-current'));
+ nav()[1].props.onClick();h.render();assert.deepEqual(rows().map(n=>n.props.open),[false,false]);
+ toggle(1);nav()[0].props.onClick();h.render();assert.deepEqual(rows().map(n=>n.props.open),[false,false]);
+ toggle(0);nav()[0].props.onClick();h.render();assert.deepEqual(rows().map(n=>n.props.open),[true,false]);
+ assert.equal(h.calls.length,0);
+ assert.equal(h.run.DRAFT.GROUPS[0].MEMBERS[0].REASON,'개별 근거');
 });
