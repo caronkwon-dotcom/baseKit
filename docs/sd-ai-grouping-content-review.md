@@ -86,3 +86,7 @@ ProjectGroupingService.start는 RequirementService.list의 전체 RequirementDat
 - 스크린샷: 그룹핑2 desktop/detail/mobile, original, review. 사용자 채팅 outputs에 저장. PM 승인 전 병합 금지, Draft 유지.
 
 그룹핑-2 제품 반영 대상 SHA: b65af36241c616e5cddc811486c12ac122dc32ac.
+
+## 2026-10-22 Compact Review Mode 후속
+
+AI 그룹핑-2에서 전환 버튼을 추천 그룹 초안 제목 줄 오른쪽으로 이동하고 본문 위 별도 행을 제거했다. 실제 본문 폭의 30:70 grid로 설정하고 목록은 그룹 제목·건수만 작게 표시한다. 요구사항 상세는 기본 접힘, 제목 13px bold·본문 12~13px, 등록 체크 20px 및 주요 버튼 높이는 유지한다. 공통 분석·이력·등록 로직 변경 없음. 실제 Edge 전체 화면에서 본문1745px/좌520.5px/우1214.5px(정확히30:70), 그룹6개·요구사항7건 렌더/열림0건 확인. 전체 화면 캡처는 사용자 산출물 grouping-review2-compact-full.jpg. build/lint/diff 통과. 공통 셸 하단 고정 등록 바 때문에 한 화면에 요구사항7개 중 일부는 스크롤해야 볼 수 있다.

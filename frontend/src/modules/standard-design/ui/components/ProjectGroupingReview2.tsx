@@ -12,8 +12,8 @@ function Review2Results({ run, draft, view, renderGroup }: GroupingResultProps) 
   // ProjectGroupingService stores the complete RequirementData in REQUEST_JSON / INPUT.
   const requirements = new Map(run.INPUT.map(input => [input.REQUIREMENT_ID, input as typeof input & Partial<Pick<Requirement, 'DESCRIPTION' | 'PROCESS_DESCRIPTION' | 'DESIGN_OPINION'>>]));
   const active = draft.GROUPS.find(group => group.GROUP_ID === activeId) ?? draft.GROUPS[0];
-  return <div className={`pg-review2 pg-review2--${view}`} aria-label="AI 그룹핑-2">
-    <nav className="pg-review2-list" aria-label="추천 그룹 목록"><h3>AI 그룹핑-2 <span>추천 그룹 {draft.GROUPS.length}개</span></h3>
+  return <div className={`pg-review2 pg-review2--${view}`} aria-label="AI 그룹핑-2"><div className="pg-review2-content">
+    <nav className="pg-review2-list" aria-label="추천 그룹 목록">
       {draft.GROUPS.map((group) => <button type="button" key={group.GROUP_ID} aria-current={active?.GROUP_ID === group.GROUP_ID ? 'true' : undefined} onClick={() => { if (active?.GROUP_ID !== group.GROUP_ID) setExpansion({ groupId: group.GROUP_ID, ids: [] }); setActiveId(group.GROUP_ID); }}>
         <span className="pg-review2-count">요구사항 {group.MEMBERS.length}건</span>
         <strong>{group.TITLE}</strong>
@@ -40,7 +40,7 @@ function Review2Results({ run, draft, view, renderGroup }: GroupingResultProps) 
         },
       }) : <p>선택할 추천 그룹이 없습니다.</p>}
     </section>
-  </div>;
+  </div></div>;
 }
 
 export default function ProjectGroupingReview2(props: { projectId: string; count: number; onBack: () => void }) {
