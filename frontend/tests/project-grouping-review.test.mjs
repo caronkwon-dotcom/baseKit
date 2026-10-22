@@ -80,12 +80,14 @@ for(const version of [true,'review2'])test(String(version)+' individual and bulk
 });
 
 
-test('review2 has compact navigation and preserves snapshot text without inventing group descriptions',async()=>{
+test('review2 retains all four snapshot sections and existing status navigation without invented descriptions',async()=>{
  const h=harness('review2');await h.ready();
  const nav=h.nodes().find(n=>n.type==='nav');
  assert.equal(h.text(nav).includes('등록된 내용 없음'),false);
  assert.equal(h.text(h.render()).includes('그룹 설명'),false);
  assert.ok(h.text(h.render()).includes('분석 당시 원문\n두 번째 줄'));
+ for (const value of ['업무 순서', '검토 의견', '개별 근거', '업무 프로세스', '설계 의견', '개별 포함 사유']) assert.ok(h.text(h.render()).includes(value));
+ assert.ok(h.text(h.render()).includes('검토 전'));
  assert.ok(h.nodes().some(n=>n.props?.['aria-label']==='AI 그룹핑-2'));
  assert.equal(h.calls.length,0);
 });
