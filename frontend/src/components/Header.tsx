@@ -18,7 +18,7 @@ function getSearchItems(menus: MenuNode[]): MenuSearchItem[] {
   const result: MenuSearchItem[] = [];
   const visit = (menu: MenuNode, parents: string[]) => {
     const path = [...parents, menu.menuName];
-    if (menu.menuType === 'SCREEN' && menu.programKey) result.push({ programKey: menu.programKey, menuName: menu.menuName, path: path.join(' > ') });
+    if (menu.menuType === 'PAGE' && menu.programKey) result.push({ programKey: menu.programKey, menuName: menu.menuName, path: path.join(' > ') });
     menu.children.forEach((child) => visit(child, path));
   };
   menus.forEach((menu) => visit(menu, []));
