@@ -20,13 +20,13 @@ function harness(review = false, multipleGroups = false) {
  function load(name){if(cache[name])return cache[name];const exports={};const code=ts.transpileModule(readFileSync(new URL('../src/modules/standard-design/ui/components/'+name+'.tsx',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
  const require=id=>id==='react'?react:id==='react/jsx-runtime'?jsx:id.includes('components/common')?{ActionButton:p=>jsx.jsx('button',{...p,children:p.label}),BaseKitMessage:p=>jsx.jsx('p',{children:p.message})}:id.includes('projectGroupingApi')?{projectGroupingApi:api,compareGroupingRuns,reconcileDraft}:id.startsWith('./ProjectGrouping')?load(id.slice(2)):{};
  vm.runInNewContext(code,{exports,require,window:{location:{hash:'#/standard-design/requirement-groups'},addEventListener(){},removeEventListener(){},confirm:()=>true},crypto:{randomUUID:()=> 'uuid'},URLSearchParams,Set,Map,JSON,Date});cache[name]=exports;return exports;}
- const Root=load(review?'ProjectGroupingReview':'ProjectGroupingWorkspace').default;
+ const Root=load(review==='review2'?'ProjectGroupingReview2':review?'ProjectGroupingReview':'ProjectGroupingWorkspace').default;
  function expand(node){if(!node||typeof node!=='object')return node;if(Array.isArray(node))return node.map(expand);if(typeof node.type==='function'){const parent=current,oldSlot=slot;current=hooks.get(node.type)??{values:[]};hooks.set(node.type,current);slot=0;const result=expand(node.type(node.props));current=parent;slot=oldSlot;return result;}return {...node,props:{...node.props,children:expand(node.props?.children)}};}
  let tree;const render=()=>{tree=expand(jsx.jsx(Root,{projectId:'p1',count:2,onBack(){}}));return tree;};
  function walk(node){return !node||typeof node!=='object'?[]:Array.isArray(node)?node.flatMap(walk):[node,...walk(node.props?.children)];}
  const nodes=()=>walk(tree);
  const text=node=>!node?'':typeof node!=='object'?String(node):Array.isArray(node)?node.map(text).join(''):text(node.props?.children);
- const button=label=>nodes().find(node=>node.type==='button'&&text(node)===label);
+ const button=label=>nodes().find(node=>node.type==='button'&&text(node).replace(/[⊞⊟] /g,'')===label);
  async function ready(){render();effects.splice(0).forEach(fn=>fn());await new Promise(resolve=>setImmediate(resolve));render();}
  return {ready,render,nodes,text,button,calls,run};
 }
@@ -45,7 +45,7 @@ test('original and review have independent result DOM, with identical shared hea
  assert.equal(review.calls.length,0);
 });
 
-for(const review of [false,true])test((review?'review':'original')+' preserves compare and approval/save/register optimistic version flow',async()=>{
+for(const review of [false,true,'review2'])test((review?'review':'original')+' preserves compare and approval/save/register optimistic version flow',async()=>{
  const h=harness(review);await h.ready();
  h.button('이력 비교').props.onClick();h.render();await h.button('비교하기').props.onClick();await new Promise(resolve=>setImmediate(resolve));h.render();
  assert.ok(h.text(h.render()).includes('이전 근거'));
@@ -59,8 +59,8 @@ for(const review of [false,true])test((review?'review':'original')+' preserves c
  assert.ok(h.text(h.render()).includes('그룹관리 등록됨'));
 });
 
-test('review individual and bulk expansion stays local and resets across groups including shared members',async()=>{
- const h=harness(true,true);await h.ready();
+for(const version of [true,'review2'])test(String(version)+' individual and bulk expansion stays local and resets across groups including shared members',async()=>{
+ const h=harness(version,true);await h.ready();
  const rows=()=>h.nodes().filter(n=>n.type==='details');
  const toggle=index=>{let prevented=false;h.nodes().filter(n=>n.type==='summary')[index].props.onClick({preventDefault(){prevented=true;}});assert.equal(prevented,true);h.render();};
  assert.deepEqual(rows().map(n=>n.props.open),[false,false]);
@@ -77,4 +77,15 @@ test('review individual and bulk expansion stays local and resets across groups 
  toggle(0);nav()[0].props.onClick();h.render();assert.deepEqual(rows().map(n=>n.props.open),[true,false]);
  assert.equal(h.calls.length,0);
  assert.equal(h.run.DRAFT.GROUPS[0].MEMBERS[0].REASON,'개별 근거');
+});
+
+
+test('review2 has compact navigation and preserves snapshot text without inventing group descriptions',async()=>{
+ const h=harness('review2');await h.ready();
+ const nav=h.nodes().find(n=>n.type==='nav');
+ assert.equal(h.text(nav).includes('등록된 내용 없음'),false);
+ assert.equal(h.text(h.render()).includes('그룹 설명'),false);
+ assert.ok(h.text(h.render()).includes('분석 당시 원문\n두 번째 줄'));
+ assert.ok(h.nodes().some(n=>n.props?.['aria-label']==='AI 그룹핑-2'));
+ assert.equal(h.calls.length,0);
 });

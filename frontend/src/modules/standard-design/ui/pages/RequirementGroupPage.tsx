@@ -3,6 +3,7 @@ import { createUuid } from '../../../../utils/uuid';
 import RequirementGroupAnalysis from '../components/RequirementGroupAnalysis';
 import ProjectGroupingWorkspace from '../components/ProjectGroupingWorkspace';
 import ProjectGroupingReview from '../components/ProjectGroupingReview';
+import ProjectGroupingReview2 from '../components/ProjectGroupingReview2';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActionButton, BaseKitMessage, BaseTabs, DataTable, FormModal, PageHeader, SearchPanel, type DataTableColumn } from '../../../../components/common';
@@ -25,7 +26,7 @@ export default function RequirementGroupPage() {
  const location = useLocation(), navigate = useNavigate();
  const groupingVersion = new URLSearchParams(location.search).get('grouping');
  const [groupingOpen,setGroupingOpen]=useState(false);
- const GroupingWorkspace = groupingVersion === 'review' ? ProjectGroupingReview : ProjectGroupingWorkspace;
+ const GroupingWorkspace = groupingVersion === 'review2' ? ProjectGroupingReview2 : groupingVersion === 'review' ? ProjectGroupingReview : ProjectGroupingWorkspace;
  const [workspaceMode,setWorkspaceMode]=useState<ProjectWorkspaceMode>('DETAIL');
  const [groups,setGroups]=useState<RequirementGroup[]>([]), [requirements,setRequirements]=useState<Requirement[]>([]);
  const [draft,setDraft]=useState<RequirementGroup|null>(null), [baseline,setBaseline]=useState('');
@@ -42,7 +43,7 @@ export default function RequirementGroupPage() {
  const activeProject=useRef(projectId), operation=useRef(0), running=useRef(false), allowLeave=useRef(false), modalFocus=useRef<HTMLElement|null>(null);
  const dirty=!!draft && (signature(draft)!==baseline || deletedMembers.length>0);
  const loaded=loadedProject===projectId;
- const showGrouping=(groupingOpen || groupingVersion === 'review' || groupingVersion === 'original') && loaded && !!projectId;
+ const showGrouping=(groupingOpen || groupingVersion === 'review2' || groupingVersion === 'review' || groupingVersion === 'original') && loaded && !!projectId;
  const readonly=!draft || draft.PROJECT_ID!==projectId || draft.GROUP_STATUS==='CONFIRMED';
  const accept=useCallback((g:RequirementGroup)=>{if(g.PROJECT_ID!==activeProject.current)return;setDraft(g);setDeletedMembers([]);setSelectedMemberKeys(new Set());setBaseline(signature(g));if(g.REQUIREMENT_GROUP_ID)sessionStorage.setItem('basekit:requirement-group-target',JSON.stringify({PROJECT_ID:g.PROJECT_ID,REQUIREMENT_GROUP_ID:g.REQUIREMENT_GROUP_ID}));},[]);
  const refreshLists=async()=>{const [gs,rs]=await Promise.all([api.list(projectId),requirementApi.list(projectId)]);if(activeProject.current===projectId){setGroups(gs);setRequirements(rs);setLoadedProject(projectId);return gs;}return [];};
