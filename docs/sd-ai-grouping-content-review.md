@@ -86,4 +86,3 @@ ProjectGroupingService.start는 RequirementService.list의 전체 RequirementDat
 - 스크린샷: 그룹핑2 desktop/detail/mobile, original, review. 사용자 채팅 outputs에 저장. PM 승인 전 병합 금지, Draft 유지.
 
 그룹핑-2 제품 반영 대상 SHA: b65af36241c616e5cddc811486c12ac122dc32ac.
-
