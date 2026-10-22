@@ -54,3 +54,15 @@ ProjectGroupingService.start는 RequirementService.list의 전체 RequirementDat
 제품 커밋과 문서 커밋은 분리한다. PR은 dev-pm 대상으로 제출하되 잔여 브라우저 검수를 명시한 draft로 둔다. PM 승인 전 병합하지 않는다.
 
 제품 반영 대상 SHA: 33d0dcdaf6e114452070742cf8588f8b4b1b9bd9
+
+## 2026-10-22 PR #39 후속 가독성 검수
+
+시작 HEAD 82406cd, origin/dev-pm 546ed6f. PR #39 OPEN/Draft, sd-work → dev-pm 확인. 동기화/병합 없이 기존 head에서 본문 두 파일만 개선했다.
+
+- 30:70 그룹 탐색, 16px 그룹명/22px 상세 제목/15px 요구사항명/14px 원문. 그룹 설명은 DTO에 없어 목록·상세 모두 등록된 내용 없음으로 표시하며 REASON을 설명으로 대체하지 않는다.
+- AI_DRAFT(없으면 DRAFT) REASON 원문을 독립 주요 섹션으로 표시. 원문 4블록은 흰 바탕·얇은 구분선·줄바꿈 보존. native details 다중 펼침, 펼치기/접기와 chevron 및 키보드 포커스 유지.
+- 사용자 첨부 실제 화면과 수정 후 Edge5176 렌더 비교. 그룹 전환, 두 행 동시 펼침, 긴 원문 줄바꿈/빈 설계 의견, 카드/목록, 양쪽 이력 비교(변경5/추가1), 승인→등록 대상 선택→등록 버튼 활성화 확인. 저장·등록·확정·새 AI 호출 실행 없음. API/원본/공통 파일 불변.
+- 390px 신규 본문 폭326px, 수직 스택, 하위 요소 화면 밖 넘침0, Enter 접기와 focus outline 확인. 기존 공통 셸 최소 폭1280px에 의한 페이지 전체 가로 스크롤은 공통 파일 수정 금지 범위여서 남아 있다.
+- frontend122/122, build/lint/diff 통과. backend90건 중78통과/12조건skip/실패0. 기존 xlsx/chunk 빌드 경고 유지.
+- 검수용 승인/선택 후 새로고침 확인창에서 브라우저 제어가 응답하지 않았다. Computer Use도 URL을 검증할 수 없어 중단했다. 확인창 해제·로컬 미저장 상태 초기화 완료는 미확인. 실제 저장 호출은 하지 않았다.
+- backend/data/ 미추적 보존. 신규 branch/worktree, dev-pm 변경 및 병합 없음. 모바일 공통 셸과 확인창 후 복귀는 잔여 검수로 Draft 유지.

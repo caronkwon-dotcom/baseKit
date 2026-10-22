@@ -1,5 +1,8 @@
 # BaseKit 현재 상태와 WBS
 
+## 2026-10-22 PR #39 후속 본문 가독성 개선
+
+신규 ProjectGroupingReview와 전용 CSS에서 탐색/AI 사유/원문 계층을 구분하고 native 다중 펼침과 키보드 포커스를 유지했다. 그룹 설명 DTO가 없어 등록된 내용 없음 표시. 원본·공통·DB/API·등록 로직 불변. frontend122/122, build/lint/diff, backend78통과/12skip/실패0. 실제 Edge5176 원본/신규·그룹 전환·다중 펼침·이력 비교·등록 활성화 및390px 본문 검수 완료. 서버 쓰기 없음. 공통 셸1280px 최소 폭에 따른 전체 가로 스크롤과 검수용 미저장 새로고침 확인창 후 복귀는 미완료. [상세 검수](sd-ai-grouping-content-review.md). PR #39 Draft 유지, dev-pm 통합 없음.
 ## 2026-10-22 Issue #38 AI 그룹핑 원본/신규 본문 분리
 
 기존 AI 그룹핑-1 원본 본문을 독립 보존하고 grouping=review URL에서 30:70 추천 목록/상세와 요구사항 다중 행 펼침을 제공한다. 기존 INPUT 원문 스냅샷과 AI_DRAFT/DRAFT 사유만 표시하며 공통 껍데기/CSS, 메뉴, 인증, DB/API 계약은 유지했다. 프런트122/122·build/lint/diff 통과, 백엔드90건 중78통과/12skip/실패0. 실제 브라우저 원본/신규·이력 선택/비교·다중 펼침·등록 대상 활성화 확인. 미저장 이동 확인창 이후 자동 제어 중단으로 확인창 해제 후 복귀/좁은 화면 검수는 미완료이며 실제 DB 저장/확정은 수행하지 않았다. [범위·필드·검증 상세](sd-ai-grouping-content-review.md). dev-pm 직접 통합 없음.
