@@ -100,4 +100,24 @@
 .pg-variant-links a { display:inline-flex; align-items:center; min-height:30px; padding:3px 9px; box-sizing:border-box; border:1px solid #a7bdd8; border-radius:5px; color:#245791; font-size:12px; font-weight:700; text-decoration:none; }
 .pg-variant-links a[aria-current=page] { background:#eaf2ff; border-color:#3575c5; }
 .pg-variant-links a:focus-visible { outline:2px solid #2563b8; }
-@media(max-width:760px) { .pg-review2-content { grid-template-columns:minmax(0,1fr); gap:8px; } .pg-review2 .pg-select { min-height:44px; } .pg-review2 .pg-review2-expand-controls button { min-height:44px; } }
+@media(max-width:760px) { .pg-review2 { width:calc(100vw - 64px); max-width:100%; } .pg-review2-content { grid-template-columns:minmax(0,1fr); gap:8px; } .pg-review2 .pg-select { min-height:44px; } .pg-review2 .pg-review2-expand-controls button { min-height:44px; } }
+
+/* Read the source first; supporting context has a quieter treatment. */
+.pg-review2 .pg-group h3 { font-size:16px; font-weight:650; }
+.pg-review2 .pg-review2-list button strong { font-weight:650; }
+.pg-review2 .pg-review2-row summary strong { font-size:14px; font-weight:650; }
+.pg-review2 .pg-review2-row summary small { font-size:11px; }
+.pg-review2 .pg-review2-fields { padding:0 14px; }
+.pg-review2 .pg-review2-fields dl > div { border-bottom:0; }
+.pg-review2 .pg-review2-fields dt { font-size:12px; font-weight:650; color:#345675; }
+.pg-review2 .pg-review2-fields dd { font-size:14px; font-weight:400; line-height:1.55; color:#233447; white-space:pre-wrap; overflow-wrap:anywhere; max-width:none; }
+.pg-review2 .pg-review2-fields .pg-review2-primary { padding:14px 0 13px; }
+.pg-review2 .pg-review2-fields .pg-review2-primary dd { color:#1e3043; }
+.pg-review2 .pg-review2-fields .pg-review2-process { margin:0 -8px; padding:10px 8px 10px 12px; border-left:3px solid #91b4da; background:#f4f8fd; }
+.pg-review2 .pg-review2-fields .pg-review2-opinion { padding:10px 0; border-bottom:1px solid #dce5ee; }
+.pg-review2 .pg-review2-fields .pg-review2-empty { display:flex; gap:6px; align-items:baseline; padding:7px 0; }
+.pg-review2 .pg-review2-fields .pg-review2-empty dt { margin:0; white-space:nowrap; }
+.pg-review2 .pg-review2-fields .pg-review2-empty dt::after { content:' ·'; }
+.pg-review2 .pg-review2-fields .pg-review2-empty dd { font-size:12px; color:#627286; }
+.pg-review2 .pg-review2-fields .pg-review2-member-reason { padding:11px 0 12px; border-top:1px solid #dce5ee; }
+.pg-review2 .pg-review2-fields .pg-review2-member-reason dt { color:#245791; }

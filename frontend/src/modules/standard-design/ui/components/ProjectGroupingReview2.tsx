@@ -31,10 +31,10 @@ function Review2Results({ run, draft, view, renderGroup }: GroupingResultProps) 
           return <details className="pg-review2-row" key={run.ANALYSIS_ID + ':' + active.GROUP_ID + ':' + id} open={expansion.groupId === active.GROUP_ID && expansion.ids.includes(id)}>
             <summary onClick={event => { event.preventDefault(); setExpansion(previous => { const ids = previous.groupId === active.GROUP_ID ? previous.ids : []; return { groupId: active.GROUP_ID, ids: ids.includes(id) ? ids.filter(value => value !== id) : [...ids, id] }; }); }}><small>{id} · 분석 기준 v{input?.REQUIREMENT_REVISION}</small><strong>{input?.REQUIREMENT_NAME || id}</strong><span className="pg-review2-disclosure"><span className="pg-review2-expand">펼치기</span><span className="pg-review2-collapse">접기</span><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg></span></summary>
             <div className="pg-review2-fields">
-              <dl><div><dt>요구사항 내용</dt><dd>{requirement?.DESCRIPTION || empty}</dd></div>
-                <div><dt>업무 프로세스</dt><dd>{requirement?.PROCESS_DESCRIPTION || empty}</dd></div>
-                <div><dt>설계 의견</dt><dd>{requirement?.DESIGN_OPINION || empty}</dd></div>
-                <div><dt>개별 포함 사유</dt><dd>{reason || empty}</dd></div></dl>
+              <dl><div className="pg-review2-primary"><dt>요구사항 내용</dt><dd>{requirement?.DESCRIPTION || empty}</dd></div>
+                <div className="pg-review2-process"><dt>업무 프로세스</dt><dd>{requirement?.PROCESS_DESCRIPTION || empty}</dd></div>
+                <div className={requirement?.DESIGN_OPINION ? 'pg-review2-opinion' : 'pg-review2-opinion pg-review2-empty'}><dt>설계 의견</dt><dd>{requirement?.DESIGN_OPINION || empty}</dd></div>
+                {reason && <div className="pg-review2-member-reason"><dt>개별 포함 사유</dt><dd>{reason}</dd></div>}</dl>
             </div>
           </details>;
         },
