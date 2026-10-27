@@ -21,6 +21,7 @@ function findTopMenuKeyByProgram(menuTree: MenuNode[], programKey: ProgramKey) {
 }
 
 function findProgramKeyByRoutePath(routePath: string): ProgramKey {
+  if (routePath === '/standard-design/design-review') return 'SD_REQUIREMENT_GROUP';
   return Object.values(programByKey).find((program) => program.routePath === routePath)?.programKey ?? 'HOME';
 }
 
@@ -46,7 +47,7 @@ export default function AppLayout() {
     return () => { disposed = true; window.removeEventListener('basekit:menu-execution-settings-changed', load); };
   }, []);
   const initialProgramKey = findProgramKeyByRoutePath(location.pathname);
-  const initialContextMissing = Boolean(programByKey[initialProgramKey].requiresProjectContext && !designLifecycleRepository.getSelectedProjectId());
+  const initialContextMissing = Boolean(location.pathname !== '/standard-design/design-review' && !(initialProgramKey === 'SD_REQUIREMENT_GROUP' && /[?&]project=[^&]+/.test(location.search ?? '')) && programByKey[initialProgramKey].requiresProjectContext && !designLifecycleRepository.getSelectedProjectId());
   const [activeTopMenuKey, setActiveTopMenuKey] = useState(() =>
     findTopMenuKeyByProgram(menuTree, initialProgramKey) ?? menuTree[0]?.menuKey ?? '',
   );

@@ -1,3 +1,5 @@
+import { designLifecycleRepository } from '../../design-lifecycle/designLifecycle.repository';
+import DesignReviewPage from './DesignReviewPage';
 import ProjectListDetailWorkspace, { type ProjectWorkspaceMode } from '../components/ProjectListDetailWorkspace';
 import { createUuid } from '../../../../utils/uuid';
 import RequirementGroupAnalysis from '../components/RequirementGroupAnalysis';
@@ -21,8 +23,34 @@ const empty=(project:string):RequirementGroup=>({REQUIREMENT_GROUP_ID:'',PROJECT
 const signature=(g:RequirementGroup)=>JSON.stringify(groupInput(g));
 interface Candidate { KEY:string; REQUIREMENT:Requirement; ANALYSIS_ID:string | null; ORIGINAL_REASON:string }
 export default function RequirementGroupPage() {
+ const location=useLocation();
+ const query=new URLSearchParams(location.search);
+ const review=location.pathname==='/standard-design/design-review' || query.get('workspace')==='design-review';
+ const projectId=query.get('project') ?? '', groupId=query.get('group') ?? '';
+ const key=JSON.stringify([projectId,groupId]);
+ const [entry,setEntry]=useState<{key:string;error?:string}>({key:''});
+ useEffect(()=>{
+  if(review || !projectId || !groupId)return;
+  let active=true;
+  void api.get(groupId).then(group=>{
+   if(!active)return;
+   if(group.PROJECT_ID!==projectId || group.REQUIREMENT_GROUP_ID!==groupId)throw new Error('그룹/프로젝트 불일치');
+   // Restore only the browser project selection, never a group or analysis record.
+   if(!designLifecycleRepository.getData().projects.some(project=>project.PROJECT_ID===projectId)) designLifecycleRepository.saveProject({PROJECT_ID:projectId,PROJECT_NAME:projectId,CUSTOMER_NAME:'',DESCRIPTION:'',STATUS:'DRAFT',START_DATE:'',END_DATE:''});
+   designLifecycleRepository.setSelectedProjectId(projectId);
+   setEntry({key});
+  }).catch(error=>{if(active)setEntry({key,error:error instanceof Error ? error.message : '그룹 조회 실패'});});
+  return()=>{active=false;};
+ },[review,projectId,groupId,key]);
+ if(review)return <DesignReviewPage />;
+ if(projectId && groupId && entry.key!==key)return <p role="status">그룹의 프로젝트 컨텍스트 확인 중…</p>;
+ if(projectId && groupId && entry.error)return <BaseKitMessage type="error" message={entry.error} />;
+ return <RequirementGroupManagement />;
+}
+function RequirementGroupManagement() {
  const {projectId,project}=useProjectContext();
- const [groupAnalysisOpen,setGroupAnalysisOpen]=useState(false);
+ const query=new URLSearchParams(useLocation().search);
+ const [groupAnalysisOpen,setGroupAnalysisOpen]=useState(query.get('tab')==='analysis');
  const location = useLocation(), navigate = useNavigate();
  const groupingVersion = new URLSearchParams(location.search).get('grouping');
  const [groupingOpen,setGroupingOpen]=useState(false);
@@ -45,7 +73,7 @@ export default function RequirementGroupPage() {
  const loaded=loadedProject===projectId;
  const showGrouping=(groupingOpen || groupingVersion === 'review2' || groupingVersion === 'review' || groupingVersion === 'original') && loaded && !!projectId;
  const readonly=!draft || draft.PROJECT_ID!==projectId || draft.GROUP_STATUS==='CONFIRMED';
- const accept=useCallback((g:RequirementGroup)=>{if(g.PROJECT_ID!==activeProject.current)return;setDraft(g);setDeletedMembers([]);setSelectedMemberKeys(new Set());setBaseline(signature(g));if(g.REQUIREMENT_GROUP_ID)sessionStorage.setItem('basekit:requirement-group-target',JSON.stringify({PROJECT_ID:g.PROJECT_ID,REQUIREMENT_GROUP_ID:g.REQUIREMENT_GROUP_ID}));},[]);
+ const accept=useCallback((g:RequirementGroup)=>{if(g.PROJECT_ID!==activeProject.current)return;setDraft(g);setDeletedMembers([]);setSelectedMemberKeys(new Set());setBaseline(signature(g));if(g.REQUIREMENT_GROUP_ID)sessionStorage.setItem('basekit:requirement-group-target',JSON.stringify({PROJECT_ID:g.PROJECT_ID,REQUIREMENT_GROUP_ID:g.REQUIREMENT_GROUP_ID}));},[activeProject]);
  const refreshLists=async()=>{const [gs,rs]=await Promise.all([api.list(projectId),requirementApi.list(projectId)]);if(activeProject.current===projectId){setGroups(gs);setRequirements(rs);setLoadedProject(projectId);return gs;}return [];};
  useEffect(()=>{
   activeProject.current=projectId; const generation=++operation.current; running.current=false;
@@ -53,12 +81,13 @@ export default function RequirementGroupPage() {
   (projectId ? Promise.all([api.list(projectId),requirementApi.list(projectId)]) : Promise.resolve<[RequirementGroup[],Requirement[]]>([[],[]])).then(async([gs,rs])=>{
    if(!current || generation!==operation.current) return;
    setGroupingOpen(false);
-   setGroups(gs);setRequirements(rs);setLoadedProject(projectId);setDraft(null);setDeletedMembers([]);setBaseline('');setModal(null);setGroupAnalysisOpen(false);setBusy(false);
+   setGroups(gs);setRequirements(rs);setLoadedProject(projectId);setDraft(null);setDeletedMembers([]);setBaseline('');setModal(null);setGroupAnalysisOpen(new URLSearchParams(window.location.hash.split('?')[1]).get('tab')==='analysis');setBusy(false);
    setSelectedMemberKeys(new Set());setKeyword('');setSearchCondition({keyword:''});
    // An explicit jump from Requirement detail takes precedence over default selection.
    const jump=JSON.parse(sessionStorage.getItem('basekit:requirement-group-jump') || 'null') as {PROJECT_ID:string;REQUIREMENT_GROUP_ID:string}|null;
    sessionStorage.removeItem('basekit:requirement-group-jump');
-   const initialId=jump?.PROJECT_ID===projectId && gs.some(g=>g.REQUIREMENT_GROUP_ID===jump.REQUIREMENT_GROUP_ID) ? jump.REQUIREMENT_GROUP_ID:gs[0]?.REQUIREMENT_GROUP_ID;
+   const requestedGroup=new URLSearchParams(window.location.hash.split('?')[1]).get('group');
+   const initialId=requestedGroup && gs.some(g=>g.REQUIREMENT_GROUP_ID===requestedGroup) ? requestedGroup : jump?.PROJECT_ID===projectId && gs.some(g=>g.REQUIREMENT_GROUP_ID===jump.REQUIREMENT_GROUP_ID) ? jump.REQUIREMENT_GROUP_ID:gs[0]?.REQUIREMENT_GROUP_ID;
    if(initialId) {const group=await api.get(initialId);if(current && generation===operation.current)accept(group);}
    else if(projectId) accept(empty(projectId));
 
@@ -156,7 +185,7 @@ export default function RequirementGroupPage() {
    <ProjectListDetailWorkspace subject="요구사항 그룹" initialListWidthPercent={40} mode={workspaceMode} onModeChange={setWorkspaceMode}
     list={<div className="sd-requirement-workspace-shell">{searchOpen ? <div id="group-inline-search" className="project-inline-search"><SearchPanel layout="inline" rows={1} actionDisplay="label" fields={[{key:'keyword',label:'그룹명'}]} value={searchCondition} initialValue={{keyword:''}} onValueChange={setSearchCondition} onSearch={value=>setKeyword(value.keyword)} onReset={value=>{setSearchCondition(value);setKeyword(value.keyword);}} /></div>:null}<div className="project-master-heading project-master-heading--search-toggle"><button type="button" className="secondary-button" aria-expanded={searchOpen} aria-controls="group-inline-search" onClick={()=>setSearchOpen(open=>!open)}>검색</button></div><BaseKitDataGrid key={`${projectId}:${loaded}`} programKey="SD_REQUIREMENT_GROUP" roleCode="ADMIN" title="그룹 목록" rows={visible} columns={groupColumns} getRowKey={g=>g.REQUIREMENT_GROUP_ID} currentRowKey={draft?.REQUIREMENT_GROUP_ID} enabledActions={[]} loading={busy} onRowClick={g=>requestLeave(()=>void run(()=>select(g.REQUIREMENT_GROUP_ID)))} emptyMessage={loaded ? groups.length ? '검색 결과가 없습니다.':'등록된 그룹이 없습니다.':'조회 중 또는 조회 실패. 다시 조회하세요.'} toolbarActions={[]} /></div>}
     detail={<div className="multi-grid-detail content-detail-top">
-     <div className="multi-grid-detail-top">{draft?.PROJECT_ID===projectId ? <BaseTabs activeTab={groupAnalysisOpen ? 'group-analysis':'group-basic'} onChange={id=>setGroupAnalysisOpen(id==='group-analysis')} ariaLabel="그룹 상세" tabs={[{id:'group-analysis',label:'분석',content:<RequirementGroupAnalysis key={draft.REQUIREMENT_GROUP_ID} group={draft} embedded blocked={dirty || busy} projectName={project?.PROJECT_NAME} onClose={()=>setGroupAnalysisOpen(false)} />},{id:'group-basic',label:'기본정보',content:<div><div className="grid-toolbar"><div className="grid-heading-group"><h2>그룹 기본정보 · {groupStatusLabels[draft.GROUP_STATUS]}{dirty ? ' · 미저장':''}</h2></div></div><div className="standard-design-lifecycle-form standard-design-project-form">{keyword && !visible.some(g=>g.REQUIREMENT_GROUP_ID===draft.REQUIREMENT_GROUP_ID) && draft.REQUIREMENT_GROUP_ID ? <p>검색 밖 선택 그룹입니다.</p>:null}<FormField label="그룹명" required errorId="group-name-error" error={!draft.REQUIREMENT_GROUP_NAME.trim() ? '그룹명을 입력하세요.':undefined}><input maxLength={200} aria-label="그룹명" aria-invalid={!draft.REQUIREMENT_GROUP_NAME.trim()} aria-describedby="group-name-error" disabled={readonly || busy} value={draft.REQUIREMENT_GROUP_NAME} onChange={e=>setDraft({...draft,REQUIREMENT_GROUP_NAME:e.target.value})} /></FormField><FormField label="설명"><textarea rows={2} aria-label="그룹 설명" disabled={readonly || busy} value={draft.DESCRIPTION} onChange={e=>setDraft({...draft,DESCRIPTION:e.target.value})} /></FormField></div></div>}].reverse()} />:<p className="sd-project-empty-help">그룹을 선택하거나 새 그룹을 작성하세요.</p>}</div>
+     <div className="multi-grid-detail-top">{draft?.PROJECT_ID===projectId ? <BaseTabs activeTab={groupAnalysisOpen ? 'group-analysis':'group-basic'} onChange={id=>setGroupAnalysisOpen(id==='group-analysis')} ariaLabel="그룹 상세" tabs={[{id:'group-analysis',label:'분석',content:<RequirementGroupAnalysis key={draft.REQUIREMENT_GROUP_ID} group={draft} initialAnalysisId={query.get('group')===draft.REQUIREMENT_GROUP_ID ? query.get('analysis') ?? undefined : undefined} embedded blocked={dirty || busy} projectName={project?.PROJECT_NAME} onClose={()=>setGroupAnalysisOpen(false)} />},{id:'group-basic',label:'기본정보',content:<div><div className="grid-toolbar"><div className="grid-heading-group"><h2>그룹 기본정보 · {groupStatusLabels[draft.GROUP_STATUS]}{dirty ? ' · 미저장':''}</h2></div></div><div className="standard-design-lifecycle-form standard-design-project-form">{keyword && !visible.some(g=>g.REQUIREMENT_GROUP_ID===draft.REQUIREMENT_GROUP_ID) && draft.REQUIREMENT_GROUP_ID ? <p>검색 밖 선택 그룹입니다.</p>:null}<FormField label="그룹명" required errorId="group-name-error" error={!draft.REQUIREMENT_GROUP_NAME.trim() ? '그룹명을 입력하세요.':undefined}><input maxLength={200} aria-label="그룹명" aria-invalid={!draft.REQUIREMENT_GROUP_NAME.trim()} aria-describedby="group-name-error" disabled={readonly || busy} value={draft.REQUIREMENT_GROUP_NAME} onChange={e=>setDraft({...draft,REQUIREMENT_GROUP_NAME:e.target.value})} /></FormField><FormField label="설명"><textarea rows={2} aria-label="그룹 설명" disabled={readonly || busy} value={draft.DESCRIPTION} onChange={e=>setDraft({...draft,DESCRIPTION:e.target.value})} /></FormField></div></div>}].reverse()} />:<p className="sd-project-empty-help">그룹을 선택하거나 새 그룹을 작성하세요.</p>}</div>
      <div className="multi-grid-detail-bottom">{groupAnalysisOpen ? <p>기본정보 탭에서 Requirement 구성을 수정하고 저장할 수 있습니다.</p>:<BaseKitDataGrid programKey="SD_REQUIREMENT_GROUP" roleCode="ADMIN" title="포함 Requirement" getRowState={member=>deletedMemberKeys.has(member.REQUIREMENT_ID) ? 'DELETED':groupMemberRowState(member,savedMembers.get(member.REQUIREMENT_ID))} columns={memberColumns} selectedRowKeys={selectedMemberKeys} onSelectedRowKeysChange={setSelectedMemberKeys} editing={{keys:['INCLUSION_REASON'],isEditable:()=>!readonly && !busy,onChange:(member,key,value)=>setDraft(previous=>previous ? {...previous,MEMBERS:previous.MEMBERS.map(item=>item.REQUIREMENT_ID===member.REQUIREMENT_ID ? {...item,[key]:value}:item)}:previous)}} rows={displayedMembers} getRowKey={m=>m.REQUIREMENT_ID} enabledActions={[]} emptyMessage="함께 검토할 Requirement를 직접 또는 Analysis 결과에서 추가하세요." toolbarActions={[{actionCode:'DELETE',label:'행 삭제',tone:'danger',disabled:({selectedRows})=>readonly || busy || !selectedRows.some(row=>!deletedMemberKeys.has(row.REQUIREMENT_ID)),onClick:({selectedRows})=>{const newlyDeleted=selectedRows.filter(row=>!deletedMemberKeys.has(row.REQUIREMENT_ID));const removed=new Set(newlyDeleted.map(row=>row.REQUIREMENT_ID));setDeletedMembers(previous=>[...previous,...newlyDeleted]);setDraft(previous=>previous ? {...previous,MEMBERS:previous.MEMBERS.filter(member=>!removed.has(member.REQUIREMENT_ID))}:previous);setSelectedMemberKeys(new Set());}},{actionCode:'CREATE',label:'요구사항에서 추가',disabled:readonly || busy,onClick:()=>openAdd('HUMAN')},{actionCode:'CREATE',label:'Analysis에서 추가',disabled:readonly || busy,onClick:()=>openAdd('ANALYSIS')}]} />}</div>
     </div>} />
    <div className="multi-grid-message-area" aria-live="polite">{message ? <BaseKitMessage type={message.type} message={message.text} dismissible onDismiss={()=>setMessage(null)} />:null}</div>

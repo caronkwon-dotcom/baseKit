@@ -1,3 +1,5 @@
+import { useLocation } from 'react-router-dom';
+import { designReviewUrl } from '../../requirementgroup/designReview';
 import GroupAnalysisReport from './GroupAnalysisReport';
 import './groupAnalysis.css';
 import { adaptGroupAnalysis } from '../../requirementgroup/groupAnalysisAdapter';
@@ -15,7 +17,8 @@ const labels: Record<GroupAnalysisStatus,string> = {
  SUCCEEDED:'기존 분석 성공 · 검토 필요',CALL_FAILED:'기존 호출 실패',PARSE_FAILED:'기존 파싱 실패',
 };
 const succeeded=(run:GroupAnalysis)=>run.STATUS==='SUCCESS' || run.STATUS==='SUCCEEDED';
-export default function RequirementGroupAnalysis({group,onClose,projectName,embedded=false,blocked=false}:{group:RequirementGroup;onClose:()=>void;projectName?:string;embedded?:boolean;blocked?:boolean}) {
+export default function RequirementGroupAnalysis({group,onClose,projectName,embedded=false,blocked=false,initialAnalysisId}:{group:RequirementGroup;onClose:()=>void;projectName?:string;embedded?:boolean;blocked?:boolean;initialAnalysisId?:string}) {
+ const {pathname}=useLocation();
  const [runs,setRuns]=useState<GroupAnalysis[]>([]), [selected,setSelected]=useState<GroupAnalysis|null>(null);
  const [analysisType,setAnalysisType]=useState(()=>sessionStorage.getItem(`basekit:group-analysis-request:${group.REQUIREMENT_GROUP_ID}:type`) ?? 'GROUP_RECOMMENDATION');
  const [busy,setBusy]=useState(false), [error,setError]=useState(''), [notice,setNotice]=useState('');
@@ -24,10 +27,10 @@ export default function RequirementGroupAnalysis({group,onClose,projectName,embe
  const [pendingRequest,setPendingRequest]=useState(()=>!!sessionStorage.getItem(storageKey));
  const request=useRef<string|null>(sessionStorage.getItem(storageKey));
  const requestVersion=useRef<number>(Number(sessionStorage.getItem(`${storageKey}:version`)) || group.VERSION);
- const running=useRef(false), alive=useRef(true), selectedId=useRef('');
+ const running=useRef(false), alive=useRef(true), selectedId=useRef(initialAnalysisId ?? '');
  const statuses=useRef(new Map<string,GroupAnalysisStatus>());
  const hasRunning=runs.some(run=>run.STATUS==='RUNNING');
- useEffect(()=>{selectedId.current=selected?.ANALYSIS_ID ?? '';},[selected?.ANALYSIS_ID]);
+ useEffect(()=>{if(selected)selectedId.current=selected.ANALYSIS_ID;},[selected]);
  useEffect(()=>{
   let current=true;alive.current=true;let polling=false;
   const load=async()=>{
@@ -90,6 +93,7 @@ export default function RequirementGroupAnalysis({group,onClose,projectName,embe
   <div className="sd-analysis-controls"><FormField label="실행 이력" labelPosition="TOP" className="sd-analysis-history"><select aria-label="그룹 분석 실행 이력" disabled={busy} value={selected?.ANALYSIS_ID ?? ''} onChange={e=>{const id=e.target.value;if(id)void operate(async()=>{selectedId.current=id;const result=await api.analysis(group.REQUIREMENT_GROUP_ID,id);if(alive.current)setSelected(result);});}}>
    <option value="">실행 선택</option>{runs.map(run=><option key={run.ANALYSIS_ID} value={run.ANALYSIS_ID}>{run.ANALYSIS_TYPE==='GROUP_RECOMMENDATION' ? '그룹 보완':'그룹 설계'} · {new Date(run.CREATED_AT).toLocaleString('ko-KR')} · {labels[run.STATUS]} · v{run.GROUP_VERSION}</option>)}
   </select></FormField><ActionButton actionCode="SEARCH" label="이력 새로고침" disabled={busy} onClick={refresh} /></div>
+  {selected?.ANALYSIS_TYPE==='GROUP_DESIGN' && succeeded(selected) && <p><a href={designReviewUrl(group.PROJECT_ID,group.REQUIREMENT_GROUP_ID,selected.ANALYSIS_ID,pathname)} target="_blank" rel="noreferrer">설계 초안 검토 열기 · 읽기 전용 ↗</a></p>}
   {selected ? <><p className="sd-analysis-help">{labels[selected.STATUS]} · 그룹 버전 {selected.GROUP_VERSION}{selected.ELAPSED_MS!=null ? ` · ${(selected.ELAPSED_MS/1000).toFixed(1)}초`:''}</p>
    {selected.ERROR_MESSAGE ? <BaseKitMessage type="error" message={selected.ERROR_MESSAGE} />:null}
    {selected.STATUS==='RUNNING' ? <BaseKitMessage type="info" message="분석 중입니다. 창을 닫고 다른 작업을 계속할 수 있습니다. 완료 상태는 자동 조회합니다." />:null}

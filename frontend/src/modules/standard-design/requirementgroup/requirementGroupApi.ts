@@ -25,6 +25,7 @@ export const requirementGroupApi={
  save:(id:string,input:GroupInput)=>request<RequirementGroup>(id ? `/${encodeURIComponent(id)}` : '',body(id ? 'PUT':'POST',input)),
  confirm:(id:string,version:number,projectName?:string)=>request<RequirementGroup>(`/${encodeURIComponent(id)}/confirm`,body('POST',{VERSION:version,PROJECT_NAME:projectName})),
  edit:(id:string,version:number)=>request<RequirementGroup>(`/${encodeURIComponent(id)}/edit`,body('POST',{VERSION:version})),
+ readOnlyAnalyses:(id:string)=>request<GroupAnalysis[]>(`/${encodeURIComponent(id)}/analyses/menu-draft`),
  analyses:(id:string)=>request<GroupAnalysis[]>(`/${encodeURIComponent(id)}/analyses`),
  analysis:(id:string,analysisId:string)=>request<GroupAnalysis>(`/${encodeURIComponent(id)}/analyses/${encodeURIComponent(analysisId)}`),
  analyze:(id:string,version:number,requestId:string,projectName?:string,analysisType='GROUP_DESIGN')=>request<GroupAnalysis>(`/${encodeURIComponent(id)}/analyses`,body('POST',{VERSION:version,REQUEST_ID:requestId,PROJECT_NAME:projectName,ANALYSIS_TYPE:analysisType})),

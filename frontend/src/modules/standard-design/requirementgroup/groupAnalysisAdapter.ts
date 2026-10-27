@@ -24,7 +24,7 @@ const text = (value: unknown): string => typeof value === 'string' ? value : '';
 const strings = (value: unknown): string[] => Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
 
 /** Pure projection of a detail API result. Never changes stored JSON or business state. */
-export function adaptGroupAnalysis(run: AnalysisInput): GroupAnalysisDisplay {
+export function adaptGroupAnalysis(run: AnalysisInput, missingTitle?: string): GroupAnalysisDisplay {
  const warnings = [...strings(run.WARNINGS)];
  const parse = (raw: string | null | undefined): unknown => {
   if (!raw) return undefined;
@@ -65,7 +65,7 @@ export function adaptGroupAnalysis(run: AnalysisInput): GroupAnalysisDisplay {
    const evidence = strings(row.evidenceRequirementIds);
    if (!evidence.length || !Array.isArray(row.evidenceRequirementIds) || evidence.length !== row.evidenceRequirementIds.length)
     warnings.push(`${key}[${index}]: 근거 ID를 확인하세요.`);
-   items.push({ TITLE: text(row.name) || text(row.title) || `후보 ${index + 1}`,
+   items.push({ TITLE: text(row.name) || text(row.title) || missingTitle || `후보 ${index + 1}`,
     DESCRIPTION: text(row.description) || text(row.purpose), EVIDENCE_REQUIREMENT_IDS: evidence });
   });
   sections.push({ KEY: key, TITLE: title, ITEMS: items });

@@ -27,7 +27,7 @@ export default function StandaloneShell() {
   const [, refreshContext] = useState(0);
   const designType = settings.find(setting => setting.MENU_ID === menuId)?.DESIGN_TYPE ?? 'BASEKIT';
   const program = programByKey[programKey];
-  const contextMissing = program?.requiresProjectContext && !designLifecycleRepository.getSelectedProjectId();
+  const contextMissing = !(programKey === 'SD_REQUIREMENT_GROUP' && /[?&]project=[^&]+/.test(location.search ?? '')) && program?.requiresProjectContext && !designLifecycleRepository.getSelectedProjectId();
   useEffect(() => {
     let active = true;
     // Presentation only: a missing settings server must never block the screen.
