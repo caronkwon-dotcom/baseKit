@@ -1,5 +1,12 @@
 # BaseKit 현재 상태와 WBS
 
+## 2026-10-27 설계 초안 검토 1차 — 지정 분석 읽기 전용 워크스페이스
+
+기존 그룹 분석 본문의 성공 GROUP_DESIGN 이력에서 독립 /standard-design/design-review로 진입한다. 프로젝트·그룹·분석 ID를 URL에 고정해 직접 진입·새로고침·버전 선택·동일 분석 복귀를 지원한다. 기존 SD/Window Shell과 메뉴·화면 설계는 유지한다. 기존 DTO/adapter 및 부작용 없는 analyses/menu-draft·상세 GET을 재사용하고, 분석 입력 스냅샷의 근거 이름·Rev·본문과 현재 Rev 차이를 표시한다. 기존 analyses GET의 만료 상태 갱신은 변경하지 않으며 새 검토에서는 호출하지 않는다. 설계 편집/저장/확정·새 DB 모델 없음.
+
+프런트133/133, build/lint/diff 통과. 격리 H2 백엔드78통과/12skip. 실제 Edge에서 두 분석 선택·새로고침·본문 링크·복귀·기존 탭·실패 이력·프로젝트 불일치·기본/Window Shell 확인. 개발 PostgreSQL 읽기 전용 SELECT로 전후 그룹19/분석41/요구사항163 및 전체 그룹·분석 행 해시 불변 확인. 실제 RUNNING0건으로 실행 중·권한 오류·빈 필드는 자동 테스트 검증. backend/data 보존. sd-work의 검토용 변경이며 dev-pm 통합 없음. 다음 단계는 원본 분석과 분리한 Draft 식별/버전/근거/사용자 판단/확정 권한 계약 확정. [구현·필드·검증 상세](sd-design-review-phase1.md).
+
+
 ## 2026-10-22 사용자 HTML 기준 review2 이식 — 최종 시각 인수 보류
 
 첨부 ai-grouping-design-v2.html 전체 소스/해시 확인 후 review2를 해당 토큰·380px sticky 목록·16px 간격·15px 문서형 본문·블루 AI 근거로 교체했다. 업무 프로세스·설계 의견·개별 포함 사유를 원문과 함께 유지한다. 실제 기존 검토 상태·등록 선택만 연결하며 공통 셸/버튼/원본/기존 검토/backend는 보존했다. 제품 SHA52d8443. 프런트126/126·build/lint/diff, H2 backend78통과/12skip. Edge1920/1440/390 및 이력/비교/선택/펼침 회귀 확인. 실제 DB 저장/등록/확정 없음. file:// 기준본 브라우저 접근은 보안 정책으로 차단되어 HTML 대 React 나란히 시각 비교는 미완료이며 완료 인수로 표시하지 않는다. 공통 셸 최소 폭1280은 유지. PR39 Draft·PM 병합 전. 상세 sd-ai-grouping-content-review.md.
