@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { promptCompanyLlm, testCompanyLlm, type CompanyLlmTestResult } from '../../llm/companyLlm.repository';
 import DesignLifecyclePage from './DesignLifecyclePage';
+import ProgramRegister from '../../programs/ProgramRegister';
 
 export default function ScreenDesignPage() {
   const [prompt, setPrompt] = useState('');
@@ -35,6 +36,9 @@ export default function ScreenDesignPage() {
   };
 
   return (
+    <>
+      <ProgramRegister />
+      <details><summary>기존 화면 설계 / 회사 LLM 연결 확인</summary>
     <DesignLifecyclePage view="screens" supplement={
       <section className="standard-design-llm-test" aria-labelledby="company-llm-test-title">
         <div className="standard-design-llm-heading">
@@ -72,5 +76,7 @@ export default function ScreenDesignPage() {
         {error ? <p className="standard-design-llm-error" role="alert">{error}</p> : null}
       </section>
     } />
+      </details>
+    </>
   );
 }

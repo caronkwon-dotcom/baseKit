@@ -1,0 +1,8 @@
+.sd-program-register { min-width: 0; }
+.sd-program-register label { display: flex; flex-direction: column; gap: 6px; margin: 12px 0; }
+.sd-program-register label:has(input[type=checkbox]) { flex-direction: row; align-items: center; }
+.sd-program-register input:not([type=checkbox]), .sd-program-register select, .sd-program-register textarea { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid var(--color-border, #cbd5e1); border-radius: 4px; font: inherit; }
+.sd-program-register article { border-top: 1px solid var(--color-border, #cbd5e1); padding: 8px 0; }
+.sd-program-register details { margin: 8px 0; }
+.sd-program-register pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.sd-program-actions { display: flex; gap: 8px; margin: 12px 0; }

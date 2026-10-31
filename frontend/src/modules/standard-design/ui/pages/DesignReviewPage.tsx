@@ -29,6 +29,7 @@ export default function DesignReviewPage() {
  const sections=definitions.filter(([id,,kind])=>kind!=='legacy'||display?.SECTIONS.some(section=>section.KEY===id));
  const count=(id:string)=>display?.SECTIONS.find(section=>section.KEY===id)?.ITEMS.length??0;
  return <section className="sd-design-review" aria-label="설계 초안 검토">
+  <p><a target="_blank" rel="noreferrer" href={'#/standard-design/screens?'+new URLSearchParams({project,group,analysis})}>프로그램 대장 · AI 후보 가져오기</a></p>
   <div className="page-head"><div><div className="eyebrow">DESIGN DRAFT / REVIEW</div><h1>설계 초안 검토 <span className="badge">읽기 전용</span></h1><p className="sub">분석 결과의 설계 후보입니다. 설계가 확정된 상태가 아닙니다.</p></div>
    {data && <div className="picker"><label htmlFor="design-analysis-select">분석 버전 · GROUP_DESIGN 실행 이력</label><select id="design-analysis-select" aria-label="설계 검토 분석 이력" value={analysis} onChange={event=>{const next=new URLSearchParams(params);next.set('analysis',event.target.value);setParams(next);}}>
     {!data.runs.some(run=>run.ANALYSIS_ID===analysis) && <option value={analysis}>{analysis} · 목록에 없는 지정 기록</option>}
