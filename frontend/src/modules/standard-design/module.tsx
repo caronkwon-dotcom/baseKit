@@ -115,8 +115,8 @@ const standardDesignModule: ApplicationModule = {
     },
   ],
   menus: [
-    { menuKey: 'STANDARD_DESIGN.MENU_DESIGN', parentMenuKey: 'STANDARD_DESIGN', menuName: '메뉴 설계', menuLevel: 2, menuType: 'SCREEN', programKey: 'SD_MENU_DESIGN', sortOrder: 4.6, useYn: 'Y' },
-    { menuKey: 'STANDARD_DESIGN.REQUIREMENT_GROUP', parentMenuKey: 'STANDARD_DESIGN', menuName: '요구사항 그룹 관리', menuLevel: 2, menuType: 'SCREEN', programKey: 'SD_REQUIREMENT_GROUP', sortOrder: 4.5, useYn: 'Y' },
+    { menuKey: 'STANDARD_DESIGN.MENU_DESIGN', parentMenuKey: 'STANDARD_DESIGN', menuName: '메뉴 설계', menuLevel: 2, menuType: 'PAGE', programKey: 'SD_MENU_DESIGN', sortOrder: 4.6, useYn: 'Y' },
+    { menuKey: 'STANDARD_DESIGN.REQUIREMENT_GROUP', parentMenuKey: 'STANDARD_DESIGN', menuName: '요구사항 그룹 관리', menuLevel: 2, menuType: 'PAGE', programKey: 'SD_REQUIREMENT_GROUP', sortOrder: 4.5, useYn: 'Y' },
     {
       menuKey: 'STANDARD_DESIGN',
       parentMenuKey: null,
