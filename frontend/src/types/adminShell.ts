@@ -48,7 +48,7 @@ export interface ProgramMeta {
  * parentMenuKey  : 상위 메뉴 ID
  * menuName       : 메뉴명
  * menuLevel      : 메뉴 깊이
- * menuType       : 그룹인지 화면인지
+ * menuType       : 그룹(FOLDER)인지 실행 페이지(PAGE)인지 — DB canonical
  * programKey     : 연결될 화면 ID
  * sortOrder      : 정렬 순서
  * useYn          : 사용 여부
@@ -58,7 +58,7 @@ export interface MenuMeta {
   parentMenuKey: string | null;
   menuName: string;
   menuLevel: number;
-  menuType: 'GROUP' | 'SCREEN';
+  menuType: 'FOLDER' | 'PAGE';
   programKey: ProgramKey | null;
   sortOrder: number;
   useYn: 'Y' | 'N';

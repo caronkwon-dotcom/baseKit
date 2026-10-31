@@ -4,7 +4,7 @@
     "parentMenuKey": null,
     "menuName": "시스템관리",
     "menuLevel": 1,
-    "menuType": "GROUP",
+    "menuType": "FOLDER",
     "programKey": null,
     "sortOrder": 1,
     "useYn": "Y"
@@ -14,7 +14,7 @@
     "parentMenuKey": "SYS",
     "menuName": "사용자관리",
     "menuLevel": 2,
-    "menuType": "SCREEN",
+    "menuType": "PAGE",
     "programKey": "USER_MGMT",
     "sortOrder": 1,
     "useYn": "Y"
@@ -24,7 +24,7 @@
     "parentMenuKey": "SYS",
     "menuName": "공통코드관리",
     "menuLevel": 2,
-    "menuType": "SCREEN",
+    "menuType": "PAGE",
     "programKey": "COMMON_CODE_MGMT",
     "sortOrder": 2,
     "useYn": "Y"
@@ -34,7 +34,7 @@
     "parentMenuKey": "SYS",
     "menuName": "메뉴관리",
     "menuLevel": 2,
-    "menuType": "SCREEN",
+    "menuType": "PAGE",
     "programKey": "MENU_MGMT",
     "sortOrder": 3,
     "useYn": "Y"
@@ -44,7 +44,7 @@
     "parentMenuKey": "SYS",
     "menuName": "프로그램관리",
     "menuLevel": 2,
-    "menuType": "SCREEN",
+    "menuType": "PAGE",
     "programKey": "PROGRAM_MGMT",
     "sortOrder": 4,
     "useYn": "Y"
@@ -54,7 +54,7 @@
     "parentMenuKey": "SYS",
     "menuName": "테이블관리",
     "menuLevel": 2,
-    "menuType": "SCREEN",
+    "menuType": "PAGE",
     "programKey": "TABLE_MGMT",
     "sortOrder": 5,
     "useYn": "Y"
@@ -64,7 +64,7 @@
     "parentMenuKey": "SYS",
     "menuName": "표준데이터관리",
     "menuLevel": 2,
-    "menuType": "GROUP",
+    "menuType": "FOLDER",
     "programKey": null,
     "sortOrder": 6,
     "useYn": "Y"
@@ -74,7 +74,7 @@
     "parentMenuKey": "SYS.STANDARD_DATA",
     "menuName": "표준용어관리",
     "menuLevel": 3,
-    "menuType": "SCREEN",
+    "menuType": "PAGE",
     "programKey": "TERM_CURATION",
     "sortOrder": 3,
     "useYn": "Y"
@@ -84,7 +84,7 @@
     "parentMenuKey": "SYS.STANDARD_DATA",
     "menuName": "단어관리",
     "menuLevel": 3,
-    "menuType": "SCREEN",
+    "menuType": "PAGE",
     "programKey": "WORD_MGMT",
     "sortOrder": 1,
     "useYn": "Y"
@@ -94,7 +94,7 @@
     "parentMenuKey": "SYS.STANDARD_DATA",
     "menuName": "도메인관리",
     "menuLevel": 3,
-    "menuType": "SCREEN",
+    "menuType": "PAGE",
     "programKey": "DOMAIN_MGMT",
     "sortOrder": 2,
     "useYn": "Y"
@@ -104,7 +104,7 @@
     "parentMenuKey": null,
     "menuName": "개발자가이드",
     "menuLevel": 1,
-    "menuType": "GROUP",
+    "menuType": "FOLDER",
     "programKey": null,
     "sortOrder": 99,
     "useYn": "Y"
@@ -114,7 +114,7 @@
     "parentMenuKey": "DEV_GUIDE",
     "menuName": "BaseKit 문서센터",
     "menuLevel": 2,
-    "menuType": "SCREEN",
+    "menuType": "PAGE",
     "programKey": "DOCUMENT_CENTER",
     "sortOrder": 1,
     "useYn": "Y"
@@ -124,7 +124,7 @@
     "parentMenuKey": "DEV_GUIDE",
     "menuName": "화면 샘플",
     "menuLevel": 2,
-    "menuType": "GROUP",
+    "menuType": "FOLDER",
     "programKey": null,
     "sortOrder": 2,
     "useYn": "Y"
@@ -134,7 +134,7 @@
     "parentMenuKey": "DEV_GUIDE.SAMPLES",
     "menuName": "기본 검색 페이지 샘플",
     "menuLevel": 3,
-    "menuType": "SCREEN",
+    "menuType": "PAGE",
     "programKey": "DEV_SEARCH_SAMPLE_TYPE_1",
     "sortOrder": 1,
     "useYn": "Y"
@@ -144,7 +144,7 @@
     "parentMenuKey": "DEV_GUIDE.SAMPLES",
     "menuName": "고급 검색 페이지 샘플 Type 2",
     "menuLevel": 3,
-    "menuType": "SCREEN",
+    "menuType": "PAGE",
     "programKey": "DEV_SEARCH_SAMPLE_TYPE_2",
     "sortOrder": 2,
     "useYn": "Y"
@@ -154,7 +154,7 @@
     "parentMenuKey": "DEV_GUIDE.SAMPLES",
     "menuName": "Layout L1R2",
     "menuLevel": 3,
-    "menuType": "SCREEN",
+    "menuType": "PAGE",
     "programKey": "LYT_L1R2",
     "sortOrder": 3,
     "useYn": "Y"
@@ -164,7 +164,7 @@
     "parentMenuKey": "DEV_GUIDE",
     "menuName": "LLM 파일·검색 테스트",
     "menuLevel": 2,
-    "menuType": "SCREEN",
+    "menuType": "PAGE",
     "programKey": "DEV_LLM_FILE_TEST",
     "sortOrder": 4,
     "useYn": "Y"

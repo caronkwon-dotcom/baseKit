@@ -55,7 +55,7 @@ export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(() => localStorage.getItem('basekit.navigation.sidebar-pinned') === 'Y');
   const [floatingMenuOpen, setFloatingMenuOpen] = useState(false);
   const [expandedMenuKeys, setExpandedMenuKeys] = useState<string[]>(() =>
-    menuTree.flatMap((menu) => menu.children.filter((child) => child.menuType === 'GROUP').map((child) => child.menuKey)),
+    menuTree.flatMap((menu) => menu.children.filter((child) => child.menuType === 'FOLDER').map((child) => child.menuKey)),
   );
   const [tabs, setTabs] = useState<MdiTab[]>(() =>
     initialProgramKey === 'HOME' || initialContextMissing

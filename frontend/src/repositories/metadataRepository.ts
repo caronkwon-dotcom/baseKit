@@ -95,8 +95,8 @@ function validateMetadata() {
       }
     }
 
-    if (menu.menuType === 'SCREEN' && !menu.programKey) {
-      throw new Error(`${menu.menuKey} SCREEN 메뉴에는 PROGRAM_KEY가 필요합니다.`);
+    if (menu.menuType === 'PAGE' && !menu.programKey) {
+      throw new Error(`${menu.menuKey} PAGE 메뉴에는 PROGRAM_KEY가 필요합니다.`);
     }
     if (menu.programKey && !programKeys.has(menu.programKey)) {
       throw new Error(`${menu.menuKey}에 연결된 PROGRAM_KEY가 없습니다: ${menu.programKey}`);
@@ -152,7 +152,7 @@ export const metadataRepository = {
   getActions: () => actions,
   getMenuNameByProgram: (programKey: ProgramKey) =>
     menus.find(
-      (menu) => menu.useYn === 'Y' && menu.menuType === 'SCREEN' && menu.programKey === programKey,
+      (menu) => menu.useYn === 'Y' && menu.menuType === 'PAGE' && menu.programKey === programKey,
     )?.menuName,
   getRoleProgramActions: () => roleProgramActions,
   hasAction: (

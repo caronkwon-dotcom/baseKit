@@ -60,7 +60,7 @@ export default function Sidebar({
       <nav className="sidebar-nav" aria-label={`${menu.menuName} 하위 메뉴`}>
         <ul>
           {menu.children.map((secondDepth) => {
-            if (secondDepth.menuType === 'SCREEN') {
+            if (secondDepth.menuType === 'PAGE') {
               return (
                 <li key={secondDepth.menuKey}>
                   <ScreenMenu
