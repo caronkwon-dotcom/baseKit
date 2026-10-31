@@ -1,4 +1,13 @@
 # BaseKit 현재 상태와 WBS
+
+## 2026-10-31 COMMON Role 관리 로컬 작업 보존 및 오류 수정
+
+미커밋 RoleManagePage와 roleApi를 common-work에 보존한다. Role CRUD 및 Program/ButtonGroup 권한 조회·전체 저장을 기존 /api/core/roles 계약에 연결한다. Effect 본문의 동기 상태 갱신을 초기 상태와 역할 선택 이벤트로 이동하여 lint 오류 2건을 해결했다. 역할 변경 시 이전 권한을 초기화하고 오래된 조회 응답을 무시하며, 권한 조회 실패·조회 중에는 저장을 차단한다. 저장 중 역할 전환을 막고 ButtonGroup 조회 실패를 빈 목록으로 숨기지 않아 불완전한 권한 목록 저장을 방지한다.
+
+실제 컴포넌트 Effect·핸들러 기반 회귀 4건(기본 거부, 오래된 응답/조회 실패, 저장 중 역할 유지, ButtonGroup 조회 실패)을 추가했다. 기존 메뉴 선택 테스트는 DB 메뉴 API·useMemo·현재 상태 구조에 맞게 fixture를 수정하고, 목록 조회 완료 후 저장된 실행 설정 및 하위 상속을 확인한다. 메뉴 제품 코드는 변경하지 않았다.
+
+build/lint 및 frontend 106건 통과. backend:test는 외부 DB 환경변수를 제거한 격리 H2에서 95건 중83통과·외부 조건12skip·실패0. diff check 통과. 기존 xlsx import·번들 크기 경고 유지. 실제 브라우저 Role CRUD/권한 저장 및 운영 Host 권한 집행은 이번에 검증하지 않았다. 실제 DB migration·서버 재시작·dev-pm 통합은 수행하지 않았다. .env-check-tmp.txt는 보존하고 commit에서 제외한다. workroom CURRENT.md가 없어 사용자 직접 오류 수정·commit/push 지시를 적용했다.
+
 ## 2026-10-18 SD Revision 실제 개발 PostgreSQL 검증 완료
 
 개발 PostgreSQL localhost:5432/basekit의 V21 성공 이력 및 정상 Flyway validate/migrate 확인. 현재 코드 8098/Edge 5188에서 Revision 초안 생성·저장·확정·취소, 첨부 ID/저장 키 승계·미리보기, 전체 논리 폐기·감사 이력, 그룹 REVIEW_REQUIRED/기존 검토 근거 보존 검증 완료. JDBC 변경 뒤 MyBatis 같은 세션의 오래된 projection 조회를 findOne flushCache로 최소 보완했다.
