@@ -1,4 +1,40 @@
 # BaseKit 현재 상태와 WBS
+
+## 2026-10-31 노트북 이전을 위한 sd-work 원격 보존
+
+사용자의 원격 반영 지시에 따라 미커밋 프로그램 대장 V1을 저장했다. 공통 V22 원문은 선행 의존성 commit `623a616`, SD 제품 코드·테스트·V23은 별도 commit `3f3d49e`로 분리했다. 공통 V22는 origin/common-work의 0af3ca3과 동일한 Git blob이며 기존 적용 원문·checksum을 유지한다. 문서는 제품 코드와 별도 commit으로 관리한다. [새 노트북 재개 및 데이터 이전 범위](sd-program-register-handoff.md)를 따른다.
+
+원격 보존 전 build/lint 통과, Frontend136/136·Backend94건 중82통과/12조건skip/실패0·diff검사 통과. 외부 DB 테스트 환경변수를 제거한 격리 H2 테스트이며 공유 DB/서버 변경은 수행하지 않았다. backend/data/ 및 DB 백업·로컬 환경설정은 Git 대상에서 제외하고 원본을 보존한다. PR40은 기존 읽기 전용 설계 검토 범위이며 이번 작업의 새 PR/merge/rebase/새 branch/worktree는 없다. dev-pm 반영은 PM의 별도 선택 통합 단계다. 푸시 결과와 최종 HEAD는 이번 Codex 채팅의 이전 결과 보고서로 확인한다.
+
+
+## 2026-10-27 프로그램 대장 공유 환경 최종 실측 검증
+
+사용자의 공유 V23 적용·8083 전환·실제 화면 검증 승인을 받고 재확인했을 때 이미 공유V23 success(checksum1137077725,23:04:45)와 신규8083/PID8992(sd,23:04:42기동)가 존재했다. 이번 턴에서 migration재실행·서버종료/재시작을 하지 않았다. 적용·기동 주체는 확인하지 못했다. 공통V22 checksum-1664499172/원문/설치일 보존,공유Flyway23개validate성공/current23/pending0. 실제FE5176→BE8083→공유5432/basekit TCP·API 연결 확인. 원본 시작 콘솔 로그는 미확보이며 실행경로/profile/OpenAPI 신규5개method·HTTP/DB·별도validate로그로 확인했다.
+
+기존 적용 전 전체백업196344바이트의SHA256동일/보관 확인,UI검증직전 V23+기존AI2건 포함 추가 전체백업198411바이트(SHA256 E3D272D18F116732778FC2B1F6893362419E02D4B658CBE7EB0673D54D27E6BD)생성/archive목록검증. 실제5176 Edge에서 미등록 과거분석GA-5ff749652b644a799e264d6eb0c75145의 화면설계생성기 선택등록→명칭/설명편집저장→새로고침유지,수동추가→새로고침유지,이미채택후보checkbox비활성,직접중복POST409/데이터불변 확인. 기존2건 완전보존하며 검증용2건을 추가해 최종프로그램4/근거3건. 검증용AI SDPG-bf8df36a-622a-4dc9-8135-84c7b8165167(VERSION2),수동 SDPG-5293c924-8b25-4899-a6de-cb226d77e4a1은 삭제하지 않았다.
+
+검증전후 나머지43개테이블 전체해시동일. 그룹19/분석43/요구사항163,원본입력/응답JSON·이력·공통Program/Role 불변.5176/8083직접의health·그룹·분석이력·프로그램목록·후보조회모두200.이번코드변경은이현황기록뿐이며직전build/lint/frontend136/backend82pass12skip결과와최종diff검사통과를유지한다.기존backend/data/·Shell/CSS·모든미커밋변경보존. sd-work/HEAD/origin-dev-pm21e8cc0,commit/push/새PR/merge/rebase/새branch/worktree없음.실패/복구실행없음.백업·HTTP·DB해시·화면증빙은현재Codex채팅outputs/BaseKit-SD-live-final-result.md에정리했다.
+
+
+## 2026-10-27 프로그램 대장 migration 충돌 해소·전체 백업 복원 검증 — 공유 적용 승인 대기
+
+사용자 승인 범위는 migration 번호 정리와 실제 공유 DB 전체 백업·격리 PostgreSQL 복원/검증이다. 미적용 프로그램 대장 migration은 본문 변경 없이 V23으로 이동했다. 공통 V22__create_role.sql은 common-work 원본과 SHA256 동일한 사본을 SD 실행 리소스에 제공했으며 Flyway checksum -1664499172를 유지한다. 공통 선행 migration 의존성으로 별도 관리하며 SD 제품 commit/PR에 임의 혼입하지 않는다. 기존 적용 migration/공유 이력 수정·삭제·repair 없음.
+
+실제 localhost:5432/basekit 전체 custom backup 196344바이트(SHA256 8A804523F18639DF0CC2C2FCC7DF2F6391A13A2D5182966F53BD949CE70AFB45)를 별도 127.0.0.1:55433 클러스터에 복원했다. 복원 직후 public 45테이블 컬럼·행 수·내용 SHA256이 공유 원본과 모두 일치. 격리 backend8123에서 Flyway23개 validate, V22→V23 한 건만 적용(checksum1137077725), 기존 V22 checksum 일치. startup EndpointCollector가 BSYENDP 115건 MOD_DT를 갱신하고 신규 프로그램 API5건을 추가하는 기존 동작을 별도 확인했다. 나머지 업무 데이터는 불변이다.
+
+격리 FE5198→BE8123→PostgreSQL55433의 실제 Edge에서 지정 GROUP_DESIGN 후보 선택→등록→이름/설명 저장→새로고침 유지·수동 추가·중복 체크박스 비활성 확인. 실제 HTTP 중복 채택409/구버전 편집409 및 거부 전후 데이터 동일. 프로그램2/근거1은 격리본에만 존재. 기존 그룹19/분석43/요구사항163과 원본 JSON, 공통 Program/Role 포함41테이블 해시 불변; 공유 원본45테이블도 검증 전후 동일. frontend136/136, backend94중82통과/12조건skip/실패0, build/lint/diff검사 통과. 기존 xlsx/번들 크기 경고 유지.
+
+공유 DB V23 적용 및8083 전환은 미승인·미수행. 최종 점검 시 기존8083/PID10460 종료·포트미청취를 관찰했으며 이번 작업의 종료/재시작 조작은 없다. 현재 격리 검증 서버만 정상이다. 다음 단계는 사용자 검증 결과 확인과 명시 승인 후 적용 직전 재백업·공유 DB/Flyway/번호 재확인→V23 적용→8083 전환→5176 실제 화면 재검증이다. backend/data/·기존 작업 보존, sd-work21e8cc0 유지, commit/push/PR/merge/rebase/새branch/worktree 없음. 검증 보고서와 백업은 이번 Codex 채팅 outputs에 보관한다.
+
+
+## 2026-10-27 프로젝트별 프로그램 대장 V1 — 로컬 구현·검증
+
+PR40 병합 후 sd-work/dev-pm 기준 21e8cc0에서 구현했다. 기존 화면 설계 상단에 프로그램 대장을 연결하고 기존 화면/LLM 도구는 접힘 영역에 보존한다. 지정 그룹·GROUP_DESIGN 이력의 programCandidates 선택 등록, 수동 추가, 명칭/설명 저장, UUID PROGRAM_ID, 프로젝트 격리, 낙관적 편집 버전, 같은 분석 후보 DB 중복 제약을 제공한다. 분석 당시 요구사항 ID/Revision/원문 snapshot과 그룹/분석/그룹 버전을 별도 프로그램 근거로 저장한다. 원본 분석·그룹·이력은 수정하지 않는다. 공통 Shell/CSS·메뉴 등록·AI 재실행 없음.
+
+BSDGPROG/BSDGPREQ 재사용, V22 추가 migration과 /api/standard-design/projects/{project}/programs API를 구현했다. 기존 분석 생성 프로그램도 조회한다. 성공한 GROUP_DESIGN의 programCandidates만 이번 채택 대상이며 과거 screenCandidates는 자동 채택하지 않는다. 근거 미제공은 미제공으로 표시하고 입력에 없는 근거는 채택을 거부한다.
+
+실제 PostgreSQL 분석을 읽기 전용 복사한 격리 H2 8110/프런트5197에서 후보 등록→편집→새로고침 유지, 수동 추가, 중복 선택 차단, 이전 이력 전환, 근거 Rev/당시 본문/원본 분석 링크를 확인했다. PostgreSQL V22 문법/수동 다건/중복 제약/근거 Rev는 임시 테이블 트랜잭션 롤백으로 통과했다. frontend136/136, backend94건 중82통과·조건12skip·실패0, build/lint/diff 검사 통과. 원본 서버와 격리 서버의 지정 분석 REQUEST_JSON/RESPONSE_RAW_JSON 동일함을 API로 재확인했다. 공유 PostgreSQL V22 적용과 기존 8083 재기동은 미수행이므로 기존 5176 서버에 이 기능의 저장 경로는 아직 배포되지 않았다. 검증 서버 데이터는 격리 메모리 DB이며 프로세스 종료 시 사라진다. backend/data 보존, commit/push/새 PR/dev-pm 통합 미수행. 다음 반복은 PM 검토 후 개발 DB V22 반영·새 백엔드 전환 및 UI 고도화다.
+
 ## 2026-10-27 설계 초안 검토 HTML v2 디자인 이식
 
 첨부 HTML을 직접 읽고 브라우저 렌더와 비교해 독립 검토 화면 전용 CSS/카드/컨텍스트/요약/sticky 탐색/근거 Rev/원본 접힘을 이식했다. 기존 실제 API/DTO/adapter/입력 스냅샷·URL·복귀를 유지했다. 시안 단독 헤더·합성 안내·샘플은 제품에 넣지 않았다. 공통 Shell·CSS·메뉴·툴바·DB 불변. 1920/1440/390 전체·상세 비교와 이력 전환·직접 URL·오류·근거·복귀 확인. 390 본문366px/내부 넘침0이나 공통 Shell 최소폭1280의 전체 가로 스크롤은 남는다. 프런트133/133, build/lint/diff, 격리 H2 backend78통과/12skip. 기존 PR40 갱신 대상이며 PM 병합 전. [검증 및 차이](sd-design-review-html-v2.md).
