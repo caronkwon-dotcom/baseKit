@@ -85,3 +85,10 @@ export function groupingNotices(input: GroupingNoticeInput): GroupingNotice[] {
  }
  return notices;
 }
+
+/** Card badge: only claims an origin when the AI baseline or the reviewed copy proves it. */
+export function memberBadge(row: Pick<DiffRow, 'origin'> | undefined): string {
+ if (row?.origin === 'KEPT') return 'AI 추천';
+ if (row?.origin === 'ADDED') return '직접 추가';
+ return '';
+}
