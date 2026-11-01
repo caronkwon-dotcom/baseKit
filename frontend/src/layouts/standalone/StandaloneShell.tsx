@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { programComponents } from '../../config/programRegistry';
-import { metadataRepository, programByKey } from '../../repositories/metadataRepository';
+import { programByKey } from '../../repositories/metadataRepository';
+import { useSidebarMenuTree } from '../../runtime/useSidebarMenuTree';
 import type { MenuNode } from '../../types/adminShell';
 import { designLifecycleRepository } from '../../modules/standard-design/design-lifecycle/designLifecycle.repository';
 import { ProjectContextDialog } from '../../modules/standard-design/ui/components/ProjectContextSelector';
@@ -17,11 +18,12 @@ function decode(value: string | undefined) {
 export default function StandaloneShell() {
   const location = useLocation();
   const navigate = useNavigate();
+  const sidebarMenus = useSidebarMenuTree();
   const parts = location.pathname.split('/');
   const menuId = decode(parts[2]);
   const programKey = decode(parts[3]);
-  const root = metadataRepository.getMenuTree().find(menu => menu.menuKey === menuId);
-  const keys = root ? programs(root).filter(key => programByKey[key]?.useYn === 'Y' && programComponents[key]) : [];
+  const root = sidebarMenus.menuTree.find(menu => menu.menuKey === menuId);
+  const keys = useMemo(() => root ? programs(root).filter(key => programByKey[key]?.useYn === 'Y' && programComponents[key]) : [], [root]);
   const [settings, setSettings] = useState<MenuExecutionSetting[]>([]);
   const [projectDialog, setProjectDialog] = useState(false);
   const [, refreshContext] = useState(0);
@@ -42,16 +44,19 @@ export default function StandaloneShell() {
   useEffect(() => {
     const linked = (event: Event) => {
       const key = (event as CustomEvent<{ PROGRAM_KEY: string }>).detail?.PROGRAM_KEY;
-      if (!root || !programs(root).includes(key) || !programComponents[key]) return;
+      if (!root || !keys.includes(key)) return;
       const resume = () => navigate(`/window/${encodeURIComponent(menuId)}/${encodeURIComponent(key)}`);
       if (window.dispatchEvent(new CustomEvent('basekit:before-program-change', { cancelable: true, detail: { resume } }))) resume();
     };
     window.addEventListener('basekit:open-program', linked);
     return () => window.removeEventListener('basekit:open-program', linked);
-  }, [menuId, navigate, root]);
+  }, [keys, menuId, navigate, root]);
+  if (sidebarMenus.status === 'loading') return <main role="status">Loading standalone menu…</main>;
+  if (sidebarMenus.status === 'error') return <main role="alert">Could not load standalone menu. {sidebarMenus.errorMessage}</main>;
   if (!root || !keys.includes(programKey) || parts.length !== 4) return <main role="alert">등록되지 않은 독립 창 주소입니다.</main>;
   return <div className={`standalone-shell standalone-shell--${designType.toLowerCase()}`}>
     <header className="standalone-shell__header"><strong>{root.menuName}</strong><span>{program.programName}</span></header>
+    {sidebarMenus.invalidProgramMenus.length > 0 && <p role="status">{sidebarMenus.invalidProgramMenus.length} menu(s) have invalid Program links.</p>}
     <nav className="standalone-shell__navigation" aria-label="모듈 메뉴">{keys.map(key => <button key={key} aria-current={key === programKey ? 'page' : undefined} onClick={() => open(key)}>{programByKey[key].programName}</button>)}</nav>
     {contextMissing ? <main className="standalone-shell__content"><p>이 화면을 사용하려면 프로젝트를 선택하세요.</p><button onClick={() => setProjectDialog(true)}>프로젝트 선택</button></main>
       : <main className="standalone-shell__content" key={programKey}>{programComponents[programKey]()}</main>}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { listMenuExecutionSettings, type MenuExecutionSetting } from '../services/menuExecutionApi';
 import { launchStandaloneWindow, resolveMenuExecution } from '../runtime/menuExecution';
@@ -7,7 +7,8 @@ import MdiTabs from '../components/MdiTabs';
 import Sidebar from '../components/Sidebar';
 import Workspace from '../components/Workspace';
 import { programComponents } from '../config/programRegistry';
-import { metadataRepository, programByKey } from '../repositories/metadataRepository';
+import { programByKey } from '../repositories/metadataRepository';
+import { useSidebarMenuTree } from '../runtime/useSidebarMenuTree';
 import type { MdiTab, MenuNode, ProgramKey } from '../types/adminShell';
 import { designLifecycleRepository } from '../modules/standard-design/design-lifecycle/designLifecycle.repository';
 import { ProjectContextDialog } from '../modules/standard-design/ui/components/ProjectContextSelector';
@@ -28,7 +29,8 @@ function findProgramKeyByRoutePath(routePath: string): ProgramKey {
 export default function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const menuTree = useMemo(() => metadataRepository.getMenuTree(), []);
+  const sidebarMenus = useSidebarMenuTree();
+  const menuTree = sidebarMenus.menuTree;
   const [executionSettings, setExecutionSettings] = useState<MenuExecutionSetting[]>([]);
   const [executionMessage, setExecutionMessage] = useState('');
   useEffect(() => {
@@ -65,7 +67,10 @@ export default function AppLayout() {
   const [activeProgramKey, setActiveProgramKey] = useState<ProgramKey>(initialContextMissing ? 'HOME' : initialProgramKey);
   const [projectContextDialogOpen, setProjectContextDialogOpen] = useState(initialContextMissing);
   const [pendingProjectProgramKey, setPendingProjectProgramKey] = useState<ProgramKey | null>(initialContextMissing ? initialProgramKey : null);
-  const activeTopMenu = menuTree.find((menu) => menu.menuKey === activeTopMenuKey) ?? menuTree[0];
+  const effectiveTopMenuKey = menuTree.some((menu) => menu.menuKey === activeTopMenuKey)
+    ? activeTopMenuKey
+    : findTopMenuKeyByProgram(menuTree, initialProgramKey) ?? menuTree[0]?.menuKey ?? '';
+  const activeTopMenu = menuTree.find((menu) => menu.menuKey === effectiveTopMenuKey);
 
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => {
@@ -106,7 +111,7 @@ export default function AppLayout() {
   const pinSidebar = () => { setSidebarPinned(true); setSidebarOpen(true); localStorage.setItem('basekit.navigation.sidebar-pinned', 'Y'); };
   const unpinSidebar = () => { setSidebarPinned(false); localStorage.setItem('basekit.navigation.sidebar-pinned', 'N'); };
   const selectTopMenu = (menuKey: string) => {
-    const sameMenu = menuKey === activeTopMenuKey;
+    const sameMenu = menuKey === effectiveTopMenuKey;
     setActiveTopMenuKey(menuKey);
     setFloatingMenuOpen(sameMenu ? !floatingMenuOpen : true);
   };
@@ -130,7 +135,7 @@ export default function AppLayout() {
   };
 
   const openProgram = (programKey: ProgramKey) => {
-    const execution = resolveMenuExecution(menuTree, programKey, executionSettings, activeTopMenuKey);
+    const execution = resolveMenuExecution(menuTree, programKey, executionSettings, effectiveTopMenuKey);
     if (execution?.EXECUTION_TYPE === 'WINDOW') {
       setExecutionMessage(launchStandaloneWindow(execution.MENU_ID, programKey) ? '' : '팝업이 차단되었습니다. 이 사이트의 팝업을 허용한 후 메뉴를 다시 선택해 주세요.');
       setFloatingMenuOpen(false);
@@ -185,10 +190,25 @@ export default function AppLayout() {
   return (
     <div className="app-shell">
       {executionMessage ? <div role="status">{executionMessage}</div> : null}
-      <Header topMenus={menuTree} activeTopMenuKey={activeTopMenuKey}
+      <Header topMenus={menuTree} activeTopMenuKey={effectiveTopMenuKey}
         sidebarOpen={sidebarOpen} onSelectTopMenu={selectTopMenu}
         onToggleSidebar={() => setSidebarOpen((open) => !open)}
         onOpenProgram={openProgram} notificationCount={3} />
+      {sidebarMenus.status === 'loading' && <div role="status" className="navigation-runtime-message">Loading DB menus...</div>}
+      {sidebarMenus.status === 'empty' && <div role="status" className="navigation-runtime-message">
+        {sidebarMenus.invalidProgramMenus.length
+          ? 'No usable DB menus are available. Review the invalid Program links below.'
+          : '등록된 DB 메뉴가 없습니다. HOME 화면은 계속 사용할 수 있습니다.'}
+      </div>}
+      {sidebarMenus.status === 'error' && <div role="alert" className="navigation-runtime-message">
+        Could not load DB menus. Static menus were not loaded automatically. {sidebarMenus.errorMessage}
+      </div>}
+      {sidebarMenus.invalidProgramMenus.length > 0 && sidebarMenus.status !== 'empty' && (
+        <div role="status" className="navigation-runtime-message">
+          Program 연결을 확인할 수 없어 메뉴 {sidebarMenus.invalidProgramMenus.length}개를 숨겼습니다.
+          {' '}{sidebarMenus.invalidProgramMenus.map((issue) => issue.MENU_KEY).join(', ')}
+        </div>
+      )}
       {floatingMenuOpen && activeTopMenu && (
         <>
           <button type="button" className="floating-navigation-backdrop" aria-label="플로팅 메뉴 닫기" onClick={() => setFloatingMenuOpen(false)} />

@@ -2,6 +2,8 @@ package com.caron.basekit.core.menu;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.caron.basekit.core.program.ProgramData;
+import com.caron.basekit.core.program.ProgramService;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -20,9 +22,11 @@ public class MenuService {
     private static final Set<String> PHASE_ONE_TYPES = Set.of("FOLDER", "PAGE");
 
     private final MenuMapper mapper;
+    private final ProgramService programService;
 
-    MenuService(MenuMapper mapper) {
+    MenuService(MenuMapper mapper, ProgramService programService) {
         this.mapper = mapper;
+        this.programService = programService;
     }
 
     @Transactional(readOnly = true)
@@ -42,7 +46,37 @@ public class MenuService {
 
     @Transactional(readOnly = true)
     public List<MenuTreeData> findMenuTree() {
+        return toMenuTree(mapper.findMenus(null, null, null, null, "Y"));
+    }
+
+    @Transactional(readOnly = true)
+    public MenuRuntimeData findRuntimeMenuTree() {
         List<MenuData> rows = mapper.findMenus(null, null, null, null, "Y");
+        Map<String, ProgramData> programsByKey = new HashMap<>();
+        programService.findPrograms(null, null, null, null)
+                .forEach(program -> programsByKey.put(program.PROGRAM_KEY(), program));
+
+        List<MenuProgramIssue> issues = new ArrayList<>();
+        List<MenuData> runtimeRows = rows.stream().filter(row -> {
+            if (!"PAGE".equals(row.MENU_TYPE_CODE())) {
+                return true;
+            }
+            ProgramData program = programsByKey.get(row.PROGRAM_KEY());
+            if (program == null) {
+                issues.add(new MenuProgramIssue(row.MENU_KEY(), row.PROGRAM_KEY(), "PROGRAM_NOT_REGISTERED"));
+                return false;
+            }
+            if (!"Y".equals(program.USE_YN())) {
+                issues.add(new MenuProgramIssue(row.MENU_KEY(), row.PROGRAM_KEY(), "PROGRAM_INACTIVE"));
+                return false;
+            }
+            return true;
+        }).toList();
+
+        return new MenuRuntimeData(toMenuTree(runtimeRows), issues);
+    }
+
+    private List<MenuTreeData> toMenuTree(List<MenuData> rows) {
         Map<String, List<MenuData>> childrenByParent = new HashMap<>();
         for (MenuData row : rows) {
             childrenByParent.computeIfAbsent(row.PARENT_MENU_KEY(), ignored -> new ArrayList<>()).add(row);

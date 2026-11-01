@@ -17,6 +17,7 @@ function harness(path, loadSettings) {
   if(id.includes('programRegistry')) return {programComponents:{P:()=>({screen:'menu-builder'})}};
   if(id.includes('metadataRepository')) return {metadataRepository:{getMenuTree:()=>tree},programByKey:{P:{useYn:'Y',programName:'메뉴 설계'}}};
   if(id.includes('menuExecutionApi')) return {listMenuExecutionSettings:loadSettings};
+  if(id.includes('runtime/useSidebarMenuTree')) return {useSidebarMenuTree:()=>({source:'STATIC',status:'ready',menuTree:tree,invalidProgramMenus:[],errorMessage:''})};
   if(id.includes('designLifecycle.repository')) return {designLifecycleRepository:{getSelectedProjectId:()=>''}};
   return {};
  };
@@ -24,18 +25,22 @@ function harness(path, loadSettings) {
  return {effects,render(){index=0;effects.length=0;return exports.default();}};
 }
 
+function renderedProgram(page) {
+ return page.props.children.find(child=>child?.props?.className==='standalone-shell__content').props.children;
+}
+
 test('registered Window renders immediately while settings are pending and after server failure',async()=>{
  let reject;
  const h=harness('/window/SD/P',()=>new Promise((_,r)=>{reject=r;}));
  let page=h.render();
  assert.equal(page.type,'div');
- assert.equal(page.props.children[2].props.children.screen,'menu-builder');
+ assert.equal(renderedProgram(page).screen,'menu-builder');
  h.effects.forEach(fn=>fn());
  reject(new Error('old server or offline'));
  await new Promise(resolve=>setImmediate(resolve));
  page=h.render();
  assert.equal(page.props.className,'standalone-shell standalone-shell--basekit');
- assert.equal(page.props.children[2].props.children.screen,'menu-builder');
+ assert.equal(renderedProgram(page).screen,'menu-builder');
 });
 
 test('saved LINEAR presentation is retained without access confirmation',async()=>{

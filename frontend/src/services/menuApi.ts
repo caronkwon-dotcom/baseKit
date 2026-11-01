@@ -1,3 +1,5 @@
+import { MENU_RUNTIME_CHANGED_EVENT } from './menuRuntimeApi';
+
 interface ApiResponse<T> { SUCCESS: boolean; DATA: T }
 interface ErrorResponse { MESSAGE?: string; FIELD_ERRORS?: Array<{ FIELD_NAME: string; MESSAGE: string }> }
 
@@ -46,10 +48,14 @@ async function request<T>(path = '', init?: RequestInit): Promise<T> {
 
 export const menuApi = {
   find: (values: Record<string, string>) => request<MenuRecord[]>(query(values)),
-  update: (menuKey: string, value: MenuSave) => request<MenuRecord>(`/${encodeURIComponent(menuKey)}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(value),
-  }),
+  update: async (menuKey: string, value: MenuSave) => {
+    const updated = await request<MenuRecord>(`/${encodeURIComponent(menuKey)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(value),
+    });
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event(MENU_RUNTIME_CHANGED_EVENT));
+    return updated;
+  },
 };
 

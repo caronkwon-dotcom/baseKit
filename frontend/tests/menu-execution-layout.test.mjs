@@ -20,6 +20,7 @@ function layoutHarness(loadSettings) {
   if(id==='react/jsx-runtime') return {jsx:(type,props)=>({type,props}),jsxs:(type,props)=>({type,props})};
   if(id==='react-router-dom') return {useLocation:()=>({pathname:'/'}),useNavigate:()=>path=>navigations.push(path)};
   if(id.includes('menuExecutionApi')) return {listMenuExecutionSettings:loadSettings};
+  if(id.includes('runtime/useSidebarMenuTree')) return {useSidebarMenuTree:()=>({source:'STATIC',status:'ready',menuTree:tree,invalidProgramMenus:[],errorMessage:''})};
   if(id.includes('runtime/menuExecution')) return {resolveMenuExecution,launchStandaloneWindow:(...args)=>{launches.push(args);return true;}};
   if(id.includes('metadataRepository')) return {metadataRepository:{getMenuTree:()=>tree},programByKey:programs};
   if(id.includes('designLifecycle.repository')) return {designLifecycleRepository:{getSelectedProjectId:()=>null}};
