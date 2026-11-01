@@ -17,20 +17,27 @@ const labels: Record<GroupAnalysisStatus,string> = {
  SUCCEEDED:'기존 분석 성공 · 검토 필요',CALL_FAILED:'기존 호출 실패',PARSE_FAILED:'기존 파싱 실패',
 };
 const succeeded=(run:GroupAnalysis)=>run.STATUS==='SUCCESS' || run.STATUS==='SUCCEEDED';
-export default function RequirementGroupAnalysis({group,onClose,projectName,embedded=false,blocked=false,initialAnalysisId}:{group:RequirementGroup;onClose:()=>void;projectName?:string;embedded?:boolean;blocked?:boolean;initialAnalysisId?:string}) {
+export default function RequirementGroupAnalysis({group,onClose,projectName,embedded=false,blocked=false,initialAnalysisId,fixedType,onRunsChange}:{group:RequirementGroup;onClose:()=>void;projectName?:string;embedded?:boolean;blocked?:boolean;initialAnalysisId?:string;fixedType?:GroupAnalysis['ANALYSIS_TYPE'];onRunsChange?:(runs:GroupAnalysis[])=>void}) {
  const {pathname}=useLocation();
  const [runs,setRuns]=useState<GroupAnalysis[]>([]), [selected,setSelected]=useState<GroupAnalysis|null>(null);
- const [analysisType,setAnalysisType]=useState(()=>sessionStorage.getItem(`basekit:group-analysis-request:${group.REQUIREMENT_GROUP_ID}:type`) ?? 'GROUP_RECOMMENDATION');
+ const [analysisType,setAnalysisType]=useState(()=>fixedType ?? sessionStorage.getItem(`basekit:group-analysis-request:${group.REQUIREMENT_GROUP_ID}:type`) ?? 'GROUP_RECOMMENDATION');
  const [busy,setBusy]=useState(false), [error,setError]=useState(''), [notice,setNotice]=useState('');
  const [connection,setConnection]=useState<{content:string;elapsedMs:number;model:string}|null>(null);
  const storageKey=`basekit:group-analysis-request:${group.REQUIREMENT_GROUP_ID}`;
- const [pendingRequest,setPendingRequest]=useState(()=>!!sessionStorage.getItem(storageKey));
- const request=useRef<string|null>(sessionStorage.getItem(storageKey));
+ // A pending request of the other analysis type belongs to the other step: never recover, poll or overwrite it here.
+ const storedType=sessionStorage.getItem(`${storageKey}:type`);
+ const foreignPending=!!fixedType && !!sessionStorage.getItem(storageKey) && !!storedType && storedType!==fixedType;
+ const ofType=(list:GroupAnalysis[])=>fixedType ? list.filter(run=>run.ANALYSIS_TYPE===fixedType):list;
+ const onRuns=useRef(onRunsChange), runsLoaded=useRef(false);
+ useEffect(()=>{onRuns.current=onRunsChange;});
+ const [pendingRequest,setPendingRequest]=useState(()=>!foreignPending && !!sessionStorage.getItem(storageKey));
+ const request=useRef<string|null>(foreignPending ? null:sessionStorage.getItem(storageKey));
  const requestVersion=useRef<number>(Number(sessionStorage.getItem(`${storageKey}:version`)) || group.VERSION);
  const running=useRef(false), alive=useRef(true), selectedId=useRef(initialAnalysisId ?? '');
  const statuses=useRef(new Map<string,GroupAnalysisStatus>());
  const hasRunning=runs.some(run=>run.STATUS==='RUNNING');
  useEffect(()=>{if(selected)selectedId.current=selected.ANALYSIS_ID;},[selected]);
+ useEffect(()=>{if(runsLoaded.current)onRuns.current?.(runs);},[runs]);
  useEffect(()=>{
   let current=true;alive.current=true;let polling=false;
   const load=async()=>{
@@ -39,9 +46,10 @@ export default function RequirementGroupAnalysis({group,onClose,projectName,embe
     const list=await api.analyses(group.REQUIREMENT_GROUP_ID);if(!current)return;
     const completed=list.find(run=>statuses.current.get(run.ANALYSIS_ID)==='RUNNING' && run.STATUS!=='RUNNING');
     if(completed)setNotice(succeeded(completed) ? '분석이 완료되었습니다. 결과와 근거를 검토하세요.' : `분석이 종료되었습니다: ${labels[completed.STATUS]}`);
-    statuses.current=new Map(list.map(run=>[run.ANALYSIS_ID,run.STATUS]));setRuns(list);
+    statuses.current=new Map(list.map(run=>[run.ANALYSIS_ID,run.STATUS]));runsLoaded.current=true;setRuns(list);
     const recovered=request.current ? list.find(run=>run.REQUEST_ID===request.current):undefined;
-    const target=recovered ?? list.find(run=>run.ANALYSIS_ID===selectedId.current) ?? list[0];
+    const typed=fixedType ? list.filter(run=>run.ANALYSIS_TYPE===fixedType):list;
+    const target=(recovered && typed.includes(recovered) ? recovered:undefined) ?? typed.find(run=>run.ANALYSIS_ID===selectedId.current) ?? typed[0];
     if(target){const result=await api.analysis(group.REQUIREMENT_GROUP_ID,target.ANALYSIS_ID);if(current)setSelected(result);}
     if(recovered){request.current=null;sessionStorage.removeItem(storageKey);setPendingRequest(false);}
    }catch{if(current)setError('실행 상태를 조회하지 못했습니다. 연결이 복구되면 다시 확인합니다.');}
@@ -50,16 +58,17 @@ export default function RequirementGroupAnalysis({group,onClose,projectName,embe
   void load();
   const timer=hasRunning || request.current ? window.setInterval(()=>void load(),2500):undefined;
   return()=>{current=false;alive.current=false;if(timer)window.clearInterval(timer);};
- },[group.REQUIREMENT_GROUP_ID,storageKey,hasRunning,pendingRequest]);
+ },[group.REQUIREMENT_GROUP_ID,storageKey,hasRunning,pendingRequest,fixedType]);
  const operate=async(work:()=>Promise<void>)=>{
   if(running.current)return;running.current=true;setBusy(true);setError('');
   try{await work();}catch(e){if(alive.current)setError(e instanceof Error ? e.message:'요청 결과를 확인하지 못했습니다. 실행 이력을 조회하세요.');}
   finally{running.current=false;if(alive.current)setBusy(false);}
  };
  const refresh=()=>void operate(async()=>{
-  const list=await api.analyses(group.REQUIREMENT_GROUP_ID);if(!alive.current)return;setRuns(list);
+  const list=await api.analyses(group.REQUIREMENT_GROUP_ID);if(!alive.current)return;runsLoaded.current=true;setRuns(list);
   const found=request.current ? list.find(run=>run.REQUEST_ID===request.current):undefined;
-  const target=found ?? list.find(run=>run.ANALYSIS_ID===selectedId.current) ?? list[0];
+  const typed=ofType(list);
+  const target=(found && typed.includes(found) ? found:undefined) ?? typed.find(run=>run.ANALYSIS_ID===selectedId.current) ?? typed[0];
   if(target){const result=await api.analysis(group.REQUIREMENT_GROUP_ID,target.ANALYSIS_ID);if(alive.current)setSelected(result);}
   if(found){request.current=null;sessionStorage.removeItem(storageKey);setPendingRequest(false);}
  });
@@ -70,7 +79,7 @@ export default function RequirementGroupAnalysis({group,onClose,projectName,embe
   request.current=null;sessionStorage.removeItem(storageKey);setPendingRequest(false);if(!alive.current)return;
   selectedId.current=result.ANALYSIS_ID;setSelected(result);
   statuses.current.set(result.ANALYSIS_ID,result.STATUS);
-  setRuns(previous=>[result,...previous.filter(run=>run.ANALYSIS_ID!==result.ANALYSIS_ID)]);
+  runsLoaded.current=true;setRuns(previous=>[result,...previous.filter(run=>run.ANALYSIS_ID!==result.ANALYSIS_ID)]);
   setNotice(result.STATUS==='RUNNING' ? '분석을 실행했습니다. 다른 작업을 계속할 수 있습니다. 이 창에서 완료 상태를 자동 확인합니다.' : labels[result.STATUS]);
  });
  const checkConnection=()=>void operate(async()=>{
@@ -80,18 +89,20 @@ export default function RequirementGroupAnalysis({group,onClose,projectName,embe
  const display=selected ? adaptGroupAnalysis(selected):null;
  const actions=<div className="sd-analysis-controls">
 
-  <label>분석 유형<select aria-label="분석 유형" value={analysisType} disabled={busy || pendingRequest} onChange={e=>setAnalysisType(e.target.value)}><option value="GROUP_RECOMMENDATION">그룹 보완 · 요구사항 추천</option><option value="GROUP_DESIGN">그룹 설계 · 업무 구조 제안</option></select></label>
-  <ActionButton actionCode="EXECUTE" label={pendingRequest ? '실행 요청 재확인':'분석 실행'} disabled={busy || blocked || !group.REQUIREMENT_GROUP_ID || !group.MEMBERS.length || hasRunning} onClick={execute} />
+  {fixedType ? <p className="sd-analysis-help">분석 유형: {fixedType==='GROUP_RECOMMENDATION' ? '그룹 보완 · 요구사항 추천':'그룹 설계 · 업무 구조 제안'}</p>:<label>분석 유형<select aria-label="분석 유형" value={analysisType} disabled={busy || pendingRequest} onChange={e=>setAnalysisType(e.target.value)}><option value="GROUP_RECOMMENDATION">그룹 보완 · 요구사항 추천</option><option value="GROUP_DESIGN">그룹 설계 · 업무 구조 제안</option></select></label>}
+  <ActionButton actionCode="EXECUTE" label={pendingRequest ? '실행 요청 재확인':'분석 실행'} disabled={busy || blocked || foreignPending || !group.REQUIREMENT_GROUP_ID || !group.MEMBERS.length || hasRunning} onClick={execute} />
 
  </div>;
  const content=<>
-  <p className="sd-analysis-help">{analysisType === 'GROUP_RECOMMENDATION' ? '현재 그룹에 추가할 요구사항과 추천 사유를 검토합니다.' : '현재 그룹의 업무영역·프로세스·프로그램 후보를 검토합니다.'} 결과를 검토한 후 기본정보에서 반영하세요.</p>
+  <p className="sd-analysis-help">{analysisType === 'GROUP_RECOMMENDATION' ? '현재 그룹에 추가할 요구사항과 추천 사유를 검토합니다.' : '현재 그룹의 업무영역·프로세스·프로그램 후보를 검토합니다.'} 결과를 검토한 후 STEP 01에서 반영하세요.</p>
   {notice ? <BaseKitMessage type="info" message={notice} />:null}
 
-  {blocked ? <BaseKitMessage type="warn" message="기본정보에서 변경 내용을 저장한 후 분석을 실행하세요." />:null}
+  {blocked ? <BaseKitMessage type="warn" message="STEP 01에서 변경 내용을 저장한 후 분석을 실행하세요." />:null}
+  {foreignPending ? <BaseKitMessage type="info" message="다른 단계의 분석 실행 요청을 확인 중입니다. 확인이 끝난 후 실행하세요." />:null}
+  {hasRunning && !ofType(runs).some(run=>run.STATUS==='RUNNING') ? <BaseKitMessage type="info" message="다른 단계의 분석이 진행 중입니다. 완료 후 실행하세요." />:null}
   {error ? <BaseKitMessage type="error" message={error} />:null}
   <div className="sd-analysis-controls"><FormField label="실행 이력" labelPosition="TOP" className="sd-analysis-history"><select aria-label="그룹 분석 실행 이력" disabled={busy} value={selected?.ANALYSIS_ID ?? ''} onChange={e=>{const id=e.target.value;if(id)void operate(async()=>{selectedId.current=id;const result=await api.analysis(group.REQUIREMENT_GROUP_ID,id);if(alive.current)setSelected(result);});}}>
-   <option value="">실행 선택</option>{runs.map(run=><option key={run.ANALYSIS_ID} value={run.ANALYSIS_ID}>{run.ANALYSIS_TYPE==='GROUP_RECOMMENDATION' ? '그룹 보완':'그룹 설계'} · {new Date(run.CREATED_AT).toLocaleString('ko-KR')} · {labels[run.STATUS]} · v{run.GROUP_VERSION}</option>)}
+   <option value="">실행 선택</option>{ofType(runs).map(run=><option key={run.ANALYSIS_ID} value={run.ANALYSIS_ID}>{run.ANALYSIS_TYPE==='GROUP_RECOMMENDATION' ? '그룹 보완':'그룹 설계'} · {new Date(run.CREATED_AT).toLocaleString('ko-KR')} · {labels[run.STATUS]} · v{run.GROUP_VERSION}</option>)}
   </select></FormField><ActionButton actionCode="SEARCH" label="이력 새로고침" disabled={busy} onClick={refresh} /></div>
   {selected?.ANALYSIS_TYPE==='GROUP_DESIGN' && succeeded(selected) && <p><a href={designReviewUrl(group.PROJECT_ID,group.REQUIREMENT_GROUP_ID,selected.ANALYSIS_ID,pathname)} target="_blank" rel="noreferrer">설계 초안 검토 열기 · 읽기 전용 ↗</a></p>}
   {selected ? <><p className="sd-analysis-help">{labels[selected.STATUS]} · 그룹 버전 {selected.GROUP_VERSION}{selected.ELAPSED_MS!=null ? ` · ${(selected.ELAPSED_MS/1000).toFixed(1)}초`:''}</p>

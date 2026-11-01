@@ -23,7 +23,7 @@ test('deleted, discarded, and foreign-project requirements cannot make old evide
 test('URLs retain exact run identity and shell context; return retains analysis tab',()=>{
  const url=designReviewUrl('P 1','G/1','A&1','/standard-design/requirement-groups');const q=new URLSearchParams(url.split('?')[1]);assert.ok(url.startsWith('#/standard-design/design-review?'));assert.equal(q.get('analysis'),'A&1');assert.equal(q.get('group'),'G/1');
  const windowUrl=designReviewUrl('P1','G1','A1','/window/SD/SD_REQUIREMENT_GROUP');assert.ok(windowUrl.includes('/window/SD/SD_REQUIREMENT_GROUP?'));assert.equal(new URLSearchParams(windowUrl.split('?')[1]).get('workspace'),'design-review');
- const back=groupAnalysisUrl('P1','G1','A1','/window/SD/SD_REQUIREMENT_GROUP');assert.equal(new URLSearchParams(back.split('?')[1]).get('tab'),'analysis');assert.equal(new URLSearchParams(back.split('?')[1]).get('analysis'),'A1');
+ const back=groupAnalysisUrl('P1','G1','A1','/window/SD/SD_REQUIREMENT_GROUP');assert.equal(new URLSearchParams(back.split('?')[1]).get('tab'),'analysis');assert.equal(new URLSearchParams(back.split('?')[1]).get('step'),'3');assert.equal(new URLSearchParams(back.split('?')[1]).get('analysis'),'A1');
 });
 test('review loader only GETs audited endpoints and never replaces an older selected execution',async()=>{
  const original=globalThis.fetch;const calls=[];
