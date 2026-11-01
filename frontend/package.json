@@ -11,6 +11,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "preview": "vite preview",
     "import:standard-words": "node scripts/import-standard-words.mjs"
   },

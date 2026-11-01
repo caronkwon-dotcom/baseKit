@@ -30,6 +30,11 @@ public class MenuController {
         return ApiResponse.success(service.findMenuTree());
     }
 
+    @GetMapping("/runtime")
+    ApiResponse<MenuRuntimeData> findRuntimeMenuTree() {
+        return ApiResponse.success(service.findRuntimeMenuTree());
+    }
+
     @GetMapping
     ApiResponse<List<MenuData>> findMenus(
             @RequestParam(name = "KEYWORD", required = false) String keyword,
