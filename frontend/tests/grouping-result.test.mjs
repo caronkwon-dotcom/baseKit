@@ -76,3 +76,12 @@ test('group status and requirement drift are reported as mismatches', () => {
  assert.match(notice({ revisionMismatch: 2 })[0].text, /2건의 요구사항/);
  assert.match(notice({ discarded: 1 })[0].text, /폐기/);
 });
+
+test('card badge is shown only when the origin is proven', async () => {
+ const { memberBadge } = await import('../src/modules/standard-design/requirementgroup/groupingResult.ts');
+ assert.equal(memberBadge({ origin: 'KEPT' }), 'AI 추천');
+ assert.equal(memberBadge({ origin: 'ADDED' }), '직접 추가');
+ assert.equal(memberBadge({ origin: 'UNKNOWN' }), '');
+ assert.equal(memberBadge({ origin: 'EXCLUDED' }), '');
+ assert.equal(memberBadge(undefined), '');
+});
