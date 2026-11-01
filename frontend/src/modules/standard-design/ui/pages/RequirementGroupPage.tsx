@@ -140,9 +140,9 @@ function RequirementGroupManagement() {
  const finishLeave=(action:()=>void)=>{setLeave(null);setTimeout(()=>{allowLeave.current=true;action();allowLeave.current=false;},0);};
  const openAdd=(source:'HUMAN'|'ANALYSIS')=>void run(async()=>{
   const [rs,as]=await Promise.all([requirementApi.list(projectId),source==='ANALYSIS' ? requirementAnalysisSourceApi.list(projectId):Promise.resolve([])]);
-  if(activeProject.current!==projectId)return;setRequirements(rs);setAnalyses(as);setAnalysisId(as[0]?.ANALYSIS_ID ?? '');setBasket({});setModalSearch('');setReviewBasket(false);setModal(source);
+  if(activeProject.current!==projectId)return;setRequirements(rs);setAnalyses(as);setAnalysisId(as[0]?.ANALYSIS_ID ?? '');setBasket({});setModalSearch('');setReviewBasket(false);setMessage(m=>m?.type==='error' ? null:m);setModal(source);
  });
- const closeAdd=()=>{if(Object.keys(basket).length && !window.confirm('아직 반영하지 않은 선택을 버릴까요?'))return;setModal(null);setBasket({});};
+ const closeAdd=()=>{if(Object.keys(basket).length && !window.confirm('아직 반영하지 않은 선택을 버릴까요?'))return;setMessage(m=>m?.type==='error' ? null:m);setModal(null);setBasket({});};
  const candidates:Candidate[]=modal==='HUMAN' ? requirements.map(r=>({KEY:r.REQUIREMENT_ID,REQUIREMENT:r,ANALYSIS_ID:null,ORIGINAL_REASON:''})) : (analyses.find(a=>a.ANALYSIS_ID===analysisId)?.ITEMS ?? []).flatMap(item=>{
   const r=requirements.find(r=>r.REQUIREMENT_ID===item.REQUIREMENT_ID);return r ? [{KEY:`${analysisId}:${r.REQUIREMENT_ID}`,REQUIREMENT:r,ANALYSIS_ID:analysisId,ORIGINAL_REASON:item.ORIGINAL_REASON}]:[];
  });
