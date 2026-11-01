@@ -11,7 +11,7 @@ export function designReviewUrl(project: string, group: string, analysis: string
  return '#' + (windowPath || DESIGN_REVIEW_PATH) + '?' + params;
 }
 export function groupAnalysisUrl(project: string, group: string, analysis: string, sourcePath: string) {
- return '#' + (sourcePath.startsWith('/window/') ? sourcePath : '/standard-design/requirement-groups') + '?' + new URLSearchParams({project,group,analysis,tab:'analysis'});
+ return '#' + (sourcePath.startsWith('/window/') ? sourcePath : '/standard-design/requirement-groups') + '?' + new URLSearchParams({project,group,analysis,tab:'analysis',step:'3'});
 }
 /** Only audited GET methods. The ordinary analyses list expires RUNNING records. */
 export async function loadDesignReview(project: string, groupId: string, analysisId: string) {
