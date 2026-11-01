@@ -1,28 +1,61 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { BaseKitMessage, DataTable, type DataTableColumn } from '../../../../components/common';
 import { projectGroupingApi, type GroupingRun } from '../../projectgrouping/projectGroupingApi';
 import { groupStatusLabels, type GroupMember, type RequirementGroup } from '../../requirementgroup/requirementGroupApi';
 import { compareGroupingResult, groupingNotices, groupingSourceOf, memberBadge, type DiffOrigin, type DiffRow } from '../../requirementgroup/groupingResult';
+import { parseDescription, parseProcess } from '../../requirementgroup/requirementText';
 import './groupAnalysis.css';
 
 const originLabels: Record<DiffOrigin, string> = { KEPT: 'AI 추천 유지', ADDED: '추가', EXCLUDED: '제외', UNKNOWN: '확인 불가' };
 const stageLabels = { REVIEW: '등록 전 검토', AFTER: '등록 후 변경', '': '' } as const;
 const empty = '등록된 내용 없음';
 
+const section = (title: string, children: ReactNode, className = '') => <div className={`sd-gr-field ${className}`.trim()}><dt>{title}</dt><dd>{children}</dd></div>;
+const none = <span className="sd-gr-empty">{empty}</span>;
+
+function Description({ text }: { text: string | undefined }) {
+ const lines = parseDescription(text);
+ if (!lines.length) return none;
+ // Consecutive bullets share one list so assistive technology reads them as a single list.
+ const blocks: ({ kind: 'gap' } | { kind: 'meta'; text: string } | { kind: 'bullets'; items: string[] })[] = [];
+ for (const line of lines) {
+  const last = blocks[blocks.length - 1];
+  if (line.kind === 'bullet') { if (last?.kind === 'bullets') last.items.push(line.text); else blocks.push({ kind: 'bullets', items: [line.text] }); }
+  else if (line.kind === 'meta') blocks.push({ kind: 'meta', text: line.text });
+  else blocks.push({ kind: 'gap' });
+ }
+ return <div className="sd-gr-text">{blocks.map((block, index) => block.kind === 'gap' ? <div key={index} className="sd-gr-gap" aria-hidden="true" /> : block.kind === 'meta' ? <p key={index} className="sd-gr-meta-line">{block.text}</p> : <ul key={index} className="sd-gr-bullets">{block.items.map((item, itemIndex) => <li key={itemIndex}>{item}</li>)}</ul>)}</div>;
+}
+
+function Process({ text }: { text: string | undefined }) {
+ const view = parseProcess(text);
+ if (view.mode === 'EMPTY') return none;
+ if (view.mode === 'TEXT') return <p className="sd-gr-plain">{view.text}</p>;
+ return <ol className={view.mode === 'CHIPS' ? 'sd-gr-steps' : 'sd-gr-steps sd-gr-steps--list'}>{view.steps.map((step, index) => <li key={index}><span className="sd-gr-step-no" aria-hidden="true">{index + 1}</span><span>{step}</span></li>)}</ol>;
+}
+
 function MemberCard({ member, badge, open, onToggle }: { member: GroupMember; badge: string; open: boolean; onToggle: () => void }) {
  const requirement = member.REQUIREMENT;
  const drifted = !!requirement && requirement.REQUIREMENT_REVISION !== member.REVIEWED_REVISION;
+ const reasonLabel = badge === 'AI 추천' ? '포함 사유 (AI)' : badge === '직접 추가' ? '포함 사유 (사용자)' : '포함 사유';
  return <details className="sd-gr-card" open={open}>
-  <summary onClick={event => { event.preventDefault(); onToggle(); }}>
+  <summary aria-expanded={open} onClick={event => { event.preventDefault(); onToggle(); }}>
    <strong>{requirement?.REQUIREMENT_NAME || member.REQUIREMENT_ID}</strong>
    {badge ? <span className="sd-gr-badge">{badge}</span> : null}
    <span className="sd-gr-id">{member.REQUIREMENT_ID}</span>
   </summary>
-  <dl className="sd-gr-body">
+  <div className="sd-gr-body">
    {drifted ? <BaseKitMessage type="warn" message={`검토 당시(r${member.REVIEWED_REVISION})와 다른 개정(현재 r${requirement.REQUIREMENT_REVISION})입니다. 아래는 현재 요구사항 기준입니다.`} /> : null}
-   {([['원문 내용', requirement?.DESCRIPTION], ['업무 프로세스', requirement?.PROCESS_DESCRIPTION], ['설계 의견', requirement?.DESIGN_OPINION], ['포함 사유', member.INCLUSION_REASON]] as const).map(([label, value]) =>
-    <div key={label}><dt>{label}</dt><dd className={value ? undefined : 'sd-gr-empty'}>{value || empty}</dd></div>)}
-  </dl>
+   <div className="sd-gr-chips"><span className="sd-gr-chip">{member.REQUIREMENT_ID}</span>{requirement ? <span className="sd-gr-chip">분석 기준 v{requirement.REQUIREMENT_REVISION}</span> : null}</div>
+   <dl className="sd-gr-fields">
+    {section('요구사항 내용', <Description text={requirement?.DESCRIPTION} />)}
+    {section('업무 프로세스', <Process text={requirement?.PROCESS_DESCRIPTION} />)}
+    <div className="sd-gr-pair">
+     {section('설계 의견', requirement?.DESIGN_OPINION ? <p className="sd-gr-plain">{requirement.DESIGN_OPINION}</p> : none, 'sd-gr-opinion')}
+     {section(reasonLabel, member.INCLUSION_REASON ? <p className="sd-gr-plain">{member.INCLUSION_REASON}</p> : none, 'sd-gr-reason-box')}
+    </div>
+   </dl>
+  </div>
  </details>;
 }
 
