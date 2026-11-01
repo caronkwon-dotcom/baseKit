@@ -14,14 +14,17 @@ test('STEP 01 reflects group status and unsaved edits', () => {
  assert.equal(groupStepStates(input({ saved: false }))[1].enabled, true);
 });
 
-test('STEP 02 follows the server analysis conditions and does not require confirmation (ADR 034)', () => {
+test('STEP 02 only shows stored results: it needs a saved unchanged group and no analysis precondition', () => {
  for (const status of ['DRAFT', 'REVIEW_REQUIRED', 'CONFIRMED']) assert.equal(groupStepStates(input({ status }))[2].enabled, true, status);
  assert.match(groupStepStates(input({ saved: false }))[2].reason, /저장/);
  assert.match(groupStepStates(input({ dirty: true }))[2].reason, /저장하지 않은 변경/);
- assert.match(groupStepStates(input({ memberCount: 0 }))[2].reason, /Requirement/);
- assert.match(groupStepStates(input({ hasDiscarded: true }))[2].reason, /폐기/);
+ assert.equal(groupStepStates(input({ memberCount: 0 }))[2].enabled, true);
+ assert.equal(groupStepStates(input({ hasDiscarded: true }))[2].enabled, true);
+ assert.equal(groupStepStates(input())[2].status, 'UNKNOWN');
  assert.equal(groupStepStates(input({ dirty: true }))[2].status, 'DISABLED');
  assert.equal(analysisBlockReason(input()), '');
+ assert.match(analysisBlockReason(input({ memberCount: 0 })), /Requirement/);
+ assert.match(analysisBlockReason(input({ hasDiscarded: true })), /폐기/);
 });
 
 test('STEP 03 additionally requires a confirmed group', () => {
@@ -48,10 +51,10 @@ test('analysis status is computed per type from the current group version', () =
  assert.equal(analysisTypeStatus([run(design, 'RUNNING', 3)], rec, 3), 'NOT_STARTED');
 });
 
-test('a version change turns completed analysis steps into re-review and never auto-completes', () => {
+test('a version change turns the completed design step into re-review and never auto-completes', () => {
  const analyses = [run('GROUP_RECOMMENDATION', 'SUCCESS', 3), run('GROUP_DESIGN', 'SUCCESS', 4)];
  const before = groupStepStates(input({ status: 'CONFIRMED', version: 4, analyses }));
- assert.equal(before[2].status, 'REVIEW_REQUIRED');
+ assert.equal(before[2].status, 'UNKNOWN');
  assert.equal(before[3].status, 'DONE');
  const after = groupStepStates(input({ status: 'DRAFT', version: 5, analyses }));
  assert.equal(after[3].status, 'DISABLED');
@@ -61,7 +64,7 @@ test('a version change turns completed analysis steps into re-review and never a
 
 test('labels carry the step title and a text status, and legacy URLs map to a step', () => {
  assert.equal(stepLabel(1, 'DONE'), 'STEP 01 그룹 구성·확정 · 완료');
- assert.equal(stepLabel(2, 'REVIEW_REQUIRED'), 'STEP 02 그룹 분석·검토 · 재검토 필요');
+ assert.equal(stepLabel(2, 'UNKNOWN'), 'STEP 02 그룹핑 분석 결과');
  assert.equal(stepLabel(3, 'DISABLED'), 'STEP 03 설계 분석·초안 검토');
  assert.equal(stepLabel(3, 'UNKNOWN'), 'STEP 03 설계 분석·초안 검토');
  assert.equal(stepFromQuery(new URLSearchParams('')), 1);

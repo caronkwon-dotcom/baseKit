@@ -37,6 +37,8 @@ export function analysisTypeStatus(analyses: GroupAnalysis[] | null, type: Group
 
 export function groupStepStates(input: GroupStepInput): Record<GroupStep, GroupStepState> {
  const blocked = analysisBlockReason(input);
+ // STEP 02 only shows stored results, so it needs a saved, unchanged group but no analysis precondition.
+ const viewBlocked = input.saved && !input.dirty ? '' : analysisBlockReason(input);
  const step1: GroupStepStatus = !input.saved ? 'NOT_STARTED'
   : input.dirty ? 'IN_PROGRESS'
   : input.status === 'CONFIRMED' ? 'DONE'
@@ -45,12 +47,12 @@ export function groupStepStates(input: GroupStepInput): Record<GroupStep, GroupS
  const step3Reason = blocked || (input.status === 'CONFIRMED' ? '' : confirmedReason);
  return {
   1: { step: 1, status: step1, enabled: true, reason: '' },
-  2: { step: 2, status: blocked ? 'DISABLED' : analysisTypeStatus(input.analyses, 'GROUP_RECOMMENDATION', input.version), enabled: !blocked, reason: blocked },
+  2: { step: 2, status: viewBlocked ? 'DISABLED' : 'UNKNOWN', enabled: !viewBlocked, reason: viewBlocked },
   3: { step: 3, status: step3Reason ? 'DISABLED' : analysisTypeStatus(input.analyses, 'GROUP_DESIGN', input.version), enabled: !step3Reason, reason: step3Reason },
  };
 }
 
-const stepTitles: Record<GroupStep, string> = { 1: 'STEP 01 그룹 구성·확정', 2: 'STEP 02 그룹 분석·검토', 3: 'STEP 03 설계 분석·초안 검토' };
+const stepTitles: Record<GroupStep, string> = { 1: 'STEP 01 그룹 구성·확정', 2: 'STEP 02 그룹핑 분석 결과', 3: 'STEP 03 설계 분석·초안 검토' };
 const statusTexts: Record<GroupStepStatus, string> = {
  UNKNOWN: '', DISABLED: '', NOT_STARTED: '미진행', IN_PROGRESS: '진행중', DONE: '완료', REVIEW_REQUIRED: '재검토 필요', FAILED: '실패',
 };
