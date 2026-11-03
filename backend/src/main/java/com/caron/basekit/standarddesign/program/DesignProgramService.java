@@ -42,7 +42,7 @@ public class DesignProgramService {
   var run=analyses.get(group,analysis);
   var input=read(Objects.toString(run.get("REQUEST_JSON"),"{}"));
   if(!project.equals(input.path("project").path("projectId").asText()) || !group.equals(input.path("group").path("groupId").asText())) throw bad("분석 입력의 프로젝트/그룹이 일치하지 않습니다.");
-  if(!"GROUP_DESIGN".equals(run.get("ANALYSIS_TYPE")) || !Set.of("SUCCESS","SUCCEEDED").contains(run.get("STATUS")))throw bad("성공한 GROUP_DESIGN 이력을 선택하세요.");
+  if(!Set.of("GROUP_DESIGN","GROUP_PROGRAMS").contains(run.get("ANALYSIS_TYPE")) || !Set.of("SUCCESS","SUCCEEDED").contains(run.get("STATUS")))throw bad("성공한 GROUP_DESIGN 또는 GROUP_PROGRAMS 이력을 선택하세요.");
   var response=run.get("RESPONSE");if(!(response instanceof JsonNode node) || !node.path("programCandidates").isArray())throw bad("프로그램 후보가 없는 분석입니다.");
   return new Source(run,input,((JsonNode)response).path("programCandidates"));
  }

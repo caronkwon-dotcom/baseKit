@@ -225,4 +225,37 @@ class RequirementGroupAnalysisIntegrationTest {
   jdbc.update("UPDATE BSDRGANL SET STATUS='SUCCEEDED',LEGACY_STATUS='SUCCEEDED',PROMPT_VERSION='group-analysis-v0.1',RESPONSE_RAW_JSON=? WHERE ANALYSIS_ID=?",raw,id);
   var saved=service.get(g.id(),id);assertEquals(raw,saved.get("RESPONSE_RAW_JSON"));assertNotNull(saved.get("RESPONSE"));assertEquals("SUCCEEDED",saved.get("STATUS"));
  }
+ @Test void programListResultKeepsExactIdsAndPreservesUncoveredRequirements() {
+  String input="{\"requirements\":[{\"requirementId\":\"A\"},{\"requirementId\":\"B\"},{\"requirementId\":\"C\"}]}";
+  var output=json.createObjectNode();var programs=output.putArray("programs");
+  programs.addObject().put("name","구매 목록").put("purpose","구매를 조회합니다.").putArray("requirementIds").add("A").add("A").add("HALLUCINATION");
+  programs.addObject().put("name","근거 없음").put("purpose","무시됩니다.").putArray("requirementIds").add("NOPE");
+  output.putArray("unclassified").addObject().put("requirementId","B").put("reason","불명확합니다.");
+  var result=service.programsResult(output.toString(),input);
+  assertEquals(1,result.path("programCandidates").size());
+  assertEquals(1,result.path("programCandidates").get(0).path("evidenceRequirementIds").size());
+  assertEquals(2,result.path("unclassified").size());
+  assertEquals("B",result.path("unclassified").get(0).path("requirementId").asText());
+  assertEquals("불명확합니다.",result.path("unclassified").get(0).path("reason").asText());
+  assertEquals("C",result.path("unclassified").get(1).path("requirementId").asText());
+  assertThrows(IllegalArgumentException.class,()->service.programsResult("{\"programs\":[]}",input));
+  assertThrows(IllegalArgumentException.class,()->service.programsResult("설명 "+output,input));
+  ((com.fasterxml.jackson.databind.node.ObjectNode)programs.get(0)).put("name","가".repeat(101));
+  assertThrows(IllegalArgumentException.class,()->service.programsResult(output.toString(),input));
+ }
+ @Test void groupProgramsAnalysisStoresValidatedCandidatesAndRejectsInvalidResponses() throws Exception {
+  Group g=setup(true);
+  var output=json.createObjectNode();
+  output.putArray("programs").addObject().put("name","구매 등록").put("purpose","구매를 등록합니다.").putArray("requirementIds").add(g.req());
+  reply(output.toString());
+  var done=completed(g,service.execute(g.id(),new RequirementGroupAnalysisService.Execute(g.version(),"programs",null,"GROUP_PROGRAMS")).get("ANALYSIS_ID").toString());
+  assertEquals("SUCCESS",done.get("STATUS"));assertEquals("GROUP_PROGRAMS",done.get("ANALYSIS_TYPE"));assertEquals("group-programs-v0.1",done.get("PROMPT_VERSION"));
+  var response=(JsonNode)done.get("RESPONSE");
+  assertEquals(g.req(),response.path("programCandidates").get(0).path("evidenceRequirementIds").get(0).asText());
+  assertEquals(0,response.path("unclassified").size());
+  assertTrue(((String)done.get("REQUEST_JSON")).contains("inclusionReason"));
+  reply("{\"programs\":[]}");
+  var failed=completed(g,service.execute(g.id(),new RequirementGroupAnalysisService.Execute(g.version(),"programs-invalid",null,"GROUP_PROGRAMS")).get("ANALYSIS_ID").toString());
+  assertEquals("FAILED_INVALID_JSON",failed.get("STATUS"));assertNotNull(failed.get("RESPONSE_RAW_JSON"));
+ }
 }

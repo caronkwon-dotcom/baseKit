@@ -66,3 +66,14 @@
 .sd-gr-opinion { background: #fff7e0; border: 1px solid #f0d890; }
 .sd-gr-reason-box { background: #eaf1fd; border: 1px solid #cddcf7; }
 .sd-gr-empty { color: var(--text-secondary); }
+.sd-gp { display: grid; gap: 10px; }
+.sd-gp h4, .sd-gp-unclassified h5 { margin: 0; font-size: 16px; }
+.sd-gp-list { display: grid; gap: 8px; }
+.sd-gp-item { border: 1px solid var(--border-default); border-radius: 8px; padding: 12px 14px; display: grid; gap: 6px; background: var(--surface-panel); }
+.sd-gp-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; cursor: pointer; }
+.sd-group-analysis .sd-gp-text { margin: 0; font-size: 14px; line-height: 1.7; color: var(--text-primary); white-space: pre-wrap; overflow-wrap: anywhere; }
+.sd-gp-evidence { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.sd-gp-evidence li { display: inline-flex; align-items: center; gap: 8px; padding: 2px 10px; border-radius: 99px; background: var(--surface-muted); border: 1px solid var(--border-default); font-size: 13px; }
+.sd-gp-unclassified { padding: 10px 14px; border: 1px dashed var(--border-strong); border-radius: 8px; }
+.sd-gp-unclassified ul { margin: 6px 0 0; padding-left: 18px; }
+.sd-gp-actions { display: flex; justify-content: flex-end; }
