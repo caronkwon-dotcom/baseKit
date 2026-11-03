@@ -50,3 +50,15 @@ test('nested menu tree selects PAGE and resolves inherited execution setting fro
   assert.equal(h.states[6].MENU_ID, 'SYS');
   assert.equal(h.states[6].DESIGN_TYPE, 'LINEAR');
 });
+
+test('new root outside the execution settings catalog stays on the default and cannot save settings', async () => {
+  const root = { MENU_KEY: 'NEW.ROOT', MENU_NAME: 'New Root', MENU_TYPE_CODE: 'FOLDER', PARENT_MENU_KEY: null, PROGRAM_KEY: null, SORT_ORDER: 0, USE_YN: 'Y' };
+  const h = harness({ rows: [root] });
+  h.render(); h.effects[0](); await tick(); const page = h.render();
+  const rootButton = h.nodes(page).find(node => node.type === 'button' && node.props.children?.[0] === 'New Root');
+  await rootButton.props.onClick(); const selected = h.render();
+  const executionSelects = h.nodes(selected).filter(node => node.type === 'select' && node.props.value === 'INNER');
+  assert.equal(executionSelects.length, 1);
+  assert.equal(executionSelects[0].props.disabled, true);
+  assert.equal(h.nodes(selected).some(node => node.type === 'button' && node.props.children === '실행 설정 저장'), false);
+});
