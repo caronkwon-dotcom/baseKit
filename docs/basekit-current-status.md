@@ -1,5 +1,13 @@
 # BaseKit 현재 상태와 WBS
 
+## 2026-11-03 SD STEP 03 프로그램 목록 — 로컬 구현·검증
+
+그룹 관리 STEP 03을 "프로그램 목록"으로 바꿨다. STEP 02의 그룹 구성·요구사항 내용을 입력으로 AI가 프로그램 후보를 제안하고, 사용자가 선택해 기존 프로그램 대장에 등록한다. 신규 분석 유형 GROUP_PROGRAMS(group-programs-v0.1), 입력에 사용자 포함 사유 추가, 응답 검증(입력 외 ID 제거·근거 없는 프로그램 제외·미분류 보존), V25(분석 유형 CHECK 확장), 기존 후보 조회·채택 API 확장, STEP 03 화면(후보 카드·미분류·이 그룹의 등록 프로그램 목록)을 구현했다. 기존 GROUP_DESIGN은 접힌 참고 영역으로 보존한다. [ADR 037](decisions/037-sd-group-program-list.md).
+
+검증: 프런트 테스트·build·lint·diff check, 백엔드 분석·프로그램 통합 테스트(H2, V25 적용 포함). 실제 LLM 호출, 공유 PostgreSQL의 V25 적용, 신규 분석 실행은 하지 않았다. 브라우저는 읽기 전용으로 확인하고 신규 분석 결과는 응답 주입으로 렌더링만 확인했다.
+
+미완료: 프로그램 제외·삭제 API, 30건 초과 그룹 분할, 화면 설계 메뉴(HTML UI)와 DB 설계는 별도 단계. 추천 분석(GROUP_RECOMMENDATION) 실행 위치는 미결정.
+
 ## 2026-10-31 노트북 이전을 위한 sd-work 원격 보존
 
 사용자의 원격 반영 지시에 따라 미커밋 프로그램 대장 V1을 저장했다. 공통 V22 원문은 선행 의존성 commit `623a616`, SD 제품 코드·테스트·V23은 별도 commit `3f3d49e`로 분리했다. 공통 V22는 origin/common-work의 0af3ca3과 동일한 Git blob이며 기존 적용 원문·checksum을 유지한다. 문서는 제품 코드와 별도 commit으로 관리한다. [새 노트북 재개 및 데이터 이전 범위](sd-program-register-handoff.md)를 따른다.

@@ -4,7 +4,7 @@ import type { GroupStatus } from './requirementGroupApi.ts';
 /** Derives step state from existing group/analysis data only; nothing here is persisted or sent to the server. */
 export type GroupStep = 1 | 2 | 3;
 export type GroupStepStatus = 'UNKNOWN' | 'DISABLED' | 'NOT_STARTED' | 'IN_PROGRESS' | 'DONE' | 'REVIEW_REQUIRED' | 'FAILED';
-export type GroupStepAnalysisType = 'GROUP_RECOMMENDATION' | 'GROUP_DESIGN';
+export type GroupStepAnalysisType = 'GROUP_RECOMMENDATION' | 'GROUP_DESIGN' | 'GROUP_PROGRAMS';
 
 export interface GroupStepInput {
  saved: boolean; dirty: boolean; status: GroupStatus; version: number; memberCount: number; hasDiscarded: boolean;
@@ -48,11 +48,11 @@ export function groupStepStates(input: GroupStepInput): Record<GroupStep, GroupS
  return {
   1: { step: 1, status: step1, enabled: true, reason: '' },
   2: { step: 2, status: viewBlocked ? 'DISABLED' : 'UNKNOWN', enabled: !viewBlocked, reason: viewBlocked },
-  3: { step: 3, status: step3Reason ? 'DISABLED' : analysisTypeStatus(input.analyses, 'GROUP_DESIGN', input.version), enabled: !step3Reason, reason: step3Reason },
+  3: { step: 3, status: step3Reason ? 'DISABLED' : analysisTypeStatus(input.analyses, 'GROUP_PROGRAMS', input.version), enabled: !step3Reason, reason: step3Reason },
  };
 }
 
-const stepTitles: Record<GroupStep, string> = { 1: 'STEP 01 그룹 구성·확정', 2: 'STEP 02 그룹핑 분석 결과', 3: 'STEP 03 설계 분석·초안 검토' };
+const stepTitles: Record<GroupStep, string> = { 1: 'STEP 01 그룹 구성·확정', 2: 'STEP 02 그룹핑 분석 결과', 3: 'STEP 03 프로그램 목록' };
 const statusTexts: Record<GroupStepStatus, string> = {
  UNKNOWN: '', DISABLED: '', NOT_STARTED: '미진행', IN_PROGRESS: '진행중', DONE: '완료', REVIEW_REQUIRED: '재검토 필요', FAILED: '실패',
 };

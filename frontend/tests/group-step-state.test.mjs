@@ -52,7 +52,7 @@ test('analysis status is computed per type from the current group version', () =
 });
 
 test('a version change turns the completed design step into re-review and never auto-completes', () => {
- const analyses = [run('GROUP_RECOMMENDATION', 'SUCCESS', 3), run('GROUP_DESIGN', 'SUCCESS', 4)];
+ const analyses = [run('GROUP_RECOMMENDATION', 'SUCCESS', 3), run('GROUP_PROGRAMS', 'SUCCESS', 4)];
  const before = groupStepStates(input({ status: 'CONFIRMED', version: 4, analyses }));
  assert.equal(before[2].status, 'UNKNOWN');
  assert.equal(before[3].status, 'DONE');
@@ -60,13 +60,15 @@ test('a version change turns the completed design step into re-review and never 
  assert.equal(after[3].status, 'DISABLED');
  assert.equal(groupStepStates(input({ status: 'CONFIRMED', version: 5, analyses }))[3].status, 'REVIEW_REQUIRED');
  assert.equal(groupStepStates(input({ analyses: null }))[2].status, 'UNKNOWN');
+ // The legacy design overview does not complete the program list step.
+ assert.equal(groupStepStates(input({ status: 'CONFIRMED', version: 4, analyses: [run('GROUP_DESIGN', 'SUCCESS', 4)] }))[3].status, 'NOT_STARTED');
 });
 
 test('labels carry the step title and a text status, and legacy URLs map to a step', () => {
  assert.equal(stepLabel(1, 'DONE'), 'STEP 01 그룹 구성·확정 · 완료');
  assert.equal(stepLabel(2, 'UNKNOWN'), 'STEP 02 그룹핑 분석 결과');
- assert.equal(stepLabel(3, 'DISABLED'), 'STEP 03 설계 분석·초안 검토');
- assert.equal(stepLabel(3, 'UNKNOWN'), 'STEP 03 설계 분석·초안 검토');
+ assert.equal(stepLabel(3, 'DISABLED'), 'STEP 03 프로그램 목록');
+ assert.equal(stepLabel(3, 'UNKNOWN'), 'STEP 03 프로그램 목록');
  assert.equal(stepFromQuery(new URLSearchParams('')), 1);
  assert.equal(stepFromQuery(new URLSearchParams('tab=analysis')), 2);
  assert.equal(stepFromQuery(new URLSearchParams('tab=analysis&step=3')), 3);
