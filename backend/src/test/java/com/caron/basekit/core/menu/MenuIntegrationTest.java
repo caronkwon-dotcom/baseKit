@@ -121,6 +121,49 @@ class MenuIntegrationTest {
     }
 
     @Test
+    void protectsHierarchyWhenMovingOrDeletingMenus() throws Exception {
+        String suffix = suffix();
+        String root = "TEST.MOVE.ROOT." + suffix;
+        String middle = root + ".MIDDLE";
+        String branch = "TEST.MOVE.BRANCH." + suffix;
+        String leaf = middle + ".LEAF";
+        mockMvc.perform(post("/api/core/menus").contentType(MediaType.APPLICATION_JSON).content(folderJson(root)))
+                .andExpect(status().isCreated());
+        mockMvc.perform(post("/api/core/menus").contentType(MediaType.APPLICATION_JSON).content(folderJson(middle, root, 1, "Y")))
+                .andExpect(status().isCreated());
+        mockMvc.perform(post("/api/core/menus").contentType(MediaType.APPLICATION_JSON).content(folderJson(leaf, middle, 1, "Y")))
+                .andExpect(status().isCreated());
+        mockMvc.perform(post("/api/core/menus").contentType(MediaType.APPLICATION_JSON).content(folderJson(branch)))
+                .andExpect(status().isCreated());
+        mockMvc.perform(put("/api/core/menus/" + root).contentType(MediaType.APPLICATION_JSON)
+                        .content(folderJson(root, branch, 1, "Y")))
+                .andExpect(status().isConflict());
+        mockMvc.perform(put("/api/core/menus/" + branch).contentType(MediaType.APPLICATION_JSON)
+                        .content(folderJson(branch, leaf, 1, "Y")))
+                .andExpect(status().isConflict());
+        mockMvc.perform(put("/api/core/menus/" + root).contentType(MediaType.APPLICATION_JSON)
+                        .content(pageJson(root, null, "PROGRAM_MGMT")))
+                .andExpect(status().isConflict());
+
+        String pageParent = "TEST.PAGE.PARENT." + suffix;
+        mockMvc.perform(post("/api/core/menus").contentType(MediaType.APPLICATION_JSON)
+                        .content(pageJson(pageParent, null, "PROGRAM_MGMT")))
+                .andExpect(status().isCreated());
+        mockMvc.perform(post("/api/core/menus").contentType(MediaType.APPLICATION_JSON)
+                        .content(folderJson(pageParent + ".CHILD", pageParent, 1, "Y")))
+                .andExpect(status().isConflict());
+
+        String inactiveParent = "TEST.INACTIVE.CHILD.PARENT." + suffix;
+        String inactiveChild = inactiveParent + ".CHILD";
+        mockMvc.perform(post("/api/core/menus").contentType(MediaType.APPLICATION_JSON).content(folderJson(inactiveParent)))
+                .andExpect(status().isCreated());
+        mockMvc.perform(post("/api/core/menus").contentType(MediaType.APPLICATION_JSON)
+                        .content(folderJson(inactiveChild, inactiveParent, 1, "N")))
+                .andExpect(status().isCreated());
+        mockMvc.perform(delete("/api/core/menus/" + inactiveParent)).andExpect(status().isConflict());
+    }
+
+    @Test
     void sortsTreeCalculatesLevelsAndExcludesUnusedOrDeletedMenus() throws Exception {
         String suffix = suffix();
         String lateRoot = "TEST.TREE.LATE." + suffix;

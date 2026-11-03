@@ -48,6 +48,12 @@ async function request<T>(path = '', init?: RequestInit): Promise<T> {
 
 export const menuApi = {
   find: (values: Record<string, string>) => request<MenuRecord[]>(query(values)),
+  get: (menuKey: string) => request<MenuRecord>(`/${encodeURIComponent(menuKey)}`),
+  create: async (value: MenuSave) => {
+    const created = await request<MenuRecord>('', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(value) });
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event(MENU_RUNTIME_CHANGED_EVENT));
+    return created;
+  },
   update: async (menuKey: string, value: MenuSave) => {
     const updated = await request<MenuRecord>(`/${encodeURIComponent(menuKey)}`, {
       method: 'PUT',
@@ -56,6 +62,10 @@ export const menuApi = {
     });
     if (typeof window !== 'undefined') window.dispatchEvent(new Event(MENU_RUNTIME_CHANGED_EVENT));
     return updated;
+  },
+  delete: async (menuKey: string) => {
+    await request<void>(`/${encodeURIComponent(menuKey)}`, { method: 'DELETE' });
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event(MENU_RUNTIME_CHANGED_EVENT));
   },
 };
 

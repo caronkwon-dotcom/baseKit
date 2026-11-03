@@ -132,7 +132,7 @@ public class MenuService {
     public void deleteMenu(String menuKey) {
         String key = trimRequired(menuKey, "메뉴 KEY");
         findMenu(key);
-        if (mapper.countActiveChildren(key) > 0) {
+        if (mapper.countChildren(key) > 0) {
             throw new MenuConflictException("활성 하위 메뉴가 있어 삭제할 수 없습니다.");
         }
         mapper.logicalDeleteMenu(key, SYSTEM_ACTOR);
@@ -145,6 +145,10 @@ public class MenuService {
         }
 
         String programKey = trim(candidate.PROGRAM_KEY());
+        List<MenuData> allMenus = mapper.findMenus(null, null, null, null, null);
+        if ("PAGE".equals(type) && currentKey != null && mapper.countChildren(currentKey) > 0) {
+            throw new MenuConflictException("하위 메뉴가 있는 메뉴는 PAGE 유형으로 변경할 수 없습니다.");
+        }
         if ("FOLDER".equals(type) && programKey != null) {
             throw new MenuConflictException("FOLDER 메뉴에는 Program을 연결할 수 없습니다.");
         }
@@ -157,6 +161,9 @@ public class MenuService {
 
         String parentKey = trim(candidate.PARENT_MENU_KEY());
         if (parentKey == null) {
+            if (currentKey != null && subtreeHeight(currentKey, allMenus) > MAX_DEPTH) {
+                throw new MenuConflictException("메뉴 계층은 최대 3Depth까지만 허용됩니다.");
+            }
             return;
         }
         if (parentKey.equals(currentKey)) {
@@ -177,12 +184,36 @@ public class MenuService {
             if (parent == null || "N".equals(parent.USE_YN())) {
                 throw new MenuConflictException("사용 가능한 부모 메뉴를 찾을 수 없습니다.");
             }
+            if (!"FOLDER".equals(parent.MENU_TYPE_CODE())) {
+                throw new MenuConflictException("PAGE 메뉴 아래에는 하위 메뉴를 지정할 수 없습니다.");
+            }
             depth++;
             if (depth > MAX_DEPTH) {
                 throw new MenuConflictException("메뉴는 최대 3Depth까지만 허용됩니다.");
             }
             cursor = trim(parent.PARENT_MENU_KEY());
         }
+        if (currentKey != null && depth + subtreeHeight(currentKey, allMenus) - 1 > MAX_DEPTH) {
+            throw new MenuConflictException("메뉴 계층은 최대 3Depth까지만 허용됩니다.");
+        }
+    }
+
+    private int subtreeHeight(String key, List<MenuData> rows) {
+        return subtreeHeight(key, rows, new HashSet<>());
+    }
+
+    private int subtreeHeight(String key, List<MenuData> rows, Set<String> path) {
+        if (!path.add(key)) {
+            throw new MenuConflictException("메뉴 계층에 순환 참조가 있습니다.");
+        }
+        int height = 1;
+        for (MenuData row : rows) {
+            if (key.equals(row.PARENT_MENU_KEY())) {
+                height = Math.max(height, 1 + subtreeHeight(row.MENU_KEY(), rows, path));
+            }
+        }
+        path.remove(key);
+        return height;
     }
 
     private List<MenuTreeData> buildTree(Map<String, List<MenuData>> childrenByParent,

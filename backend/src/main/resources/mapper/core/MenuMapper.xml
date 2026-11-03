@@ -47,6 +47,12 @@
            AND USE_YN = 'Y'
     </select>
 
+    <select id="countChildren" resultType="int">
+        SELECT COUNT(*) FROM BSYMENU
+         WHERE PARENT_MENU_KEY = #{PARENT_MENU_KEY}
+           AND DEL_YN = 'N'
+    </select>
+
     <select id="countActiveProgram" resultType="int">
         SELECT COUNT(*) FROM BSYPROG
          WHERE PROGRAM_KEY = #{PROGRAM_KEY}
