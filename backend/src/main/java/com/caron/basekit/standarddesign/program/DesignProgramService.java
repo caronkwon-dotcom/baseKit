@@ -20,11 +20,22 @@ public class DesignProgramService {
  private void project(String project) {if(project==null || project.isBlank() || project.length()>50) throw bad("프로젝트 ID가 필요합니다.");}
  private void validate(Edit input) {if(input==null || input.PROGRAM_NAME()==null || input.PROGRAM_NAME().isBlank() || input.PROGRAM_NAME().strip().length()>300 || input.DESCRIPTION()==null || input.DESCRIPTION().length()>20000) throw bad("명칭(1~300자)과 설명(최대 20000자)을 확인하세요.");}
  private Map<String,Object> upper(Map<String,Object> row) {var result=new LinkedHashMap<String,Object>();row.forEach((k,v)->result.put(k.toUpperCase(Locale.ROOT),v));return result;}
- private Map<String,Object> program(Map<String,Object> row) {
-  var result=upper(row);result.put("DESCRIPTION",result.remove("PURPOSE"));
+ private Map<String,Object> program(Map<String,Object> row) {return program(row,new HashMap<>());}
+ /** The program type lives in the immutable source analysis candidate; manual programs and older analyses have none. */
+ private String kind(Map<String,Object> result,Map<String,JsonNode> cache) {
+  Object group=result.get("SOURCE_GROUP_ID"),analysis=result.get("SOURCE_ANALYSIS_ID"),index=result.get("SOURCE_CANDIDATE_INDEX");
+  if(group==null || analysis==null || !(index instanceof Number number))return null;
+  try {
+   var response=cache.computeIfAbsent(group+":"+analysis,key->{var run=analyses.get((String)group,(String)analysis);return run.get("RESPONSE") instanceof JsonNode node ? node:json.nullNode();});
+   String kind=response.path("programCandidates").path(number.intValue()).path("type").asText("");
+   return RequirementGroupAnalysisService.PROGRAM_KINDS.contains(kind) ? kind:null;
+  } catch(RuntimeException e) {return null;}
+ }
+ private Map<String,Object> program(Map<String,Object> row,Map<String,JsonNode> cache) {
+  var result=upper(row);result.put("DESCRIPTION",result.remove("PURPOSE"));result.put("PROGRAM_KIND",kind(result,cache));
   result.put("EVIDENCE",jdbc.queryForList("SELECT REQUIREMENT_ID,REQUIREMENT_REVISION,SNAPSHOT_JSON FROM BSDGPREQ WHERE PROGRAM_ID=? ORDER BY REQUIREMENT_ID",result.get("PROGRAM_ID")).stream().map(this::upper).toList());return result;
  }
- @Transactional(readOnly=true) public List<Map<String,Object>> list(String project) {project(project);return jdbc.queryForList("SELECT * FROM BSDGPROG WHERE PROJECT_ID=? ORDER BY CREATED_AT,PROGRAM_ID",project).stream().map(this::program).toList();}
+ @Transactional(readOnly=true) public List<Map<String,Object>> list(String project) {project(project);var cache=new HashMap<String,JsonNode>();return jdbc.queryForList("SELECT * FROM BSDGPROG WHERE PROJECT_ID=? ORDER BY CREATED_AT,PROGRAM_ID",project).stream().map(row->program(row,cache)).toList();}
  private Map<String,Object> get(String project,String id) {var rows=jdbc.queryForList("SELECT * FROM BSDGPROG WHERE PROJECT_ID=? AND PROGRAM_ID=?",project,id);if(rows.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"프로그램을 찾을 수 없습니다.");return program(rows.getFirst());}
  @Transactional public Map<String,Object> create(String project,Edit input) {
   project(project);validate(input);String id="SDPG-"+UUID.randomUUID();
@@ -61,7 +72,7 @@ public class DesignProgramService {
  @Transactional(readOnly=true) public List<Map<String,Object>> candidates(String project,String group,String analysis) {
   var source=source(project,group,analysis);var result=new ArrayList<Map<String,Object>>();int index=0;
   for(var candidate:source.candidates()) {
-   var row=new LinkedHashMap<String,Object>();row.put("CANDIDATE_INDEX",index);row.put("PROGRAM_NAME",name(candidate));row.put("DESCRIPTION",description(candidate));row.put("GROUP_VERSION",source.run().get("GROUP_VERSION"));
+   var row=new LinkedHashMap<String,Object>();row.put("CANDIDATE_INDEX",index);row.put("PROGRAM_NAME",name(candidate));row.put("DESCRIPTION",description(candidate));row.put("PROGRAM_KIND",candidate.path("type").asText(null));row.put("GROUP_VERSION",source.run().get("GROUP_VERSION"));
    try {validate(new Edit(name(candidate),description(candidate),null));row.put("EVIDENCE",evidence(source,candidate));row.put("ERROR",null);}catch(ResponseStatusException e){row.put("EVIDENCE",List.of());row.put("ERROR",e.getReason());}
    var ids=jdbc.queryForList("SELECT PROGRAM_ID FROM BSDGPROG WHERE PROJECT_ID=? AND SOURCE_GROUP_ID=? AND SOURCE_ANALYSIS_ID=? AND SOURCE_CANDIDATE_INDEX=?",String.class,project,group,analysis,index);
    row.put("PROGRAM_ID",ids.isEmpty()?null:ids.getFirst());result.add(row);index++;

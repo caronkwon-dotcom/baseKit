@@ -228,16 +228,19 @@ class RequirementGroupAnalysisIntegrationTest {
  @Test void programListResultKeepsExactIdsAndPreservesUncoveredRequirements() {
   String input="{\"requirements\":[{\"requirementId\":\"A\"},{\"requirementId\":\"B\"},{\"requirementId\":\"C\"}]}";
   var output=json.createObjectNode();var programs=output.putArray("programs");
-  programs.addObject().put("name","구매 목록").put("purpose","구매를 조회합니다.").putArray("requirementIds").add("A").add("A").add("HALLUCINATION");
+  programs.addObject().put("name","구매 목록").put("type","batch").put("purpose","구매를 조회합니다.").putArray("requirementIds").add("A").add("A").add("HALLUCINATION");
   programs.addObject().put("name","근거 없음").put("purpose","무시됩니다.").putArray("requirementIds").add("NOPE");
   output.putArray("unclassified").addObject().put("requirementId","B").put("reason","불명확합니다.");
   var result=service.programsResult(output.toString(),input);
   assertEquals(1,result.path("programCandidates").size());
+  assertEquals("BATCH",result.path("programCandidates").get(0).path("type").asText());
   assertEquals(1,result.path("programCandidates").get(0).path("evidenceRequirementIds").size());
   assertEquals(2,result.path("unclassified").size());
   assertEquals("B",result.path("unclassified").get(0).path("requirementId").asText());
   assertEquals("불명확합니다.",result.path("unclassified").get(0).path("reason").asText());
   assertEquals("C",result.path("unclassified").get(1).path("requirementId").asText());
+  var unknownKind=json.createObjectNode();unknownKind.putArray("programs").addObject().put("name","구매").put("type","WIDGET").put("purpose","설명").putArray("requirementIds").add("A");
+  assertTrue(service.programsResult(unknownKind.toString(),input).path("programCandidates").get(0).path("type").isMissingNode());
   assertThrows(IllegalArgumentException.class,()->service.programsResult("{\"programs\":[]}",input));
   assertThrows(IllegalArgumentException.class,()->service.programsResult("설명 "+output,input));
   ((com.fasterxml.jackson.databind.node.ObjectNode)programs.get(0)).put("name","가".repeat(101));
@@ -249,7 +252,7 @@ class RequirementGroupAnalysisIntegrationTest {
   output.putArray("programs").addObject().put("name","구매 등록").put("purpose","구매를 등록합니다.").putArray("requirementIds").add(g.req());
   reply(output.toString());
   var done=completed(g,service.execute(g.id(),new RequirementGroupAnalysisService.Execute(g.version(),"programs",null,"GROUP_PROGRAMS")).get("ANALYSIS_ID").toString());
-  assertEquals("SUCCESS",done.get("STATUS"));assertEquals("GROUP_PROGRAMS",done.get("ANALYSIS_TYPE"));assertEquals("group-programs-v0.1",done.get("PROMPT_VERSION"));
+  assertEquals("SUCCESS",done.get("STATUS"));assertEquals("GROUP_PROGRAMS",done.get("ANALYSIS_TYPE"));assertEquals("group-programs-v0.2",done.get("PROMPT_VERSION"));
   var response=(JsonNode)done.get("RESPONSE");
   assertEquals(g.req(),response.path("programCandidates").get(0).path("evidenceRequirementIds").get(0).asText());
   assertEquals(0,response.path("unclassified").size());

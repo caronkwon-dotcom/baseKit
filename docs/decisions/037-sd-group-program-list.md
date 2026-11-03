@@ -9,11 +9,17 @@
 요구사항 그룹 관리 STEP 03을 "프로그램 목록"으로 재정의한다. STEP 02의 그룹 구성과 요구사항 내용(원문·업무 프로세스·설계 의견·포함 사유)을 입력으로 AI가 프로그램 후보를 제안하고, 사람이 검토해 기존 프로그램 대장(BSDGPROG/BSDGPREQ)에 등록한다. 화면 설계는 이 목록 이후의 별도 메뉴이며 이번 범위에 포함하지 않는다.
 
 - 신규 분석 유형 `GROUP_PROGRAMS`(프롬프트 `group-programs-v0.1`)를 추가한다. 기존 `GROUP_DESIGN`은 개요용(각 목록 최대 3개, 대표 근거 1개)이라 목록 산출에 쓰지 않고, 이력 호환을 위해 보존하며 STEP 03에서는 접힌 참고 영역으로 유지한다.
-- 응답은 `programs[{name,purpose,requirementIds[]}]`와 `unclassified[]`다. 서버는 입력에 없는 ID를 버리고, 근거가 없는 프로그램은 제외하며, 어느 프로그램에도 연결되지 않은 요구사항을 "미분류"로 보존한다. 검증된 결과는 기존 `programCandidates` 모양으로 `RESPONSE_VALIDATED_JSON`에 저장해 기존 채택 코드를 재사용한다. 원문(`RESPONSE_RAW_JSON`)은 덮어쓰지 않는다.
+- 응답은 `programs[{name,type,purpose,requirementIds[]}]`와 `unclassified[]`다. `type`은 SCREEN(화면)·BATCH(배치)·INTERFACE(연동·알림)·REPORT(보고서)이며 허용값 밖은 버린다. 서버는 입력에 없는 ID를 버리고, 근거가 없는 프로그램은 제외하며, 어느 프로그램에도 연결되지 않은 요구사항을 "미분류"로 보존한다. 검증된 결과는 기존 `programCandidates` 모양으로 `RESPONSE_VALIDATED_JSON`에 저장해 기존 채택 코드를 재사용한다. 원문(`RESPONSE_RAW_JSON`)은 덮어쓰지 않는다.
 - LLM 입력은 불변 그룹 Snapshot에 사용자의 포함 사유를 더한 것이다. 이전 AI의 "묶은 이유"는 입력하지 않는다. 요구사항 30건 초과 그룹은 지원하지 않고 안내한다.
 - AI 결과는 자동 등록하지 않는다. 사람이 후보를 선택해 등록한다(ADR 034).
 - migration V25: `BSDRGANL.ANALYSIS_TYPE`의 이름 없는 CHECK(V17)는 DB마다 이름이 달라 이식 가능한 DROP이 없어, 컬럼을 복사·재생성하고 이름 있는 제약을 추가한다.
 - STEP 03 진입 조건은 변경하지 않는다(확정 그룹, 저장된 구성원 1건 이상, 미저장 변경 없음, 폐기 요구사항 없음).
+
+## 프롬프트 v0.2 (2026-11-03 사용자 승인)
+
+실사용에서 요구사항 단위로 쪼개진 "기능 목록"이 나오고 비화면(배치·알림) 요구사항이 프로그램처럼 보이는 문제가 확인되어 프롬프트를 `group-programs-v0.2`로 개정했다. 프로그램은 업무 대상을 관리하는 실행 단위이며 등록·조회·승인 같은 기능은 프로그램 안의 기능(Action)이다. 같은 업무 대상의 요구사항은 하나로 통합하고, 이름은 업무 대상 명사형으로 하며, 설명에 주요 기능을 나열한다. 화면 설계는 유형이 SCREEN인 프로그램만 대상으로 한다.
+
+유형은 `BSDGPROG.LAYOUT_TYPE`에 저장하지 않는다. 그 컬럼은 화면 레이아웃(L1R2 등)용이며 검증 규칙이 있다. 유형은 불변 출처 분석(`SOURCE_ANALYSIS_ID`, `SOURCE_CANDIDATE_INDEX`)의 후보에서 읽어 `PROGRAM_KIND`로 내려 주며, 수동 등록과 이전 분석 유래 프로그램은 유형이 없다. 이 방식은 migration이 필요 없다.
 
 ## 이번 범위에서 제외
 
