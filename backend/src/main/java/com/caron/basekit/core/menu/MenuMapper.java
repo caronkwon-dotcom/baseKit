@@ -19,6 +19,8 @@ interface MenuMapper {
 
     int countActiveChildren(@Param("PARENT_MENU_KEY") String parentMenuKey);
 
+    int countChildren(@Param("PARENT_MENU_KEY") String parentMenuKey);
+
     int countActiveProgram(@Param("PROGRAM_KEY") String programKey);
 
     int countActiveMenuType(@Param("MENU_TYPE_CODE") String menuTypeCode);
