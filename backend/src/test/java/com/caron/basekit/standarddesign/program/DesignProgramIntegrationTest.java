@@ -77,11 +77,13 @@ class DesignProgramIntegrationTest {
  @Test void adoptsCandidatesFromGroupProgramsAnalysis() throws Exception {
   var f=fixture();
   var validated=json.createObjectNode();
-  validated.putArray("programCandidates").addObject().put("name","구매 등록").put("purpose","구매 요청을 등록합니다.").putArray("evidenceRequirementIds").add(f.req());
+  validated.putArray("programCandidates").addObject().put("name","구매 등록").put("type","BATCH").put("purpose","구매 요청을 등록합니다.").putArray("evidenceRequirementIds").add(f.req());
   validated.putArray("unclassified");
   jdbc.update("UPDATE BSDRGANL SET ANALYSIS_TYPE='GROUP_PROGRAMS',RESPONSE_VALIDATED_JSON=? WHERE ANALYSIS_ID=?",validated.toString(),f.analysis());
-  mvc.perform(get(f.base()+"/candidates").param("GROUP_ID",f.group()).param("ANALYSIS_ID",f.analysis())).andExpect(status().isOk()).andExpect(jsonPath("$.DATA[0].PROGRAM_NAME").value("구매 등록")).andExpect(jsonPath("$.DATA[0].EVIDENCE[0].requirementId").value(f.req()));
+  mvc.perform(get(f.base()+"/candidates").param("GROUP_ID",f.group()).param("ANALYSIS_ID",f.analysis())).andExpect(status().isOk()).andExpect(jsonPath("$.DATA[0].PROGRAM_NAME").value("구매 등록")).andExpect(jsonPath("$.DATA[0].EVIDENCE[0].requirementId").value(f.req())).andExpect(jsonPath("$.DATA[0].PROGRAM_KIND").value("BATCH"));
   var program=postJson(f.base()+"/adoptions",adoption(f,0)).get(0);
   assertEquals(f.group(),program.path("SOURCE_GROUP_ID").asText());assertEquals(1,program.path("EVIDENCE").size());
+  assertEquals("BATCH",program.path("PROGRAM_KIND").asText());
+  mvc.perform(get(f.base())).andExpect(status().isOk()).andExpect(jsonPath("$.DATA[0].PROGRAM_KIND").value("BATCH"));
  }
 }

@@ -3,6 +3,7 @@ import { BaseKitMessage, DataTable, type DataTableColumn } from '../../../../com
 import { designProgramApi, type DesignProgram, type ProgramCandidate } from '../../programs/designProgramApi';
 import type { GroupAnalysis } from '../../requirementgroup/groupAnalysis.types';
 import type { RequirementGroup } from '../../requirementgroup/requirementGroupApi';
+import { programKindLabel } from '../../programs/programKind';
 import RequirementGroupAnalysis from './RequirementGroupAnalysis';
 import './groupAnalysis.css';
 
@@ -62,6 +63,7 @@ function ProgramCandidates({ group, run, onAdopted }: { group: RequirementGroup;
      <input type="checkbox" aria-label={`${candidate.PROGRAM_NAME} 선택`} disabled={busy || !!candidate.PROGRAM_ID || !!candidate.ERROR} checked={selected.has(candidate.CANDIDATE_INDEX)} onChange={event => toggle(candidate.CANDIDATE_INDEX, event.target.checked)} />
      <span className="sd-gr-step-no" aria-hidden="true">{position + 1}</span>
      <strong>{candidate.PROGRAM_NAME}</strong>
+     {programKindLabel(candidate.PROGRAM_KIND) ? <span className="sd-gr-badge">{programKindLabel(candidate.PROGRAM_KIND)}</span> : null}
      {candidate.PROGRAM_ID ? <span className="sd-gr-badge sd-gp-registered">등록됨</span> : null}
     </label>
     <div className="sd-gp-body">
@@ -105,6 +107,7 @@ export default function GroupProgramPanel({ group, projectName, blocked, onRunsC
  const current = registered.key === key;
  const columns: DataTableColumn<DesignProgram>[] = [
   { key: 'PROGRAM_NAME', header: '프로그램명', minWidth: 180, flex: 2, render: program => program.PROGRAM_NAME },
+  { key: 'PROGRAM_KIND', header: '유형', width: 90, render: program => programKindLabel(program.PROGRAM_KIND) || '-' },
   { key: 'DESCRIPTION', header: '설명', minWidth: 220, flex: 3, render: program => program.DESCRIPTION || '등록된 내용 없음' },
   { key: 'REQUIREMENTS', header: '담당 요구사항', minWidth: 220, flex: 3, render: program => program.EVIDENCE.length ? program.EVIDENCE.map(item => snapshotName(item.SNAPSHOT_JSON) || item.REQUIREMENT_ID).join(', ') : '-' },
   { key: 'SOURCE', header: '출처', minWidth: 160, render: program => program.SOURCE_ANALYSIS_ID ? `AI 분석 ${program.SOURCE_ANALYSIS_ID}` : '수동' },
@@ -112,7 +115,7 @@ export default function GroupProgramPanel({ group, projectName, blocked, onRunsC
  return <div className="sd-group-analysis">
   <section className="sd-gp-intro" aria-label="STEP 03 안내">
    <h4>AI 프로그램 목록 제안</h4>
-   <p>STEP 02의 그룹 구성과 요구사항 내용(원문·업무 프로세스·설계 의견)을 기반으로 AI가 필요한 프로그램을 제안합니다. 등록한 프로그램은 이후 화면 설계의 대상이 됩니다.</p>
+   <p>STEP 02의 그룹 구성과 요구사항 내용(원문·업무 프로세스·설계 의견)을 기반으로 AI가 필요한 프로그램을 제안합니다. 프로그램은 화면·배치·연동·보고서로 구분되며, 화면 설계는 유형이 '화면'인 프로그램이 대상입니다.</p>
    <ol className="sd-gr-steps" aria-label="진행 순서">
     {guide.map((label, index) => <li key={label}><span className="sd-gr-step-no" aria-hidden="true">{index + 1}</span><span>{label}</span></li>)}
    </ol>
