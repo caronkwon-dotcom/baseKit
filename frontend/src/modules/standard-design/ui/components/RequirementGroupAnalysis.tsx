@@ -7,7 +7,7 @@ import { createUuid } from '../../../../utils/uuid';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ActionButton, BaseKitMessage, FormModal } from '../../../../components/common';
 import FormField from '../../../../components/common/FormField';
-import { requirementGroupApi as api, type RequirementGroup } from '../../requirementgroup/requirementGroupApi';
+import { GroupApiError, requirementGroupApi as api, type RequirementGroup } from '../../requirementgroup/requirementGroupApi';
 import { testCompanyLlm } from '../../llm/companyLlm.repository';
 import type { GroupAnalysis, GroupAnalysisStatus } from '../../requirementgroup/groupAnalysis.types';
 
@@ -75,7 +75,14 @@ export default function RequirementGroupAnalysis({group,onClose,projectName,embe
  const execute=()=>void operate(async()=>{
   if(!request.current) {request.current=createUuid();requestVersion.current=group.VERSION;}
   sessionStorage.setItem(`${storageKey}:type`,analysisType);sessionStorage.setItem(storageKey,request.current);sessionStorage.setItem(`${storageKey}:version`,String(requestVersion.current));setPendingRequest(true);
-  const result=await api.analyze(group.REQUIREMENT_GROUP_ID,requestVersion.current,request.current,projectName,analysisType);
+  let result:GroupAnalysis;
+  try{result=await api.analyze(group.REQUIREMENT_GROUP_ID,requestVersion.current,request.current,projectName,analysisType);}
+  catch(e){
+   // The server definitively rejected the request: keeping it would leave the button stuck on "재확인". Network/5xx/timeout keep it for an idempotent retry.
+   if(e instanceof GroupApiError && e.status>=400 && e.status<500 && e.status!==408 && e.status!==429){request.current=null;sessionStorage.removeItem(storageKey);sessionStorage.removeItem(`${storageKey}:type`);sessionStorage.removeItem(`${storageKey}:version`);setPendingRequest(false);}
+   if(analysisType==='GROUP_PROGRAMS' && e instanceof Error && e.message.includes('ANALYSIS_TYPE'))throw new Error('서버가 프로그램 목록 분석을 아직 지원하지 않습니다. 백엔드를 최신 버전으로 재시작해 migration V25를 적용하세요.',{cause:e});
+   throw e;
+  }
   request.current=null;sessionStorage.removeItem(storageKey);setPendingRequest(false);if(!alive.current)return;
   selectedId.current=result.ANALYSIS_ID;setSelected(result);
   statuses.current.set(result.ANALYSIS_ID,result.STATUS);
