@@ -11,5 +11,6 @@ public class DesignProgramController {
  @PostMapping public ApiResponse<Map<String,Object>> create(@PathVariable String project,@RequestBody DesignProgramService.Edit input){return ApiResponse.success(service.create(project,input));}
  @PutMapping("/{id}") public ApiResponse<Map<String,Object>> edit(@PathVariable String project,@PathVariable String id,@RequestBody DesignProgramService.Edit input){return ApiResponse.success(service.edit(project,id,input));}
  @GetMapping("/candidates") public ApiResponse<List<Map<String,Object>>> candidates(@PathVariable String project,@RequestParam("GROUP_ID") String group,@RequestParam("ANALYSIS_ID") String analysis){return ApiResponse.success(service.candidates(project,group,analysis));}
+ @GetMapping("/adoption-check") public ApiResponse<Map<String,Object>> adoptionCheck(@PathVariable String project,@RequestParam("GROUP_ID") String group,@RequestParam("ANALYSIS_ID") String analysis,@RequestParam("CANDIDATE_INDEXES") List<Integer> indexes){return ApiResponse.success(service.adoptionCheck(project,group,analysis,indexes));}
  @PostMapping("/adoptions") public ApiResponse<List<Map<String,Object>>> adopt(@PathVariable String project,@RequestBody DesignProgramService.Adopt input){return ApiResponse.success(service.adopt(project,input));}
 }

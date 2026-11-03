@@ -4,6 +4,6 @@ export interface GroupAnalysis {
  MODEL_NAME: string; PROMPT_VERSION: string; STATUS: GroupAnalysisStatus;
  CREATED_AT: string; COMPLETED_AT?: string; ERROR_MESSAGE?: string; REQUEST_JSON?: string; RESPONSE_RAW_JSON?: string;
  HTTP_STATUS?: number; FINISH_REASON?: string; INPUT_TOKENS?: number; OUTPUT_TOKENS?: number; ELAPSED_MS?: number;
- RESPONSE?: { recommendedRequirements?: {requirementId:string;reason:string}[]; summary?: {text: string}; businessAreas?: Record<string,unknown>[]; processCandidates?: Record<string,unknown>[]; programCandidates?: Record<string,unknown>[]; unclassified?: {requirementId:string;reason:string}[]; observations?: (string|Record<string,unknown>)[]; businessStructure?: Record<string,unknown>[]; processes?: Record<string,unknown>[]; screenCandidates?: Record<string,unknown>[] };
+ RESPONSE?: { recommendedRequirements?: {requirementId:string;reason:string}[]; summary?: {text: string}; businessAreas?: Record<string,unknown>[]; processCandidates?: Record<string,unknown>[]; programCandidates?: Record<string,unknown>[]; unclassified?: {requirementId:string;reason:string;source?:"AI"|"SERVER"}[]; observations?: (string|Record<string,unknown>)[]; businessStructure?: Record<string,unknown>[]; processes?: Record<string,unknown>[]; screenCandidates?: Record<string,unknown>[] };
  WARNINGS?: string[];
 }

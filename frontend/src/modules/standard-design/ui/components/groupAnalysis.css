@@ -99,3 +99,21 @@
 .sd-gp-reason { display: block; font-size: 13px; color: var(--text-secondary); }
 .sd-gp-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding-top: 4px; }
 .sd-gp-registered-list { display: grid; gap: 8px; }
+.sd-gp-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.sd-gp-filters button[aria-pressed=true] { border-color: #1f5fd1; background: #eaf1fd; color: #1d4ed8; font-weight: 700; }
+.sd-gp-state { font-weight: 700; }
+.sd-gp-state--new { border-color: #18794e; color: #18794e; }
+.sd-gp-state--reuse { border-color: #1f5fd1; color: #1d4ed8; }
+.sd-gp-state--change { border-color: #9a5b00; color: #9a5b00; }
+.sd-gp-state--review_required { border-color: #b3261e; color: #b3261e; background: #fdecea; }
+.sd-gp-state--not_compared { border-style: dashed; color: var(--text-secondary); }
+.sd-gp-item--blocked .sd-gp-head { cursor: default; }
+.sd-gp-existing { padding: 10px 12px; background: #eaf1fd; border: 1px solid #c5d8f7; border-radius: 8px; display: grid; gap: 4px; }
+.sd-gp-existing h5 { margin: 0; font-size: 13px; color: #1d4ed8; }
+.sd-group-analysis .sd-gp-existing p { margin: 0; font-size: 14px; color: var(--text-primary); }
+.sd-gp-issues { display: grid; gap: 6px; }
+.sd-group-analysis .sd-gp-block { margin: 0; font-size: 13px; color: var(--text-secondary); }
+.sd-gp-review { padding: 12px 14px; background: #fff7e0; border: 1px solid #f0d890; border-radius: 8px; display: grid; gap: 8px; }
+.sd-gp-review h5 { margin: 0; font-size: 14px; }
+.sd-gp-review ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.sd-group-analysis .sd-gp-review p { margin: 0; font-size: 14px; color: var(--text-primary); }

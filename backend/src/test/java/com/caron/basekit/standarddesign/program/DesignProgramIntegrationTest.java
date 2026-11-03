@@ -86,4 +86,76 @@ class DesignProgramIntegrationTest {
   assertEquals("BATCH",program.path("PROGRAM_KIND").asText());
   mvc.perform(get(f.base())).andExpect(status().isOk()).andExpect(jsonPath("$.DATA[0].PROGRAM_KIND").value("BATCH"));
  }
+ /** Stores a validated program list on the fixture's analysis; compare=null mimics an analysis that never compared the register. */
+ void validated(Fixture f,String compare,JsonNode... candidates) {
+  var response=json.createObjectNode();var array=response.putArray("programCandidates");for(var candidate:candidates)array.add(candidate);response.putArray("unclassified");
+  if(compare!=null)response.putObject("ledgerCompare").put("performed",true).put("total",1).put("included",compare.equals("PARTIAL")?0:1).put("omitted",compare.equals("PARTIAL")?1:0).put("detail","FULL").put("partial",compare.equals("PARTIAL"));
+  jdbc.update("UPDATE BSDRGANL SET ANALYSIS_TYPE='GROUP_PROGRAMS',PROMPT_VERSION=?,RESPONSE_VALIDATED_JSON=? WHERE ANALYSIS_ID=?",compare==null?"group-programs-v0.2":"group-programs-v0.3",response.toString(),f.analysis());
+ }
+ JsonNode candidate(Fixture f,String name,String decision,String status,String issue) {
+  var item=json.createObjectNode().put("name",name).put("type","SCREEN").put("purpose","설명").put("decision",decision).put("reason","근거").put("reviewStatus",status);
+  item.putNull("existingProgramId");item.putNull("changeSummary");item.putArray("evidenceRequirementIds").add(f.req());item.putArray("warnings");
+  var issues=item.putArray("issues");if(issue!=null)issues.add(issue);
+  if(!decision.equals("NEW")&&issue==null)item.putObject("existing").put("programId","SDPG-x").put("name","기존").putNull("kind");
+  return item;
+ }
+ int programCount(Fixture f) {return jdbc.queryForObject("SELECT COUNT(*) FROM BSDGPROG WHERE PROJECT_ID=?",Integer.class,f.project());}
+ @Test void reviewRequiredReuseAndChangeCandidatesCannotBeRegistered() throws Exception {
+  var f=fixture();
+  validated(f,"DONE",candidate(f,"신규 프로그램","NEW","OK",null),candidate(f,"검토 필요","REUSE","REVIEW_REQUIRED","EXISTING_ID_UNKNOWN"),candidate(f,"재사용","REUSE","OK",null),candidate(f,"변경","CHANGE","OK",null));
+  var rows=json.readTree(mvc.perform(get(f.base()+"/candidates").param("GROUP_ID",f.group()).param("ANALYSIS_ID",f.analysis())).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
+  assertTrue(rows.get(0).path("REGISTRABLE").asBoolean());assertEquals("DONE",rows.get(0).path("LEDGER_COMPARE").asText());
+  for(int i=1;i<=3;i++){assertFalse(rows.get(i).path("REGISTRABLE").asBoolean(),"candidate "+i);assertTrue(rows.get(i).path("BLOCK_REASONS").size()>0);}
+  assertEquals("EXISTING_ID_UNKNOWN",rows.get(1).path("ISSUES").get(0).path("CODE").asText());
+  assertTrue(rows.get(1).path("ISSUES").get(0).path("MESSAGE").asText().contains("존재하지 않습니다"));
+  for(int i=1;i<=3;i++) mvc.perform(post(f.base()+"/adoptions").contentType(MediaType.APPLICATION_JSON).content(adoption(f,i).toString())).andExpect(status().isUnprocessableEntity());
+  mvc.perform(post(f.base()+"/adoptions").contentType(MediaType.APPLICATION_JSON).content(adoption(f,0,1).toString())).andExpect(status().isUnprocessableEntity());
+  assertEquals(0,programCount(f));
+  assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM BSDGPREQ WHERE PROGRAM_ID IN (SELECT PROGRAM_ID FROM BSDGPROG WHERE PROJECT_ID=?)",Integer.class,f.project()));
+  postJson(f.base()+"/adoptions",adoption(f,0));
+  assertEquals(1,programCount(f));
+ }
+ @Test void partialRegisterAnalysisBlocksNewRegistration() throws Exception {
+  var f=fixture();
+  validated(f,"PARTIAL",candidate(f,"신규 프로그램","NEW","OK",null));
+  mvc.perform(get(f.base()+"/candidates").param("GROUP_ID",f.group()).param("ANALYSIS_ID",f.analysis())).andExpect(status().isOk())
+   .andExpect(jsonPath("$.DATA[0].LEDGER_COMPARE").value("PARTIAL")).andExpect(jsonPath("$.DATA[0].REGISTRABLE").value(false));
+  mvc.perform(post(f.base()+"/adoptions").contentType(MediaType.APPLICATION_JSON).content(adoption(f,0).toString())).andExpect(status().isUnprocessableEntity());
+  assertEquals(0,programCount(f));
+ }
+ @Test void resultsWithoutRegisterComparisonStayReadableAndRegistrableWithoutChangingTheAnalysis() throws Exception {
+  var f=fixture();
+  var older=json.createObjectNode().put("name","이전 분석 프로그램").put("purpose","설명");older.putArray("evidenceRequirementIds").add(f.req());
+  validated(f,null,older);
+  var before=jdbc.queryForMap("SELECT * FROM BSDRGANL WHERE ANALYSIS_ID=?",f.analysis());
+  mvc.perform(get(f.base()+"/candidates").param("GROUP_ID",f.group()).param("ANALYSIS_ID",f.analysis())).andExpect(status().isOk())
+   .andExpect(jsonPath("$.DATA[0].LEDGER_COMPARE").value("NOT_PERFORMED")).andExpect(jsonPath("$.DATA[0].REGISTRABLE").value(true)).andExpect(jsonPath("$.DATA[0].REVIEW_STATUS").doesNotExist());
+  postJson(f.base()+"/adoptions",adoption(f,0));
+  assertEquals(1,programCount(f));
+  assertEquals(before,jdbc.queryForMap("SELECT * FROM BSDRGANL WHERE ANALYSIS_ID=?",f.analysis()));
+ }
+ @Test void registrationReadsTheCurrentRegisterAgain() throws Exception {
+  var f=fixture();
+  validated(f,"DONE",candidate(f,"구매 등록","NEW","OK",null));
+  postJson(f.base(),json.createObjectNode().put("PROGRAM_NAME"," 구매   등록 ").put("DESCRIPTION",""));
+  var check=json.readTree(mvc.perform(get(f.base()+"/adoption-check").param("GROUP_ID",f.group()).param("ANALYSIS_ID",f.analysis()).param("CANDIDATE_INDEXES","0")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
+  assertEquals(1,check.path("NAME_CONFLICTS").size());
+  mvc.perform(post(f.base()+"/adoptions").contentType(MediaType.APPLICATION_JSON).content(adoption(f,0).toString())).andExpect(status().isConflict());
+  var acknowledged=adoption(f,0);((com.fasterxml.jackson.databind.node.ObjectNode)acknowledged).put("ACKNOWLEDGE_LEDGER_CHANGES",true);
+  mvc.perform(post(f.base()+"/adoptions").contentType(MediaType.APPLICATION_JSON).content(acknowledged.toString())).andExpect(status().isConflict());
+  assertEquals(1,programCount(f));
+ }
+ @Test void programsRegisteredAfterTheAnalysisNeedAcknowledgementAndSimilarNamesAreOnlyShown() throws Exception {
+  var f=fixture();
+  validated(f,"DONE",candidate(f,"구매 등록","NEW","OK",null));
+  Thread.sleep(30);
+  postJson(f.base(),json.createObjectNode().put("PROGRAM_NAME","구매 등록 관리").put("DESCRIPTION",""));
+  var check=json.readTree(mvc.perform(get(f.base()+"/adoption-check").param("GROUP_ID",f.group()).param("ANALYSIS_ID",f.analysis()).param("CANDIDATE_INDEXES","0")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).path("DATA");
+  assertEquals(0,check.path("NAME_CONFLICTS").size());assertEquals(1,check.path("SIMILAR_NAMES").size());assertEquals(1,check.path("ADDED_AFTER_ANALYSIS").size());
+  mvc.perform(post(f.base()+"/adoptions").contentType(MediaType.APPLICATION_JSON).content(adoption(f,0).toString())).andExpect(status().isConflict());
+  assertEquals(1,programCount(f));
+  var acknowledged=adoption(f,0);((com.fasterxml.jackson.databind.node.ObjectNode)acknowledged).put("ACKNOWLEDGE_LEDGER_CHANGES",true);
+  postJson(f.base()+"/adoptions",acknowledged);
+  assertEquals(2,programCount(f));
+ }
 }

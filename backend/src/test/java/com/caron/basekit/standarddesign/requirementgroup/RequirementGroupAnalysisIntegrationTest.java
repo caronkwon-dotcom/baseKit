@@ -232,7 +232,10 @@ class RequirementGroupAnalysisIntegrationTest {
   programs.addObject().put("name","근거 없음").put("purpose","무시됩니다.").putArray("requirementIds").add("NOPE");
   output.putArray("unclassified").addObject().put("requirementId","B").put("reason","불명확합니다.");
   var result=service.programsResult(output.toString(),input);
-  assertEquals(1,result.path("programCandidates").size());
+  // A program whose evidence is invalid is kept for review instead of silently disappearing.
+  assertEquals(2,result.path("programCandidates").size());
+  assertEquals("REVIEW_REQUIRED",result.path("programCandidates").get(1).path("reviewStatus").asText());
+  assertEquals("NO_VALID_EVIDENCE",result.path("programCandidates").get(1).path("issues").get(0).asText());
   assertEquals("BATCH",result.path("programCandidates").get(0).path("type").asText());
   assertEquals(1,result.path("programCandidates").get(0).path("evidenceRequirementIds").size());
   assertEquals(2,result.path("unclassified").size());
@@ -252,7 +255,7 @@ class RequirementGroupAnalysisIntegrationTest {
   output.putArray("programs").addObject().put("name","구매 등록").put("purpose","구매를 등록합니다.").putArray("requirementIds").add(g.req());
   reply(output.toString());
   var done=completed(g,service.execute(g.id(),new RequirementGroupAnalysisService.Execute(g.version(),"programs",null,"GROUP_PROGRAMS")).get("ANALYSIS_ID").toString());
-  assertEquals("SUCCESS",done.get("STATUS"));assertEquals("GROUP_PROGRAMS",done.get("ANALYSIS_TYPE"));assertEquals("group-programs-v0.2",done.get("PROMPT_VERSION"));
+  assertEquals("SUCCESS",done.get("STATUS"));assertEquals("GROUP_PROGRAMS",done.get("ANALYSIS_TYPE"));assertEquals("group-programs-v0.3",done.get("PROMPT_VERSION"));
   var response=(JsonNode)done.get("RESPONSE");
   assertEquals(g.req(),response.path("programCandidates").get(0).path("evidenceRequirementIds").get(0).asText());
   assertEquals(0,response.path("unclassified").size());
@@ -260,5 +263,116 @@ class RequirementGroupAnalysisIntegrationTest {
   reply("{\"programs\":[]}");
   var failed=completed(g,service.execute(g.id(),new RequirementGroupAnalysisService.Execute(g.version(),"programs-invalid",null,"GROUP_PROGRAMS")).get("ANALYSIS_ID").toString());
   assertEquals("FAILED_INVALID_JSON",failed.get("STATUS"));assertNotNull(failed.get("RESPONSE_RAW_JSON"));
+ }
+ String ledgerInput(String project,String... programIds) {
+  var input=json.createObjectNode();input.putObject("project").put("projectId",project);
+  var requirements=input.putArray("requirements");for(String id:List.of("A","B","C"))requirements.addObject().put("requirementId",id);
+  var existing=input.putArray("existingPrograms");for(String id:programIds)existing.addObject().put("programId",id).put("name","기존 "+id).put("kind","SCREEN");
+  input.putObject("existingProgramsInfo").put("total",programIds.length).put("included",programIds.length).put("omitted",0).put("detail","FULL");
+  return input.toString();
+ }
+ JsonNode program(String decision,String existingId,String... requirementIds) {
+  var item=json.createObjectNode().put("name","프로그램 "+decision).put("type","SCREEN").put("purpose","설명").put("reason","근거");
+  if(decision!=null)item.put("decision",decision);
+  if(existingId!=null)item.put("existingProgramId",existingId);
+  var ids=item.putArray("requirementIds");for(String id:requirementIds)ids.add(id);
+  return item;
+ }
+ com.fasterxml.jackson.databind.node.ObjectNode only(JsonNode... programs) {var output=json.createObjectNode();var array=output.putArray("programs");for(var p:programs)array.add(p);return output;}
+ @Test void wrongLedgerJudgmentsAreFlaggedForReviewAndNeverTurnedIntoNew() throws Exception {
+  String project="LV-"+UUID.randomUUID().toString().substring(0,8),other="LV-"+UUID.randomUUID().toString().substring(0,8);
+  var mine=postJson("/api/standard-design/projects/"+project+"/programs",json.createObjectNode().put("PROGRAM_NAME","내 프로그램").put("DESCRIPTION","")).path("PROGRAM_ID").asText();
+  var foreign=postJson("/api/standard-design/projects/"+other+"/programs",json.createObjectNode().put("PROGRAM_NAME","남의 프로그램").put("DESCRIPTION","")).path("PROGRAM_ID").asText();
+  var sentOnly="SDPG-sent";
+  String input=ledgerInput(project,sentOnly);
+  var output=only(program("REUSE",sentOnly,"A"),program("CHANGE","SDPG-nowhere","B"),program("REUSE",foreign,"B"),program("REUSE",mine,"C"),
+   program("REUSE",null,"C"),program(null,null,"A"),program("MAYBE",null,"A"),program("NEW",sentOnly,"A"),program("NEW",null,"B"));
+  var candidates=service.programsResult(output.toString(),input).path("programCandidates");
+  assertEquals("OK",candidates.get(0).path("reviewStatus").asText());
+  assertEquals(sentOnly,candidates.get(0).path("existing").path("programId").asText());
+  assertEquals("기존 "+sentOnly,candidates.get(0).path("existing").path("name").asText());
+  assertEquals("EXISTING_ID_UNKNOWN",candidates.get(1).path("issues").get(0).asText());
+  assertEquals("EXISTING_ID_OTHER_PROJECT",candidates.get(2).path("issues").get(0).asText());
+  assertEquals("EXISTING_ID_NOT_PROVIDED",candidates.get(3).path("issues").get(0).asText());
+  assertEquals("EXISTING_ID_MISSING",candidates.get(4).path("issues").get(0).asText());
+  assertEquals("DECISION_MISSING",candidates.get(5).path("issues").get(0).asText());
+  assertEquals("DECISION_INVALID",candidates.get(6).path("issues").get(0).asText());
+  assertEquals("NEW_WITH_EXISTING_ID",candidates.get(7).path("issues").get(0).asText());
+  assertEquals("OK",candidates.get(8).path("reviewStatus").asText());
+  for(int i=1;i<=7;i++) assertEquals("REVIEW_REQUIRED",candidates.get(i).path("reviewStatus").asText(),"candidate "+i);
+  // What the model said is preserved, not rewritten into NEW.
+  assertEquals("CHANGE",candidates.get(1).path("decision").asText());
+  assertEquals("SDPG-nowhere",candidates.get(1).path("existingProgramId").asText());
+  assertTrue(candidates.get(1).path("existing").isMissingNode());
+  assertTrue(service.programsResult(output.toString(),input).path("ledgerCompare").path("performed").asBoolean());
+ }
+ @Test void ledgerWarningsDoNotBlockAndPartialInputIsReported() throws Exception {
+  var kinds=json.createObjectNode().put("name","유형 다름").put("type","BATCH").put("purpose","설명").put("decision","REUSE").put("existingProgramId","P1");kinds.putArray("requirementIds").add("A");
+  var again=json.createObjectNode().put("name","같은 대상").put("type","SCREEN").put("purpose","설명").put("decision","CHANGE").put("existingProgramId","P1");again.putArray("requirementIds").add("B");
+  var partial=json.readTree("{\"project\":{\"projectId\":\"X\"},\"requirements\":[{\"requirementId\":\"A\"},{\"requirementId\":\"B\"},{\"requirementId\":\"C\"}],\"existingPrograms\":[{\"programId\":\"P1\",\"name\":\"하나\",\"kind\":\"SCREEN\"}],\"existingProgramsInfo\":{\"total\":5,\"included\":1,\"omitted\":4,\"detail\":\"RELEVANT\"}}");
+  var result=service.programsResult(only(kinds,again).toString(),partial.toString());
+  var list=result.path("programCandidates");
+  assertEquals("OK",list.get(0).path("reviewStatus").asText());
+  assertTrue(list.get(0).path("warnings").toString().contains("KIND_MISMATCH"));
+  assertTrue(list.get(0).path("warnings").toString().contains("DUPLICATE_EXISTING_TARGET"));
+  assertTrue(list.get(1).path("warnings").toString().contains("CHANGE_SUMMARY_MISSING"));
+  assertTrue(result.path("ledgerCompare").path("partial").asBoolean());
+  assertEquals(4,result.path("ledgerCompare").path("omitted").asInt());
+ }
+ @Test void everyRequirementIsEitherLinkedOrUnclassified() {
+  String input=ledgerInput("P");
+  var output=only(program("NEW",null,"A","ZZZ"));
+  var declared=output.putArray("unclassified");
+  declared.addObject().put("requirementId","B").put("reason","불명확");
+  declared.addObject().put("requirementId","A").put("reason","중복 선언");
+  declared.addObject().put("requirementId","UNKNOWN").put("reason","없는 ID");
+  var result=service.programsResult(output.toString(),input);
+  var coverage=result.path("coverage");
+  assertEquals(3,coverage.path("total").asInt());assertEquals(1,coverage.path("covered").asInt());
+  assertEquals(1,coverage.path("unclassifiedByAi").asInt());assertEquals(1,coverage.path("unclassifiedByServer").asInt());
+  assertEquals(1,coverage.path("conflictsRemoved").asInt());assertEquals(2,coverage.path("ignoredUnknownIds").asInt());
+  assertEquals("B",result.path("unclassified").get(0).path("requirementId").asText());assertEquals("AI",result.path("unclassified").get(0).path("source").asText());
+  assertEquals("C",result.path("unclassified").get(1).path("requirementId").asText());assertEquals("SERVER",result.path("unclassified").get(1).path("source").asText());
+ }
+ @Test void analysisInputCarriesTheRegisterAndNewProjectsStillWork() throws Exception {
+  Group g=setup(true);
+  String project=jdbc.queryForObject("SELECT PROJECT_ID FROM BSDRGRP WHERE REQUIREMENT_GROUP_ID=?",String.class,g.id());
+  var output=only(program("NEW",null,g.req()));
+  reply(output.toString());
+  var first=completed(g,service.execute(g.id(),new RequirementGroupAnalysisService.Execute(g.version(),"fresh",null,"GROUP_PROGRAMS")).get("ANALYSIS_ID").toString());
+  var emptyInput=json.readTree((String)first.get("REQUEST_JSON"));
+  assertEquals("SUCCESS",first.get("STATUS"));
+  assertTrue(emptyInput.path("existingPrograms").isMissingNode());
+  assertEquals(0,emptyInput.path("existingProgramsInfo").path("total").asInt());assertEquals("NONE",emptyInput.path("existingProgramsInfo").path("detail").asText());
+  assertTrue(emptyInput.path("existingProgramsInfo").path("requirementsChars").asInt()>0);
+  assertTrue(((JsonNode)first.get("RESPONSE")).path("ledgerCompare").path("performed").asBoolean());
+  postJson("/api/standard-design/projects/"+project+"/programs",json.createObjectNode().put("PROGRAM_NAME","기존 주문 관리").put("DESCRIPTION","주문을 관리합니다."));
+  reply(output.toString());
+  var second=completed(g,service.execute(g.id(),new RequirementGroupAnalysisService.Execute(g.version(),"with-ledger",null,"GROUP_PROGRAMS")).get("ANALYSIS_ID").toString());
+  var input=json.readTree((String)second.get("REQUEST_JSON"));
+  assertEquals(1,input.path("existingPrograms").size());
+  assertEquals("기존 주문 관리",input.path("existingPrograms").get(0).path("name").asText());
+  assertEquals("FULL",input.path("existingProgramsInfo").path("detail").asText());assertEquals(0,input.path("existingProgramsInfo").path("omitted").asInt());
+ }
+ @Test void configuredInputLimitReducesTheRegisterAndNeverCutsRequirements() throws Exception {
+  Group g=setup(true);
+  String project=jdbc.queryForObject("SELECT PROJECT_ID FROM BSDRGRP WHERE REQUIREMENT_GROUP_ID=?",String.class,g.id());
+  for(int i=0;i<12;i++)postJson("/api/standard-design/projects/"+project+"/programs",json.createObjectNode().put("PROGRAM_NAME","프로그램 "+i).put("DESCRIPTION","설명 ".repeat(40)));
+  var reader=new com.caron.basekit.standarddesign.program.ProgramLedgerReader(jdbc,json);
+  var snapshot=jdbc.queryForObject("SELECT REQUEST_JSON FROM BSDRGCTX WHERE REQUIREMENT_GROUP_ID=? AND GROUP_VERSION=?",String.class,g.id(),g.version());
+  int base=snapshot.length()+RequirementGroupAnalysisService.PROGRAMS_PROMPT.length();
+  var tight=new RequirementGroupAnalysisService(jdbc,json,llm,properties,manager,60,2048,reader,base+800,0);
+  reply(only(program("NEW",null,g.req())).toString());
+  var done=completed(g,tight.execute(g.id(),new RequirementGroupAnalysisService.Execute(g.version(),"tight",null,"GROUP_PROGRAMS")).get("ANALYSIS_ID").toString());
+  var info=json.readTree((String)done.get("REQUEST_JSON")).path("existingProgramsInfo");
+  assertEquals(12,info.path("total").asInt());
+  assertEquals(info.path("total").asInt(),info.path("included").asInt()+info.path("omitted").asInt());
+  assertNotEquals("FULL",info.path("detail").asText());
+  assertEquals(base+800,info.path("maxInputChars").asInt());
+  assertEquals(1,json.readTree((String)done.get("REQUEST_JSON")).path("requirements").size());
+  var impossible=new RequirementGroupAnalysisService(jdbc,json,llm,properties,manager,60,2048,reader,10,0);
+  var rejected=org.junit.jupiter.api.Assertions.assertThrows(org.springframework.web.server.ResponseStatusException.class,()->impossible.execute(g.id(),new RequirementGroupAnalysisService.Execute(g.version(),"impossible",null,"GROUP_PROGRAMS")));
+  assertEquals(400,rejected.getStatusCode().value());
+  assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM BSDRGANL WHERE REQUIREMENT_GROUP_ID=? AND REQUEST_ID='impossible'",Integer.class,g.id()));
  }
 }
