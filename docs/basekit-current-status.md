@@ -4,6 +4,8 @@
 
 프로젝트 관리가 브라우저 localStorage만 읽어 브라우저마다 목록이 달랐던 문제를 해결하기 위해 프로젝트 마스터(BSDPROJ, V26)와 기존 PROJECT_ID 백필(V27), 프로젝트 API(목록·상세·등록·수정·삭제, 낙관적 잠금, 하위 데이터가 있으면 삭제 차단·없으면 논리 삭제)를 구현했다. 프로젝트 관리 화면과 프로젝트 선택 창은 서버 목록만 사용하고 서버 연결 실패 시 오류를 표시한다(목업·저장소 대체 없음). 그룹 확정·AI 분석 스냅샷의 프로젝트명은 서버 마스터에서 조회한다(없으면 기존 동작). 브라우저 저장소의 기존 프로젝트·인력 정보는 읽지도 지우지도 않는다. [ADR 039](decisions/039-sd-project-master-postgresql.md).
 
+SD 테이블·컬럼 코멘트: `V28__sd_table_comments.sql`로 BSD* 31개 테이블·250개 컬럼에 코멘트(논리명 | Full Name | 설명)를 추가했고(구조 변경 없음) `SdTableCommentTest`가 누락을 검출한다. Schema Catalog에는 BSDPROJ만 등록했으며 나머지는 Alias 중복·공통 컬럼 규칙 때문에 설계자 결정 대기 상태다. [ADR 039](decisions/039-sd-project-master-postgresql.md) 추가 결정 참조.
+
 검증: 백엔드 H2 통합 테스트, 프런트 테스트·build·lint, 브라우저(모의 API). **PostgreSQL에서 V26·V27은 실행하지 못했다**(공유 DB 미변경). 임시 DB에서 `BASEKIT_PG_PROJECT_REVIEW=true`로 `ProjectPostgresTest`를 실행해 확인해야 한다. 배포는 백엔드(V26·V27)를 먼저 한다.
 
 미완료: 브라우저 저장소 데이터 이전 도구(P2), 프로젝트 인력 서버 전환(P3), 서버 테이블 프로젝트 FK(P4), WBS·DB 설계(P5), 사용자 DB 연동.
