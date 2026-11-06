@@ -11,11 +11,11 @@ function load(file, imports) {
  return exports.default;
 }
 const jsx = {jsx:(type,props)=>({type,props}),jsxs:(type,props)=>({type,props})};
-test('SD manifest orders requirement, group, menu design and existing screen design; preserves project menu',()=>{
+test('SD manifest orders requirement, group, menu design, program register and screen design; preserves project menu',()=>{
  const module = load('module.tsx',id=>id==='react/jsx-runtime'?jsx:id.includes('actionCodes')?{COMMON_ACTIONS:{SEARCH:'SEARCH'}}:{__esModule:true,default:()=>null});
  const menus = module.menus.filter(m=>m.parentMenuKey==='STANDARD_DESIGN').sort((a,b)=>a.sortOrder-b.sortOrder);
  const start=menus.findIndex(m=>m.programKey==='SD_REQUIREMENT_DESIGN');
- assert.deepEqual(Array.from(menus.slice(start,start+4),m=>m.programKey),['SD_REQUIREMENT_DESIGN','SD_REQUIREMENT_GROUP','SD_MENU_DESIGN','SD_SCREEN_DESIGN']);
+ assert.deepEqual(Array.from(menus.slice(start,start+5),m=>m.programKey),['SD_REQUIREMENT_DESIGN','SD_REQUIREMENT_GROUP','SD_MENU_DESIGN','SD_PROGRAM_REGISTER','SD_SCREEN_DESIGN']);
  assert.ok(menus.some(m=>m.programKey==='SD_PROJECT_MENU'));
  assert.equal(module.programs.find(p=>p.programKey==='SD_MENU_DESIGN').routePath,'/standard-design/prototypes/menu-builder');
  assert.equal(typeof module.components.SD_MENU_DESIGN,'function');

@@ -1,9 +1,18 @@
 import { useState, type FormEvent } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { PageHeader } from '../../../../components/common';
 import { promptCompanyLlm, testCompanyLlm, type CompanyLlmTestResult } from '../../llm/companyLlm.repository';
+import ScreenDesignWorkspace from '../../screen-design/ScreenDesignWorkspace';
+import ProjectContextSelector from '../components/ProjectContextSelector';
+import { useProjectContext } from '../components/useProjectContext';
 import DesignLifecyclePage from './DesignLifecyclePage';
-import ProgramRegister from '../../programs/ProgramRegister';
 
+/** Route shell: resolves the project (?project= first, then the project context) and hosts the reusable workspace. */
 export default function ScreenDesignPage() {
+  const context = useProjectContext();
+  const [params, setParams] = useSearchParams();
+  const navigate = useNavigate();
+  const projectId = params.get('project') || context.projectId;
   const [prompt, setPrompt] = useState('');
   const [result, setResult] = useState<CompanyLlmTestResult | null>(null);
   const [error, setError] = useState('');
@@ -36,9 +45,15 @@ export default function ScreenDesignPage() {
   };
 
   return (
-    <>
-      <ProgramRegister />
-      <details><summary>기존 화면 설계 / 회사 LLM 연결 확인</summary>
+    <section className="page multi-grid-page sd-screen-design-page">
+      <PageHeader
+        breadcrumbs={['Standard Design', '화면 설계']}
+        rightContent={<ProjectContextSelector onSelected={project => { const next = new URLSearchParams(params); next.set('project', project.PROJECT_ID); setParams(next); }} />}
+      />
+      {projectId
+        ? <ScreenDesignWorkspace key={projectId} projectId={projectId} onOpenRegister={() => navigate(`/standard-design/programs?project=${encodeURIComponent(projectId)}`)} />
+        : <p>프로젝트를 선택하세요.</p>}
+      <details><summary>기존 화면 설계(브라우저 저장) / 회사 LLM 연결 확인</summary>
     <DesignLifecyclePage view="screens" supplement={
       <section className="standard-design-llm-test" aria-labelledby="company-llm-test-title">
         <div className="standard-design-llm-heading">
@@ -77,6 +92,6 @@ export default function ScreenDesignPage() {
       </section>
     } />
       </details>
-    </>
+    </section>
   );
 }

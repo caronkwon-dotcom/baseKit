@@ -81,11 +81,11 @@ class MenuProgramSeedMigrationTest {
     }
 
     private void assertSeededInventory(JdbcTemplate jdbc) {
-        assertEquals(24, jdbc.queryForObject("SELECT COUNT(*) FROM BSYPROG", Integer.class));
-        assertEquals(28, jdbc.queryForObject("SELECT COUNT(*) FROM BSYMENU", Integer.class));
+        assertEquals(25, jdbc.queryForObject("SELECT COUNT(*) FROM BSYPROG", Integer.class));
+        assertEquals(29, jdbc.queryForObject("SELECT COUNT(*) FROM BSYMENU", Integer.class));
         assertEquals(5, jdbc.queryForObject(
                 "SELECT COUNT(*) FROM BSYMENU WHERE MENU_TYPE_CODE='FOLDER'", Integer.class));
-        assertEquals(23, jdbc.queryForObject(
+        assertEquals(24, jdbc.queryForObject(
                 "SELECT COUNT(*) FROM BSYMENU WHERE MENU_TYPE_CODE='PAGE'", Integer.class));
         assertEquals(3, jdbc.queryForObject(
                 "SELECT COUNT(*) FROM BSYMENU WHERE PARENT_MENU_KEY IS NULL", Integer.class));
@@ -106,6 +106,7 @@ class MenuProgramSeedMigrationTest {
                 """, Integer.class));
         assertEquals(45, menuSort(jdbc, "STANDARD_DESIGN.REQUIREMENT_GROUP"));
         assertEquals(46, menuSort(jdbc, "STANDARD_DESIGN.MENU_DESIGN"));
+        assertEquals(46, menuSort(jdbc, "STANDARD_DESIGN.PROGRAM_REGISTER")); // V30: same order as menu design, listed after it by MENU_KEY
         assertEquals(47, menuSort(jdbc, "STANDARD_DESIGN.SCREEN"));
 
         Map<String, String> parents = new HashMap<>();
