@@ -2,7 +2,7 @@
 
 ## Status
 
-ACCEPTED / implemented as a browser-storage reference
+ACCEPTED / implemented as a browser-storage reference. **The project master moved to PostgreSQL in [ADR 039](039-sd-project-master-postgresql.md); only the selected project ID, project members, WBS and DB-design skeleton data stay in the browser.**
 
 ## Decision
 
