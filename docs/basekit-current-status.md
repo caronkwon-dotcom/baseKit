@@ -10,6 +10,8 @@ V28 적용 시 29개 테이블이 postgres 소유라 42501로 실패했다(원�
 
 TASK SD-SCREEN-001: 화면 설계 메뉴를 프로그램 목록(왼쪽)·UI 설계(오른쪽) Master/Detail로 구현했다. 설계는 BSDSCRN(V29)에 프로그램당 1건 저장하고 서버 검증·낙관적 잠금·초안/확정 상태를 둔다. AI 초안은 Backend 경유로 검증한 결과만 화면에 채우며 자동 저장하지 않는다. 프로그램 대장은 독립 프로그램 SD_PROGRAM_REGISTER(V30 시드, 메뉴 "프로그램 대장")로 분리했다. H2 통합·프런트 순수 로직 테스트와 임시 H2 서버 브라우저 검증(1280px)을 마쳤고, PostgreSQL 적용과 실제 회사 LLM 응답은 미검증이다. [ADR 041](decisions/041-sd-screen-design-menu.md).
 
+TASK SD-SCREEN-002: 설계에 기능 요건(FUNCTION_SPECS)·검색 규칙·읽기전용을 추가하고(DESIGN_JSON SCHEMA_VERSION 2, migration 없음) 화면에 "기능 요건" 탭과 상세 편집 모달을 구현했다. 저장된 설계를 단일 정적 HTML 설계서(현업 검토 Part A + 개발 지시서 Part B)로 내려받는 "설계서 출력" 버튼(SD_SCREEN_DOC_EXPORT)을 추가했다. AI 초안은 기능 요건도 만들며 근거에 없는 요구사항 ID는 제거하고 경고한다. 서버·프런트 테스트와 임시 H2 서버 브라우저 검증(편집·저장·AI 초안·출력 파일 직접 열기)을 마쳤고, PostgreSQL 적용과 실제 회사 LLM 응답은 미검증이다. 백엔드를 먼저 배포한다. [ADR 042](decisions/042-sd-screen-design-document-and-function-specs.md).
+
 검증: 백엔드 H2 통합 테스트, 프런트 테스트·build·lint, 브라우저(모의 API). **PostgreSQL에서 V26·V27은 실행하지 못했다**(공유 DB 미변경). 임시 DB에서 `BASEKIT_PG_PROJECT_REVIEW=true`로 `ProjectPostgresTest`를 실행해 확인해야 한다. 배포는 백엔드(V26·V27)를 먼저 한다.
 
 미완료: 브라우저 저장소 데이터 이전 도구(P2), 프로젝트 인력 서버 전환(P3), 서버 테이블 프로젝트 FK(P4), WBS·DB 설계(P5), 사용자 DB 연동.

@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -31,6 +33,11 @@ public class ScreenDesignService {
         return rows.get(0);
     }
 
+    /** Requirement IDs the program was registered with; function specs may only point at these. */
+    Set<String> evidenceIds(String programId) {
+        return new LinkedHashSet<>(jdbc.queryForList("SELECT REQUIREMENT_ID FROM BSDGPREQ WHERE PROGRAM_ID = ? ORDER BY REQUIREMENT_ID", String.class, programId));
+    }
+
     @Transactional(readOnly = true)
     public List<Map<String, Object>> summaries(String project) {
         if (project == null || project.isBlank() || project.length() > 50) throw ScreenDesignValidator.bad("프로젝트 ID가 필요합니다.");
@@ -49,7 +56,7 @@ public class ScreenDesignService {
     public Map<String, Object> save(String project, String programId, JsonNode request) {
         var program = program(project, programId);
         if (request == null || !request.isObject()) throw ScreenDesignValidator.bad("요청 형식을 확인하세요.");
-        var design = ScreenDesignValidator.strict(json, request);
+        var design = ScreenDesignValidator.strict(json, request, evidenceIds(programId));
         Long expected = request.hasNonNull("VERSION") && request.get("VERSION").isIntegralNumber() ? request.get("VERSION").asLong() : null;
         var rows = jdbc.queryForList("SELECT VERSION FROM BSDSCRN WHERE PROGRAM_ID = ? AND DEL_YN = 'N'", programId);
         long programVersion = ((Number) program.get("VERSION")).longValue();

@@ -8,16 +8,23 @@ import { hasAction, programByKey } from '../../../repositories/metadataRepositor
 import { requirementGroupApi } from '../requirementgroup/requirementGroupApi';
 import { designProgramApi, type DesignProgram } from '../programs/designProgramApi';
 import { programKindLabel } from '../programs/programKind';
+import { getProjects } from '../projects/projectStore';
 import {
   ACTION_DEFS, ALIGNS, ALIGN_LABELS, CONTROL_LABELS, CONTROL_TYPES, DATA_TYPES, DATA_TYPE_LABELS, LEAVE_BLOCKED_MESSAGE, SCREEN_TYPES, SCREEN_TYPE_LABELS, STATUS_LABELS,
   buildProgramRows, buttonState, cloneDesign, defaultAlign, emptyDesign, filterProgramRows, initialSearch, isDesignChanged, leaveBlocked, newColumn, newDetailField, newSearchField, toPayload, validateDesign,
-  type Align, type ColumnRow, type ControlType, type DataType, type DesignBody, type DesignStatus, type FieldRow, type ProgramRow, type ScreenDesignRecord, type ScreenDesignSummary, type ScreenType, type SearchCondition, type TabId,
+  type Align, type ColumnRow, type ControlType, type DataType, type DesignBody, type DesignStatus, type FieldRow, type FunctionSpec, type ProgramRow, type ScreenDesignRecord, type ScreenDesignSummary, type ScreenType, type SearchCondition, type TabId,
 } from './screenDesign';
 import { screenDesignApi } from './screenDesignApi';
+import { docFileName, evidenceFromProgram, renderDesignDocument } from './designDocument';
+import { downloadTextFile } from './downloadFile';
+import { linesToText, newFunctionSpec, textToLines, uncoveredRequirements } from './functionSpec';
 import './screenDesign.css';
 
 export const AI_DRAFT_ACTION = 'SD_SCREEN_AI_DRAFT';
+export const EXPORT_ACTION = 'SD_SCREEN_DOC_EXPORT';
 const fieldKey = (row: { FIELD_ID: string }) => row.FIELD_ID;
+const specKey = (row: { FUNCTION_ID: string }) => row.FUNCTION_ID;
+interface FunctionDraft { id: string; name: string; action: string; description: string; rules: string; validations: string; acceptance: string; requirements: string[] }
 const rowId = (row: { __GRID_ROW_ID: string }) => row.__GRID_ROW_ID;
 const badge = (label: string, tone?: 'info' | 'warn') => <span className={`metadata-badge${tone ? ` ${tone}` : ''}`}>{label}</span>;
 const statusBadge = (status: DesignStatus) => badge(STATUS_LABELS[status], status === 'DRAFT' ? 'warn' : status === 'CONFIRMED' ? 'info' : undefined);
@@ -58,9 +65,12 @@ export default function ScreenDesignWorkspace({ projectId, onOpenRegister, progr
   const searchRows = useGridRowState<FieldRow>(fieldKey);
   const columnRows = useGridRowState<ColumnRow>(fieldKey);
   const detailRows = useGridRowState<FieldRow>(fieldKey);
+  const functionRows = useGridRowState<FunctionSpec>(specKey);
+  const [editing, setEditing] = useState<FunctionDraft | null>(null);
   const { replace: replaceSearch, add: addSearch } = searchRows;
   const { replace: replaceColumns, add: addColumn } = columnRows;
   const { replace: replaceDetail, add: addDetail } = detailRows;
+  const { replace: replaceFunctions, add: addFunction } = functionRows;
 
   const program = programs.find(item => item.PROGRAM_ID === selectedId) ?? null;
   const allowed = useCallback((code: string) => canUseGridAction(code, programByKey[programKey]?.actionCodes ?? [], action => hasAction(roleCode, programKey, action)), [programKey, roleCode]);
@@ -82,8 +92,9 @@ export default function ScreenDesignWorkspace({ projectId, onOpenRegister, progr
   const loadEditor = useCallback((design: DesignBody | null, isWorking: boolean) => {
     setWorking(isWorking); setScreenType(design?.SCREEN_TYPE ?? 'GRID_DETAIL'); setActions(design?.ACTION_CODES ?? []);
     replaceSearch(design?.SEARCH_FIELDS ?? []); replaceColumns(design?.GRID_COLUMNS ?? []); replaceDetail(design?.DETAIL_FIELDS ?? []);
+    replaceFunctions(design?.FUNCTION_SPECS ?? []);
     setSelectedRows(new Set());
-  }, [replaceSearch, replaceColumns, replaceDetail]);
+  }, [replaceSearch, replaceColumns, replaceDetail, replaceFunctions]);
 
   useEffect(() => {
     if (!selectedId) return undefined;
@@ -100,10 +111,13 @@ export default function ScreenDesignWorkspace({ projectId, onOpenRegister, progr
     SEARCH_FIELDS: plain(searchRows.rows, row => searchRows.getState(row) === 'DELETED') as FieldRow[],
     GRID_COLUMNS: plain(columnRows.rows, row => columnRows.getState(row) === 'DELETED') as ColumnRow[],
     DETAIL_FIELDS: plain(detailRows.rows, row => detailRows.getState(row) === 'DELETED') as FieldRow[],
-  } : null, [working, screenType, actions, searchRows, columnRows, detailRows]);
+    FUNCTION_SPECS: plain(functionRows.rows, row => functionRows.getState(row) === 'DELETED') as FunctionSpec[],
+  } : null, [working, screenType, actions, searchRows, columnRows, detailRows, functionRows]);
+  const evidenceIds = useMemo(() => program?.EVIDENCE.map(item => item.REQUIREMENT_ID) ?? [], [program]);
   const dirty = isDesignChanged(current, record?.DESIGN ?? null);
   const status: DesignStatus = record?.DESIGN_STATUS ?? 'NONE';
   const buttons = buttonState({ hasDesign: working, saved: Boolean(record), dirty, status, busy: busy || detailLoading });
+  const canExport = Boolean(record) && !dirty && !busy && !detailLoading;
 
   const programRows = useMemo(() => buildProgramRows(programs, summaries, groupNames), [programs, summaries, groupNames]);
   const visibleRows = useMemo(() => filterProgramRows(programRows, applied), [programRows, applied]);
@@ -127,19 +141,24 @@ export default function ScreenDesignWorkspace({ projectId, onOpenRegister, progr
     setBusy(true);
     try { await work(); } catch (error) { setMessage({ type: 'error', text: error instanceof Error ? error.message : '작업을 완료하지 못했습니다.' }); } finally { setBusy(false); }
   };
-  const apply = async (saved: ScreenDesignRecord, text: string) => {
-    setRecord(saved); loadEditor(cloneDesign(saved.DESIGN), true); await refreshSummaries(); setMessage({ type: 'success', text });
+  const apply = async (saved: ScreenDesignRecord, text: string, type: BaseKitMessageType = 'success') => {
+    setRecord(saved); loadEditor(cloneDesign(saved.DESIGN), true); await refreshSummaries(); setMessage({ type, text });
   };
   const save = () => void run(async () => {
     if (!current) return;
-    const problem = validateDesign(current);
+    const problem = validateDesign(current, evidenceIds);
     if (problem) { setMessage({ type: 'warn', text: problem }); return; }
     await apply(await screenDesignApi.save(projectId, selectedId, toPayload(current), record?.VERSION), '화면 설계를 저장했습니다.');
   });
   const confirm = () => void run(async () => {
     if (!record) return;
     const confirmed = await screenDesignApi.confirm(projectId, selectedId, record.VERSION);
-    await apply(confirmed, `설계를 확정했습니다. (설계 v${confirmed.VERSION})`);
+    const specs = confirmed.DESIGN.FUNCTION_SPECS;
+    const missing = uncoveredRequirements(specs, evidenceIds);
+    const done = `설계를 확정했습니다. (설계 v${confirmed.VERSION})`;
+    if (!specs.length) await apply(confirmed, `${done} 다만 기능 요건이 없습니다. 설계서의 기능 요건 장이 비어 있으니 작성을 권장합니다.`, 'warn');
+    else if (missing.length) await apply(confirmed, `${done} 다만 어떤 기능에도 연결되지 않은 근거 요구사항(누락 후보)이 있습니다: ${missing.join(', ')}`, 'warn');
+    else await apply(confirmed, done);
   });
   const revert = () => {
     loadEditor(record ? cloneDesign(record.DESIGN) : null, Boolean(record));
@@ -150,20 +169,58 @@ export default function ScreenDesignWorkspace({ projectId, onOpenRegister, progr
     try {
       const draft = await screenDesignApi.aiDraft(projectId, selectedId);
       setWorking(true); setScreenType(draft.DESIGN.SCREEN_TYPE); setActions(draft.DESIGN.ACTION_CODES);
-      replaceSearch([]); replaceColumns([]); replaceDetail([]); setSelectedRows(new Set());
-      draft.DESIGN.SEARCH_FIELDS.forEach(addSearch); draft.DESIGN.GRID_COLUMNS.forEach(addColumn); draft.DESIGN.DETAIL_FIELDS.forEach(addDetail);
+      replaceSearch([]); replaceColumns([]); replaceDetail([]); replaceFunctions([]); setSelectedRows(new Set());
+      draft.DESIGN.SEARCH_FIELDS.forEach(addSearch); draft.DESIGN.GRID_COLUMNS.forEach(addColumn); draft.DESIGN.DETAIL_FIELDS.forEach(addDetail); draft.DESIGN.FUNCTION_SPECS.forEach(addFunction);
       setTab('search');
-      setMessage({ type: 'info', text: 'AI 초안을 생성했습니다. 검토·수정한 뒤 저장하세요. (AI 제안 항목은 구분 열에 표시됩니다)' });
+      const base = 'AI 초안을 생성했습니다. 검토·수정한 뒤 저장하세요. (AI 제안 항목은 구분 열에 표시됩니다)';
+      setMessage(draft.WARNINGS.length ? { type: 'warn', text: `${base} 자동 정리한 내용: ${draft.WARNINGS.join(' / ')}` } : { type: 'info', text: base });
     } finally { setAiOpen(false); }
   });
 
-  const fieldColumns = (state: typeof searchRows): DataTableColumn<TrackedGridRow<FieldRow>>[] => {
+  const exportDocument = () => {
+    if (!record || !program) return;
+    const fileName = docFileName(program.PROGRAM_ID, record.VERSION);
+    const html = renderDesignDocument({
+      generatedAt: new Date().toLocaleDateString('sv-SE'), projectId, projectName: getProjects().find(item => item.PROJECT_ID === projectId)?.PROJECT_NAME ?? projectId,
+      program: { PROGRAM_ID: program.PROGRAM_ID, PROGRAM_NAME: program.PROGRAM_NAME, PROGRAM_KIND_LABEL: programKindLabel(program.PROGRAM_KIND), SOURCE_GROUP_ID: program.SOURCE_GROUP_ID ?? '', SOURCE_GROUP_NAME: program.SOURCE_GROUP_ID ? groupNames.get(program.SOURCE_GROUP_ID) ?? '' : '', DESCRIPTION: program.DESCRIPTION },
+      design: { VERSION: record.VERSION, DESIGN_STATUS: record.DESIGN_STATUS }, evidence: evidenceFromProgram(program.EVIDENCE), body: record.DESIGN,
+    });
+    downloadTextFile(fileName, html, 'text/html;charset=utf-8');
+    setMessage({ type: 'info', text: `설계서를 내려받았습니다. (${fileName})${record.DESIGN_STATUS === 'DRAFT' ? ' 초안 상태라 표지에 "초안 · 현업 검토 전"이 표시됩니다.' : ''}` });
+  };
+  const openFunction = (row: TrackedGridRow<FunctionSpec>) => setEditing({
+    id: row.__GRID_ROW_ID, name: row.NAME, action: row.ACTION_CODE, description: row.DESCRIPTION,
+    rules: linesToText(row.RULES), validations: linesToText(row.VALIDATIONS), acceptance: linesToText(row.ACCEPTANCE), requirements: row.REQUIREMENT_IDS,
+  });
+  const saveFunction = () => {
+    if (!editing) return;
+    functionRows.update(editing.id, row => ({ ...row, NAME: editing.name.trim(), ACTION_CODE: editing.action, DESCRIPTION: editing.description, RULES: textToLines(editing.rules), VALIDATIONS: textToLines(editing.validations), ACCEPTANCE: textToLines(editing.acceptance), REQUIREMENT_IDS: evidenceIds.filter(id => editing.requirements.includes(id)) }));
+    setEditing(null);
+  };
+
+  const fieldColumns = (state: typeof searchRows, kind: 'search' | 'detail'): DataTableColumn<TrackedGridRow<FieldRow>>[] => {
     const set = (row: TrackedGridRow<FieldRow>, patch: Partial<FieldRow>) => state.update(row.__GRID_ROW_ID, value => ({ ...value, ...patch }));
     return [
       { key: 'LABEL', header: '항목명', minWidth: 160, flex: 1.4, render: row => <input className="basekit-grid-input" aria-label="항목명" maxLength={100} value={row.LABEL} onChange={event => set(row, { LABEL: event.target.value })} onClick={event => event.stopPropagation()} /> },
       { key: 'CONTROL_TYPE', header: '컨트롤', width: 140, render: row => <select className="basekit-grid-input" aria-label="컨트롤" value={row.CONTROL_TYPE} onChange={event => set(row, { CONTROL_TYPE: event.target.value as ControlType })} onClick={event => event.stopPropagation()}>{CONTROL_TYPES.map(type => <option key={type} value={type}>{CONTROL_LABELS[type]}</option>)}</select> },
       { key: 'REQUIRED_YN', header: '필수', width: 70, align: 'center', render: row => <input type="checkbox" aria-label="필수" checked={row.REQUIRED_YN === 'Y'} onChange={event => set(row, { REQUIRED_YN: event.target.checked ? 'Y' : 'N' })} onClick={event => event.stopPropagation()} /> },
+      kind === 'search'
+        ? { key: 'RULE', header: '검색 규칙', minWidth: 140, flex: 1.2, render: row => <input className="basekit-grid-input" aria-label="검색 규칙" maxLength={200} value={row.RULE ?? ''} onChange={event => set(row, { RULE: event.target.value })} onClick={event => event.stopPropagation()} /> }
+        : { key: 'READONLY_YN', header: '읽기전용', width: 84, align: 'center', render: row => <input type="checkbox" aria-label="읽기전용" checked={row.READONLY_YN === 'Y'} onChange={event => set(row, { READONLY_YN: event.target.checked ? 'Y' : 'N' })} onClick={event => event.stopPropagation()} /> },
       { key: 'SOURCE', header: '구분', width: 90, align: 'center', render: row => sourceBadge(row.SOURCE) },
+    ];
+  };
+  const functionColumns = (): DataTableColumn<TrackedGridRow<FunctionSpec>>[] => {
+    const set = (row: TrackedGridRow<FunctionSpec>, patch: Partial<FunctionSpec>) => functionRows.update(row.__GRID_ROW_ID, value => ({ ...value, ...patch }));
+    return [
+      { key: 'FUNCTION_ID', header: '기능ID', width: 78, render: row => row.FUNCTION_ID },
+      { key: 'NAME', header: '기능명', minWidth: 140, flex: 1.2, render: row => <input className="basekit-grid-input" aria-label="기능명" maxLength={100} value={row.NAME} onChange={event => set(row, { NAME: event.target.value })} onClick={event => event.stopPropagation()} /> },
+      { key: 'ACTION_CODE', header: 'ACTION_CODE', width: 150, render: row => <select className="basekit-grid-input" aria-label="ACTION_CODE" value={row.ACTION_CODE} onChange={event => set(row, { ACTION_CODE: event.target.value })} onClick={event => event.stopPropagation()}><option value="">(없음)</option>{[...new Set([...actions, ...(row.ACTION_CODE ? [row.ACTION_CODE] : [])])].map(code => <option key={code} value={code}>{code}</option>)}</select> },
+      { key: 'DESCRIPTION', header: '설명', minWidth: 160, flex: 1.5, render: row => row.DESCRIPTION || '-' },
+      { key: 'RULES', header: '규칙', width: 56, align: 'right', render: row => row.RULES.length },
+      { key: 'REQUIREMENT_IDS', header: '근거 요구사항', minWidth: 130, flex: 1, render: row => row.REQUIREMENT_IDS.length ? row.REQUIREMENT_IDS.join(', ') : '-' },
+      { key: 'SOURCE', header: '구분', width: 90, align: 'center', render: row => sourceBadge(row.SOURCE) },
+      { key: 'EDIT', header: '상세', width: 100, align: 'center', render: row => <ActionButton actionCode={COMMON_ACTIONS.UPDATE} label="상세 편집" display="text" onClick={() => openFunction(row)} /> },
     ];
   };
   const columnColumns = (): DataTableColumn<TrackedGridRow<ColumnRow>>[] => {
@@ -186,9 +243,10 @@ export default function ScreenDesignWorkspace({ projectId, onOpenRegister, progr
   const toggleAction = (code: string, on: boolean) => setActions(list => on ? [...new Set([...list, code])] : list.filter(item => item !== code));
 
   const tabs = [
-    { id: 'search', label: `검색조건 (${count(searchRows.rows.filter(row => searchRows.getState(row) !== 'DELETED'))})`, content: editableGrid('검색조건', searchRows as never, fieldColumns(searchRows) as never, newSearchField) },
+    { id: 'search', label: `검색조건 (${count(searchRows.rows.filter(row => searchRows.getState(row) !== 'DELETED'))})`, content: editableGrid('검색조건', searchRows as never, fieldColumns(searchRows, 'search') as never, newSearchField) },
     { id: 'cols', label: `그리드 컬럼 (${count(columnRows.rows.filter(row => columnRows.getState(row) !== 'DELETED'))})`, content: editableGrid('그리드 컬럼', columnRows as never, columnColumns() as never, newColumn) },
-    { id: 'detail', label: `상세 입력항목 (${count(detailRows.rows.filter(row => detailRows.getState(row) !== 'DELETED'))})`, content: editableGrid('상세 입력항목', detailRows as never, fieldColumns(detailRows) as never, newDetailField) },
+    { id: 'detail', label: `상세 입력항목 (${count(detailRows.rows.filter(row => detailRows.getState(row) !== 'DELETED'))})`, content: editableGrid('상세 입력항목', detailRows as never, fieldColumns(detailRows, 'detail') as never, newDetailField) },
+    { id: 'functions', label: `기능 요건 (${count(functionRows.rows.filter(row => functionRows.getState(row) !== 'DELETED'))})`, content: editableGrid('기능 요건', functionRows as never, functionColumns() as never, () => newFunctionSpec(functionRows.rows)) },
     { id: 'actions', label: `버튼 · Action (${actions.length})`, content: (
       <BaseKitDataGrid programKey={programKey} roleCode={roleCode} title="버튼 · Action" selectable={false} toolbarActions={[]} rows={actionRows} getRowKey={rowId}
         columns={[
@@ -223,6 +281,7 @@ export default function ScreenDesignWorkspace({ projectId, onOpenRegister, progr
           {allowed(COMMON_ACTIONS.REVERT_CHANGES) && <ActionButton actionCode={COMMON_ACTIONS.REVERT_CHANGES} label="되돌리기" disabled={!buttons.revert} onClick={revert} />}
           {allowed(COMMON_ACTIONS.SAVE) && <ActionButton actionCode={COMMON_ACTIONS.SAVE} label="저장" disabled={!buttons.save} onClick={save} />}
           {allowed(COMMON_ACTIONS.APPROVE) && <ActionButton actionCode={COMMON_ACTIONS.APPROVE} label="설계 확정" disabled={!buttons.confirm} onClick={confirm} />}
+          {allowed(EXPORT_ACTION) && <ActionButton actionCode={EXPORT_ACTION} label="설계서 출력" disabled={!canExport} onClick={exportDocument} />}
         </div>
       </div>
       <div className="sd-screen-form">
@@ -248,7 +307,7 @@ export default function ScreenDesignWorkspace({ projectId, onOpenRegister, progr
 
   return <>
     <SearchPanel rows={1} fields={searchFields} value={condition} initialValue={initialSearch} onValueChange={setCondition} onSearch={value => { setApplied(value); reload(); }} onReset={value => { setCondition(value); setApplied(value); }} />
-    <MasterDetailMultiGrid detailTopSizing="content" masterWidth="46%"
+    <MasterDetailMultiGrid detailTopSizing="content"
       master={<BaseKitDataGrid programKey={programKey} roleCode={roleCode} title="프로그램 목록" selectable={false} columns={masterColumns} rows={visibleRows} getRowKey={row => row.PROGRAM_ID} currentRowKey={selectedId} loading={loading}
         metrics={[{ label: '설계 확정', value: doneCount }]} onRowClick={row => pick(row.PROGRAM_ID)} emptyMessage="등록된 프로그램이 없습니다. 프로그램 대장에서 등록하세요."
         toolbarActions={onOpenRegister && allowed(COMMON_ACTIONS.CREATE) ? [{ actionCode: COMMON_ACTIONS.CREATE, label: '프로그램 등록', onClick: onOpenRegister }] : []} />}
@@ -261,6 +320,19 @@ export default function ScreenDesignWorkspace({ projectId, onOpenRegister, progr
         <dl><dt>프로그램</dt><dd><b>{program.PROGRAM_NAME}</b></dd><dt>설명</dt><dd>{program.DESCRIPTION || '-'}</dd>
           <dt>근거</dt><dd>{program.EVIDENCE.length ? `근거 요구사항 ${program.EVIDENCE.length}건` : '근거 요구사항 없음 — 프로그램 설명만으로 생성됩니다.'}</dd></dl>
         {working && <p className="sd-screen-ai-warn">현재 편집 중인 내용은 AI 초안으로 대체됩니다. 저장 전에는 되돌리기로 복구할 수 있습니다.</p>}
+      </div>}
+    </FormModal>
+    <FormModal open={Boolean(editing)} title={`기능 요건 상세 편집${editing ? ` · ${editing.id.startsWith('NEW_') ? '새 기능' : editing.id}` : ''}`} submitLabel="적용" submitDisabled={!editing?.name.trim()} onClose={() => setEditing(null)} onSubmit={saveFunction}>
+      {editing && program && <div className="sd-screen-func">
+        <label><span>기능명 *</span><input aria-label="기능명" maxLength={100} value={editing.name} onChange={event => setEditing({ ...editing, name: event.target.value })} /></label>
+        <label><span>ACTION_CODE</span><select aria-label="ACTION_CODE" value={editing.action} onChange={event => setEditing({ ...editing, action: event.target.value })}><option value="">(없음)</option>{[...new Set([...actions, ...(editing.action ? [editing.action] : [])])].map(code => <option key={code} value={code}>{code}</option>)}</select></label>
+        <label><span>설명</span><textarea aria-label="설명" rows={3} maxLength={2000} value={editing.description} onChange={event => setEditing({ ...editing, description: event.target.value })} /></label>
+        <label><span>처리 규칙 (한 줄에 하나)</span><textarea aria-label="처리 규칙" rows={4} value={editing.rules} onChange={event => setEditing({ ...editing, rules: event.target.value })} /></label>
+        <label><span>검증 · 오류 메시지 (한 줄에 하나)</span><textarea aria-label="검증 오류 메시지" rows={3} value={editing.validations} onChange={event => setEditing({ ...editing, validations: event.target.value })} /></label>
+        <label><span>수용 기준 (Given/When/Then, 한 줄에 하나)</span><textarea aria-label="수용 기준" rows={3} value={editing.acceptance} onChange={event => setEditing({ ...editing, acceptance: event.target.value })} /></label>
+        <fieldset><legend>근거 요구사항</legend>
+          {evidenceFromProgram(program.EVIDENCE).length ? evidenceFromProgram(program.EVIDENCE).map(item => <label key={item.REQUIREMENT_ID} className="sd-screen-func-check"><input type="checkbox" checked={editing.requirements.includes(item.REQUIREMENT_ID)} onChange={event => setEditing({ ...editing, requirements: event.target.checked ? [...editing.requirements, item.REQUIREMENT_ID] : editing.requirements.filter(id => id !== item.REQUIREMENT_ID) })} /><span><b>{item.REQUIREMENT_ID}</b> {item.NAME}</span></label>) : <p>근거 요구사항이 없는 프로그램입니다.</p>}
+        </fieldset>
       </div>}
     </FormModal>
   </>;

@@ -31,7 +31,8 @@ public class ScreenDesignAiService {
         허용 값 — SCREEN_TYPE: GRID_DETAIL, GRID_ONLY, FORM_ONLY, TREE_DETAIL, POPUP.
         CONTROL_TYPE: TEXT, COMBO, DATE, DATE_RANGE, CHECK, POPUP_SELECT. DATA_TYPE: TEXT, NUMBER, DATE, BADGE. ALIGN: LEFT, CENTER, RIGHT.
         ACTION_CODES: SEARCH, CREATE, UPDATE, DELETE, SAVE, EXCEL_UPLOAD, EXCEL_DOWNLOAD, APPROVE (프로그램에 필요한 것만).
-        출력 형식: {"SCREEN_TYPE":"...","SEARCH_FIELDS":[{"LABEL":"...","CONTROL_TYPE":"...","REQUIRED_YN":"Y|N"}],"GRID_COLUMNS":[{"LABEL":"...","DATA_TYPE":"...","WIDTH":120,"ALIGN":"..."}],"DETAIL_FIELDS":[{"LABEL":"...","CONTROL_TYPE":"...","REQUIRED_YN":"Y|N"}],"ACTION_CODES":["SEARCH"]}
+        FUNCTION_SPECS: 화면이 제공할 기능 요건 목록(기능 3~10개). 각 기능은 NAME, ACTION_CODE(없으면 빈 문자열, 위 ACTION_CODES 중 이 설계에서 쓰는 것만), DESCRIPTION, RULES(처리 규칙 문장 배열), VALIDATIONS(검증·오류 메시지 배열), ACCEPTANCE("Given … When … Then …" 배열), REQUIREMENT_IDS(입력의 evidenceRequirements에 있는 requirementId만)를 가집니다. 근거 요구사항을 모두 어떤 기능에든 연결하세요.
+        출력 형식: {"SCREEN_TYPE":"...","SEARCH_FIELDS":[{"LABEL":"...","CONTROL_TYPE":"...","REQUIRED_YN":"Y|N","RULE":"검색 규칙"}],"GRID_COLUMNS":[{"LABEL":"...","DATA_TYPE":"...","WIDTH":120,"ALIGN":"..."}],"DETAIL_FIELDS":[{"LABEL":"...","CONTROL_TYPE":"...","REQUIRED_YN":"Y|N","READONLY_YN":"Y|N"}],"ACTION_CODES":["SEARCH"],"FUNCTION_SPECS":[{"NAME":"...","ACTION_CODE":"SEARCH","DESCRIPTION":"...","RULES":["..."],"VALIDATIONS":["..."],"ACCEPTANCE":["..."],"REQUIREMENT_IDS":["REQ-1"]}]}
         규칙: 근거 요구사항에 있는 업무 용어를 사용하고 없는 기능을 지어내지 마세요. 항목은 검색조건 1~6개, 그리드 컬럼 3~12개, 상세 입력항목 2~20개 정도로 간결하게 하세요. 근거가 없으면 프로그램명과 설명만으로 보수적으로 작성하세요.
         """;
 
@@ -42,7 +43,7 @@ public class ScreenDesignAiService {
     private final int maxOutputTokens, timeoutSeconds;
 
     public ScreenDesignAiService(JdbcTemplate jdbc, ObjectMapper json, DesignLlmClient llm, ScreenDesignService designs,
-                                 @Value("${standard-design.screen-design.max-output-tokens:4000}") int maxOutputTokens,
+                                 @Value("${standard-design.screen-design.max-output-tokens:8000}") int maxOutputTokens,
                                  @Value("${standard-design.screen-design.timeout-seconds:120}") int timeoutSeconds) {
         this.jdbc = jdbc; this.json = json; this.llm = llm; this.designs = designs;
         this.maxOutputTokens = maxOutputTokens; this.timeoutSeconds = timeoutSeconds;
@@ -84,9 +85,10 @@ public class ScreenDesignAiService {
         catch (LlmConnectionException e) { throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "회사 LLM에 연결하지 못했습니다. 기존 편집 내용은 그대로 유지됩니다."); }
         log.info("screen-design AI draft program={} evidence={} promptChars={} replyChars={}", programId, evidence.size(), prompt.length(), reply.content() == null ? 0 : reply.content().length());
         if (reply.httpStatus() < 200 || reply.httpStatus() >= 300) throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "LLM 서버가 요청을 거부했습니다. (HTTP " + reply.httpStatus() + ")");
-        ObjectNode design = parse(reply.content());
+        var outcome = parse(reply.content(), evidence.stream().map(row -> String.valueOf(row.get("REQUIREMENT_ID"))).collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new)));
         var result = new LinkedHashMap<String, Object>();
-        result.put("DESIGN", design);
+        result.put("DESIGN", outcome.design());
+        result.put("WARNINGS", outcome.warnings());
         result.put("MODEL", reply.model());
         result.put("PROGRAM_VERSION", program.get("VERSION"));
         result.put("EVIDENCE_COUNT", evidence.size());
@@ -95,7 +97,7 @@ public class ScreenDesignAiService {
     }
 
     /** Accepts either the model text or an OpenAI-style envelope; never repairs content, only unwraps fences and surrounding prose. */
-    ObjectNode parse(String raw) {
+    ScreenDesignValidator.Outcome parse(String raw, java.util.Set<String> evidenceIds) {
         String text = raw == null ? "" : raw.strip();
         try {
             JsonNode envelope = json.readTree(text);
@@ -112,11 +114,12 @@ public class ScreenDesignAiService {
         JsonNode node;
         try { node = json.readTree(text.substring(from, to + 1)); }
         catch (Exception e) { throw unreadable(); }
-        ObjectNode design;
-        try { design = ScreenDesignValidator.lenient(json, node); }
+        ScreenDesignValidator.Outcome outcome;
+        try { outcome = ScreenDesignValidator.lenient(json, node, evidenceIds); }
         catch (ResponseStatusException e) { throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "AI 초안이 설계 규격에 맞지 않습니다. " + e.getReason() + " 기존 편집 내용은 유지됩니다."); }
-        for (String key : List.of("SEARCH_FIELDS", "GRID_COLUMNS", "DETAIL_FIELDS")) design.path(key).forEach(item -> ((ObjectNode) item).put("SOURCE", "AI"));
-        return design;
+        ObjectNode design = outcome.design();
+        for (String key : List.of("SEARCH_FIELDS", "GRID_COLUMNS", "DETAIL_FIELDS", "FUNCTION_SPECS")) design.path(key).forEach(item -> ((ObjectNode) item).put("SOURCE", "AI"));
+        return outcome;
     }
 
     private static ResponseStatusException unreadable() {

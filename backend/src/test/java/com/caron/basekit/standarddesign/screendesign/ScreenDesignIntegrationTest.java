@@ -152,4 +152,70 @@ class ScreenDesignIntegrationTest {
   assertEquals(0, data.path("DESIGN").path("GRID_COLUMNS").size());
   assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM BSDSCRN WHERE PROGRAM_ID = ?", Integer.class, program));
  }
+ ObjectNode spec(String id, String name, String action, String... requirements) {
+  var f = json.createObjectNode(); if (id != null) f.put("FUNCTION_ID", id);
+  f.put("NAME", name).put("ACTION_CODE", action).put("DESCRIPTION", "설명").put("SOURCE", "USER");
+  f.putArray("RULES").add("조건은 AND로 결합한다.").add("  "); f.putArray("VALIDATIONS").add("결과가 없으면 안내한다."); f.putArray("ACCEPTANCE").add("Given 3건 When 조회 Then 3건");
+  var ids = f.putArray("REQUIREMENT_IDS"); for (String r : requirements) ids.add(r);
+  return f;
+ }
+ void evidence(String program, String... ids) { for (String id : ids) jdbc.update("INSERT INTO BSDGPREQ(PROGRAM_ID, REQUIREMENT_ID, REQUIREMENT_REVISION, SNAPSHOT_JSON) VALUES(?,?,?,?)", program, id, 1, "{\"name\":\"요구\"}"); }
+
+ @Test void functionSpecsAreKeptValidatedAndOldDesignsStillWork() throws Exception {
+  String project = project(), program = program(project);
+  evidence(program, "REQ-1", "REQ-2");
+  // a design without function specs (saved before schema version 2) is still accepted and reads back with defaults
+  var legacy = putJson(url(project, program), design(), 200).path("DATA").path("DESIGN");
+  assertEquals(2, legacy.path("SCHEMA_VERSION").asInt());
+  assertEquals(0, legacy.path("FUNCTION_SPECS").size());
+  assertEquals("", legacy.path("SEARCH_FIELDS").path(0).path("RULE").asText());
+  assertEquals("N", legacy.path("DETAIL_FIELDS").path(0).path("READONLY_YN").asText());
+
+  var withSpecs = design().put("VERSION", 1);
+  ((ObjectNode) withSpecs.path("SEARCH_FIELDS").get(0)).put("RULE", "부분 일치");
+  ((ObjectNode) withSpecs.path("DETAIL_FIELDS").get(0)).put("READONLY_YN", "Y");
+  withSpecs.putArray("FUNCTION_SPECS").add(spec("FN-01", "이력 조회", "SEARCH", "REQ-1", "REQ-1")).add(spec("FN-02", "상세 표시", "", "REQ-2"));
+  var saved = putJson(url(project, program), withSpecs, 200).path("DATA").path("DESIGN");
+  var first = saved.path("FUNCTION_SPECS").get(0);
+  assertEquals(2, saved.path("FUNCTION_SPECS").size());
+  assertEquals(1, first.path("REQUIREMENT_IDS").size());                 // duplicates collapse
+  assertEquals(1, first.path("RULES").size());                            // blank lines are dropped
+  assertEquals("부분 일치", saved.path("SEARCH_FIELDS").path(0).path("RULE").asText());
+  assertEquals("Y", saved.path("DETAIL_FIELDS").path(0).path("READONLY_YN").asText());
+ }
+
+ @Test void functionSpecsAreRejectedWhenTheyDoNotMatchTheDesignOrTheEvidence() throws Exception {
+  String project = project(), program = program(project);
+  evidence(program, "REQ-1");
+  var outside = design(); outside.putArray("FUNCTION_SPECS").add(spec("FN-01", "조회", "SEARCH", "REQ-404"));
+  assertTrue(putJson(url(project, program), outside, 422).path("MESSAGE").asText().contains("REQ-404"));
+  var action = design(); action.putArray("FUNCTION_SPECS").add(spec("FN-01", "삭제", "DELETE", "REQ-1"));
+  assertTrue(putJson(url(project, program), action, 422).path("MESSAGE").asText().contains("ACTION_CODES"));
+  var duplicate = design(); duplicate.putArray("FUNCTION_SPECS").add(spec("FN-01", "가", "")).add(spec("FN-01", "나", ""));
+  assertTrue(putJson(url(project, program), duplicate, 422).path("MESSAGE").asText().contains("중복"));
+  var noId = design(); noId.putArray("FUNCTION_SPECS").add(spec(null, "가", ""));
+  assertTrue(putJson(url(project, program), noId, 422).path("MESSAGE").asText().contains("FUNCTION_ID"));
+  var noName = design(); noName.putArray("FUNCTION_SPECS").add(spec("FN-01", "", ""));
+  assertTrue(putJson(url(project, program), noName, 422).path("MESSAGE").asText().contains("NAME"));
+  var many = design(); var array = many.putArray("FUNCTION_SPECS"); for (int i = 0; i < 51; i++) array.add(spec("FN-" + i, "기능" + i, ""));
+  assertTrue(putJson(url(project, program), many, 422).path("MESSAGE").asText().contains("50"));
+  assertTrue(call(get(url(project, program)), 200).path("DATA").isNull());
+ }
+
+ @Test void aiDraftBringsFunctionSpecsAndDropsWhatItCannotBack() throws Exception {
+  String project = project(), program = program(project);
+  evidence(program, "REQ-1");
+  when(llm.chatRaw(anyString(), anyString(), any())).thenReturn(new DesignLlmClient.LlmChatResult("m",
+   "{\"SCREEN_TYPE\":\"GRID_DETAIL\",\"ACTION_CODES\":[\"SEARCH\"],\"FUNCTION_SPECS\":[{\"NAME\":\"이력 조회\",\"ACTION_CODE\":\"SEARCH\",\"RULES\":[\"AND 결합\"],\"REQUIREMENT_IDS\":[\"REQ-1\",\"REQ-999\"],\"SOURCE\":\"USER\"},{\"NAME\":\"저장\",\"ACTION_CODE\":\"SAVE\"}]}"));
+  var data = postJson(url(project, program) + "/ai-draft", json.createObjectNode(), 200).path("DATA");
+  var specs = data.path("DESIGN").path("FUNCTION_SPECS");
+  assertEquals("FN-01", specs.get(0).path("FUNCTION_ID").asText());
+  assertEquals("FN-02", specs.get(1).path("FUNCTION_ID").asText());
+  assertEquals("AI", specs.get(0).path("SOURCE").asText());                // the model cannot claim USER
+  assertEquals(1, specs.get(0).path("REQUIREMENT_IDS").size());
+  assertEquals("", specs.get(1).path("ACTION_CODE").asText());             // SAVE is not in this draft's ACTION_CODES
+  var warnings = data.path("WARNINGS").toString();
+  assertTrue(warnings.contains("REQ-999") && warnings.contains("SAVE"));
+  assertTrue(call(get(url(project, program)), 200).path("DATA").isNull());
+ }
 }
