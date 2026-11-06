@@ -182,7 +182,7 @@ public class RequirementGroupAnalysisService {
             var snapshots = jdbc.queryForList("SELECT REQUEST_JSON FROM BSDRGCTX WHERE REQUIREMENT_GROUP_ID=? AND GROUP_VERSION=?", group, request.VERSION());
             if (snapshots.isEmpty()) {
                 new RequirementGroupSnapshot(jdbc, json).captureCurrent(group, (String) g.get("PROJECT_ID"),
-                    request.PROJECT_NAME() == null || request.PROJECT_NAME().isBlank() ? (String) g.get("PROJECT_ID") : request.PROJECT_NAME(),
+                    com.caron.basekit.standarddesign.project.ProjectService.resolveName(jdbc, (String) g.get("PROJECT_ID"), request.PROJECT_NAME()),
                     (String) g.get("REQUIREMENT_GROUP_NAME"), (String) g.get("DESCRIPTION"), request.VERSION());
                 snapshots = jdbc.queryForList("SELECT REQUEST_JSON FROM BSDRGCTX WHERE REQUIREMENT_GROUP_ID=? AND GROUP_VERSION=?", group, request.VERSION());
             }

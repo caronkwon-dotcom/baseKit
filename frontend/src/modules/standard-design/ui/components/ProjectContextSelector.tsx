@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import DataTable, { type DataTableColumn } from '../../../../components/common/DataTable';
 import FormModal from '../../../../components/common/FormModal';
 import SearchPanel, { type SearchFieldConfig } from '../../../../components/common/SearchPanel';
 import { designLifecycleRepository } from '../../design-lifecycle/designLifecycle.repository';
 import type { DesignProject, DesignStatus } from '../../design-lifecycle/designLifecycle.types';
 import { emptyProjectSearchCondition, filterProjects, type ProjectSearchCondition, type ProjectSearchResult } from './projectReference';
+import { loadProjects, getProjects } from '../../projects/projectStore';
 import { useProjectContext } from './useProjectContext';
 
 const statuses: DesignStatus[] = ['DRAFT', 'IN_PROGRESS', 'REVIEW', 'APPROVED'];
@@ -37,26 +38,13 @@ export function ProjectContextDialog({
 }: ProjectContextDialogProps) {
   const [condition, setCondition] = useState(() => ({ ...initialCondition }));
   const [applied, setApplied] = useState(() => ({ ...initialCondition }));
-  const [databaseProjectIds, setDatabaseProjectIds] = useState<string[]>([]);
-  useEffect(() => {
-    let active = true;
-    fetch('/api/standard-design/projects')
-      .then((response) => response.ok ? response.json() : Promise.reject(new Error('프로젝트 목록 조회 실패')))
-      .then((result: { DATA?: { PROJECT_ID: string }[] }) => {
-        if (active) setDatabaseProjectIds((result.DATA ?? []).map((project) => project.PROJECT_ID));
-      })
-      .catch(() => { if (active) setDatabaseProjectIds([]); });
-    return () => { active = false; };
-  }, []);
-  const storedProjects = designLifecycleRepository.getData().projects;
-  const databaseProjects = databaseProjectIds.map((projectId): DesignProject => storedProjects.find((project) => project.PROJECT_ID === projectId)
-    ?? { PROJECT_ID: projectId, PROJECT_NAME: projectId, CUSTOMER_NAME: '', DESCRIPTION: '', STATUS: 'DRAFT', START_DATE: '', END_DATE: '' });
-  const projects = [...storedProjects.filter((project) => databaseProjectIds.length === 0 || databaseProjectIds.includes(project.PROJECT_ID)), ...databaseProjects.filter((project) => !storedProjects.some((stored) => stored.PROJECT_ID === project.PROJECT_ID))];
+  // The server is the only source of projects; browser storage only remembers which one is selected.
+  const { status, error } = useProjectContext();
+  const projects = getProjects();
   const rows = filterProjects(projects, applied);
   const select = (next: DesignProject) => {
     const accepted = onSelected?.(next, { condition: { ...applied }, rows: rows.map((row) => ({ ...row })) });
     if (accepted === false) return;
-    if (!storedProjects.some((project) => project.PROJECT_ID === next.PROJECT_ID)) designLifecycleRepository.saveProject(next);
     designLifecycleRepository.setSelectedProjectId(next.PROJECT_ID);
     onClose();
   };
@@ -64,6 +52,8 @@ export function ProjectContextDialog({
       <FormModal open title={title} onClose={onClose}>
         <SearchPanel rows={1} fields={fields} value={condition} initialValue={emptyProjectSearchCondition} onValueChange={setCondition}
           onSearch={setApplied} onReset={(next) => { setCondition(next); setApplied(next); }} />
+        {status === 'LOADING' || status === 'IDLE' ? <p role="status" className="sd-project-empty-help">프로젝트 목록을 조회하는 중입니다…</p> : null}
+        {status === 'ERROR' ? <div className="sd-project-empty-help" role="alert"><p>{error}</p><button type="button" className="secondary-button" onClick={() => void loadProjects()}>다시 조회</button></div> : null}
         <DataTable title={`검색 결과 (${rows.length}건)`} columns={columns} rows={rows} getRowKey={(row) => row.PROJECT_ID}
           onRowClick={select} emptyMessage="선택할 수 있는 프로젝트가 없습니다." />
         {!rows.length ? <div className="sd-project-empty-help"><p>먼저 프로젝트 관리에서 프로젝트 기본정보를 등록하세요.</p>{onOpenProjectManagement ? <button type="button" className="primary-button" onClick={onOpenProjectManagement}>프로젝트 관리 열기</button> : null}</div> : null}

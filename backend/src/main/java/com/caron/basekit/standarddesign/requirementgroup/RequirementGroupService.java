@@ -98,7 +98,7 @@ public class RequirementGroupService {
   if(!confirmed || (capture && !hasSnapshot)) jdbc.update("UPDATE BSDRGRP SET GROUP_STATUS='CONFIRMED',VERSION=VERSION+1,MOD_DT=CURRENT_TIMESTAMP WHERE REQUIREMENT_GROUP_ID=?",id);
   if(capture && (!confirmed || !hasSnapshot)) {
    var saved=row(id,false);
-   snapshot.capture(id,(String)saved.get("PROJECT_ID"),input.PROJECT_NAME(),(String)saved.get("REQUIREMENT_GROUP_NAME"),(String)saved.get("DESCRIPTION"),((Number)saved.get("VERSION")).longValue());
+   snapshot.capture(id,(String)saved.get("PROJECT_ID"),com.caron.basekit.standarddesign.project.ProjectService.resolveName(jdbc,(String)saved.get("PROJECT_ID"),input.PROJECT_NAME()),(String)saved.get("REQUIREMENT_GROUP_NAME"),(String)saved.get("DESCRIPTION"),((Number)saved.get("VERSION")).longValue());
   }
   return get(id);
  }

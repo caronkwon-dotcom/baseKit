@@ -6,10 +6,12 @@ import PageHeader from '../../../../components/common/PageHeader';
 import SearchPanel, { type SearchFieldConfig } from '../../../../components/common/SearchPanel';
 import { schemaCatalogRepository } from '../../../../features/system/tableManage/schemaCatalog.repository';
 import { designLifecycleRepository } from '../../design-lifecycle/designLifecycle.repository';
+import { ProjectApiError, projectApi } from '../../projects/projectApi';
+import { getProjects, hasLoadedProjects, loadProjects, removeProjectFromCache, upsertProject } from '../../projects/projectStore';
 import type { DbColumnDefinition, DesignProject, DesignStatus, ScreenField, DesignMember, ProjectMember } from '../../design-lifecycle/designLifecycle.types';
 import {
   toProjectDraft, createEmptyProjectDraft, searchProjectSnapshot, saveToProjectWorkingSet,
-  getNextProjectId, isProjectDraftDirty, getEditorProject, getAppliedSearchDescription,
+  isProjectDraftDirty, getEditorProject, getAppliedSearchDescription,
   type ProjectSearchCondition, type ProjectEditor, type ProjectDraft, type ProjectMessageTone,
 } from '../components/projectReference';
 import ProjectListDetailWorkspace, { type ProjectWorkspaceMode } from '../components/ProjectListDetailWorkspace';
@@ -130,7 +132,9 @@ function ProjectMessageBanner({ message }: { message: ProjectMessage }) {
 
 function ProjectManagementPage() {
   const [workspaceMode, setWorkspaceMode] = useState<ProjectWorkspaceMode>('LIST');
-  const [workingSet, setWorkingSet] = useState(() => designLifecycleRepository.getData().projects);
+  const { status: projectStatus, error: projectError } = useProjectContext();
+  const [workingSet, setWorkingSet] = useState(() => getProjects());
+  const [busy, setBusy] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState(() => designLifecycleRepository.getSelectedProjectId());
   const [searchCondition, setSearchCondition] = useState<ProjectSearchCondition>(initialProjectSearchCondition);
   const [appliedCondition, setAppliedCondition] = useState<ProjectSearchCondition>(initialProjectSearchCondition);
@@ -142,6 +146,13 @@ function ProjectManagementPage() {
   const [selectedProjectMemberId, setSelectedProjectMemberId] = useState('');
   const activeProject = getEditorProject(editor);
   const hasUnsavedChanges = isProjectDraftDirty(editor);
+  const versionOf = (projectId: string) => getProjects().find((project) => project.PROJECT_ID === projectId)?.VERSION;
+
+  /** Reads the server list again and re-applies the executed search; saves keep the working set (see saveToProjectWorkingSet). */
+  const refreshList = async () => {
+    await loadProjects();
+    setWorkingSet(searchProjectSnapshot(getProjects(), appliedCondition).rows);
+  };
 
   useEffect(() => {
     if (!hasUnsavedChanges) return undefined;
@@ -212,7 +223,7 @@ function ProjectManagementPage() {
 
   const runSearch = (condition: ProjectSearchCondition) => {
     try {
-      const result = searchProjectSnapshot(designLifecycleRepository.getData().projects, condition);
+      const result = searchProjectSnapshot(getProjects(), condition);
       setWorkingSet(result.rows);
       setAppliedCondition(result.condition);
       setMessage(result.rows.length === 0
@@ -223,9 +234,9 @@ function ProjectManagementPage() {
     }
   };
 
-  const saveProject = (event: FormEvent<HTMLFormElement>) => {
+  const saveProject = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!editor) return;
+    if (!editor || busy) return;
 
     const draft = {
       ...editor.draft,
@@ -241,33 +252,47 @@ function ProjectManagementPage() {
     const dateError = validateProjectDates(draft.START_DATE, draft.END_DATE);
     if (dateError) { setMessage({ tone: 'error', text: dateError }); return; }
 
+    setBusy(true);
     try {
-      const projectId = editor.mode === 'EDIT' ? editor.sourceProjectId : getNextProjectId(designLifecycleRepository.getData().projects);
-      if (!projectId) throw new Error('저장할 프로젝트 식별자를 찾지 못했습니다.');
-
-      const project: DesignProject = { PROJECT_ID: projectId, ...draft };
-      designLifecycleRepository.saveProject(project);
-      designLifecycleRepository.setSelectedProjectId(projectId);
+      let project: DesignProject;
+      if (editor.mode === 'EDIT') {
+        const version = editor.sourceProjectId ? versionOf(editor.sourceProjectId) : undefined;
+        if (!editor.sourceProjectId || version === undefined) throw new Error('최신 프로젝트 정보를 조회한 후 다시 저장하세요.');
+        project = await projectApi.update(editor.sourceProjectId, draft, version);
+      } else {
+        project = await projectApi.create(draft);
+      }
+      upsertProject(project);
+      designLifecycleRepository.setSelectedProjectId(project.PROJECT_ID);
       setWorkingSet((rows) => saveToProjectWorkingSet(rows, project, editor.mode));
-      setSelectedProjectId(projectId);
-      setEditor({ mode: 'EDIT', sourceProjectId: projectId, initialDraft: toProjectDraft(project), draft: toProjectDraft(project) });
+      setSelectedProjectId(project.PROJECT_ID);
+      setEditor({ mode: 'EDIT', sourceProjectId: project.PROJECT_ID, initialDraft: toProjectDraft(project), draft: toProjectDraft(project) });
       if (editor.mode !== 'EDIT') setSelectedProjectMemberId('');
       setWorkspaceMode('DETAIL');
       setMessage({ tone: 'success', text: `${project.PROJECT_NAME} 프로젝트를 저장했습니다.` });
     } catch (error) {
+      // Somebody else changed or removed it: show the server's reason and read the list again.
+      if (error instanceof ProjectApiError && (error.status === 409 || error.status === 404)) void refreshList();
       setMessage({ tone: 'error', text: error instanceof Error ? error.message : '프로젝트를 저장하지 못했습니다.' });
+    } finally {
+      setBusy(false);
     }
   };
 
-  const deleteProject = () => {
+  const deleteProject = async () => {
     if (!activeProject) {
       setMessage({ tone: 'error', text: '삭제할 저장 프로젝트를 먼저 선택하세요.' });
       return;
     }
-    if (!window.confirm(`${activeProject.PROJECT_NAME} 프로젝트를 삭제하시겠습니까?`)) return;
+    if (busy || !window.confirm(`${activeProject.PROJECT_NAME} 프로젝트를 삭제하시겠습니까?`)) return;
 
+    setBusy(true);
     try {
-      designLifecycleRepository.deleteItem('projects', activeProject.PROJECT_ID);
+      const version = versionOf(activeProject.PROJECT_ID);
+      if (version === undefined) throw new Error('최신 프로젝트 정보를 조회한 후 다시 삭제하세요.');
+      await projectApi.remove(activeProject.PROJECT_ID, version);
+      removeProjectFromCache(activeProject.PROJECT_ID);
+      designLifecycleRepository.removeProjectMembersOf(activeProject.PROJECT_ID);
       const nextRows = workingSet.filter((project) => project.PROJECT_ID !== activeProject.PROJECT_ID);
       const nextProjectId = nextRows[0]?.PROJECT_ID ?? '';
       designLifecycleRepository.setSelectedProjectId(nextProjectId);
@@ -278,7 +303,10 @@ function ProjectManagementPage() {
       setWorkspaceMode('LIST');
       setMessage({ tone: 'success', text: `${activeProject.PROJECT_NAME} 프로젝트를 삭제했습니다.` });
     } catch (error) {
+      if (error instanceof ProjectApiError && (error.status === 409 || error.status === 404)) void refreshList();
       setMessage({ tone: 'error', text: error instanceof Error ? error.message : '프로젝트를 삭제하지 못했습니다.' });
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -333,14 +361,15 @@ function ProjectManagementPage() {
       : '저장 시 새 프로젝트 ID가 생성됩니다.';
   const projectHeaderActions = workspaceMode === 'LIST' ? (
     <div className="standard-design-header-actions" aria-label="프로젝트 목록 기능">
-      <ActionButton display="label" actionCode="CREATE" label="신규" tone="primary" onClick={createProject} />
+      {projectStatus === 'ERROR' ? <ActionButton display="label" actionCode="SEARCH" label="다시 조회" onClick={() => void refreshList()} /> : null}
+      <ActionButton display="label" actionCode="CREATE" label="신규" tone="primary" onClick={createProject} disabled={projectStatus === 'ERROR'} />
     </div>
   ) : editor ? (
     <div className="standard-design-header-actions" aria-label="프로젝트 상세 기능">
       <ActionButton display="label" actionCode="CREATE" label="신규" tone="primary" onClick={createProject} />
       <ActionButton display="label" actionCode="CREATE" label="복사" onClick={copyProject} disabled={!activeProject} />
-      <button type="submit" form="project-detail-form" className="primary-button" data-action-code={editor.mode === 'EDIT' ? 'UPDATE' : 'CREATE'}>저장</button>
-      <ActionButton display="label" actionCode="DELETE" label="삭제" tone="danger" onClick={deleteProject} disabled={!activeProject} />
+      <button type="submit" form="project-detail-form" disabled={busy} className="primary-button" data-action-code={editor.mode === 'EDIT' ? 'UPDATE' : 'CREATE'}>저장</button>
+      <ActionButton display="label" actionCode="DELETE" label="삭제" tone="danger" onClick={() => void deleteProject()} disabled={!activeProject || busy} />
     </div>
   ) : null;
   return <div className="page standard-design-page standard-design-lifecycle-page standard-design-project-page">
@@ -384,7 +413,7 @@ function ProjectManagementPage() {
       </div>}
       detail={editor ? (
         <>
-        <form id="project-detail-form" className="standard-design-lifecycle-form standard-design-project-form" noValidate onSubmit={saveProject}>
+        <form id="project-detail-form" className="standard-design-lifecycle-form standard-design-project-form" noValidate onSubmit={(event) => void saveProject(event)}>
           <div className="standard-design-project-detail-heading">
             <div>
               <div className="standard-design-project-title-row">
@@ -434,6 +463,8 @@ function ProjectManagementPage() {
         </>
       ) : null}
     />
+    {projectStatus === 'ERROR' ? <ProjectMessageBanner message={{ tone: 'error', text: `${projectError} 프로젝트는 서버에서만 조회합니다.` }} /> : null}
+    {projectStatus === 'LOADING' || projectStatus === 'IDLE' ? <ProjectMessageBanner message={{ tone: 'info', text: '프로젝트 목록을 서버에서 조회하는 중입니다.' }} /> : null}
     {message ? <ProjectMessageBanner message={message} /> : null}
     {memberDialogOpen && activeProject ? <ProjectMemberDialog project={activeProject}
       members={designLifecycleRepository.getData().members} assignments={projectMembers} editing={editingProjectMember}
@@ -458,11 +489,6 @@ function LifecycleDetailPage({ view, supplement }: { view: LifecycleView; supple
   const rows = getRows(view, projectId);
   const selected = rows.find((item) => itemId(item) === selectedId);
   const refresh = () => setRevision((value) => value + 1);
-  const changeProject = (value: string) => {
-    designLifecycleRepository.setSelectedProjectId(value);
-    setSelectedId('');
-    setMessage('Project Context를 변경했습니다. 현재 프로젝트 기준으로 목록을 다시 표시합니다.');
-  };
   const create = () => {
     setSelectedId('');
     setMessage('신규 등록 모드입니다. 필수 항목을 입력한 후 저장하세요.');
@@ -475,11 +501,6 @@ function LifecycleDetailPage({ view, supplement }: { view: LifecycleView; supple
     }
     const form = new FormData(event.currentTarget);
     const status = form.get('STATUS') as DesignStatus;
-    if (view === 'overview') {
-      const id = selectedId || getNextProjectId(data.projects);
-      designLifecycleRepository.saveProject({ PROJECT_ID: id, PROJECT_NAME: String(form.get('NAME')).trim(), CUSTOMER_NAME: String(form.get('CUSTOMER_NAME')).trim(), DESCRIPTION: String(form.get('DESCRIPTION')).trim(), STATUS: status, START_DATE: String(form.get('START_DATE') ?? ''), END_DATE: String(form.get('END_DATE') ?? '') });
-      if (!projectId) changeProject(id);
-    }
     if (view === 'wbs') designLifecycleRepository.saveWbs({ WBS_ID: selectedId || nextId('WBS', data.wbsItems.length), PROJECT_ID: projectId, PARENT_WBS_ID: String(form.get('PARENT_WBS_ID')) || null, WBS_NAME: String(form.get('NAME')).trim(), WBS_LEVEL: Number(form.get('WBS_LEVEL')), STATUS: status });
     if (view === 'requirements') designLifecycleRepository.saveRequirement({ REQUIREMENT_ID: selectedId || nextId('REQ', data.requirements.length), PROJECT_ID: projectId, REQUIREMENT_NAME: String(form.get('NAME')).trim(), DESCRIPTION: String(form.get('DESCRIPTION')).trim(), STATUS: status, WBS_IDS: String(form.get('WBS_IDS')).split(',').map((value) => value.trim()).filter(Boolean), SCREEN_IDS: String(form.get('SCREEN_IDS')).split(',').map((value) => value.trim()).filter(Boolean), TABLE_IDS: String(form.get('TABLE_IDS')).split(',').map((value) => value.trim()).filter(Boolean) });
     if (view === 'screens') designLifecycleRepository.saveScreen({ SCREEN_ID: selectedId || nextId('SCR', data.screens.length), PROJECT_ID: projectId, SCREEN_NAME: String(form.get('NAME')).trim(), SCREEN_TYPE: form.get('SCREEN_TYPE') as 'LIST' | 'DETAIL' | 'POPUP', DESCRIPTION: String(form.get('DESCRIPTION')).trim(), STATUS: status, FIELDS: selected && 'FIELDS' in selected ? selected.FIELDS : [] });
@@ -492,12 +513,9 @@ function LifecycleDetailPage({ view, supplement }: { view: LifecycleView; supple
       setMessage('삭제할 대상을 먼저 선택하세요.');
       return;
     }
-    const type = view === 'overview' ? 'projects' : view === 'wbs' ? 'wbsItems' : view === 'requirements' ? 'requirements' : view === 'screens' ? 'screens' : 'tables';
+    if (view === 'overview') return;
+    const type = view === 'wbs' ? 'wbsItems' : view === 'requirements' ? 'requirements' : view === 'screens' ? 'screens' : 'tables';
     designLifecycleRepository.deleteItem(type, selectedId);
-    if (view === 'overview' && selectedId === projectId) {
-      const nextProjectId = data.projects.find((item) => item.PROJECT_ID !== selectedId)?.PROJECT_ID ?? '';
-      designLifecycleRepository.setSelectedProjectId(nextProjectId);
-    }
     setSelectedId('');
     setMessage(`${labels[view]} 정보를 삭제했습니다.`);
     refresh();
@@ -529,8 +547,14 @@ function LifecycleDetailPage({ view, supplement }: { view: LifecycleView; supple
   </div>;
 }
 
+/** Starts the screen from the server list: it remounts once when the first read finishes, never on later refreshes. */
+function ProjectManagement() {
+  useProjectContext();
+  return <ProjectManagementPage key={hasLoadedProjects() ? 'loaded' : 'loading'} />;
+}
+
 export default function DesignLifecyclePage({ view, supplement }: { view: LifecycleView; supplement?: ReactNode }) {
   return view === 'overview'
-    ? <ProjectManagementPage />
+    ? <ProjectManagement />
     : <LifecycleDetailPage view={view} supplement={supplement} />;
 }

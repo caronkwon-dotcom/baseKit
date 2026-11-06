@@ -1,16 +1,15 @@
 import type {
   DbTableDefinition,
   DesignLifecycleData,
-  DesignProject,
   DesignMember,
   ProjectMember,
   DesignRequirement,
   ScreenDefinition,
   WbsItem,
 } from './designLifecycle.types';
+import * as projectStore from '../projects/projectStore.ts';
 
 const STORAGE_KEY = 'basekit.standard-design.lifecycle.v1';
-const PROJECT_CONTEXT_KEY = 'basekit.standard-design.project-context.v1';
 
 const initialData: DesignLifecycleData = {
   projects: [{ PROJECT_ID: 'SDP-001', PROJECT_NAME: 'BaseKit 적용 설계', CUSTOMER_NAME: '내부 기준', DESCRIPTION: '설계 산출물과 추적성을 검증하는 기준 프로젝트입니다.', STATUS: 'IN_PROGRESS', START_DATE: '2026-01-01', END_DATE: '2026-12-31' }],
@@ -58,21 +57,17 @@ function upsert<T, K extends keyof T>(rows: T[], item: T, key: K) {
 }
 
 export const designLifecycleRepository = {
-  getData: () => loadData(),
-  getSelectedProjectId: () => {
-    const projects = loadData().projects;
-    const saved = localStorage.getItem(PROJECT_CONTEXT_KEY);
-    return projects.some((project) => project.PROJECT_ID === saved) ? saved! : '';
-  },
-  getSelectedProject: () => loadData().projects.find((project) => project.PROJECT_ID === designLifecycleRepository.getSelectedProjectId()) ?? null,
-  setSelectedProjectId: (projectId: string) => {
-    if (projectId) localStorage.setItem(PROJECT_CONTEXT_KEY, projectId);
-    else localStorage.removeItem(PROJECT_CONTEXT_KEY);
-    if (typeof window !== 'undefined') window.dispatchEvent(new Event('basekit:project-context-changed'));
-  },
-  saveProject: (project: DesignProject) => {
+  /** Projects come from the server; everything else is still the browser-local reference data. */
+  getData: () => ({ ...loadData(), projects: projectStore.getProjects() }),
+  getSelectedProjectId: () => projectStore.getSelectedProjectId(),
+  getSelectedProject: () => projectStore.getSelectedProject(),
+  setSelectedProjectId: (projectId: string) => projectStore.setSelectedProjectId(projectId),
+  /** Assignments of a deleted project would otherwise stay in this browser forever. */
+  removeProjectMembersOf: (projectId: string) => {
     const data = loadData();
-    saveData({ ...data, projects: upsert(data.projects, project, 'PROJECT_ID') });
+    // Nothing to remove means nothing to write: do not create browser data that was never there.
+    if (!data.projectMembers.some((item) => item.PROJECT_ID === projectId)) return;
+    saveData({ ...data, projectMembers: data.projectMembers.filter((item) => item.PROJECT_ID !== projectId) });
   },
   saveMember: (member: DesignMember) => {
     const data = loadData();
@@ -98,18 +93,8 @@ export const designLifecycleRepository = {
     const data = loadData();
     saveData({ ...data, tables: upsert(data.tables, item, 'TABLE_ID') });
   },
-  deleteItem: (type: keyof Pick<DesignLifecycleData, 'projects' | 'members' | 'projectMembers' | 'wbsItems' | 'requirements' | 'screens' | 'tables'>, id: string) => {
+  deleteItem: (type: keyof Pick<DesignLifecycleData, 'members' | 'projectMembers' | 'wbsItems' | 'requirements' | 'screens' | 'tables'>, id: string) => {
     const data = loadData();
-    if (type === 'projects') {
-      const projects = data.projects.filter((item) => item.PROJECT_ID !== id);
-      saveData({ ...data, projects, projectMembers: data.projectMembers.filter((item) => item.PROJECT_ID !== id) });
-      if (localStorage.getItem(PROJECT_CONTEXT_KEY) === id) {
-        const nextId = projects[0]?.PROJECT_ID ?? '';
-        if (nextId) localStorage.setItem(PROJECT_CONTEXT_KEY, nextId);
-        else localStorage.removeItem(PROJECT_CONTEXT_KEY);
-        if (typeof window !== 'undefined') window.dispatchEvent(new Event('basekit:project-context-changed'));
-      }
-    }
     if (type === 'members') saveData({ ...data, members: data.members.filter((item) => item.MEMBER_ID !== id) });
     if (type === 'projectMembers') saveData({ ...data, projectMembers: data.projectMembers.filter((item) => item.PROJECT_MEMBER_ID !== id) });
     if (type === 'wbsItems') saveData({ ...data, wbsItems: data.wbsItems.filter((item) => item.WBS_ID !== id) });

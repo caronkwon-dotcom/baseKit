@@ -39,7 +39,6 @@ export default function RequirementGroupPage() {
    if(!active)return;
    if(group.PROJECT_ID!==projectId || group.REQUIREMENT_GROUP_ID!==groupId)throw new Error('그룹/프로젝트 불일치');
    // Restore only the browser project selection, never a group or analysis record.
-   if(!designLifecycleRepository.getData().projects.some(project=>project.PROJECT_ID===projectId)) designLifecycleRepository.saveProject({PROJECT_ID:projectId,PROJECT_NAME:projectId,CUSTOMER_NAME:'',DESCRIPTION:'',STATUS:'DRAFT',START_DATE:'',END_DATE:''});
    designLifecycleRepository.setSelectedProjectId(projectId);
    setEntry({key});
   }).catch(error=>{if(active)setEntry({key,error:error instanceof Error ? error.message : '그룹 조회 실패'});});

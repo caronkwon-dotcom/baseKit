@@ -8,6 +8,8 @@ export interface DesignProject {
   STATUS: DesignStatus;
   START_DATE: string;
   END_DATE: string;
+  /** Optimistic-lock version of the server record. */
+  VERSION?: number;
 }
 
 /** Design personnel profile, independent from login and project assignment. */

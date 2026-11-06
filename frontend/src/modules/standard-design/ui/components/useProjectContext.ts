@@ -1,17 +1,19 @@
-import { useSyncExternalStore } from 'react';
-import { designLifecycleRepository } from '../../design-lifecycle/designLifecycle.repository';
+import { useEffect, useSyncExternalStore } from 'react';
+import { ensureProjectsLoaded, getProjectError, getProjectSnapshot, getProjectStatus, getSelectedProject, getSelectedProjectId, subscribeProjects } from '../../projects/projectStore';
 
 const subscribe = (notify: () => void) => {
-  window.addEventListener('basekit:project-context-changed', notify);
+  const unsubscribe = subscribeProjects(notify);
   window.addEventListener('storage', notify);
   return () => {
-    window.removeEventListener('basekit:project-context-changed', notify);
+    unsubscribe();
     window.removeEventListener('storage', notify);
   };
 };
 
+/** projectId/project follow the server list; status tells whether that list has been read yet. */
 export function useProjectContext() {
-  const projectId = useSyncExternalStore(subscribe, designLifecycleRepository.getSelectedProjectId, () => '');
-  const project = designLifecycleRepository.getData().projects.find((item) => item.PROJECT_ID === projectId) ?? null;
-  return { projectId, project };
+  useSyncExternalStore(subscribe, getProjectSnapshot, () => '');
+  useEffect(() => { void ensureProjectsLoaded(); }, []);
+  const projectId = getSelectedProjectId();
+  return { projectId, project: getSelectedProject(), status: getProjectStatus(), error: getProjectError() };
 }
