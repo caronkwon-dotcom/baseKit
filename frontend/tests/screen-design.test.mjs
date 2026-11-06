@@ -99,7 +99,7 @@ const ok = data => ({ ok: true, status: 200, json: async () => ({ SUCCESS: true,
 const fail = (status, message) => ({ ok: false, status, json: async () => ({ MESSAGE: message }) });
 
 test('api calls use the program paths and send VERSION only when given', async () => {
-  const calls = mockFetch(() => ok({}));
+  const calls = mockFetch(() => ok({ DESIGN: { SCREEN_TYPE: 'GRID_DETAIL' } }));
   await screenDesignApi.summaries('P/1');
   await screenDesignApi.get('P/1', 'SDPG-1');
   await screenDesignApi.save('P/1', 'SDPG-1', design());
@@ -114,6 +114,20 @@ test('api calls use the program paths and send VERSION only when given', async (
   assert.equal(calls[4].url.endsWith('/screen-design/confirm'), true);
   assert.deepEqual(JSON.parse(calls[4].init.body), { VERSION: 5 });
   assert.equal(calls[5].url.endsWith('/screen-design/ai-draft'), true);
+});
+
+test('records from before schema version 2 are read with defaults and drafts always carry a warnings list', async () => {
+  mockFetch(() => ok({ SCREEN_DESIGN_ID: 'X', DESIGN: { SCREEN_TYPE: 'POPUP', SEARCH_FIELDS: [field('S1', 'a')], DETAIL_FIELDS: [field('D1', 'b')] } }));
+  const old = await screenDesignApi.get('P', 'G');
+  assert.equal(old.DESIGN.SCHEMA_VERSION, 1);
+  assert.deepEqual(old.DESIGN.FUNCTION_SPECS, []);
+  assert.equal(old.DESIGN.SEARCH_FIELDS[0].RULE, '');
+  assert.equal(old.DESIGN.DETAIL_FIELDS[0].READONLY_YN, 'N');
+  assert.deepEqual(old.DESIGN.GRID_COLUMNS, []);
+  const draft = await screenDesignApi.aiDraft('P', 'G');
+  assert.deepEqual(draft.WARNINGS, []);
+  mockFetch(() => ok(null));
+  assert.equal(await screenDesignApi.get('P', 'G'), null);
 });
 
 test('api passes server messages and status, and reports a missing server clearly', async () => {

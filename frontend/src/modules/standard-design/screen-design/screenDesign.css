@@ -22,3 +22,14 @@
 .sd-screen-detail-bottom .base-tabs { height: 100%; }
 .sd-screen-detail-bottom .base-tabs__panel { flex: 1 1 auto; min-height: 0; }
 .sd-screen-detail-bottom .program-data-grid { height: 100%; }
+
+/* Function requirement edit dialog */
+.sd-screen-func { display: flex; flex-direction: column; gap: 8px; font-size: 12px; }
+.sd-screen-func > label { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: start; gap: 8px; margin: 0; color: var(--text-secondary); font-weight: 700; }
+.sd-screen-func input:not([type=checkbox]), .sd-screen-func select, .sd-screen-func textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface-panel); padding: 4px 6px; font: inherit; font-weight: 400; }
+.sd-screen-func fieldset { margin: 0; border: 1px solid var(--border-default); border-radius: 6px; padding: 6px 10px; }
+.sd-screen-func legend { color: var(--text-secondary); font-weight: 700; padding: 0 4px; }
+.sd-screen-func-check { display: flex; align-items: center; gap: 6px; margin: 2px 0; font-weight: 400; }
+
+/* Five toolbar buttons leave little room: the title may shorten with an ellipsis, the status and version never wrap. */
+.sd-screen-detail-top .grid-heading-group .metadata-badge, .sd-screen-detail-top .grid-heading-group .grid-total { flex-shrink: 0; white-space: nowrap; }

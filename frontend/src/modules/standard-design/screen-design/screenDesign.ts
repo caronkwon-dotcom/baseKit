@@ -1,3 +1,5 @@
+import { validateFunctionSpecs } from './functionSpec.ts';
+
 /** Pure screen-design logic (no React, no fetch) so it can be unit tested and reused by other shells such as /contest. */
 
 export type ScreenType = 'GRID_DETAIL' | 'GRID_ONLY' | 'FORM_ONLY' | 'TREE_DETAIL' | 'POPUP';
@@ -6,11 +8,13 @@ export type DataType = 'TEXT' | 'NUMBER' | 'DATE' | 'BADGE';
 export type Align = 'LEFT' | 'CENTER' | 'RIGHT';
 export type DesignSource = 'AI' | 'USER';
 export type DesignStatus = 'NONE' | 'DRAFT' | 'CONFIRMED';
-export type TabId = 'search' | 'cols' | 'detail' | 'actions';
+export type TabId = 'search' | 'cols' | 'detail' | 'functions' | 'actions';
 
-export interface FieldRow { FIELD_ID: string; LABEL: string; CONTROL_TYPE: ControlType; REQUIRED_YN: 'Y' | 'N'; SOURCE: DesignSource }
+/** RULE belongs to search fields and READONLY_YN to detail fields; designs saved before schema version 2 have neither. */
+export interface FieldRow { FIELD_ID: string; LABEL: string; CONTROL_TYPE: ControlType; REQUIRED_YN: 'Y' | 'N'; SOURCE: DesignSource; RULE?: string; READONLY_YN?: 'Y' | 'N' }
+export interface FunctionSpec { FUNCTION_ID: string; NAME: string; ACTION_CODE: string; DESCRIPTION: string; RULES: string[]; VALIDATIONS: string[]; ACCEPTANCE: string[]; REQUIREMENT_IDS: string[]; SOURCE: DesignSource }
 export interface ColumnRow { FIELD_ID: string; LABEL: string; DATA_TYPE: DataType; WIDTH: number; ALIGN: Align; SOURCE: DesignSource }
-export interface DesignBody { SCREEN_TYPE: ScreenType; SEARCH_FIELDS: FieldRow[]; GRID_COLUMNS: ColumnRow[]; DETAIL_FIELDS: FieldRow[]; ACTION_CODES: string[] }
+export interface DesignBody { SCHEMA_VERSION?: number; SCREEN_TYPE: ScreenType; SEARCH_FIELDS: FieldRow[]; GRID_COLUMNS: ColumnRow[]; DETAIL_FIELDS: FieldRow[]; ACTION_CODES: string[]; FUNCTION_SPECS: FunctionSpec[] }
 export interface ScreenDesignRecord { SCREEN_DESIGN_ID: string; PROGRAM_ID: string; PROGRAM_VERSION: number | null; DESIGN_STATUS: 'DRAFT' | 'CONFIRMED'; VERSION: number; DESIGN: DesignBody }
 export interface ScreenDesignSummary { PROGRAM_ID: string; DESIGN_STATUS: 'DRAFT' | 'CONFIRMED'; VERSION: number; PROGRAM_VERSION: number | null }
 
@@ -28,7 +32,19 @@ export const ACTION_DEFS: { code: string; label: string }[] = [
 ];
 export const STATUS_LABELS: Record<DesignStatus, string> = { NONE: '미설계', DRAFT: '초안', CONFIRMED: '확정' };
 
-export const emptyDesign = (): DesignBody => ({ SCREEN_TYPE: 'GRID_DETAIL', SEARCH_FIELDS: [], GRID_COLUMNS: [], DETAIL_FIELDS: [], ACTION_CODES: ['SEARCH'] });
+export const emptyDesign = (): DesignBody => ({ SCREEN_TYPE: 'GRID_DETAIL', SEARCH_FIELDS: [], GRID_COLUMNS: [], DETAIL_FIELDS: [], ACTION_CODES: ['SEARCH'], FUNCTION_SPECS: [] });
+
+/** Fills what designs saved before schema version 2 do not have, so the screen and the document can rely on it. */
+export function normalizeDesign(raw: Partial<DesignBody> & { SCREEN_TYPE: ScreenType }): DesignBody {
+  return {
+    SCHEMA_VERSION: raw.SCHEMA_VERSION ?? 1, SCREEN_TYPE: raw.SCREEN_TYPE,
+    SEARCH_FIELDS: (raw.SEARCH_FIELDS ?? []).map(row => ({ ...row, RULE: row.RULE ?? '' })),
+    GRID_COLUMNS: raw.GRID_COLUMNS ?? [],
+    DETAIL_FIELDS: (raw.DETAIL_FIELDS ?? []).map(row => ({ ...row, READONLY_YN: row.READONLY_YN ?? 'N' })),
+    ACTION_CODES: raw.ACTION_CODES ?? [],
+    FUNCTION_SPECS: raw.FUNCTION_SPECS ?? [],
+  };
+}
 
 let sequence = 0;
 /** Stable client-side key for a new row; the server keeps it as FIELD_ID. */
@@ -38,8 +54,8 @@ export function newFieldId(prefix: 'SF' | 'GC' | 'DF'): string {
   return `${prefix}-${random}`;
 }
 
-export const newSearchField = (): FieldRow => ({ FIELD_ID: newFieldId('SF'), LABEL: '새 항목', CONTROL_TYPE: 'TEXT', REQUIRED_YN: 'N', SOURCE: 'USER' });
-export const newDetailField = (): FieldRow => ({ FIELD_ID: newFieldId('DF'), LABEL: '새 항목', CONTROL_TYPE: 'TEXT', REQUIRED_YN: 'N', SOURCE: 'USER' });
+export const newSearchField = (): FieldRow => ({ FIELD_ID: newFieldId('SF'), LABEL: '새 항목', CONTROL_TYPE: 'TEXT', REQUIRED_YN: 'N', RULE: '', SOURCE: 'USER' });
+export const newDetailField = (): FieldRow => ({ FIELD_ID: newFieldId('DF'), LABEL: '새 항목', CONTROL_TYPE: 'TEXT', REQUIRED_YN: 'N', READONLY_YN: 'N', SOURCE: 'USER' });
 export const newColumn = (): ColumnRow => ({ FIELD_ID: newFieldId('GC'), LABEL: '새 컬럼', DATA_TYPE: 'TEXT', WIDTH: 120, ALIGN: 'LEFT', SOURCE: 'USER' });
 
 export function defaultAlign(dataType: DataType): Align {
@@ -47,7 +63,7 @@ export function defaultAlign(dataType: DataType): Align {
 }
 
 /** Client-side check before save; the server repeats it. Returns the first problem or an empty string. */
-export function validateDesign(design: DesignBody): string {
+export function validateDesign(design: DesignBody, evidenceIds?: readonly string[]): string {
   const lists: [string, { FIELD_ID: string; LABEL: string }[]][] = [['검색조건', design.SEARCH_FIELDS], ['그리드 컬럼', design.GRID_COLUMNS], ['상세 입력항목', design.DETAIL_FIELDS]];
   for (const [name, rows] of lists) {
     const seen = new Set<string>();
@@ -63,7 +79,7 @@ export function validateDesign(design: DesignBody): string {
   for (const column of design.GRID_COLUMNS) {
     if (!Number.isInteger(column.WIDTH) || column.WIDTH < 40 || column.WIDTH > 800) return `그리드 컬럼 "${column.LABEL}"의 너비는 40~800 사이 정수여야 합니다.`;
   }
-  return '';
+  return validateFunctionSpecs(design.FUNCTION_SPECS ?? [], design.ACTION_CODES, evidenceIds);
 }
 
 /** Saved body → editable shape (deep copy so edits never touch the cached server copy). */
@@ -72,16 +88,19 @@ export function cloneDesign(design: DesignBody): DesignBody {
 }
 
 const trimRow = <T extends { LABEL: string }>(row: T): T => ({ ...row, LABEL: row.LABEL.trim() });
+const cleanLines = (lines: string[]) => lines.map(line => line.trim()).filter(Boolean);
+const trimSpec = (row: FunctionSpec): FunctionSpec => ({ ...row, NAME: row.NAME.trim(), RULES: cleanLines(row.RULES), VALIDATIONS: cleanLines(row.VALIDATIONS), ACCEPTANCE: cleanLines(row.ACCEPTANCE) });
 export function toPayload(design: DesignBody): DesignBody {
-  return { ...design, SEARCH_FIELDS: design.SEARCH_FIELDS.map(trimRow), GRID_COLUMNS: design.GRID_COLUMNS.map(trimRow), DETAIL_FIELDS: design.DETAIL_FIELDS.map(trimRow) };
+  return { ...design, SEARCH_FIELDS: design.SEARCH_FIELDS.map(trimRow), GRID_COLUMNS: design.GRID_COLUMNS.map(trimRow), DETAIL_FIELDS: design.DETAIL_FIELDS.map(trimRow), FUNCTION_SPECS: (design.FUNCTION_SPECS ?? []).map(trimSpec) };
 }
 
 /** Order-independent fingerprint: object key order and the order of ACTION_CODES must not make a saved design look edited. */
 function fingerprint(design: DesignBody): string {
   const d = toPayload(design);
-  const field = (row: FieldRow) => [row.FIELD_ID, row.LABEL, row.CONTROL_TYPE, row.REQUIRED_YN, row.SOURCE];
+  const field = (row: FieldRow) => [row.FIELD_ID, row.LABEL, row.CONTROL_TYPE, row.REQUIRED_YN, row.RULE ?? '', row.READONLY_YN ?? 'N', row.SOURCE];
   const column = (row: ColumnRow) => [row.FIELD_ID, row.LABEL, row.DATA_TYPE, row.WIDTH, row.ALIGN, row.SOURCE];
-  return JSON.stringify([d.SCREEN_TYPE, d.SEARCH_FIELDS.map(field), d.GRID_COLUMNS.map(column), d.DETAIL_FIELDS.map(field), [...d.ACTION_CODES].sort()]);
+  const spec = (row: FunctionSpec) => [row.FUNCTION_ID, row.NAME, row.ACTION_CODE, row.DESCRIPTION, row.RULES, row.VALIDATIONS, row.ACCEPTANCE, [...row.REQUIREMENT_IDS].sort(), row.SOURCE];
+  return JSON.stringify([d.SCREEN_TYPE, d.SEARCH_FIELDS.map(field), d.GRID_COLUMNS.map(column), d.DETAIL_FIELDS.map(field), [...d.ACTION_CODES].sort(), (d.FUNCTION_SPECS ?? []).map(spec)]);
 }
 
 /** True when the editable design differs from the saved one (or nothing is saved yet and something was added). */
