@@ -31,3 +31,12 @@ H2 통합 테스트와 별도로, 환경변수(`BASEKIT_PG_PROJECT_REVIEW=true`�
 ## 이번 범위에서 제외
 
 브라우저 저장소 데이터의 서버 이전 도구(P2), 프로젝트 인력(P3), 서버 테이블의 프로젝트 FK(P4), WBS·DB 설계 스켈레톤(P5), 사용자 DB 연동.
+
+## 추가 결정: 테이블·컬럼 코멘트 (V28)
+
+ADR 017은 `COMMENT ON TABLE`(논리명, Full Name, 설명)을 요구하지만 V1~V27에는 코멘트가 없었다. V26을 수정하면 이미 적용된 DB의 Flyway 체크섬이 깨지므로 `V28__sd_table_comments.sql`로 BSDPROJ를 포함한 BSD* 31개 테이블과 모든 컬럼(250개)에 코멘트만 추가한다(구조 변경 없음).
+
+- 테이블 코멘트 형식: `논리명 | Full Name | 설명`, 컬럼 코멘트: `논리명: 설명`.
+- 논리명·설명은 스키마와 코드에서 추정한 초안이며 REVIEW 상태다. 설계자 검토 후 수정이 필요하면 새 migration으로 바꾼다.
+- `SdTableCommentTest`(H2)가 코멘트 없는 BSD* 테이블·컬럼을 실패로 처리한다. PostgreSQL 확인은 `SdTableCommentPostgresTest`(opt-in, `obj_description`/`col_description`).
+- Schema Catalog(`frontend/meta/schema-tables.json`)에는 BSDPROJ만 등록했다. 나머지 SD 테이블은 (1) Alias가 기존과 중복(BSDGPROG·BSYPROG=PROG, BSDPMENU·BSYMENU=MENU, BSDAANLS·BSDRANLS=ANLS, BSDRGANL·BSDPGANL=GANL)이고 (2) 카탈로그 검증이 모든 테이블에 공통 컬럼(REG_*·MOD_*·USE_YN·DEL_YN)을 붙이는데 기존 SD 테이블 대부분은 이 컬럼이 없어 등록하면 사실과 다르게 표시되므로, 규칙 변경에 대한 설계자 결정 후 등록한다.
