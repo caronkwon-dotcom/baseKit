@@ -1,4 +1,4 @@
-import type { DesignBody, ScreenDesignRecord, ScreenDesignSummary } from './screenDesign.ts';
+import { normalizeDesign, type DesignBody, type ScreenDesignRecord, type ScreenDesignSummary } from './screenDesign.ts';
 
 /** Screen design on the server (BSDSCRN). The AI draft endpoint returns a validated draft and stores nothing. */
 export class ScreenDesignApiError extends Error {
@@ -6,7 +6,10 @@ export class ScreenDesignApiError extends Error {
   constructor(status: number, message: string, cause?: unknown) { super(message, cause === undefined ? undefined : { cause }); this.status = status; }
 }
 
-export interface AiDraftResult { DESIGN: DesignBody; MODEL: string; PROGRAM_VERSION: number | null; EVIDENCE_COUNT: number; EVIDENCE_USED: number }
+export interface AiDraftResult { DESIGN: DesignBody; MODEL: string; PROGRAM_VERSION: number | null; EVIDENCE_COUNT: number; EVIDENCE_USED: number; WARNINGS: string[] }
+
+/** Designs saved before schema version 2 are read with defaults for the fields they lack. */
+const record = (value: ScreenDesignRecord | null): ScreenDesignRecord | null => value ? { ...value, DESIGN: normalizeDesign(value.DESIGN) } : null;
 
 const base = (project: string) => `/api/standard-design/projects/${encodeURIComponent(project)}`;
 const programBase = (project: string, program: string) => `${base(project)}/programs/${encodeURIComponent(program)}/screen-design`;
@@ -26,10 +29,13 @@ const json = (method: string, body: unknown): RequestInit => ({ method, headers:
 
 export const screenDesignApi = {
   summaries: (project: string) => request<ScreenDesignSummary[]>(`${base(project)}/screen-designs`),
-  get: (project: string, program: string) => request<ScreenDesignRecord | null>(programBase(project, program)),
-  save: (project: string, program: string, design: DesignBody, version?: number) =>
-    request<ScreenDesignRecord>(programBase(project, program), json('PUT', version === undefined ? design : { ...design, VERSION: version })),
-  confirm: (project: string, program: string, version: number) =>
-    request<ScreenDesignRecord>(`${programBase(project, program)}/confirm`, json('POST', { VERSION: version })),
-  aiDraft: (project: string, program: string) => request<AiDraftResult>(`${programBase(project, program)}/ai-draft`, json('POST', {})),
+  get: async (project: string, program: string) => record(await request<ScreenDesignRecord | null>(programBase(project, program))),
+  save: async (project: string, program: string, design: DesignBody, version?: number) =>
+    record(await request<ScreenDesignRecord>(programBase(project, program), json('PUT', version === undefined ? design : { ...design, VERSION: version }))) as ScreenDesignRecord,
+  confirm: async (project: string, program: string, version: number) =>
+    record(await request<ScreenDesignRecord>(`${programBase(project, program)}/confirm`, json('POST', { VERSION: version }))) as ScreenDesignRecord,
+  aiDraft: async (project: string, program: string) => {
+    const draft = await request<AiDraftResult>(`${programBase(project, program)}/ai-draft`, json('POST', {}));
+    return { ...draft, DESIGN: normalizeDesign(draft.DESIGN), WARNINGS: draft.WARNINGS ?? [] };
+  },
 };
