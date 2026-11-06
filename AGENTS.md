@@ -34,6 +34,7 @@
 - Menu는 탐색, Program은 실행·MDI·권한 단위, Action은 Program 내부 업무 행위다.
 - 권한은 `ROLE × PROGRAM × ACTION_CODE`를 기준으로 한다.
 - 확정된 중요 결정은 관련 문서나 `docs/decisions`에 반영한다.
+- DB 객체 소유자는 `basekit`으로 통일한다(ADR 040). migration 추가·적용 안내 시 소유자 점검 쿼리를 함께 제공하고, 테이블 생성·복원은 `basekit` 계정으로 하도록 안내한다. 공유 DB 소유권을 임의로 바꾸지 않는다.
 
 ## 검증 및 보고
 

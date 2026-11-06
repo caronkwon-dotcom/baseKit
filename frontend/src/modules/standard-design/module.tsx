@@ -4,6 +4,7 @@ import StandardDesignSkeletonPage from './ui/pages/StandardDesignSkeletonPage';
 import DesignLifecyclePage from './ui/pages/DesignLifecyclePage';
 import RequirementIntakePage from './ui/pages/RequirementIntakePage';
 import ScreenDesignPage from './ui/pages/ScreenDesignPage';
+import ProgramRegisterPage from './programs/ProgramRegisterPage';
 import TermGlossaryPage from './ui/pages/TermGlossaryPage';
 import ProjectMenuPage from './ui/pages/ProjectMenuPage';
 import RequirementGroupPage from './ui/pages/RequirementGroupPage';
@@ -13,6 +14,7 @@ import './standardDesign.css';
 const MODULE_ID = 'standard-design';
 const STANDARD_DESIGN_ACTIONS = {
   DESIGN_VALIDATE: 'SD_DESIGN_VALIDATE',
+  SCREEN_AI_DRAFT: 'SD_SCREEN_AI_DRAFT',
 } as const;
 
 const standardDesignModule: ApplicationModule = {
@@ -79,6 +81,18 @@ const standardDesignModule: ApplicationModule = {
       useYn: 'Y',
     },
     {
+      programKey: 'SD_PROGRAM_REGISTER',
+      programName: '프로그램 대장',
+      componentName: 'StandardDesignProgramRegisterPage',
+      screenType: 'GRID_DETAIL',
+      routePath: '/standard-design/programs',
+      requiresProjectContext: true,
+      dataScope: 'COMPANY',
+      modifyScope: 'ROLE',
+      actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE],
+      useYn: 'Y',
+    },
+    {
       programKey: 'SD_SCREEN_DESIGN',
       programName: '화면 설계',
       componentName: 'StandardDesignScreenDesignPage',
@@ -87,7 +101,7 @@ const standardDesignModule: ApplicationModule = {
       requiresProjectContext: true,
       dataScope: 'COMPANY',
       modifyScope: 'ROLE',
-      actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE, STANDARD_DESIGN_ACTIONS.DESIGN_VALIDATE],
+      actionCodes: [COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE, COMMON_ACTIONS.DELETE, COMMON_ACTIONS.SAVE, COMMON_ACTIONS.REVERT_CHANGES, COMMON_ACTIONS.APPROVE, STANDARD_DESIGN_ACTIONS.DESIGN_VALIDATE, STANDARD_DESIGN_ACTIONS.SCREEN_AI_DRAFT],
       useYn: 'Y',
     },
     {
@@ -178,6 +192,16 @@ const standardDesignModule: ApplicationModule = {
       useYn: 'Y',
     },
     {
+      menuKey: 'STANDARD_DESIGN.PROGRAM_REGISTER',
+      parentMenuKey: 'STANDARD_DESIGN',
+      menuName: '프로그램 대장',
+      menuLevel: 2,
+      menuType: 'PAGE',
+      programKey: 'SD_PROGRAM_REGISTER',
+      sortOrder: 4.65,
+      useYn: 'Y',
+    },
+    {
       menuKey: 'STANDARD_DESIGN.SCREEN',
       parentMenuKey: 'STANDARD_DESIGN',
       menuName: '화면 설계',
@@ -210,6 +234,7 @@ const standardDesignModule: ApplicationModule = {
   ],
   actions: [
     { actionCode: STANDARD_DESIGN_ACTIONS.DESIGN_VALIDATE, actionName: '설계검증', auditYn: 'Y' },
+    { actionCode: STANDARD_DESIGN_ACTIONS.SCREEN_AI_DRAFT, actionName: 'AI 초안', auditYn: 'Y' },
   ],
   permissions: [
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_MENU_DESIGN', ACTION_CODE: COMMON_ACTIONS.SEARCH, ALLOW_YN: 'Y' },
@@ -243,6 +268,8 @@ const standardDesignModule: ApplicationModule = {
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_SCREEN_DESIGN', ACTION_CODE: COMMON_ACTIONS.UPDATE, ALLOW_YN: 'Y' },
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_SCREEN_DESIGN', ACTION_CODE: COMMON_ACTIONS.DELETE, ALLOW_YN: 'Y' },
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_SCREEN_DESIGN', ACTION_CODE: STANDARD_DESIGN_ACTIONS.DESIGN_VALIDATE, ALLOW_YN: 'Y' },
+    ...([COMMON_ACTIONS.SAVE, COMMON_ACTIONS.REVERT_CHANGES, COMMON_ACTIONS.APPROVE, STANDARD_DESIGN_ACTIONS.SCREEN_AI_DRAFT] as const).map(action => ({ ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_SCREEN_DESIGN', ACTION_CODE: action, ALLOW_YN: 'Y' as const })),
+    ...([COMMON_ACTIONS.SEARCH, COMMON_ACTIONS.CREATE, COMMON_ACTIONS.UPDATE] as const).map(action => ({ ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_PROGRAM_REGISTER', ACTION_CODE: action, ALLOW_YN: 'Y' as const })),
     { ROLE_CODE: 'ADMIN', PROGRAM_KEY: 'SD_TERM_GLOSSARY', ACTION_CODE: COMMON_ACTIONS.SEARCH, ALLOW_YN: 'Y' },
   ],
   components: {
@@ -260,6 +287,7 @@ const standardDesignModule: ApplicationModule = {
       />
     ),
     SD_SCREEN_DESIGN: ScreenDesignPage,
+    SD_PROGRAM_REGISTER: ProgramRegisterPage,
     SD_DATABASE_DESIGN: () => <DesignLifecyclePage view="database" />,
     SD_TERM_GLOSSARY: TermGlossaryPage,
   },

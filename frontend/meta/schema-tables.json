@@ -204,5 +204,27 @@
       { "logicalName": "속성정의ID", "physicalName": "ATTRIBUTE_DEF_ID", "domain": "ID", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "REVIEW", "fk": "BSYCADF.ATTRIBUTE_DEF_ID", "description": "속성 정의 식별자" },
       { "logicalName": "속성값", "physicalName": "ATTRIBUTE_VALUE", "domain": "VALUE", "dataType": "VARCHAR(1000)", "pkYn": "N", "nullableYn": "Y", "termStatus": "REVIEW", "description": "Data Type 규칙으로 검증된 표준 문자열 값" }
     ]
+  },
+  {
+    "tableKey": "SD_PROJECT",
+    "logicalName": "프로젝트",
+    "physicalName": "BSDPROJ",
+    "moduleCode": "SD",
+    "tableCode": "PROJ",
+    "tableAlias": "PROJ",
+    "fullName": "BaseKit Standard Design Project",
+    "category": "기준정보",
+    "status": "IMPLEMENTED",
+    "description": "Standard Design 프로젝트 기준정보. 모든 SD 데이터의 PROJECT_ID 기준",
+    "columns": [
+      { "logicalName": "프로젝트ID", "physicalName": "PROJECT_ID", "domain": "ID", "dataType": "VARCHAR(50)", "pkYn": "Y", "nullableYn": "N", "termStatus": "REVIEW", "description": "서버가 SDP-UUID 형식으로 생성하는 프로젝트 식별자" },
+      { "logicalName": "프로젝트명", "physicalName": "PROJECT_NAME", "domain": "NAME", "dataType": "VARCHAR(200)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "프로젝트명" },
+      { "logicalName": "고객명", "physicalName": "CUSTOMER_NAME", "domain": "NAME", "dataType": "VARCHAR(200)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "고객명, 기본값 빈 문자열" },
+      { "logicalName": "설명", "physicalName": "DESCRIPTION", "domain": "TEXT", "dataType": "TEXT", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "프로젝트 설명, 기본값 빈 문자열" },
+      { "logicalName": "프로젝트 상태", "physicalName": "STATUS", "domain": "CODE", "dataType": "VARCHAR(30)", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "DRAFT 등 진행 상태, 기본값 DRAFT" },
+      { "logicalName": "시작일", "physicalName": "START_DATE", "domain": "DATE", "dataType": "DATE", "pkYn": "N", "nullableYn": "Y", "termStatus": "REVIEW", "description": "프로젝트 시작일" },
+      { "logicalName": "종료일", "physicalName": "END_DATE", "domain": "DATE", "dataType": "DATE", "pkYn": "N", "nullableYn": "Y", "termStatus": "REVIEW", "description": "프로젝트 종료일, 시작일 이후" },
+      { "logicalName": "버전", "physicalName": "VERSION", "domain": "NO", "dataType": "BIGINT", "pkYn": "N", "nullableYn": "N", "termStatus": "REVIEW", "description": "낙관적 잠금 버전, 기본값 1" }
+    ]
   }
 ]
