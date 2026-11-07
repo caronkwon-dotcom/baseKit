@@ -27,6 +27,9 @@ const searchFields: SearchFieldConfig<ProjectSearchCondition>[] = [
   { key: 'STATUS', label: '상태', controlType: 'select', options: [{ value: '', label: '전체' }, ...STATUS.map(status => ({ value: status, label: status }))] },
 ];
 
+/** 2026-11-01 ~ 2027-03-31; a missing date shows as a dash and no dates at all as a single dash. */
+const projectPeriod = (project: DesignProject) => project.START_DATE || project.END_DATE ? `${project.START_DATE || '-'} ~ ${project.END_DATE || '-'}` : '-';
+
 const editorFor = (project: DesignProject): ProjectEditor => {
   const draft = toProjectDraft(project);
   return { mode: 'EDIT', sourceProjectId: project.PROJECT_ID, initialDraft: draft, draft };
@@ -192,9 +195,10 @@ export default function ProjectManagementPage() {
 
   const projectColumns: DataTableColumn<DesignProject>[] = [
     { key: 'id', header: 'ID', render: project => project.PROJECT_ID, width: 84 },
-    { key: 'name', header: '프로젝트명', render: project => project.PROJECT_NAME, minWidth: 110, flex: 2.2 },
-    { key: 'customer', header: '고객명', render: project => project.CUSTOMER_NAME, minWidth: 76, flex: 1.4 },
-    { key: 'status', header: '상태', render: project => project.STATUS, width: 100, align: 'center' },
+    { key: 'name', header: '프로젝트명', render: project => project.PROJECT_NAME, minWidth: 110, flex: 2 },
+    { key: 'customer', header: '고객명', render: project => project.CUSTOMER_NAME || '-', minWidth: 80, flex: 1.2 },
+    { key: 'period', header: '기간', render: project => projectPeriod(project), width: 176, align: 'center' },
+    { key: 'status', header: '상태', render: project => project.STATUS, width: 118, align: 'center' },
   ];
   const projectMembers = activeProject ? designLifecycleRepository.getData().projectMembers.filter(assignment => assignment.PROJECT_ID === activeProject.PROJECT_ID) : [];
   const selectedProjectMember = projectMembers.find(item => item.PROJECT_MEMBER_ID === selectedProjectMemberId);
@@ -235,7 +239,7 @@ export default function ProjectManagementPage() {
     }}>
       <SearchPanel actionDisplay="label" rows={1} fields={searchFields} value={searchCondition} initialValue={initialSearchCondition} onValueChange={setSearchCondition} onSearch={runSearch} onReset={runSearch} />
     </div>
-    <MasterDetailMultiGrid
+    <MasterDetailMultiGrid masterWidth="50%"
       master={<BaseKitDataGrid programKey={PROGRAM_KEY} roleCode="ADMIN" title="프로젝트 목록" selectable={false} toolbarActions={[]} columns={projectColumns} rows={workingSet}
         getRowKey={project => project.PROJECT_ID} currentRowKey={selectedProjectId} loading={projectStatus === 'LOADING'} onRowClick={project => { openProjectDetail(project); }} emptyMessage="조회 조건에 맞는 프로젝트가 없습니다." />}
       detailEmpty={editor ? undefined : <div className="sd-project-mgmt-empty"><strong>프로젝트를 선택하세요</strong><span>목록이 조회되면 프로젝트 상세가 표시됩니다.</span></div>}
