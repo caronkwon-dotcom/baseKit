@@ -1,0 +1,10 @@
+.tree-grid-demo-page .tree-grid-guide { margin-top: 18px; padding: 14px; border: 1px solid var(--border-default); border-radius: 6px; background: var(--surface-panel); }
+.tree-grid-guide h2 { margin: 0 0 12px; font-size: 15px; }
+.tree-grid-guide-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tree-grid-guide-grid article { min-width: 0; padding: 11px; border: 1px solid var(--border-default); border-radius: 5px; background: var(--surface-panel); }
+.tree-grid-guide-grid h3 { margin: 0 0 8px; font-size: 12px; }
+.tree-grid-guide-grid p { margin: 0; color: var(--text-secondary); font-size: 12px; line-height: 1.55; }
+.tree-grid-guide-grid p + p { margin-top: 8px; }
+.tree-grid-guide-grid code, .tree-grid-guide-grid pre { font-family: var(--font-mono, Consolas, monospace); font-size: 11px; }
+.tree-grid-guide-grid pre { overflow: auto; margin: 0; padding: 8px; border-radius: 4px; background: var(--surface-muted); line-height: 1.45; }
+@media (max-width: 860px) { .tree-grid-guide-grid { grid-template-columns: 1fr; } }
