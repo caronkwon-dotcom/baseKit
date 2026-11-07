@@ -727,4 +727,4 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 
 Flyway V32에 RULE 버전, 범위·기간 Counter, 전역 고유 발급번호와 멱등 Ledger를 추가했다. 관리자 CRUD·사용 중지·미리보기·이력 API와 내부 `DocumentNumberService` 예약/완료/폐기 계약을 구현했다. 발급 예약은 독립 `REQUIRES_NEW` 트랜잭션으로 먼저 커밋하며, 업무 저장 rollback에도 번호를 재사용하지 않는다. 실제 업무별 컬럼·저장 use case 연결은 해당 업무의 별도 범위로 남긴다.
 
-시스템관리 > 채번관리 화면, 정적 메뉴·프로그램 metadata, Registry 및 Program discovery catalog를 연결했다. 발급 이력 있는 버전의 출력 형식은 잠기며 새 버전은 기존 버전을 비활성화한다. Preview는 서버에서만 계산하고 Counter/Ledger를 변경하지 않는다. Frontend 226 tests, build/lint 통과; Backend 153 tests 중 153 pass, 19 skipped. V32 isolated H2 migrate/replay 통과. PostgreSQL 동시성 테스트는 `BASEKIT_DB_URL` 미설정으로 실행되지 않았다. 실제 브라우저 화면 검수도 미실행했다.
+시스템관리 > 채번관리 화면, 정적 메뉴·프로그램 metadata, Registry 및 Program discovery catalog를 연결했다. 발급 이력 있는 버전의 출력 형식은 잠기며 새 버전은 기존 버전을 비활성화한다. Preview는 서버에서만 계산하고 Counter/Ledger를 변경하지 않는다. Frontend 226 tests, build/lint 통과; Backend 총 154건 중 135 pass, 19 skipped, 실패 0. V32 isolated H2 migrate/replay 통과. PostgreSQL 동시성 테스트는 `BASEKIT_DB_URL` 미설정으로 실행되지 않았다. 실제 브라우저 화면 검수도 미실행했다.
