@@ -12,7 +12,7 @@ TASK SD-SCREEN-001: 화면 설계 메뉴를 프로그램 목록(왼쪽)·UI 설�
 
 TASK SD-SCREEN-002: 설계에 기능 요건(FUNCTION_SPECS)·검색 규칙·읽기전용을 추가하고(DESIGN_JSON SCHEMA_VERSION 2, migration 없음) 화면에 "기능 요건" 탭과 상세 편집 모달을 구현했다. 저장된 설계를 단일 정적 HTML 설계서(현업 검토 Part A + 개발 지시서 Part B)로 내려받는 "설계서 출력" 버튼(SD_SCREEN_DOC_EXPORT)을 추가했다. AI 초안은 기능 요건도 만들며 근거에 없는 요구사항 ID는 제거하고 경고한다. 서버·프런트 테스트와 임시 H2 서버 브라우저 검증(편집·저장·AI 초안·출력 파일 직접 열기)을 마쳤고, PostgreSQL 적용과 실제 회사 LLM 응답은 미검증이다. 백엔드를 먼저 배포한다. [ADR 042](decisions/042-sd-screen-design-document-and-function-specs.md).
 
-BK-SD-PROJECT-UI-001: 프로젝트 관리 화면을 공통 MasterDetailMultiGrid 구조로 전환했다(좌 목록, 우 38% 기본정보·62% 멤버 그리드, 32px 메시지 영역). 첫 목록 화면 없이 컨텍스트 프로젝트 → 첫 행 → 0건이면 신규 순으로 바로 열린다. 하단 빈 공간의 원인(HTML 표가 래퍼를 채우지 못함)을 BaseKitDataGrid로 해소했다. 공유 ProjectListDetailWorkspace와 CSS는 수정하지 않아 요구사항 화면은 그대로다. 목록 폭 조절·접기는 이 화면에서 없어졌다. 임시 H2 서버로 0/1/다건·다양한 높이·저장·409·삭제·멤버를 확인했고, 프로젝트 멤버는 계속 브라우저 localStorage에 저장된다. [ADR 043](decisions/043-sd-project-management-master-detail.md).
+BK-SD-PROJECT-UI-001: 프로젝트 관리를 공통 MasterDetailMultiGrid로 바꿨다가(PR #61·#62) 기존 목록·상세 워크스페이스의 폭 조절·목록 접기·목록 위 검색이 사라져 PM 지적으로 되돌렸다. 현재는 기존 ProjectListDetailWorkspace를 유지하고 진입 흐름만 바꿨다: 첫 목록 화면 없이 컨텍스트 프로젝트 → 첫 행 → 0건이면 신규로 바로 열린다. 목록에 기간 컬럼을 추가하고, 하단 빈 영역은 프로젝트 관리 표 래퍼에 행 구분선을 이어 그려 보완했다(공유 컴포넌트·styles.css 미수정). 임시 H2 서버로 컨텍스트/0건/오류 진입, 미저장 가드, 신규·저장·삭제, 접기·폭 조절·검색 토글을 확인했다. 프로젝트 멤버는 계속 브라우저 localStorage에 저장된다. [ADR 043](decisions/043-sd-project-management-master-detail.md).
 
 검증: 백엔드 H2 통합 테스트, 프런트 테스트·build·lint, 브라우저(모의 API). **PostgreSQL에서 V26·V27은 실행하지 못했다**(공유 DB 미변경). 임시 DB에서 `BASEKIT_PG_PROJECT_REVIEW=true`로 `ProjectPostgresTest`를 실행해 확인해야 한다. 배포는 백엔드(V26·V27)를 먼저 한다.
 
