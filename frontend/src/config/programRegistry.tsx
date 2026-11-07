@@ -11,6 +11,7 @@ import { TermCurationPage } from '../features/system/termCuration';
 import { DomainManagePage } from '../features/system/domainManage';
 import { WordManagePage } from '../features/system/wordManage';
 import { TableManagePage } from '../features/system/tableManage';
+import { DocumentNumberManagePage } from '../features/system/documentNumberManagement';
 import { DocumentCenterPage } from '../features/devGuide/documentCenter';
 import { LlmFileTestPage } from '../features/devGuide/llmFileTest';
 import { applicationModules } from './moduleRegistry';
@@ -25,6 +26,7 @@ const coreProgramComponents: ProgramComponentMap = {
   PROGRAM_MGMT: () => <ProgramManagePage />,
   MENU_MGMT: () => <MenuManagePage />,
   TABLE_MGMT: () => <TableManagePage />,
+  DOC_NUMBER_MGMT: () => <DocumentNumberManagePage />,
   TERM_CURATION: () => <TermCurationPage />,
   WORD_MGMT: () => <WordManagePage />,
   DOMAIN_MGMT: () => <DomainManagePage />,

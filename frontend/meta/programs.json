@@ -66,6 +66,17 @@
     "useYn": "Y"
   },
   {
+    "programKey": "DOC_NUMBER_MGMT",
+    "programName": "채번관리",
+    "componentName": "DocumentNumberManagePage",
+    "screenType": "GRID_DETAIL",
+    "routePath": "/system/document-numbers",
+    "dataScope": "COMPANY",
+    "modifyScope": "ROLE",
+    "actionCodes": ["SEARCH", "CREATE", "UPDATE", "SAVE", "MANUAL_VIEW"],
+    "useYn": "Y"
+  },
+  {
     "programKey": "TERM_CURATION",
     "programName": "표준용어관리",
     "componentName": "TermCurationPage",
