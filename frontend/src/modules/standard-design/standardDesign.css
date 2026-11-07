@@ -222,6 +222,10 @@
 .project-list-detail-workspace__list-content { display: flex; min-width: 0; min-height: 0; flex: 1; flex-direction: column; }
 .standard-design-project-workspace .data-section { display: flex; min-height: 0; flex: 1; flex-direction: column; }
 .standard-design-project-workspace .standard-table-wrap { min-height: 0; max-height: none; flex: 1; }
+/* The table is only as tall as its rows: continue the row lines to the bottom of the box so the area below does not look empty (list and member tables of the project management screen only). */
+.sd-project-mgmt-page .standard-design-project-workspace .standard-table-wrap { display: flex; flex-direction: column; }
+.sd-project-mgmt-page .standard-design-project-workspace .standard-table-wrap > table { flex: 0 0 auto; }
+.sd-project-mgmt-page .standard-design-project-workspace .standard-table-wrap::after { content: ""; flex: 1 0 0; min-height: 0; background: repeating-linear-gradient(to bottom, var(--border-default) 0, var(--border-default) 1px, transparent 1px, transparent 32px); }
 .project-master-heading { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 8px; min-height: 32px; margin-bottom: 5px; }
 .project-master-heading h2 { margin: 0; color: var(--text-primary); font-size: 13px; }
 .project-master-heading h2 span { color: var(--text-muted); font-weight: 500; }
@@ -392,8 +396,6 @@
 .sd-group-detail-workspace .program-data-grid .standard-table-wrap { min-height: 0; max-height: none; flex: 1; }
 .sd-group-detail-workspace .basekit-ag-grid { height: 100%; min-height: 180px; }
 
-/* Project management (list + detail on the shared Master/Detail grid). New classes only; the project-list-detail-workspace rules stay for the requirement screens. */
-.sd-project-mgmt-page { --project-label-width: 76px; }
-.sd-project-mgmt-form { box-sizing: border-box; height: 100%; min-height: 0; }
+/* Project management: placeholder of the detail pane while nothing is selected (list loading or server error). */
 .sd-project-mgmt-empty { display: flex; height: 100%; min-height: 120px; flex-direction: column; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-panel); color: var(--text-muted); font-size: 12px; }
 .sd-project-mgmt-empty strong { color: var(--text-secondary); font-size: 13px; }
