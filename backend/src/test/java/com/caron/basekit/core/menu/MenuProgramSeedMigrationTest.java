@@ -81,11 +81,11 @@ class MenuProgramSeedMigrationTest {
     }
 
     private void assertSeededInventory(JdbcTemplate jdbc) {
-        assertEquals(25, jdbc.queryForObject("SELECT COUNT(*) FROM BSYPROG", Integer.class));
-        assertEquals(29, jdbc.queryForObject("SELECT COUNT(*) FROM BSYMENU", Integer.class));
+        assertEquals(27, jdbc.queryForObject("SELECT COUNT(*) FROM BSYPROG", Integer.class));
+        assertEquals(31, jdbc.queryForObject("SELECT COUNT(*) FROM BSYMENU", Integer.class));
         assertEquals(5, jdbc.queryForObject(
                 "SELECT COUNT(*) FROM BSYMENU WHERE MENU_TYPE_CODE='FOLDER'", Integer.class));
-        assertEquals(24, jdbc.queryForObject(
+        assertEquals(26, jdbc.queryForObject(
                 "SELECT COUNT(*) FROM BSYMENU WHERE MENU_TYPE_CODE='PAGE'", Integer.class));
         assertEquals(3, jdbc.queryForObject(
                 "SELECT COUNT(*) FROM BSYMENU WHERE PARENT_MENU_KEY IS NULL", Integer.class));

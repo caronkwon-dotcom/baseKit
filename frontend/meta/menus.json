@@ -60,6 +60,16 @@
     "useYn": "Y"
   },
   {
+    "menuKey": "SYS.DOC_NUMBER",
+    "parentMenuKey": "SYS",
+    "menuName": "채번관리",
+    "menuLevel": 2,
+    "menuType": "PAGE",
+    "programKey": "DOC_NUMBER_MGMT",
+    "sortOrder": 7,
+    "useYn": "Y"
+  },
+  {
     "menuKey": "SYS.STANDARD_DATA",
     "parentMenuKey": "SYS",
     "menuName": "표준데이터관리",
