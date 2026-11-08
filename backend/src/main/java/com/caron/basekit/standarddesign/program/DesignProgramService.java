@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class DesignProgramService {
- private final JdbcTemplate jdbc; private final ObjectMapper json; private final RequirementGroupAnalysisService analyses;
- public DesignProgramService(JdbcTemplate jdbc,ObjectMapper json,RequirementGroupAnalysisService analyses) {this.jdbc=jdbc;this.json=json;this.analyses=analyses;}
+ private final JdbcTemplate jdbc; private final ObjectMapper json; private final RequirementGroupAnalysisService analyses; private final ProgramReviewStatus review;
+ public DesignProgramService(JdbcTemplate jdbc,ObjectMapper json,RequirementGroupAnalysisService analyses,ProgramReviewStatus review) {this.jdbc=jdbc;this.json=json;this.analyses=analyses;this.review=review;}
  private static final Map<String,String> ISSUES=Map.ofEntries(
   Map.entry("DECISION_MISSING","AI 응답에 재사용·변경·신규 판단이 없습니다."),
   Map.entry("DECISION_INVALID","AI가 알 수 없는 판단 값을 반환했습니다."),
@@ -50,8 +50,8 @@ public class DesignProgramService {
   var result=upper(row);result.put("DESCRIPTION",result.remove("PURPOSE"));result.put("PROGRAM_KIND",kind(result,cache));
   result.put("EVIDENCE",jdbc.queryForList("SELECT REQUIREMENT_ID,REQUIREMENT_REVISION,SNAPSHOT_JSON FROM BSDGPREQ WHERE PROGRAM_ID=? ORDER BY REQUIREMENT_ID",result.get("PROGRAM_ID")).stream().map(this::upper).toList());return result;
  }
- @Transactional(readOnly=true) public List<Map<String,Object>> list(String project) {project(project);var cache=new HashMap<String,JsonNode>();return jdbc.queryForList("SELECT * FROM BSDGPROG WHERE PROJECT_ID=? ORDER BY CREATED_AT,PROGRAM_ID",project).stream().map(row->program(row,cache)).toList();}
- private Map<String,Object> get(String project,String id) {var rows=jdbc.queryForList("SELECT * FROM BSDGPROG WHERE PROJECT_ID=? AND PROGRAM_ID=?",project,id);if(rows.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"프로그램을 찾을 수 없습니다.");return program(rows.getFirst());}
+ @Transactional(readOnly=true) public List<Map<String,Object>> list(String project) {project(project);var cache=new HashMap<String,JsonNode>();var stale=review.staleByProgram(project);return jdbc.queryForList("SELECT * FROM BSDGPROG WHERE PROJECT_ID=? ORDER BY CREATED_AT,PROGRAM_ID",project).stream().map(row->{var item=program(row,cache);return ProgramReviewStatus.mark(item,stale.getOrDefault((String)item.get("PROGRAM_ID"),List.of()));}).toList();}
+ private Map<String,Object> get(String project,String id) {var rows=jdbc.queryForList("SELECT * FROM BSDGPROG WHERE PROJECT_ID=? AND PROGRAM_ID=?",project,id);if(rows.isEmpty())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"프로그램을 찾을 수 없습니다.");var item=program(rows.getFirst());return ProgramReviewStatus.mark(item,review.staleOf((String)item.get("PROGRAM_ID")));}
  @Transactional public Map<String,Object> create(String project,Edit input) {
   project(project);validate(input);String id="SDPG-"+UUID.randomUUID();
   jdbc.update("INSERT INTO BSDGPROG(PROGRAM_ID,PROJECT_ID,PROGRAM_NAME,PURPOSE,STATUS) VALUES(?,?,?,?,'DRAFT')",id,project,input.PROGRAM_NAME().strip(),input.DESCRIPTION());return get(project,id);

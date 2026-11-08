@@ -2,6 +2,7 @@ package com.caron.basekit.standarddesign.screendesign;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.caron.basekit.standarddesign.program.ProgramReviewStatus;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,8 +21,9 @@ import java.util.UUID;
 public class ScreenDesignService {
     private final JdbcTemplate jdbc;
     private final ObjectMapper json;
+    private final ProgramReviewStatus review;
 
-    public ScreenDesignService(JdbcTemplate jdbc, ObjectMapper json) { this.jdbc = jdbc; this.json = json; }
+    public ScreenDesignService(JdbcTemplate jdbc, ObjectMapper json, ProgramReviewStatus review) { this.jdbc = jdbc; this.json = json; this.review = review; }
 
     private static ResponseStatusException status(HttpStatus status, String message) { return new ResponseStatusException(status, message); }
 
@@ -41,8 +43,9 @@ public class ScreenDesignService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> summaries(String project) {
         if (project == null || project.isBlank() || project.length() > 50) throw ScreenDesignValidator.bad("프로젝트 ID가 필요합니다.");
+        var stale = review.staleByProgram(project);
         return jdbc.queryForList("SELECT PROGRAM_ID, DESIGN_STATUS, VERSION, PROGRAM_VERSION FROM BSDSCRN WHERE PROJECT_ID = ? AND DEL_YN = 'N' ORDER BY PROGRAM_ID", project)
-            .stream().map(ScreenDesignService::upper).toList();
+            .stream().map(ScreenDesignService::upper).map(row -> ProgramReviewStatus.mark(row, stale.getOrDefault((String) row.get("PROGRAM_ID"), List.of()))).toList();
     }
 
     @Transactional(readOnly = true)
