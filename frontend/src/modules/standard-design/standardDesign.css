@@ -325,6 +325,12 @@
 .sd-project-member-modal .search-grid label { grid-template-columns: 86px minmax(0, 1fr); }
 .sd-project-member-modal .search-panel-layout { grid-template-columns: minmax(0, 1fr); }
 .sd-project-member-modal .search-action-rail { grid-column: 1; width: auto; justify-content: flex-start; }
+/* Project selector dialog: the fixed 620px dialog cannot hold the 4-column search grid plus the button area (status field hid behind the buttons); same layout as the member dialog. */
+.sd-project-selector-modal .form-modal { width: min(760px, calc(100vw - 32px)); }
+.sd-project-selector-modal .search-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.sd-project-selector-modal .search-grid label { grid-template-columns: 70px minmax(0, 1fr); }
+.sd-project-selector-modal .search-panel-layout { grid-template-columns: minmax(0, 1fr); }
+.sd-project-selector-modal .search-action-rail { grid-column: 1; width: auto; justify-content: flex-start; }
 @media (max-width: 620px) { .sd-member-assignment-form { grid-template-columns: minmax(0, 1fr); }.sd-member-assignment-form .sd-member-note { grid-column: 1; }.sd-member-assignment-form label { grid-template-columns: 82px minmax(0, 1fr); } }
 @media (max-width: 980px) { .standard-design-header-actions { min-width: 0; }.standard-design-header-actions .standard-design-lifecycle-actions button { min-width: 42px; }.sd-project-context-selector { max-width: 220px; } }
 @media (max-width: 1180px) { .standard-design-project-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -397,7 +403,7 @@
 .sd-group-detail-workspace .basekit-ag-grid { height: 100%; min-height: 180px; }
 
 /* Project management: placeholder of the detail pane while nothing is selected (list loading or server error). */
-.sd-project-mgmt-empty { display: flex; height: 100%; min-height: 120px; flex-direction: column; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-panel); color: var(--text-muted); font-size: 12px; }
-.sd-project-mgmt-empty strong { color: var(--text-secondary); font-size: 13px; }
 .sd-project-mgmt-message-area { box-sizing: border-box; flex: 0 0 calc(var(--multi-grid-message-height) + 4px); min-height: calc(var(--multi-grid-message-height) + 4px); padding-top: 4px; overflow: hidden; }
 .sd-project-mgmt-message-area > .page-message { min-height: var(--multi-grid-message-height); box-sizing: border-box; margin: 0; }
+.sd-project-mgmt-empty { display: flex; height: 100%; min-height: 120px; flex-direction: column; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-panel); color: var(--text-muted); font-size: 12px; }
+.sd-project-mgmt-empty strong { color: var(--text-secondary); font-size: 13px; }
