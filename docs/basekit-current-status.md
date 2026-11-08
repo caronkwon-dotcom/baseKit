@@ -14,6 +14,8 @@ TASK SD-SCREEN-002: 설계에 기능 요건(FUNCTION_SPECS)·검색 규칙·읽�
 
 BK-SD-PROJECT-UI-001: 프로젝트 관리를 공통 MasterDetailMultiGrid로 바꿨다가(PR #61·#62) 기존 목록·상세 워크스페이스의 폭 조절·목록 접기·목록 위 검색이 사라져 PM 지적으로 되돌렸다. 현재는 기존 ProjectListDetailWorkspace를 유지하고 진입 흐름만 바꿨다: 첫 목록 화면 없이 컨텍스트 프로젝트 → 첫 행 → 0건이면 신규로 바로 열린다. 목록에 기간 컬럼을 추가하고, 하단 빈 영역은 프로젝트 관리 표 래퍼에 행 구분선을 이어 그려 보완했다(공유 컴포넌트·styles.css 미수정). 임시 H2 서버로 컨텍스트/0건/오류 진입, 미저장 가드, 신규·저장·삭제, 접기·폭 조절·검색 토글을 확인했다. 프로젝트 멤버는 계속 브라우저 localStorage에 저장된다. [ADR 043](decisions/043-sd-project-management-master-detail.md).
 
+BK-SD-REQ-TRACE-001: 프로젝트 선택 팝업에서 상태 콤보가 버튼에 가려지던 문제를 수정했고(1280/1440/1920 재현·확인), 연관정보 탭 안내 문구를 실제 동작에 맞게 정정했다. 요구사항 추적 조회 API(trace, trace-summary)와 프로그램·화면 설계 목록의 재검토 필요 표시 키(REVIEW_REQUIRED_YN)를 백엔드에 추가했다(DB 변경 없음, 읽을 때 계산). 연관정보 탭 실데이터, 목록 추적 상태 컬럼·필터, 재검토 배지 화면은 PM 목업 확인 후 구현한다. 관련 메뉴 탭 숨김도 목업 확인 후 함께 진행한다. [ADR 044](decisions/044-sd-requirement-traceability.md).
+
 검증: 백엔드 H2 통합 테스트, 프런트 테스트·build·lint, 브라우저(모의 API). **PostgreSQL에서 V26·V27은 실행하지 못했다**(공유 DB 미변경). 임시 DB에서 `BASEKIT_PG_PROJECT_REVIEW=true`로 `ProjectPostgresTest`를 실행해 확인해야 한다. 배포는 백엔드(V26·V27)를 먼저 한다.
 
 미완료: 브라우저 저장소 데이터 이전 도구(P2), 프로젝트 인력 서버 전환(P3), 서버 테이블 프로젝트 FK(P4), WBS·DB 설계(P5), 사용자 DB 연동.
