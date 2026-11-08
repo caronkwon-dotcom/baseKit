@@ -115,6 +115,28 @@ export function revertGridRows<T>(current: GridRowStore<T>, ids: Iterable<string
   return { ...current, rows, states, beforeDeleteStates };
 }
 
+export function acceptGridRows<T>(current: GridRowStore<T>, ids: Iterable<string>): GridRowStore<T> {
+  const accepted = new Set(ids);
+  if (!accepted.size) return current;
+  const rows: TrackedGridRow<T>[] = [];
+  const states = new Map(current.states);
+  const originals = new Map(current.originals);
+  const beforeDeleteStates = new Map(current.beforeDeleteStates);
+  current.rows.forEach((row) => {
+    const id = row.__GRID_ROW_ID;
+    if (!accepted.has(id)) { rows.push(row); return; }
+    if (states.get(id) === 'DELETED') {
+      states.delete(id); originals.delete(id); beforeDeleteStates.delete(id);
+      return;
+    }
+    states.set(id, 'NORMAL');
+    originals.set(id, clone(row));
+    beforeDeleteStates.delete(id);
+    rows.push(row);
+  });
+  return { ...current, rows, states, originals, beforeDeleteStates };
+}
+
 export function getGridChangeSet<T>(current: GridRowStore<T>, getKey: (row: T) => string): BatchChangeSet<T> {
   const result: BatchChangeSet<T> = { INSERTED: [], UPDATED: [], DELETED: [] };
   current.rows.forEach((row) => {
@@ -142,6 +164,7 @@ export function useGridRowState<T>(getKey: (row: T) => string) {
   const update = useCallback((id: string, change: (row: TrackedGridRow<T>) => TrackedGridRow<T>) => setStore((current) => updateGridRow(current, id, change)), []);
   const remove = useCallback((ids: Iterable<string>) => setStore((current) => removeGridRows(current, ids)), []);
   const revert = useCallback((ids: Iterable<string>) => setStore((current) => revertGridRows(current, ids)), []);
+  const accept = useCallback((ids: Iterable<string>) => setStore((current) => acceptGridRows(current, ids)), []);
   const changeSet = useMemo(() => getGridChangeSet(store, getKey), [getKey, store]);
   const getState = useCallback((row: TrackedGridRow<T>) => store.states.get(row.__GRID_ROW_ID) ?? 'NORMAL', [store.states]);
   const hasChanges = useCallback((ids: Iterable<string>) => {
@@ -155,6 +178,7 @@ export function useGridRowState<T>(getKey: (row: T) => string) {
     update,
     remove,
     revert,
+    accept,
     hasChanges,
     getState,
     changeSet,

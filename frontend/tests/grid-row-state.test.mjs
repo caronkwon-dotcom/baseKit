@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   addGridRow,
+  acceptGridRows,
   removeGridRows,
   replaceGridRows,
   revertGridRows,
@@ -91,4 +92,19 @@ test('7. successful save reload establishes a new NORMAL baseline', () => {
 
   assert.equal(row(reverted, 'A').NAME, 'Saved value');
   assert.equal(state(reverted, 'A'), 'NORMAL');
+});
+
+test('8. partial save accepts only completed rows and preserves failures for retry', () => {
+  let store = loadedStore();
+  store = updateGridRow(store, 'A', (value) => ({ ...value, NAME: 'Saved A' }));
+  store = updateGridRow(store, 'B', (value) => ({ ...value, NAME: 'Retry B' }));
+  store = removeGridRows(store, ['C']);
+  const partial = acceptGridRows(store, ['A', 'C']);
+
+  assert.equal(row(partial, 'A').NAME, 'Saved A');
+  assert.equal(state(partial, 'A'), 'NORMAL');
+  assert.equal(row(partial, 'C'), undefined);
+  assert.equal(state(partial, 'C'), undefined);
+  assert.equal(row(partial, 'B').NAME, 'Retry B');
+  assert.equal(state(partial, 'B'), 'UPDATED');
 });
