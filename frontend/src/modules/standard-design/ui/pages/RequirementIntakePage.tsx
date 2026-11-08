@@ -250,8 +250,7 @@ export default function RequirementIntakePage() {
   const relatedTab: ReactNode = <section className="base-tab-placeholder" aria-label="연관정보 준비 영역">
     <h3>연관정보</h3>
     {selectedId ? <IncludedRequirementGroups key={selectedId} projectId={projectId} requirementId={selectedId} revision={selected?.REQUIREMENT_REVISION} /> : <p>요구사항을 저장하면 포함 그룹을 확인할 수 있습니다.</p>}
-    <p>요구사항 관계와 설계 Traceability를 표시할 준비 영역입니다. 현재는 별도 관계 데이터를 저장하지 않습니다.</p>
-    <div className="base-tab-placeholder__grid"><div className="base-tab-placeholder"><h3>Requirement 관계</h3><p>{selectedId ? '저장된 관계 데이터가 없습니다.' : '요구사항을 저장하면 관계를 확인할 수 있습니다.'}</p></div><div className="base-tab-placeholder"><h3>설계 Traceability</h3><p>Requirement → WBS → Screen → Table 연결은 후속 설계 단계에서 관리됩니다.</p></div></div>
+    <p>이 탭에서는 요구사항이 포함된 요구사항 그룹만 조회됩니다. 프로그램·화면 설계와의 연결 조회는 추적 조회 기능 반영 후 제공됩니다.</p>
   </section>;
   const comparisonLabels = { REQUIREMENT_NAME: '요구사항명', REQUIREMENT_TYPE_CODE: '요구 유형', DESCRIPTION: '요구사항 내용', PROCESS_DESCRIPTION: '프로세스 설명', DESIGN_OPINION: '설계 의견', STATUS: '상태', MENU_KEYS: '관련 메뉴', PROJECT_MENU_IDS: '프로젝트 메뉴', ATTACHMENTS: '첨부파일' };
   const comparisonText = (value: unknown) => Array.isArray(value) ? value.map(item => typeof item === 'object' && item !== null && 'ORIGINAL_FILE_NAME' in item ? String(item.ORIGINAL_FILE_NAME) : String(item)).join(', ') : String(value ?? '');
