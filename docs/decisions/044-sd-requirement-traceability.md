@@ -1,7 +1,7 @@
 # ADR 044: 요구사항 추적 조회와 재검토 표시
 
 - 일자: 2026-11-08
-- 상태: PLAN 승인 전 구현, 사후 검토 대기(PM이 채택하면 승인 표기로 갱신). Step A 구현·Step B 백엔드 구현·로컬 검증 완료. Step B 화면은 PM 목업 확인 후 구현.
+- 상태: PLAN 승인 전 구현, PM이 PR #66 병합(2026-11-08)으로 사후 승인. 재검토 규칙 변경(첨부 제외)은 PM 지시로 구현. Step A 구현·Step B 백엔드 구현·로컬 검증 완료. Step B 화면은 PM 목업 확인 후 구현.
 - 관련: [ADR 042](042-sd-screen-design-document-and-function-specs.md)
 
 ## 결정
