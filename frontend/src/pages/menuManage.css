@@ -75,4 +75,21 @@
 .menu-tree-name { grid-column: 3; min-width: 0; overflow-wrap: anywhere; font-size: 13px; line-height: 1.35; }
 .menu-tree-meta { grid-column: 3; color: var(--text-muted); font-size: 10px; line-height: 1.25; }
 .menu-editor-grid { min-width: 0; }
+.menu-grid-section { min-width: 0; }
+.menu-grid-guidance { margin: 0 0 8px; color: var(--text-secondary); font-size: 12px; }
+.menu-manage-message { margin: 8px 0 0; color: var(--text-secondary); font-size: 12px; }
+.menu-execution-panel { margin-top: 12px; }
+.menu-execution-grid { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; }
+.menu-execution-grid > label { display: grid; gap: 4px; min-width: 180px; color: var(--text-secondary); font-size: 12px; }
+.menu-execution-grid select { min-height: 30px; border: 1px solid var(--border-default); border-radius: 4px; background: var(--surface-panel); color: var(--text-primary); padding: 0 8px; font: inherit; }
+.menu-program-cell { display: flex; align-items: center; gap: 5px; min-width: 0; height: 100%; }
+.menu-program-label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); font-size: 11px; }
+.menu-program-lookup { flex: 0 0 auto; min-height: 22px; border: 1px solid var(--border-default); border-radius: 4px; background: var(--surface-panel); color: var(--text-primary); padding: 0 6px; font: inherit; font-size: 10px; cursor: pointer; }
+.menu-program-lookup:hover:not(:disabled) { border-color: var(--brand-primary); color: var(--brand-primary); }
+.menu-program-lookup:disabled { color: var(--text-muted); cursor: default; }
+.menu-program-unavailable { color: var(--text-muted); text-align: center; }
+.menu-program-search-panel { margin-bottom: 12px; }
+.menu-program-search-panel .search-panel { margin: 0; }
+.form-modal:has(.menu-program-search-panel) { width: min(1050px, calc(100vw - 32px)); }
+.form-modal:has(.menu-program-search-panel) .basekit-ag-grid { height: min(48vh, 420px); min-height: 260px; }
 @media (max-width: 760px) { .menu-manage-layout { grid-template-columns: minmax(0, 1fr); } }

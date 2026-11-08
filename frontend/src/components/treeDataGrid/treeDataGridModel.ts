@@ -7,6 +7,7 @@ export interface TreeDataGridFields {
   idField: string;
   parentIdField: string;
   nodeTypeField: string;
+  nodeTypes?: readonly string[];
   nameField: string;
   sortField: string;
 }
@@ -137,7 +138,7 @@ export function validateTreeRows<T>(rows: T[], fields: TreeDataGridFields, getRo
     if (!id) issues.push({ code: 'REQUIRED', rowId, field: fields.idField, message: 'Identifier is required.' });
     if (!name) issues.push({ code: 'REQUIRED', rowId, field: fields.nameField, message: 'Name is required.' });
     if (id && (idCounts.get(id) ?? 0) > 1) issues.push({ code: 'DUPLICATE_KEY', rowId, field: fields.idField, message: `Duplicate identifier: ${id}` });
-    if (nodeType !== 'FOLDER' && nodeType !== 'LEAF') issues.push({ code: 'NODE_TYPE', rowId, field: fields.nodeTypeField, message: 'Type must be FOLDER or LEAF.' });
+    if (!(fields.nodeTypes ?? ['FOLDER', 'LEAF']).includes(nodeType)) issues.push({ code: 'NODE_TYPE', rowId, field: fields.nodeTypeField, message: `Type must be ${(fields.nodeTypes ?? ['FOLDER', 'LEAF']).join(' or ')}.` });
     if (!sortRaw || !Number.isInteger(sortValue) || sortValue < 0) issues.push({ code: 'REQUIRED', rowId, field: fields.sortField, message: 'Sort order must be a non-negative integer.' });
     if (parentId && !byId.has(parentId)) issues.push({ code: 'PARENT_MISSING', rowId, field: fields.parentIdField, message: `Parent identifier not found: ${parentId}` });
     if (parentId && byId.has(parentId) && valueAt(byId.get(parentId), fields.nodeTypeField) !== 'FOLDER') {

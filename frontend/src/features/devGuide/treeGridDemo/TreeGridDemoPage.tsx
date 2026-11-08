@@ -24,7 +24,7 @@ export default function TreeGridDemoPage() {
       columns={columns}
       getKey={(row) => row.MENU_ID}
       maxDepth={3}
-      onSave={(rows, changeSet) => { setLastSaved(rows.length - changeSet.DELETED.length); setLastChange({ rows, changeSet, dirty: false, issues: [] }); }}
+      onSave={(rows, changeSet) => { setLastSaved(rows.length - changeSet.DELETED.length); setLastChange({ rows, changeSet, pending: [], dirty: false, issues: [] }); }}
       onChange={setLastChange}
       emptyMessage="No demo rows. Use New to add the first item."
     />

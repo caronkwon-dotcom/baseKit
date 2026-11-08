@@ -73,7 +73,7 @@
     "routePath": "/system/document-numbers",
     "dataScope": "COMPANY",
     "modifyScope": "ROLE",
-    "actionCodes": ["SEARCH", "CREATE", "UPDATE", "SAVE", "MANUAL_VIEW"],
+    "actionCodes": ["SEARCH", "CREATE", "UPDATE", "REVERT_CHANGES", "SAVE", "MANUAL_VIEW"],
     "useYn": "Y"
   },
   {

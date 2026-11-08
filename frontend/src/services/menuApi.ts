@@ -3,7 +3,7 @@ import { MENU_RUNTIME_CHANGED_EVENT } from './menuRuntimeApi';
 interface ApiResponse<T> { SUCCESS: boolean; DATA: T }
 interface ErrorResponse { MESSAGE?: string; FIELD_ERRORS?: Array<{ FIELD_NAME: string; MESSAGE: string }> }
 
-export interface MenuRecord {
+export interface MenuRecord extends Record<string, unknown> {
   MENU_KEY: string;
   MENU_NAME: string;
   PARENT_MENU_KEY: string | null;

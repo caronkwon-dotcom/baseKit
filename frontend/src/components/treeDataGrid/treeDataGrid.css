@@ -14,7 +14,15 @@
 .tree-grid-expander:focus-visible, .tree-data-grid:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 1px; }
 .tree-grid-node-icon { display: inline-flex; width: 17px; justify-content: center; color: var(--brand-primary); font-size: 12px; }
 .tree-grid-node-icon.leaf { color: var(--text-secondary); }
-.tree-grid-state-cell { color: var(--text-secondary); font-size: 11px; text-align: center; }
-.tree-grid-selected-row { outline: 1px solid var(--brand-primary); outline-offset: -1px; }
+.tree-grid-name-column { padding-inline: 4px !important; }
+.tree-grid-name-cell .tree-grid-editor { flex: 1 1 auto; width: 100%; }
+.tree-grid-editor-cell { padding-inline: 3px !important; }
+.tree-grid-editor-cell .basekit-grid-input { min-height: 24px; }
+.tree-grid-editor-cell .basekit-grid-switch { margin: 0 auto; }
+.tree-grid-toggle-editor { display: flex; align-items: center; justify-content: center; width: 100%; }
+.tree-grid-ag-grid .ag-row.tree-grid-selected-row { background: var(--brand-soft); }
+.tree-grid-state-cell { display: inline-flex; align-items: center; justify-content: center; gap: 4px; width: 100%; color: var(--text-secondary); font-size: 10px; }
+.tree-grid-state-cell .basekit-row-state-icon { width: 14px; height: 14px; }
 .tree-grid-footer { display: flex; justify-content: space-between; gap: 10px; color: var(--text-muted); font-size: 11px; }
+.tree-grid-validation { margin: 0; padding: 8px 12px 8px 28px; border: 1px solid var(--action-danger-border, var(--border-default)); border-radius: 4px; background: var(--action-danger-bg, var(--surface-panel)); color: var(--action-danger-text); font-size: 11px; }
 @media (max-width: 800px) { .tree-grid-toolbar { align-items: flex-start; } .tree-grid-search { width: 100%; } .tree-grid-search input { flex: 1; } }

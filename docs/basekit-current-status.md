@@ -725,8 +725,10 @@ Project Working Set 후속 변경은 2026-09-20 사용자 명시 승인으로 de
 
 실제 Host 전체 연동은 공모전 이후로 보류했다. 명시적 opt-in·32자 이상 자격·local,common 전용·127.0.0.1:8081 바인딩을 강제하는 COMMON_REVIEWER 세션 Provider를 구현했다. 메뉴 설정 MENU_MGMT × SAVE와 DOCUMENT_CENTER/LYT_L1R2 실행만 허용하며 업무 API는 차단한다. 익명 WINDOW/설정 우회를 제거하고 행 선택을 API 성공과 분리했다. 실제 5174/8081 격리 H2 브라우저에서 저장·상속·INNER MDI·WINDOW 재사용·두 셸·새로고침·직접 URL 및 권한 거부를 확인했다. 운영 Host/PostgreSQL 적용은 미완료다. 실행 절차와 상세 경계는 [로컬 테스트 인증](common-local-test-auth.md)을 따른다.
 
-## 공통 채번관리 (BK-COMMON-REQ-001, 2026-11-07)
+## 공통 채번관리 (BK-COMMON-REQ-001, 2026-11-08 UI 변경)
 
 Flyway V32에 RULE 버전, 범위·기간 Counter, 전역 고유 발급번호와 멱등 Ledger를 추가했다. 관리자 CRUD·사용 중지·미리보기·이력 API와 내부 `DocumentNumberService` 예약/완료/폐기 계약을 구현했다. 발급 예약은 독립 `REQUIRES_NEW` 트랜잭션으로 먼저 커밋하며, 업무 저장 rollback에도 번호를 재사용하지 않는다. 실제 업무별 컬럼·저장 use case 연결은 해당 업무의 별도 범위로 남긴다.
 
-시스템관리 > 채번관리 화면, 정적 메뉴·프로그램 metadata, Registry 및 Program discovery catalog를 연결했다. 발급 이력 있는 버전의 출력 형식은 잠기며 새 버전은 기존 버전을 비활성화한다. Preview는 서버에서만 계산하고 Counter/Ledger를 변경하지 않는다. Frontend 226 tests, build/lint 통과; Backend 총 154건 중 135 pass, 19 skipped, 실패 0. V32 isolated H2 migrate/replay 통과. PostgreSQL 동시성 테스트는 `BASEKIT_DB_URL` 미설정으로 실행되지 않았다. 실제 브라우저 화면 검수도 미실행했다.
+시스템관리 > 채번관리 화면을 Master/Detail에서 단일 전체폭 편집 Grid로 바꿨다. 신규 행, 셀 수정, 저장·취소, 조회/재조회, 비소비 미리보기, 읽기 전용 발급 이력 팝업을 제공한다. 발급된 RULE의 출력 형식 컬럼은 잠긴다. Migration 및 Backend 계약은 변경하지 않았다.
+
+2026-11-08 동시 작업 정리에서 TreeDataGrid 구문 오류와 Hook lint 위반을 고치고 MenuManagePage 테스트 하네스를 `useCallback`과 TreeDataGrid 구성에 맞췄다. Frontend build/lint 통과, 전체 테스트 228 pass, 채번 Backend 관련 테스트 8 pass. PostgreSQL 검증용 `BASEKIT_DB_URL`은 미설정이다. 실 DB RULE 목록/API 연결은 확인하지 못했으며 V32는 RULE 데이터를 seed하지 않아 비어 있는 초기 DB에서 0건은 정상이다. Headless 브라우저 캡처는 `C:\dev\baseKit-workroom\common\reports\BK-COMMON-REQ-001-UI.png`; Backend가 기동되지 않은 상태에서 촬영되어 API 오류 문구가 보인다.

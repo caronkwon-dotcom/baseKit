@@ -64,3 +64,14 @@ test('keeps a row with a missing business key visible by its internal row id', (
   assert.equal(flattened[0].id, 'NEW_0');
   assert.ok(validateTreeRows(invalid, fields, () => 'INSERTED').some((issue) => issue.field === 'id'));
 });
+
+test('supports domain-specific leaf node names while retaining folder parent rules', () => {
+  const menuFields = { ...fields, nodeTypes: ['FOLDER', 'PAGE'] };
+  const menuRows = [
+    { id: 'folder', parentId: '', type: 'FOLDER', name: 'System', order: 1 },
+    { id: 'page', parentId: 'folder', type: 'PAGE', name: 'Menu', order: 1 },
+  ];
+  assert.deepEqual(validateTreeRows(menuRows, menuFields, () => 'NORMAL', 3), []);
+  assert.ok(validateTreeRows(menuRows, fields, () => 'NORMAL', 3).some((item) => item.code === 'NODE_TYPE'));
+  assert.ok(validateTreeRows([{ ...menuRows[1], parentId: 'page' }], menuFields, () => 'NORMAL', 3).some((item) => item.code === 'PARENT_NOT_FOLDER'));
+});

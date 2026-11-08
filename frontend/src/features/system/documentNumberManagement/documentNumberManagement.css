@@ -1,18 +1,11 @@
-.document-number-management .document-number-list-search,
-.document-number-management .document-number-actions,
-.document-number-management .document-number-preview-controls,
-.document-number-management .document-number-detail-heading { display: flex; align-items: center; gap: 8px; }
-.document-number-management .document-number-list-search { justify-content: space-between; padding: 8px; }
-.document-number-management .document-number-list-search label { display: flex; align-items: center; gap: 8px; flex: 1; }
-.document-number-management .document-number-list-search input { min-width: 100px; flex: 1; }
-.document-number-management .document-number-detail { padding: 10px; }
-.document-number-management .document-number-detail-heading { justify-content: space-between; margin-bottom: 8px; }
-.document-number-management .document-number-detail-heading h2 { margin: 0; font-size: 15px; }
-.document-number-management .document-number-detail-heading span { color: var(--text-secondary); font-size: 12px; }
-.document-number-management .document-number-form { display: grid; grid-template-columns: repeat(2, minmax(190px, 1fr)); gap: 6px 12px; }
-.document-number-management .document-number-preview-controls { flex-wrap: wrap; margin-top: 8px; }
-.document-number-management .document-number-preview-controls .standard-form-field { width: min(420px, 100%); }
-.document-number-management .document-number-preview-controls output { font-weight: 700; color: var(--brand-primary); }
-.document-number-management .document-number-actions { justify-content: flex-end; margin-top: 8px; }
-.document-number-management [aria-invalid="true"] { border-color: var(--status-danger, #c33); }
-@media (max-width: 900px) { .document-number-management .document-number-form { grid-template-columns: minmax(0, 1fr); } }
+.document-number-management .document-number-grid-panel { min-width: 0; }
+.document-number-management .document-number-grid-panel .data-section { min-width: 0; overflow-x: auto; }
+.document-number-management .document-number-grid-panel .basekit-ag-grid { min-width: 1450px; }
+.document-number-management .document-number-grid-panel .ag-header-select-all { display: none; }
+.document-number-management .document-number-grid-options { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; }
+.document-number-management .document-number-grid-options .standard-form-field { width: min(300px, 100%); }
+.document-number-management .document-number-grid-options output { padding-bottom: 6px; color: var(--brand-primary); font-weight: 700; }
+.document-number-management .document-number-grid-options > span { padding-bottom: 6px; color: var(--text-secondary); }
+.document-number-management .document-number-grid-message { min-height: 1.4em; margin: 8px 2px; color: var(--text-secondary); }
+.document-number-management [role="dialog"] .program-data-grid { min-width: 900px; }
+.document-number-management [role="dialog"] .form-modal-body { overflow: auto; }
