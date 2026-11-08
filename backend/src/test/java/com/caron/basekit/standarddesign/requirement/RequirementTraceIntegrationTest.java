@@ -35,6 +35,9 @@ class RequirementTraceIntegrationTest {
  void evidence(String program, String requirement, Integer snapshotRevision) {
   jdbc.update("INSERT INTO BSDGPREQ(PROGRAM_ID, REQUIREMENT_ID, REQUIREMENT_REVISION, SNAPSHOT_JSON) VALUES(?,?,?,'{}')", program, requirement, snapshotRevision);
  }
+ void history(String requirement, int revision, String event) {
+  jdbc.update("INSERT INTO BSDRRHIS(REQUIREMENT_ID, REQUIREMENT_REVISION, EVENT_TYPE, SNAPSHOT) VALUES(?,?,?,'{}')", requirement, revision, event);
+ }
  void design(String project, String program, String status, String designJson) {
   jdbc.update("INSERT INTO BSDSCRN(SCREEN_DESIGN_ID, PROJECT_ID, PROGRAM_ID, DESIGN_STATUS, SCREEN_TYPE, DESIGN_JSON) VALUES(?,?,?,?,'GRID_DETAIL',?)", "SDSC-" + UUID.randomUUID(), project, program, status, designJson);
  }
@@ -120,6 +123,7 @@ class RequirementTraceIntegrationTest {
  @Test void aNewerRequirementRevisionFlagsTheProgramAndItsDesignUntilTheProgramIsAdoptedAgain() throws Exception {
   String p = "SDP-" + UUID.randomUUID();
   requirement(p, "S", 3); requirement(p, "N", 3); requirement(p, "OLD", 5);
+  history("S", 2, "BASELINE"); history("S", 3, "UPDATED"); history("N", 3, "UPDATED");   // S's revision 3 is a content change
   program(p, "PG-S", null); evidence("PG-S", "S", 2); evidence("PG-S", "N", 3);   // S changed since adoption, N did not
   program(p, "PG-OLD", null); evidence("PG-OLD", "OLD", null);                    // older data: no recorded revision
   design(p, "PG-S", "DRAFT", functions("FN-01", "\"S\""));
@@ -142,13 +146,46 @@ class RequirementTraceIntegrationTest {
   var designs = call("/api/standard-design/projects/" + p + "/screen-designs", 200).path("DATA");
   for (JsonNode design : designs) assertEquals("PG-S".equals(design.path("PROGRAM_ID").asText()) ? "Y" : "N", design.path("REVIEW_REQUIRED_YN").asText());
 
-  jdbc.update("UPDATE BSDRREQ SET REQUIREMENT_REVISION = 4 WHERE REQUIREMENT_ID = 'N'");        // N changes too
+  jdbc.update("UPDATE BSDRREQ SET REQUIREMENT_REVISION = 4 WHERE REQUIREMENT_ID = 'N'"); history("N", 4, "CHANGE_CONFIRMED");   // N changes too
   assertEquals("Y", call(base() + "/N/trace?PROJECT_ID=" + p, 200).path("DATA").path("REVIEW_REQUIRED_YN").asText());
   jdbc.update("UPDATE BSDGPREQ SET REQUIREMENT_REVISION = 3 WHERE PROGRAM_ID = 'PG-S' AND REQUIREMENT_ID = 'S'");   // adopted again with the new revision
   assertEquals("N", call(base() + "/S/trace?PROJECT_ID=" + p, 200).path("DATA").path("REVIEW_REQUIRED_YN").asText());
   assertEquals("Y", summaryOf(call(base() + "/trace-summary?PROJECT_ID=" + p, 200), "N").path("REVIEW_REQUIRED_YN").asText());
   var single = call("/api/standard-design/projects/" + p + "/programs", 200).path("DATA");
   for (JsonNode program : single) if ("PG-S".equals(program.path("PROGRAM_ID").asText())) assertEquals("Y", program.path("REVIEW_REQUIRED_YN").asText(), "N is now newer than its snapshot");
+ }
+
+ /** One requirement adopted at revision 1, then the given history after it; returns its trace flag. */
+ String flagAfter(String requirement, int currentRevision, Integer snapshot, String... revisionEvents) throws Exception {
+  String p = "SDP-" + UUID.randomUUID();
+  String program = "PG-" + requirement; requirement(p, requirement, currentRevision); program(p, program, null); evidence(program, requirement, snapshot);
+  for (int i = 0; i < revisionEvents.length; i += 2) history(requirement, Integer.parseInt(revisionEvents[i]), revisionEvents[i + 1]);
+  String detail = call(base() + "/" + requirement + "/trace?PROJECT_ID=" + p, 200).path("DATA").path("REVIEW_REQUIRED_YN").asText();
+  assertEquals(detail, summaryOf(call(base() + "/trace-summary?PROJECT_ID=" + p, 200), requirement).path("REVIEW_REQUIRED_YN").asText(), "detail and summary agree");
+  var programs = call("/api/standard-design/projects/" + p + "/programs", 200).path("DATA");
+  assertEquals(detail, programs.get(0).path("REVIEW_REQUIRED_YN").asText(), "the program list agrees");
+  return detail;
+ }
+
+ @Test void anAttachmentOnlyChangeDoesNotRequireAReview() throws Exception {
+  assertEquals("N", flagAfter("A1", 2, 1, "1", "BASELINE", "2", "ATTACHMENT_ADDED"));
+  assertEquals("N", flagAfter("A2", 3, 1, "1", "BASELINE", "2", "ATTACHMENT_ADDED", "3", "ATTACHMENT_REMOVED"));
+ }
+
+ @Test void aContentChangeRequiresAReview() throws Exception {
+  assertEquals("Y", flagAfter("C1", 2, 1, "1", "BASELINE", "2", "UPDATED"));
+  assertEquals("Y", flagAfter("C2", 2, 1, "1", "BASELINE", "2", "CHANGE_CONFIRMED"));
+ }
+
+ @Test void aContentChangeStaysFlaggedWhenAttachmentsChangeLaterOrBefore() throws Exception {
+  assertEquals("Y", flagAfter("M1", 3, 1, "1", "BASELINE", "2", "UPDATED", "3", "ATTACHMENT_ADDED"), "content, then an attachment");
+  assertEquals("Y", flagAfter("M2", 3, 1, "1", "BASELINE", "2", "ATTACHMENT_REMOVED", "3", "UPDATED"), "an attachment, then content");
+  assertEquals("N", flagAfter("M3", 3, 2, "1", "BASELINE", "2", "UPDATED", "3", "ATTACHMENT_ADDED"), "adopted after the content change: only the attachment is newer");
+ }
+
+ @Test void olderDataWithoutHistoryIsNeverFlagged() throws Exception {
+  assertEquals("N", flagAfter("H1", 5, 1), "revision is ahead of the snapshot but no history row exists");
+  assertEquals("N", flagAfter("H2", 5, null, "5", "UPDATED"), "no recorded snapshot revision cannot be judged");
  }
 
  @Test void anUnreadableDesignDoesNotBreakTheTrace() throws Exception {

@@ -43,13 +43,18 @@ public class RequirementTraceService {
     }
 
     /** What the queries return for one project (or for one requirement of it). */
-    private record Loaded(Map<String, Long> revisions, Map<String, List<Group>> groups, Map<String, List<Evidence>> evidence, Map<String, Design> designs) { }
+    private record Loaded(Map<String, Long> revisions, Map<String, Long> contentRevisions, Map<String, List<Group>> groups, Map<String, List<Evidence>> evidence, Map<String, Design> designs) { }
 
     private Loaded load(String project, String onlyRequirement) {
         Map<String, Long> revisions = new LinkedHashMap<>();
         String filter = onlyRequirement == null ? "" : " AND REQUIREMENT_ID = ?";
         Object[] args = onlyRequirement == null ? new Object[] {project} : new Object[] {project, onlyRequirement};
         jdbc.query("SELECT REQUIREMENT_ID, REQUIREMENT_REVISION FROM BSDRREQ WHERE PROJECT_ID = ?" + filter + " ORDER BY REQUIREMENT_ID", rs -> { revisions.put(rs.getString(1), rs.getLong(2)); }, args);
+
+        // Newest revision per requirement whose history event changed the content (attachment-only revisions do not count).
+        Map<String, Long> contentRevisions = new HashMap<>();
+        jdbc.query("SELECT REQUIREMENT_ID, MAX(REQUIREMENT_REVISION) FROM BSDRRHIS WHERE EVENT_TYPE NOT IN (" + ProgramReviewStatus.ATTACHMENT_EVENTS + ")"
+            + " AND REQUIREMENT_ID IN (SELECT REQUIREMENT_ID FROM BSDRREQ WHERE PROJECT_ID = ?" + filter + ") GROUP BY REQUIREMENT_ID", rs -> { contentRevisions.put(rs.getString(1), rs.getLong(2)); }, args);
 
         Map<String, List<Group>> groups = new HashMap<>();
         jdbc.query("SELECT Q.REQUIREMENT_ID, G.REQUIREMENT_GROUP_ID, G.REQUIREMENT_GROUP_NAME, G.GROUP_STATUS FROM BSDRGRQ Q JOIN BSDRGRP G ON G.REQUIREMENT_GROUP_ID = Q.REQUIREMENT_GROUP_ID"
@@ -71,7 +76,7 @@ public class RequirementTraceService {
                 designs.put(programId, new Design(rs.getString(2), rs.getLong(3), functions(rs.getString(4))));
             }, project);
         }
-        return new Loaded(revisions, groups, evidence, designs);
+        return new Loaded(revisions, contentRevisions, groups, evidence, designs);
     }
 
     /** Requirement ID → the function specs naming it. A design that cannot be read simply lists none. */
@@ -103,11 +108,11 @@ public class RequirementTraceService {
     }
 
     private static boolean reviewRequired(String requirementId, Loaded data) {
-        long current = data.revisions().getOrDefault(requirementId, 0L);
-        return data.evidence().getOrDefault(requirementId, List.of()).stream().anyMatch(item -> ProgramReviewStatus.stale(current, item.snapshotRevision()));
+        Long content = data.contentRevisions().get(requirementId);
+        return data.evidence().getOrDefault(requirementId, List.of()).stream().anyMatch(item -> ProgramReviewStatus.stale(content, item.snapshotRevision()));
     }
 
-    /** One entry per requirement of the project, computed with four queries (not one call per requirement). */
+    /** One entry per requirement of the project, computed with five queries (not one call per requirement). */
     @Transactional(readOnly = true)
     public List<Map<String, Object>> summary(String project) {
         Loaded data = load(project(project), null);
@@ -139,12 +144,12 @@ public class RequirementTraceService {
             item.put("REQUIREMENT_GROUP_ID", group.id()); item.put("REQUIREMENT_GROUP_NAME", group.name()); item.put("GROUP_STATUS", group.status());
             return (Map<String, Object>) item;
         }).toList());
-        long current = data.revisions().get(requirementId);
+        Long content = data.contentRevisions().get(requirementId);
         result.put("PROGRAMS", data.evidence().getOrDefault(requirementId, List.of()).stream().map(evidence -> {
             var item = new LinkedHashMap<String, Object>();
             item.put("PROGRAM_ID", evidence.programId()); item.put("PROGRAM_NAME", evidence.programName()); item.put("SOURCE_GROUP_ID", evidence.sourceGroupId());
             item.put("SNAPSHOT_REVISION", evidence.snapshotRevision());
-            item.put("REVIEW_REQUIRED_YN", ProgramReviewStatus.stale(current, evidence.snapshotRevision()) ? "Y" : "N");
+            item.put("REVIEW_REQUIRED_YN", ProgramReviewStatus.stale(content, evidence.snapshotRevision()) ? "Y" : "N");
             item.put("REFLECTED_YN", reflected(evidence, data.designs()) ? "Y" : "N");
             Design design = data.designs().get(evidence.programId());
             if (design == null) item.put("DESIGN", null);
