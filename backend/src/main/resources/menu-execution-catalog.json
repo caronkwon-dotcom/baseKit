@@ -7,6 +7,7 @@
       "MENU_MGMT",
       "PROGRAM_MGMT",
       "TABLE_MGMT",
+      "DOC_NUMBER_MGMT",
       "TERM_CURATION",
       "WORD_MGMT",
       "DOMAIN_MGMT"
@@ -19,7 +20,8 @@
       "DEV_SEARCH_SAMPLE_TYPE_1",
       "DEV_SEARCH_SAMPLE_TYPE_2",
       "LYT_L1R2",
-      "DEV_LLM_FILE_TEST"
+      "DEV_LLM_FILE_TEST",
+      "DEV_TREE_GRID"
     ]
   },
   {
