@@ -484,9 +484,11 @@ function ProjectManagementPage() {
         </>
       ) : <div className="sd-project-mgmt-empty"><strong>프로젝트를 선택하세요</strong><span>목록이 조회되면 프로젝트 상세가 표시됩니다.</span></div>}
     />
-    {projectStatus === 'ERROR' ? <ProjectMessageBanner message={{ tone: 'error', text: `${projectError} 프로젝트는 서버에서만 조회합니다.` }} /> : null}
-    {projectStatus === 'LOADING' || projectStatus === 'IDLE' ? <ProjectMessageBanner message={{ tone: 'info', text: '프로젝트 목록을 서버에서 조회하는 중입니다.' }} /> : null}
-    {message ? <ProjectMessageBanner message={message} /> : null}
+    <div className="sd-project-mgmt-message-area" aria-live="polite">
+      {projectStatus === 'ERROR' ? <ProjectMessageBanner message={{ tone: 'error', text: `${projectError} 프로젝트는 서버에서만 조회합니다.` }} /> : null}
+      {projectStatus === 'LOADING' || projectStatus === 'IDLE' ? <ProjectMessageBanner message={{ tone: 'info', text: '프로젝트 목록을 서버에서 조회하는 중입니다.' }} /> : null}
+      {message ? <ProjectMessageBanner message={message} /> : null}
+    </div>
     {memberDialogOpen && activeProject ? <ProjectMemberDialog project={activeProject}
       members={designLifecycleRepository.getData().members} assignments={projectMembers} editing={editingProjectMember}
       onClose={() => setMemberDialogOpen(false)} onSave={(member: DesignMember, assignment) => {
