@@ -1,7 +1,7 @@
 # ADR 044: 요구사항 추적 조회와 재검토 표시
 
 - 일자: 2026-11-08
-- 상태: PM 추천안 승인(BK-SD-REQ-TRACE-001), Step A 구현·Step B 백엔드 구현·로컬 검증 완료. Step B 화면은 PM 목업 확인 후 구현.
+- 상태: PLAN 승인 전 구현, 사후 검토 대기(PM이 채택하면 승인 표기로 갱신). Step A 구현·Step B 백엔드 구현·로컬 검증 완료. Step B 화면은 PM 목업 확인 후 구현.
 - 관련: [ADR 042](042-sd-screen-design-document-and-function-specs.md)
 
 ## 결정
@@ -13,6 +13,7 @@
 
 ## 아직 하지 않은 것
 Step B 화면(연관정보 탭 실데이터, 목록 추적 상태 컬럼·필터, 재검토 배지), 관련 메뉴 탭 숨김, 설계서 발행 이력·RTM·프로젝트 커버리지, 기능↔요구사항 테이블화.
+사용자 관리 도입 시 trace API(`trace`, `trace-summary`)에 ROLE × PROGRAM × ACTION_CODE 검사 추가(현재는 프로젝트 소속 검증만).
 
 ## 공통 요청 후보
 `SearchPanel`이 폭에 따라 칸 수를 줄이지 않아 폭이 고정된 팝업에서 겹치는 문제, `FormModal` 폭 지정 수단.
