@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import ts from 'typescript';
 
 function harness(seed = []) {
-  const hookState = [], effects = [], calls = [];
+  const hookState = [], effects = [], calls = [], validationInputs = [], stateUpdates = [];
   let hookIndex = 0, gridRows = [], rowStates = new Map(), sequence = 0, gridProps;
   let rules = structuredClone(seed);
   const api = {
@@ -49,6 +49,7 @@ function harness(seed = []) {
       gridRows = gridRows.map(row => {
         if (row.__GRID_ROW_ID !== id) return row;
         const next = change(row);
+        stateUpdates.push(structuredClone(next));
         if (rowStates.get(id) !== 'INSERTED') rowStates.set(id, JSON.stringify(next) === JSON.stringify(row) ? 'NORMAL' : 'UPDATED');
         return next;
       });
@@ -80,7 +81,7 @@ function harness(seed = []) {
       : id.includes('gridRowState') ? { useGridRowState: () => grid }
         : id.includes('documentNumberApi') ? { documentNumberApi: api }
           : id.includes('gridFieldValidation') ? { findGridValidationIssue: () => null, gridValidationIssueMessage: () => '' }
-            : id.includes('documentNumberValidation') ? { validateDocumentNumberRule: draft => !draft.RULE_KEY.trim() ? { RULE_KEY: 'RULE KEY는 필수 입력값입니다.' } : {} }
+            : id.includes('documentNumberValidation') ? { validateDocumentNumberRule: draft => { validationInputs.push(structuredClone(draft)); return !draft.RULE_KEY.trim() ? { RULE_KEY: 'RULE KEY는 필수 입력값입니다.' } : {}; } }
               : id.includes('actionCodes') ? { COMMON_ACTIONS: { CREATE: 'CREATE', UPDATE: 'UPDATE', SAVE: 'SAVE', SEARCH: 'SEARCH', REVERT_CHANGES: 'REVERT_CHANGES' } }
                 : id.includes('metadataRepository') ? { hasAction: () => true }
                   : id.includes('BaseKitDataGrid') ? { __esModule: true, default: props => {
@@ -100,7 +101,7 @@ function harness(seed = []) {
     if (typeof node.type === 'function') return nodes(node.type(node.props));
     return [node, ...[node.props?.children].flat(Infinity).flatMap(nodes)];
   };
-  return { render, nodes, effects, calls, api, grid, get gridProps() { return gridProps; } };
+  return { render, nodes, effects, calls, validationInputs, stateUpdates, api, grid, get gridProps() { return gridProps; } };
 }
 
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -130,6 +131,31 @@ test('new RULE KEY input updates tracked React row state before save validation 
   save.props.onClick(); await tick(); await tick();
   assert.equal(h.calls.filter(([type]) => type === 'create').length, 1);
   assert.equal(h.calls.find(([type]) => type === 'create')[1].RULE_KEY, 'PROJECT_TEST');
+});
+
+test('RULE KEY blur followed immediately by Save validates and sends the current DOM value', async () => {
+  const h = harness();
+  h.nodes(h.render()); h.effects.forEach(effect => effect()); await tick(); h.nodes(h.render());
+  h.nodes(h.render()).find(node => node.type === 'button' && node.props.children === '신규 행').props.onClick();
+  const rendered = h.nodes(h.render());
+  const save = rendered.find(node => node.type === 'button' && node.props.children === '저장');
+  const row = h.grid.rows[0];
+  const editor = h.gridProps.columns.find(column => column.key === 'RULE_KEY').render(row);
+  const inputDom = { value: '' };
+  for (const character of 'PROJECT') inputDom.value += character;
+
+  editor.props.onBlur({ currentTarget: inputDom });
+  const changeSetKeyAtBlur = h.grid.changeSet.INSERTED[0]?.RULE_KEY;
+  // Model one event batch: Save runs before a rerender can replace its closure.
+  save.props.onClick();
+  await tick(); await tick();
+
+  assert.equal(inputDom.value, 'PROJECT');
+  assert.equal(h.stateUpdates.at(-1)?.RULE_KEY, 'PROJECT');
+  assert.equal(h.grid.rows[0].RULE_KEY, 'PROJECT');
+  assert.equal(changeSetKeyAtBlur, 'PROJECT');
+  assert.equal(h.validationInputs[0]?.RULE_KEY, 'PROJECT');
+  assert.equal(h.calls.find(([type]) => type === 'create')?.[1]?.RULE_KEY, 'PROJECT');
 });
 
 test('existing RULE edits still use the versioned update API', async () => {

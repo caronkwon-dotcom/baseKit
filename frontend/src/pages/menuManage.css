@@ -76,6 +76,7 @@
 .menu-tree-meta { grid-column: 3; color: var(--text-muted); font-size: 10px; line-height: 1.25; }
 .menu-editor-grid { min-width: 0; }
 .menu-grid-section { min-width: 0; }
+.menu-grid-section .ag-cell.tree-grid-editor-cell:has(.basekit-grid-switch)::after { content: none; }
 .menu-grid-guidance { margin: 0 0 8px; color: var(--text-secondary); font-size: 12px; }
 .menu-manage-message { margin: 8px 0 0; color: var(--text-secondary); font-size: 12px; }
 .menu-execution-inherited { display: block; overflow: hidden; color: var(--text-muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
