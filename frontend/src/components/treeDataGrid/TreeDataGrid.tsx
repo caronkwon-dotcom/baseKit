@@ -164,7 +164,8 @@ export default function TreeDataGrid<T extends Record<string, unknown>>({
 
   const columnDefs = useMemo<ColDef<TreeViewRow<T>>[]>(() => [
     {
-      field: fields.nameField as never, headerName: 'Name', minWidth: 260, flex: 1, sortable: false,
+      field: fields.nameField as never, headerName: 'Name', width: 300, minWidth: 260, maxWidth: 420,
+      pinned: 'left', lockPinned: true, resizable: true, sortable: false,
       cellClass: 'tree-grid-name-column',
       cellRenderer: (params: ICellRendererParams<TreeViewRow<T>>) => {
         const row = params.data;
@@ -282,7 +283,7 @@ export default function TreeDataGrid<T extends Record<string, unknown>>({
     </div>
     <div className="tree-grid-table">
       <div className="basekit-ag-grid tree-grid-ag-grid"><AgGridReact<TreeViewRow<T>>
-        modules={[AllCommunityModule]} theme={gridTheme} rowData={gridRows} columnDefs={columnDefs} getRowId={(params) => params.data.__GRID_ROW_ID}
+        modules={[AllCommunityModule]} theme={gridTheme} rowData={gridRows} columnDefs={columnDefs} defaultColDef={{ resizable: true }} getRowId={(params) => params.data.__GRID_ROW_ID}
         postSortRows={(params) => params.nodes.sort((left, right) => (left.data?.__TREE_ORDER ?? 0) - (right.data?.__TREE_ORDER ?? 0))}
         onGridReady={(event) => { apiRef.current = event.api; }} onRowClicked={(event) => event.data && selectRow(event.data)}
         getRowClass={(params) => params.data ? [params.data.__TREE_STATE !== 'NORMAL' ? `grid-${params.data.__TREE_STATE.toLowerCase()}-row` : '', selectedId === params.data.__GRID_ROW_ID ? 'basekit-current-row tree-grid-selected-row' : ''].filter(Boolean).join(' ') : ''}

@@ -58,6 +58,24 @@ class DocumentNumberIntegrationTest {
     }
 
     @Test
+    void updatesRuleAndPersistsChangesForReadback() throws Exception {
+        String key = key();
+        createRule(key, "YEAR", "YYYY", "GLOBAL");
+        String update = ruleJson(key, "YEAR", "YYYY", "GLOBAL")
+                .replace("Integration Rule", "Updated Project Rule");
+
+        mockMvc.perform(put("/api/core/document-number-rules/{key}/1", key)
+                        .contentType(MediaType.APPLICATION_JSON).content(update))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.DATA.RULE_NAME").value("Updated Project Rule"));
+        mockMvc.perform(get("/api/core/document-number-rules").param("KEYWORD", key))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.DATA[0].RULE_NAME").value("Updated Project Rule"));
+        assertThat(jdbc.queryForObject("SELECT RULE_NAME FROM BKDOCSEQ_RULE WHERE RULE_KEY=? AND RULE_VERSION=1", String.class, key))
+                .isEqualTo("Updated Project Rule");
+    }
+
+    @Test
     void sameIdempotencyKeyReusesReservationAndDifferentPayloadConflicts() {
         String key = key(); createRule(key, "NONE", "NONE", "GLOBAL");
         String idem = UUID.randomUUID().toString();

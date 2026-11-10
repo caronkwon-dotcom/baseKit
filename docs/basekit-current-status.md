@@ -732,3 +732,11 @@ Flyway V32에 RULE 버전, 범위·기간 Counter, 전역 고유 발급번호와
 시스템관리 > 채번관리 화면을 Master/Detail에서 단일 전체폭 편집 Grid로 바꿨다. 신규 행, 셀 수정, 저장·취소, 조회/재조회, 비소비 미리보기, 읽기 전용 발급 이력 팝업을 제공한다. 발급된 RULE의 출력 형식 컬럼은 잠긴다. Migration 및 Backend 계약은 변경하지 않았다.
 
 2026-11-08 동시 작업 정리에서 TreeDataGrid 구문 오류와 Hook lint 위반을 고치고 MenuManagePage 테스트 하네스를 `useCallback`과 TreeDataGrid 구성에 맞췄다. Frontend build/lint 통과, 전체 테스트 228 pass, 채번 Backend 관련 테스트 8 pass. PostgreSQL 검증용 `BASEKIT_DB_URL`은 미설정이다. 실 DB RULE 목록/API 연결은 확인하지 못했으며 V32는 RULE 데이터를 seed하지 않아 비어 있는 초기 DB에서 0건은 정상이다. Headless 브라우저 캡처는 `C:\dev\baseKit-workroom\common\reports\BK-COMMON-REQ-001-UI.png`; Backend가 기동되지 않은 상태에서 촬영되어 API 오류 문구가 보인다.
+
+## BK-COMMON 메뉴관리 UX 및 채번 저장 보완 (2026-11-10, ai-common 미커밋)
+
+기존 TreeDataGrid를 유지하며 Name 열을 고정하고 너비·가로 스크롤을 조정했다. 최상위 메뉴 실행 설정 패널을 제거하고 실행 유형·디자인 유형을 최상위 행의 인라인 컬럼으로 옮겼다. 하위 메뉴에는 1Depth 상속을 표시하며, 기존 메뉴 API와 메뉴 실행 설정 API 계약은 유지했다. TreeDataGrid의 다른 소비 화면은 회귀 검증 대상이므로 공통 그리드 동작은 변경하지 않았다.
+
+채번관리 RULE KEY는 신규 행에서 기본 Grid 편집기를 쓰지 않고 입력 DOM 값을 타이핑 중 유지한다. 포커스가 빠질 때 행 상태에 값을 반영하며, 그리드 행 키와 상태 조회 콜백도 안정화했다. 신규 등록과 기존 RULE 수정 API 경로는 Frontend 회귀 테스트로 확인한다. Backend 격리 H2 통합 테스트는 수정 응답, 목록 재조회와 DB 값을 확인한다.
+
+검증: Frontend 전체 231 pass, build/lint 통과, `git diff --check` 통과. Backend 전체 격리 H2 154건 0 실패·19 skip; 수정/DB 재조회 통합 테스트 8건 0 실패. 실제 Edge에서 `PROJECT_TEST` 연속 입력 12자 동안 입력 DOM 및 포커스 유지, blur 후 행 상태 반영을 확인했다. 메뉴 레이아웃은 모의 API 응답으로 1920px/1366px에서 Name 고정, 헤더·셀 정렬, 가로 스크롤 및 실행/디자인 유형 선택을 확인했다. 로컬 Backend가 연결되지 않아 브라우저에서 신규·수정 저장 API와 DB 재조회·새로고침 영속성은 미검증이다. 운영 PostgreSQL 미검증, DB Migration/스키마 변경 없음. Commit·Push·PR은 하지 않았다. 기존 미커밋 `AGENTS.md` 및 workspace는 변경·staging하지 않았다.
