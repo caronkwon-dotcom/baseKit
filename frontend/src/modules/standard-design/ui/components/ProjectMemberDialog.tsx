@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import DataTable, { type DataTableColumn } from '../../../../components/common/DataTable';
+import FormField from '../../../../components/common/FormField';
 import FormModal from '../../../../components/common/FormModal';
+import RequiredFieldsNotice from '../../../../components/common/RequiredFieldsNotice';
 import SearchPanel, { type SearchFieldConfig } from '../../../../components/common/SearchPanel';
 import { users } from '../../../../mock/users';
 import type { User } from '../../../../types';
@@ -102,14 +104,15 @@ export default function ProjectMemberDialog({ project, members, assignments, edi
         </section>
         <section className="sd-member-assignment-form" aria-label="프로젝트 투입정보">
           <h3>투입 정보</h3>
-          <label>참여구분<select value={participation} onChange={(event) => setParticipation(event.target.value as ProjectMember['PARTICIPATION_TYPE_CD'])}>{PARTICIPATION_TYPES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-          <label>역할<select value={role} onChange={(event) => setRole(event.target.value)}>{PROJECT_ROLES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-          <label>프로젝트 등급<select value={grade} onChange={(event) => setGrade(event.target.value as ProjectMember['GRADE_CD'])}>{PROJECT_GRADES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-          <label>참여 상태<select value={status} onChange={(event) => setStatus(event.target.value as ProjectMember['STATUS_CD'])}><option value="ACTIVE">참여</option><option value="INACTIVE">미참여</option></select></label>
-          <label>투입 시작일<input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></label>
-          <label>투입 종료일<input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} /></label>
-          <label>계획 MM<input type="number" min="0" step="0.1" value={planMm} onChange={(event) => setPlanMm(event.target.value)} /></label>
-          <label className="sd-member-note">비고<textarea rows={2} value={note} onChange={(event) => setNote(event.target.value)} /></label>
+          <RequiredFieldsNotice />
+          <FormField label="참여구분" labelPosition="TOP"><select value={participation} onChange={(event) => setParticipation(event.target.value as ProjectMember['PARTICIPATION_TYPE_CD'])}>{PARTICIPATION_TYPES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></FormField>
+          <FormField label="역할" labelPosition="TOP"><select value={role} onChange={(event) => setRole(event.target.value)}>{PROJECT_ROLES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></FormField>
+          <FormField label="프로젝트 등급" labelPosition="TOP"><select value={grade} onChange={(event) => setGrade(event.target.value as ProjectMember['GRADE_CD'])}>{PROJECT_GRADES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></FormField>
+          <FormField label="참여 상태" labelPosition="TOP"><select value={status} onChange={(event) => setStatus(event.target.value as ProjectMember['STATUS_CD'])}><option value="ACTIVE">참여</option><option value="INACTIVE">미참여</option></select></FormField>
+          <FormField label="투입 시작일" required labelPosition="TOP"><input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></FormField>
+          <FormField label="투입 종료일" required labelPosition="TOP"><input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} /></FormField>
+          <FormField label="계획 MM" required labelPosition="TOP"><input type="number" min="0" step="0.1" value={planMm} onChange={(event) => setPlanMm(event.target.value)} /></FormField>
+          <FormField label="비고" labelPosition="TOP" className="sd-member-note"><textarea rows={2} value={note} onChange={(event) => setNote(event.target.value)} /></FormField>
         </section>
       </>}
       {error ? <p role="alert" className="page-message error">{error}</p> : null}

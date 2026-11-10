@@ -329,6 +329,7 @@
 .sd-member-assignment-form input, .sd-member-assignment-form select, .sd-member-assignment-form textarea { width: 100%; min-width: 0; box-sizing: border-box; min-height: 30px; border: 1px solid var(--border-default); border-radius: 5px; background: var(--surface-panel); color: var(--text-primary); padding: 5px 8px; font: inherit; }
 .sd-member-assignment-form .sd-member-note { grid-column: 1 / -1; }
 .sd-member-assignment-form .sd-member-note > *:last-child { resize: vertical; }
+.sd-member-assignment-form .standard-form-required-notice { grid-column: 1 / -1; margin: -4px 0 0; }
 .sd-member-footer-info { margin-right: auto; min-width: 0; color: var(--text-muted); font-size: 12px; overflow-wrap: anywhere; }
 .sd-member-footer-info strong { color: var(--text-primary); }
 .sd-member-footer-prev { margin-right: auto; }
