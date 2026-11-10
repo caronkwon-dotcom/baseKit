@@ -78,10 +78,7 @@
 .menu-grid-section { min-width: 0; }
 .menu-grid-guidance { margin: 0 0 8px; color: var(--text-secondary); font-size: 12px; }
 .menu-manage-message { margin: 8px 0 0; color: var(--text-secondary); font-size: 12px; }
-.menu-execution-panel { margin-top: 12px; }
-.menu-execution-grid { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; }
-.menu-execution-grid > label { display: grid; gap: 4px; min-width: 180px; color: var(--text-secondary); font-size: 12px; }
-.menu-execution-grid select { min-height: 30px; border: 1px solid var(--border-default); border-radius: 4px; background: var(--surface-panel); color: var(--text-primary); padding: 0 8px; font: inherit; }
+.menu-execution-inherited { display: block; overflow: hidden; color: var(--text-muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 .menu-program-cell { display: flex; align-items: center; gap: 5px; min-width: 0; height: 100%; }
 .menu-program-label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); font-size: 11px; }
 .menu-program-lookup { flex: 0 0 auto; min-height: 22px; border: 1px solid var(--border-default); border-radius: 4px; background: var(--surface-panel); color: var(--text-primary); padding: 0 6px; font: inherit; font-size: 10px; cursor: pointer; }

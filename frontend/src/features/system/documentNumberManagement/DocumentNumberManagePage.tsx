@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import FormField from '../../../components/common/FormField';
 import FormModal from '../../../components/common/FormModal';
 import PageHeader from '../../../components/common/PageHeader';
@@ -50,8 +50,8 @@ const fields = {
 };
 
 const formatKeys = new Set(['PREFIX', 'DATE_FORMAT', 'SEQUENCE_LENGTH', 'START_VALUE', 'INCREMENT_VALUE', 'RESET_CYCLE', 'SCOPE_TYPE']);
-const columns: DataTableColumn<RuleRow>[] = [
-  { key: 'RULE_KEY', header: 'RULE KEY', width: 150, editPolicy: 'insert-only', fieldDefinition: fields.RULE_KEY, render: row => row.RULE_KEY },
+const baseColumns: DataTableColumn<RuleRow>[] = [
+  { key: 'RULE_KEY', header: 'RULE KEY', width: 150, editPolicy: 'read-only', fieldDefinition: fields.RULE_KEY, render: row => row.RULE_KEY },
   { key: 'RULE_VERSION', header: '버전', width: 70, render: row => row.RULE_VERSION || '신규' },
   { key: 'RULE_NAME', header: '규칙명', width: 180, fieldDefinition: fields.RULE_NAME, render: row => row.RULE_NAME },
   { key: 'PREFIX', header: '접두어', width: 120, fieldDefinition: fields.PREFIX, render: row => row.PREFIX },
@@ -77,6 +77,10 @@ const toRuleRow = (rule: DocumentNumberRule): RuleRow => ({ ...rule, DESCRIPTION
 export default function DocumentNumberManagePage() {
   const grid = useGridRowState<RuleRow>(ruleKey);
   const { rows, replace, add, update, revert, getState, changeSet, dirty } = grid;
+  const gridStateReader = useRef(getState);
+  useLayoutEffect(() => { gridStateReader.current = getState; }, [getState]);
+  const stableGetState = useCallback((row: TrackedGridRow<RuleRow>) => gridStateReader.current(row), []);
+  const getGridRowKey = useCallback((row: TrackedGridRow<RuleRow>) => row.__GRID_ROW_ID, []);
   const [selectedId, setSelectedId] = useState('');
   const [scopeKey, setScopeKey] = useState('');
   const [preview, setPreview] = useState('');
@@ -91,6 +95,29 @@ export default function DocumentNumberManagePage() {
   const canCreate = hasAction('ADMIN', 'DOC_NUMBER_MGMT', COMMON_ACTIONS.CREATE);
   const canUpdate = hasAction('ADMIN', 'DOC_NUMBER_MGMT', COMMON_ACTIONS.UPDATE);
   const writableRows = rows.filter(row => getState(row) !== 'DELETED');
+  const columns = useMemo<DataTableColumn<RuleRow>[]>(() => baseColumns.map(column => column.key !== 'RULE_KEY' ? column : ({
+    ...column,
+    render: row => stableGetState(row as TrackedGridRow<RuleRow>) === 'INSERTED'
+      ? <input
+        className="basekit-grid-input document-number-rule-key-input"
+        aria-label="RULE KEY"
+        maxLength={80}
+        autoComplete="off"
+        defaultValue={row.RULE_KEY}
+        disabled={!canCreate}
+        onClick={event => event.stopPropagation()}
+        onBlur={event => {
+          const trackedRow = row as TrackedGridRow<RuleRow>;
+          const value = event.currentTarget.value;
+          if (value !== row.RULE_KEY) {
+            update(trackedRow.__GRID_ROW_ID, current => ({ ...current, RULE_KEY: value }));
+            setPreview('');
+            setMessage('');
+          }
+        }}
+      />
+      : row.RULE_KEY,
+  })), [canCreate, stableGetState, update]);
 
   const load = useCallback(async (preserveId?: string) => {
     setLoading(true);
@@ -122,11 +149,11 @@ export default function DocumentNumberManagePage() {
       setPreview('');
     },
     isEditable: (row, key) => {
-      if (!canUpdate && getState(row) !== 'INSERTED') return false;
-      if (key === 'RULE_KEY') return getState(row) === 'INSERTED';
-      return !formatKeys.has(key) || getState(row) === 'INSERTED' || row.CURRENT_VALUE === 0;
+      if (!canUpdate && stableGetState(row) !== 'INSERTED') return false;
+      if (key === 'RULE_KEY') return stableGetState(row) === 'INSERTED';
+      return !formatKeys.has(key) || stableGetState(row) === 'INSERTED' || row.CURRENT_VALUE === 0;
     },
-  }), [canUpdate, getState, update]);
+  }), [canUpdate, stableGetState, update]);
 
   const addRule = () => {
     const row = { ...EMPTY_RULE };
@@ -230,7 +257,7 @@ export default function DocumentNumberManagePage() {
     <section className="document-number-grid-panel">
       <BaseKitDataGrid
         programKey="DOC_NUMBER_MGMT" roleCode="ADMIN" title="채번 규칙" columns={columns} rows={gridRows}
-        getRowKey={row => row.__GRID_ROW_ID} currentRowKey={selectedId} getRowState={getState}
+        getRowKey={getGridRowKey} currentRowKey={selectedId} getRowState={stableGetState}
         editing={editing} loading={loading || saving} onRowClick={row => setSelectedId(row.__GRID_ROW_ID)}
         selectable={false} toolbarActions={toolbarActions} toolbarLayout="two-row"
         toolbarOptions={<div className="document-number-grid-options">

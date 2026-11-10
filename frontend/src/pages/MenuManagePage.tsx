@@ -20,17 +20,6 @@ type ProgramTarget = { rowId: string; onChange: (value: unknown) => void };
 const emptyProgramSearch: ProgramSearch = { KEYWORD: '' };
 const menuFields = { idField: 'MENU_KEY', parentIdField: 'PARENT_MENU_KEY', nodeTypeField: 'MENU_TYPE_CODE', nodeTypes: ['FOLDER', 'PAGE'], nameField: 'MENU_NAME', sortField: 'SORT_ORDER' } as const;
 
-function rootOf(menu: MenuRecord, rows: MenuRecord[]): MenuRecord {
-  const byKey = new Map(rows.filter((row) => row.MENU_KEY).map((row) => [row.MENU_KEY, row]));
-  let current = menu;
-  const seen = new Set<string>();
-  while (current.PARENT_MENU_KEY && byKey.has(current.PARENT_MENU_KEY) && !seen.has(current.MENU_KEY)) {
-    seen.add(current.MENU_KEY);
-    current = byKey.get(current.PARENT_MENU_KEY)!;
-  }
-  return current;
-}
-
 function childCount(rows: MenuRecord[], key: string) {
   return rows.filter((row) => row.PARENT_MENU_KEY === key).length;
 }
@@ -44,7 +33,6 @@ export default function MenuManagePage() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [settings, setSettings] = useState<MenuExecutionSetting[]>([]);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
-  const [executionDraft, setExecutionDraft] = useState<MenuExecutionSetting | null>(null);
   const [change, setChange] = useState<TreeDataGridChange<MenuRecord> | null>(null);
   const [programSearch, setProgramSearch] = useState<ProgramSearch>(emptyProgramSearch);
   const [appliedProgramSearch, setAppliedProgramSearch] = useState<ProgramSearch>(emptyProgramSearch);
@@ -52,16 +40,14 @@ export default function MenuManagePage() {
   const [selectedProgramKey, setSelectedProgramKey] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [executionBusy, setExecutionBusy] = useState(false);
   const [message, setMessage] = useState('');
   const rowsRef = useRef<MenuRecord[]>(menus);
   const programByKey = useMemo(() => new Map(programs.map((program) => [program.PROGRAM_KEY, program])), [programs]);
-  const activeRows = change?.rows ?? menus;
-  const selectedMenu = selectedKey ? activeRows.find((row) => row.MENU_KEY === selectedKey) ?? menus.find((row) => row.MENU_KEY === selectedKey) ?? null : null;
-  const selectedRoot = selectedMenu ? rootOf(selectedMenu, activeRows.some((row) => row.MENU_KEY === selectedMenu.MENU_KEY) ? activeRows : menus) : null;
-  const executionEditable = !!selectedRoot && selectedRoot.MENU_KEY === selectedMenu?.MENU_KEY
-    && settings.some((setting) => setting.MENU_ID === selectedRoot.MENU_KEY);
-  const selectedPending = change?.pending.find((row) => row.row.MENU_KEY === selectedKey);
+  const gridMenus = useMemo(() => menus.map((row) => {
+    if (row.PARENT_MENU_KEY) return { ...row, EXECUTION_TYPE: '', DESIGN_TYPE: '' };
+    const setting = settings.find((item) => item.MENU_ID === row.MENU_KEY);
+    return { ...row, EXECUTION_TYPE: setting?.EXECUTION_TYPE ?? 'INNER', DESIGN_TYPE: setting?.DESIGN_TYPE ?? 'BASEKIT' };
+  }), [menus, settings]);
 
   useEffect(() => { rowsRef.current = menus; }, [menus]);
 
@@ -82,7 +68,7 @@ export default function MenuManagePage() {
       void reload().then((rows) => {
         if (!active) return;
         setChange(null);
-        if (rows.length) selectRow(rows[0], rows, []);
+        if (rows.length) selectRow(rows[0], rows);
       }).catch((error: unknown) => {
         if (active) setMessage(error instanceof Error ? error.message : '메뉴 조회에 실패했습니다.');
       });
@@ -92,12 +78,9 @@ export default function MenuManagePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function selectRow(row: MenuRecord | null, sourceRows = rowsRef.current, currentSettings = settings) {
+  function selectRow(row: MenuRecord | null, sourceRows = rowsRef.current) {
     setSelectedKey(row?.MENU_KEY || null);
-    if (!row?.MENU_KEY) { setExecutionDraft(null); return; }
-    const root = rootOf(row, sourceRows);
-    setExecutionDraft(currentSettings.find((setting) => setting.MENU_ID === root.MENU_KEY)
-      ?? { MENU_ID: root.MENU_KEY, EXECUTION_TYPE: 'INNER', DESIGN_TYPE: 'BASEKIT' });
+    if (row?.MENU_KEY) rowsRef.current = sourceRows;
   }
 
   const onGridChange = useCallback((next: TreeDataGridChange<MenuRecord>) => {
@@ -147,7 +130,25 @@ export default function MenuManagePage() {
         </div>;
       },
     },
-  ], [programByKey]);
+    {
+      field: 'EXECUTION_TYPE', headerName: '실행 유형', width: 150, editor: 'select',
+      options: [{ value: 'INNER', label: '기본 화면 (INNER)' }, { value: 'WINDOW', label: '독립 창 (WINDOW)' }],
+      editable: (row, state) => state !== 'DELETED' && !row.PARENT_MENU_KEY && settings.some((setting) => setting.MENU_ID === row.MENU_KEY),
+      renderEditor: ({ row, value, editable, onChange, onFocus }) => row.PARENT_MENU_KEY
+        ? <span className="menu-execution-inherited">1Depth 설정 상속</span>
+        : !editable ? <span className="menu-execution-inherited" title="실행 설정 카탈로그에 등록된 최상위 메뉴만 편집할 수 있습니다.">설정 대상 아님</span>
+        : <select className="basekit-grid-input tree-grid-editor" aria-label="실행 유형" value={String(value || 'INNER')} disabled={!editable} onFocus={onFocus} onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()} onChange={(event) => onChange(event.target.value)}><option value="INNER">기본 화면 (INNER)</option><option value="WINDOW">독립 창 (WINDOW)</option></select>,
+    },
+    {
+      field: 'DESIGN_TYPE', headerName: '디자인 유형', width: 140, editor: 'select',
+      options: [{ value: 'BASEKIT', label: 'BASEKIT' }, { value: 'LINEAR', label: 'LINEAR' }],
+      editable: (row, state) => state !== 'DELETED' && !row.PARENT_MENU_KEY && settings.some((setting) => setting.MENU_ID === row.MENU_KEY),
+      renderEditor: ({ row, value, editable, onChange, onFocus }) => row.PARENT_MENU_KEY
+        ? <span className="menu-execution-inherited">1Depth 설정 상속</span>
+        : !editable ? <span className="menu-execution-inherited" title="실행 설정 카탈로그에 등록된 최상위 메뉴만 편집할 수 있습니다.">설정 대상 아님</span>
+        : <select className="basekit-grid-input tree-grid-editor" aria-label="디자인 유형" value={String(value || 'BASEKIT')} disabled={!editable} onFocus={onFocus} onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()} onChange={(event) => onChange(event.target.value)}><option value="BASEKIT">BASEKIT</option><option value="LINEAR">LINEAR</option></select>,
+    },
+  ], [programByKey, settings]);
 
   const programMatches = useMemo(() => {
     const keyword = appliedProgramSearch.KEYWORD.trim().toLocaleLowerCase();
@@ -193,6 +194,17 @@ export default function MenuManagePage() {
             };
             if (operation.state === 'INSERTED') await menuApi.create(payload);
             else await menuApi.update(row.MENU_KEY, payload);
+            if (!row.PARENT_MENU_KEY && settings.some((setting) => setting.MENU_ID === row.MENU_KEY)) {
+              const currentSetting = settings.find((setting) => setting.MENU_ID === row.MENU_KEY);
+              const executionType = String(row.EXECUTION_TYPE || 'INNER') as MenuExecutionSetting['EXECUTION_TYPE'];
+              const designType = String(row.DESIGN_TYPE || 'BASEKIT') as MenuExecutionSetting['DESIGN_TYPE'];
+              const previousExecutionType = currentSetting?.EXECUTION_TYPE ?? 'INNER';
+              const previousDesignType = currentSetting?.DESIGN_TYPE ?? 'BASEKIT';
+              if (operation.state === 'INSERTED' || executionType !== previousExecutionType || designType !== previousDesignType) {
+                await saveMenuExecutionSetting({ MENU_ID: row.MENU_KEY, EXECUTION_TYPE: executionType, DESIGN_TYPE: designType });
+                window.dispatchEvent(new Event('basekit:menu-execution-settings-changed'));
+              }
+            }
           }
           acceptedRowIds.push(operation.rowId);
         } catch (error) {
@@ -200,8 +212,9 @@ export default function MenuManagePage() {
         }
       }
       let refreshed: MenuRecord[] | null = null;
+      let refreshedSettings: MenuExecutionSetting[] | null = null;
       let refreshError = '';
-      try { refreshed = await menuApi.find({}); }
+      try { [refreshed, refreshedSettings] = await Promise.all([menuApi.find({}), listMenuExecutionSettings()]); }
       catch (error) { refreshError = error instanceof Error ? error.message : 'DB 재조회에 실패했습니다.'; }
       let reconciledCount = 0;
       if (refreshed && failures.length) {
@@ -214,7 +227,11 @@ export default function MenuManagePage() {
             && persisted.MENU_TYPE_CODE === row.MENU_TYPE_CODE
             && persisted.SORT_ORDER === Number(row.SORT_ORDER)
             && persisted.PROGRAM_KEY === (row.MENU_TYPE_CODE === 'PAGE' ? row.PROGRAM_KEY : null)
-            && persisted.USE_YN === row.USE_YN;
+            && persisted.USE_YN === row.USE_YN
+            && (!row.PARENT_MENU_KEY
+              ? (refreshedSettings!.find((setting) => setting.MENU_ID === row.MENU_KEY)?.EXECUTION_TYPE ?? 'INNER') === String(row.EXECUTION_TYPE || 'INNER')
+                && (refreshedSettings!.find((setting) => setting.MENU_ID === row.MENU_KEY)?.DESIGN_TYPE ?? 'BASEKIT') === String(row.DESIGN_TYPE || 'BASEKIT')
+              : true);
           if (!confirmed) return true;
           acceptedRowIds.push(operation.rowId);
           reconciledCount++;
@@ -225,6 +242,7 @@ export default function MenuManagePage() {
       }
       if (!failures.length && refreshed) {
         setMenus(refreshed);
+        if (refreshedSettings) setSettings(refreshedSettings);
         const nextSelected = selectedKey ? refreshed.find((row) => row.MENU_KEY === selectedKey) : null;
         selectRow(nextSelected ?? refreshed[0] ?? null, refreshed);
         setMessage(`${acceptedRowIds.length}건을 저장하고 DB에서 다시 조회했습니다. 개별 API 순차 저장이며 전체 원자성은 보장하지 않습니다.`);
@@ -250,19 +268,6 @@ export default function MenuManagePage() {
     finally { setBusy(false); }
   }
 
-  async function saveExecution() {
-    if (!executionDraft || !executionEditable || executionBusy) return;
-    setExecutionBusy(true); setMessage('');
-    try {
-      const saved = await saveMenuExecutionSetting(executionDraft);
-      setSettings((current) => [...current.filter((row) => row.MENU_ID !== saved.MENU_ID), saved]);
-      setExecutionDraft(saved);
-      setMessage('실행 설정을 저장했습니다. 하위 메뉴는 이 1Depth 설정을 사용합니다.');
-      window.dispatchEvent(new Event('basekit:menu-execution-settings-changed'));
-    } catch (error) { setMessage(error instanceof Error ? error.message : '실행 설정 저장에 실패했습니다.'); }
-    finally { setExecutionBusy(false); }
-  }
-
   const validateMenuRows = useCallback((rows: MenuRecord[], getState: (row: MenuRecord) => GridRowState) => {
     const active = rows.filter((row) => getState(row) !== 'DELETED');
     const issues: TreeDataGridIssue[] = [];
@@ -286,7 +291,7 @@ export default function MenuManagePage() {
       <h2>메뉴 계층</h2>
       <p className="menu-grid-guidance">셀을 직접 편집합니다. 신규·수정·삭제 항목은 저장 전까지 브라우저에 보관됩니다.</p>
       <TreeDataGrid
-        initialRows={menus}
+        initialRows={gridMenus}
         fields={menuFields}
         columns={columns}
         getKey={(row) => row.MENU_KEY}
@@ -303,20 +308,6 @@ export default function MenuManagePage() {
       />
       {message && <p className="menu-manage-message" role="status">{message}</p>}
     </section>
-    <section className="detail-section metadata-editor menu-execution-panel" aria-label="메뉴 실행 설정">
-      <h2>최상위 메뉴 실행 설정</h2>
-      {!selectedRoot || !executionDraft ? <p>실행 설정을 관리할 최상위 메뉴를 선택하세요.</p> : <>
-        <p>설정 기준: {selectedRoot.MENU_NAME} ({selectedRoot.MENU_KEY}){selectedRoot.MENU_KEY !== selectedKey && ' · 하위 메뉴는 1Depth 설정을 상속합니다.'}</p>
-        {selectedPending && <p role="note">저장되지 않은 메뉴입니다. 실행 설정은 메뉴 저장 후 관리할 수 있습니다.</p>}
-        {selectedRoot.MENU_KEY === selectedKey && !executionEditable && <p role="note">이 루트 메뉴는 기존 실행 설정 대상이 아니므로 기본 INNER / BASEKIT 설정을 사용합니다.</p>}
-        <div className="standard-form-grid menu-execution-grid">
-          <label>실행 유형<select value={executionDraft.EXECUTION_TYPE} disabled={!executionEditable || executionBusy || !!selectedPending} onChange={(event) => setExecutionDraft({ ...executionDraft, EXECUTION_TYPE: event.target.value as MenuExecutionSetting['EXECUTION_TYPE'] })}><option value="INNER">기본 화면 (INNER)</option><option value="WINDOW">독립 창 (WINDOW)</option></select></label>
-          <label>디자인 유형<select value={executionDraft.DESIGN_TYPE} disabled={!executionEditable || executionBusy || !!selectedPending} onChange={(event) => setExecutionDraft({ ...executionDraft, DESIGN_TYPE: event.target.value as MenuExecutionSetting['DESIGN_TYPE'] })}><option value="BASEKIT">BASEKIT</option><option value="LINEAR">LINEAR</option></select></label>
-          {executionEditable && <ActionButton actionCode="SAVE" label={executionBusy ? '처리 중…' : '실행 설정 저장'} tone="primary" disabled={executionBusy || !!selectedPending} onClick={() => void saveExecution()} />}
-        </div>
-      </>}
-    </section>
-
     <FormModal
       open={!!programTarget}
       title="프로그램 검색"
