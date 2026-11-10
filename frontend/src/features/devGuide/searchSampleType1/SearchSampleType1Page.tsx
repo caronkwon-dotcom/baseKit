@@ -10,6 +10,7 @@ import {
 } from './searchSampleType1.config';
 import { searchSampleType1Repository } from './searchSampleType1.repository';
 import type { SearchSampleType1Condition } from './searchSampleType1.types';
+import '../devGuideSkin.css';
 
 export default function SearchSampleType1Page() {
     const [previewRows, setPreviewRows] = useState<SearchPanelRows>(
@@ -38,7 +39,7 @@ export default function SearchSampleType1Page() {
     );
 
     return (
-        <section className="page">
+        <section className="page" data-skin-scope="modern">
             <PageHeader
                 breadcrumbs={[...SEARCH_SAMPLE_TYPE_1_PAGE.breadcrumbs]}
                 description={SEARCH_SAMPLE_TYPE_1_PAGE.description}

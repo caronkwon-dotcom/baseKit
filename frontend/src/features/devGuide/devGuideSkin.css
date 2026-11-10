@@ -1,0 +1,217 @@
+/*
+ * Dev Guide "Modern" skin (시범 적용)
+ *
+ * - 적용 범위: [data-skin-scope="modern"] 속성을 가진 영역 안쪽만.
+ * - 기존 styles.css / Core 공통 컴포넌트는 수정하지 않는다. 토큰 값과 표면 스타일만 덮어쓴다.
+ * - 제거 방법: 페이지의 data-skin-scope 속성과 이 파일 import 한 줄을 지우면 원래대로 돌아간다.
+ *
+ * 디자인 방향 (HIG 원칙 + AI 티 제거)
+ *  - 위계: 제목 > 섹션 > 본문을 크기·굵기·명도로만 구분 (그라데이션/글로우 없음)
+ *  - 일관성: 라운드 8/12px 두 단계, 테두리는 1px 헤어라인, 그림자는 아주 약하게
+ *  - 밀도: SI 업무 화면이므로 컨트롤 높이 32px, 행 높이 36px 유지 (모바일식 큰 여백 사용 안 함)
+ *  - 접근성: 포커스 링 명확, 색에만 의존하지 않음
+ */
+
+[data-skin-scope="modern"] {
+  --skin-radius-sm: 8px;
+  --skin-radius-lg: 12px;
+  --skin-shadow: 0 1px 2px rgb(16 24 40 / 6%);
+  --skin-focus-ring: 0 0 0 3px color-mix(in srgb, var(--brand-primary) 22%, transparent);
+
+  --surface-app: #f5f6f8;
+  --surface-panel: #ffffff;
+  --text-primary: #1c1f26;
+  --border-default: #e3e6ec;
+  --brand-primary: #2563eb;
+
+  --control-height-compact: 32px;
+  --search-control-height: 32px;
+  --action-search-bg: var(--brand-primary);
+  --action-search-hover-bg: var(--brand-hover);
+  --action-search-border: var(--brand-primary);
+  --action-neutral-bg: var(--surface-panel);
+  --action-neutral-hover-bg: #f1f3f6;
+  --action-neutral-border: var(--border-default);
+
+  font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── 페이지 헤더 ───────────────────────────────── */
+[data-skin-scope="modern"] .page-context-row {
+  min-height: 32px;
+  margin-bottom: 8px;
+  border-bottom-color: transparent;
+}
+
+[data-skin-scope="modern"] .breadcrumb {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+[data-skin-scope="modern"] .breadcrumb > :last-child {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+[data-skin-scope="modern"] .program-summary {
+  font-weight: 400;
+}
+
+/* ── 표면(카드) ───────────────────────────────── */
+[data-skin-scope="modern"] .search-panel,
+[data-skin-scope="modern"] .data-section {
+  border-color: var(--border-default);
+  border-radius: var(--skin-radius-lg);
+  box-shadow: var(--skin-shadow);
+}
+
+/* ── 검색 영역 ────────────────────────────────── */
+[data-skin-scope="modern"] .search-panel {
+  margin-bottom: 12px;
+  padding: 14px 16px;
+}
+
+[data-skin-scope="modern"] .search-panel-layout {
+  gap: 12px;
+}
+
+[data-skin-scope="modern"] .search-grid {
+  column-gap: 20px;
+  row-gap: 10px;
+}
+
+[data-skin-scope="modern"] .search-grid label {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+[data-skin-scope="modern"] .search-grid input,
+[data-skin-scope="modern"] .search-grid select {
+  border-color: var(--border-default);
+  border-radius: var(--skin-radius-sm);
+  padding: 0 10px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+[data-skin-scope="modern"] .search-grid input:hover,
+[data-skin-scope="modern"] .search-grid select:hover {
+  border-color: var(--border-strong);
+}
+
+[data-skin-scope="modern"] .search-grid input:focus-visible,
+[data-skin-scope="modern"] .search-grid select:focus-visible {
+  border-color: var(--brand-primary);
+  box-shadow: var(--skin-focus-ring);
+  outline: 0;
+}
+
+[data-skin-scope="modern"] .search-grid input::placeholder {
+  color: color-mix(in srgb, var(--text-primary) 38%, var(--surface-panel));
+}
+
+/* ── 버튼 ─────────────────────────────────────── */
+[data-skin-scope="modern"] .action-button,
+[data-skin-scope="modern"] .search-icon-button,
+[data-skin-scope="modern"] .hidden-condition-indicator {
+  border-radius: var(--skin-radius-sm);
+  font-weight: 600;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+[data-skin-scope="modern"] .action-button:focus-visible,
+[data-skin-scope="modern"] .search-icon-button:focus-visible,
+[data-skin-scope="modern"] .search-layout-preview button:focus-visible {
+  box-shadow: var(--skin-focus-ring);
+  outline: 0;
+}
+
+/* ── 단수 미리보기 (세그먼트 컨트롤) ───────────── */
+[data-skin-scope="modern"] .search-layout-preview {
+  gap: 0;
+  margin-bottom: 10px;
+}
+
+[data-skin-scope="modern"] .search-layout-preview > span {
+  margin-right: 10px;
+  font-weight: 500;
+}
+
+[data-skin-scope="modern"] .search-layout-preview button {
+  min-height: 28px;
+  margin-left: -1px;
+  border-color: var(--border-default);
+  border-radius: 0;
+  padding: 0 12px;
+  font-weight: 500;
+}
+
+[data-skin-scope="modern"] .search-layout-preview button:first-of-type {
+  margin-left: 0;
+  border-radius: var(--skin-radius-sm) 0 0 var(--skin-radius-sm);
+}
+
+[data-skin-scope="modern"] .search-layout-preview button:last-of-type {
+  border-radius: 0 var(--skin-radius-sm) var(--skin-radius-sm) 0;
+}
+
+[data-skin-scope="modern"] .search-layout-preview button.active {
+  position: relative;
+  z-index: 1;
+  border-color: var(--brand-primary);
+  background: var(--brand-soft);
+  color: var(--brand-hover);
+  font-weight: 600;
+}
+
+/* ── 결과 테이블 ──────────────────────────────── */
+[data-skin-scope="modern"] .data-section h2 {
+  padding: 14px 16px 10px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+[data-skin-scope="modern"] .standard-table-wrap {
+  margin-top: 0;
+  border-top-color: var(--border-default);
+}
+
+[data-skin-scope="modern"] .standard-data-table th,
+[data-skin-scope="modern"] .standard-data-table td {
+  padding: 6px 16px;
+  border-top-color: color-mix(in srgb, var(--border-default) 70%, var(--surface-panel));
+}
+
+[data-skin-scope="modern"] .standard-data-table th {
+  height: 36px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+[data-skin-scope="modern"] .standard-data-table td {
+  height: 36px;
+  color: var(--text-primary);
+}
+
+[data-skin-scope="modern"] tbody tr.clickable-row:hover td {
+  background: color-mix(in srgb, var(--brand-primary) 6%, var(--surface-panel));
+}
+
+[data-skin-scope="modern"] tbody tr.selected-row td {
+  background: var(--brand-soft);
+}
+
+[data-skin-scope="modern"] .empty-cell {
+  color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin-scope="modern"] * {
+    transition: none !important;
+  }
+}
