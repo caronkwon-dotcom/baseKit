@@ -5,6 +5,7 @@ import SearchPanel, { type SearchFieldConfig } from '../../../../components/comm
 import { users } from '../../../../mock/users';
 import type { User } from '../../../../types';
 import type { DesignMember, DesignProject, ProjectMember } from '../../design-lifecycle/designLifecycle.types';
+import { canGoNext, initialStep, type MemberDialogStep } from './memberDialogStep';
 import { PROJECT_GRADES, PROJECT_ROLES, PARTICIPATION_TYPES, isActiveProjectMemberDuplicate, nextDomainId, validateProjectAssignment } from './projectContext';
 
 interface Props {
@@ -40,6 +41,7 @@ export default function ProjectMemberDialog({ project, members, assignments, edi
   const [status, setStatus] = useState<ProjectMember['STATUS_CD']>(editing?.STATUS_CD ?? 'ACTIVE');
   const [note, setNote] = useState(editing?.NOTE ?? '');
   const [error, setError] = useState('');
+  const [step, setStep] = useState<MemberDialogStep>(() => initialStep(Boolean(editing)));
   const filtered = useMemo(() => users.filter((user) => user.USE_YN === 'Y' && user.DEL_YN === 'N' && user.STATUS_CODE === 'ACTIVE' && user.LOCKED_YN === 'N'
     && (!applied.name || user.USER_NAME.toLocaleLowerCase().includes(applied.name.trim().toLocaleLowerCase()))
     && (!applied.loginId || user.LOGIN_ID.toLocaleLowerCase().includes(applied.loginId.trim().toLocaleLowerCase()))
@@ -66,28 +68,50 @@ export default function ProjectMemberDialog({ project, members, assignments, edi
     onSave(member, assignment);
   };
 
+  const isEdit = Boolean(editing);
+  const inSelect = step === 'SELECT';
+  const goStep = (next: MemberDialogStep) => { setError(''); setStep(next); };
+  const summaryName = selectedUser?.USER_NAME ?? existingMember?.MEMBER_NAME ?? '';
+  const summaryLoginId = selectedUser?.LOGIN_ID ?? existingMember?.USER_ID ?? '';
+  const summaryOrg = selectedUser?.DEPARTMENT_NAME ?? existingMember?.ORG_ID ?? '';
+  const footerActions = inSelect
+    ? <span className="sd-member-footer-info">{selectedUser ? <>선택한 사용자: <strong>{selectedUser.USER_NAME} ({selectedUser.LOGIN_ID})</strong></> : '사용자를 선택하세요.'}</span>
+    : !isEdit ? <button type="button" className="secondary-button sd-member-footer-prev" onClick={() => goStep('SELECT')}>&lt; 이전</button> : null;
+
   return <div className="sd-project-member-modal">
-    <FormModal open title={editing ? 'Project Member 수정' : '인원 추가'} submitLabel="저장" onClose={onClose} onSubmit={save}>
-      <p className="sd-member-project-name">프로젝트: <strong>{project.PROJECT_ID} / {project.PROJECT_NAME}</strong></p>
-      {!editing ? <>
+    <FormModal open title={isEdit ? '인원 수정' : '인원 추가'} submitLabel={inSelect ? '다음 >' : '저장'} submitDisabled={inSelect && !canGoNext(selectedUser?.USER_ID)}
+      onClose={onClose} onSubmit={inSelect ? () => goStep('DETAIL') : save} footerActions={footerActions}>
+      <div className="sd-member-head">
+        <p className="sd-member-project-name">프로젝트: <strong>{project.PROJECT_ID} / {project.PROJECT_NAME}</strong></p>
+        {!isEdit ? <ol className="sd-member-steps" aria-label="진행 단계">
+          <li className={inSelect ? 'active' : 'done'} aria-current={inSelect ? 'step' : undefined}>{inSelect ? '①' : '✓'} 사용자 선택</li>
+          <li className={inSelect ? '' : 'active'} aria-current={inSelect ? undefined : 'step'}>② 투입 정보</li>
+        </ol> : null}
+      </div>
+      {inSelect ? <>
         <SearchPanel rows={1} fields={searchFields} value={condition} initialValue={initialSearch} onValueChange={setCondition} onSearch={setApplied}
           onReset={(next) => { setCondition(next); setApplied(next); }} />
         <DataTable title={`활성 사용자 (${filtered.length}명)`} columns={userColumns} rows={filtered} getRowKey={(user) => user.USER_ID}
           onRowClick={setSelectedUser} getRowClassName={(user) => user.USER_ID === selectedUser?.USER_ID ? 'selected-row' : ''}
           emptyMessage="검색 조건에 맞는 활성 사용자가 없습니다." />
-      </> : null}
-      <section className="sd-member-assignment-form" aria-label="프로젝트 투입정보">
-        <h3>{editing ? '회원 프로필' : '선택한 사용자'}: {selectedUser?.USER_NAME ?? existingMember?.MEMBER_NAME ?? '사용자를 먼저 선택하세요.'}</h3>
-        <p>{selectedUser?.LOGIN_ID ?? ''} {selectedUser ? `/ ${selectedUser.DEPARTMENT_NAME}` : ''}</p>
-        <label>참여구분<select value={participation} onChange={(event) => setParticipation(event.target.value as ProjectMember['PARTICIPATION_TYPE_CD'])}>{PARTICIPATION_TYPES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-        <label>역할<select value={role} onChange={(event) => setRole(event.target.value)}>{PROJECT_ROLES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-        <label>프로젝트 등급<select value={grade} onChange={(event) => setGrade(event.target.value as ProjectMember['GRADE_CD'])}>{PROJECT_GRADES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-        <label>투입 시작일<input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></label>
-        <label>투입 종료일<input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} /></label>
-        <label>계획 MM<input type="number" min="0" step="0.1" value={planMm} onChange={(event) => setPlanMm(event.target.value)} /></label>
-        <label>참여 상태<select value={status} onChange={(event) => setStatus(event.target.value as ProjectMember['STATUS_CD'])}><option value="ACTIVE">참여</option><option value="INACTIVE">미참여</option></select></label>
-        <label className="sd-member-note">비고<textarea rows={2} value={note} onChange={(event) => setNote(event.target.value)} /></label>
-      </section>
+      </> : <>
+        <section className="sd-member-summary" aria-label={isEdit ? '프로필' : '선택한 사용자'}>
+          <span className="sd-member-avatar" aria-hidden="true">{summaryName.slice(0, 1)}</span>
+          <div className="sd-member-summary-text"><strong>{summaryName || '-'}</strong><span>{summaryLoginId}{summaryOrg ? ` · ${summaryOrg}` : ''}</span></div>
+          {!isEdit ? <button type="button" className="secondary-button" onClick={() => goStep('SELECT')}>다시 선택</button> : null}
+        </section>
+        <section className="sd-member-assignment-form" aria-label="프로젝트 투입정보">
+          <h3>투입 정보</h3>
+          <label>참여구분<select value={participation} onChange={(event) => setParticipation(event.target.value as ProjectMember['PARTICIPATION_TYPE_CD'])}>{PARTICIPATION_TYPES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+          <label>역할<select value={role} onChange={(event) => setRole(event.target.value)}>{PROJECT_ROLES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+          <label>프로젝트 등급<select value={grade} onChange={(event) => setGrade(event.target.value as ProjectMember['GRADE_CD'])}>{PROJECT_GRADES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+          <label>참여 상태<select value={status} onChange={(event) => setStatus(event.target.value as ProjectMember['STATUS_CD'])}><option value="ACTIVE">참여</option><option value="INACTIVE">미참여</option></select></label>
+          <label>투입 시작일<input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></label>
+          <label>투입 종료일<input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} /></label>
+          <label>계획 MM<input type="number" min="0" step="0.1" value={planMm} onChange={(event) => setPlanMm(event.target.value)} /></label>
+          <label className="sd-member-note">비고<textarea rows={2} value={note} onChange={(event) => setNote(event.target.value)} /></label>
+        </section>
+      </>}
       {error ? <p role="alert" className="page-message error">{error}</p> : null}
     </FormModal>
   </div>;
