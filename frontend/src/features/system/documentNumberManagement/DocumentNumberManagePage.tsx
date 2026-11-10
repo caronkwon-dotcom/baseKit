@@ -80,6 +80,15 @@ export default function DocumentNumberManagePage() {
   const gridStateReader = useRef(getState);
   useLayoutEffect(() => { gridStateReader.current = getState; }, [getState]);
   const stableGetState = useCallback((row: TrackedGridRow<RuleRow>) => gridStateReader.current(row), []);
+  const saveSnapshot = useRef({ rows, changeSet, getState });
+  useLayoutEffect(() => { saveSnapshot.current = { rows, changeSet, getState }; }, [changeSet, getState, rows]);
+  const pendingRuleKeys = useRef(new Map<string, string>());
+  useLayoutEffect(() => {
+    for (const [rowId, value] of pendingRuleKeys.current) {
+      const row = rows.find(item => item.__GRID_ROW_ID === rowId);
+      if (!row || row.RULE_KEY === value) pendingRuleKeys.current.delete(rowId);
+    }
+  }, [rows]);
   const getGridRowKey = useCallback((row: TrackedGridRow<RuleRow>) => row.__GRID_ROW_ID, []);
   const [selectedId, setSelectedId] = useState('');
   const [scopeKey, setScopeKey] = useState('');
@@ -110,9 +119,12 @@ export default function DocumentNumberManagePage() {
           const trackedRow = row as TrackedGridRow<RuleRow>;
           const value = event.currentTarget.value;
           if (value !== row.RULE_KEY) {
+            pendingRuleKeys.current.set(trackedRow.__GRID_ROW_ID, value);
             update(trackedRow.__GRID_ROW_ID, current => ({ ...current, RULE_KEY: value }));
             setPreview('');
             setMessage('');
+          } else {
+            pendingRuleKeys.current.delete(trackedRow.__GRID_ROW_ID);
           }
         }}
       />
@@ -163,6 +175,7 @@ export default function DocumentNumberManagePage() {
   };
 
   const cancelChanges = () => {
+    pendingRuleKeys.current.clear();
     revert(rows.map(row => row.__GRID_ROW_ID));
     setSelectedId(current => rows.some(row => row.__GRID_ROW_ID === current && getState(row) !== 'INSERTED') ? current : '');
     setPreview('');
@@ -170,7 +183,16 @@ export default function DocumentNumberManagePage() {
   };
 
   const saveChanges = async () => {
-    const changes = changeSet;
+    const snapshot = saveSnapshot.current;
+    const insertedRows = snapshot.rows.filter(row => snapshot.getState(row) === 'INSERTED');
+    const changes = {
+      ...snapshot.changeSet,
+      INSERTED: snapshot.changeSet.INSERTED.map((row, index) => {
+        const rowId = insertedRows[index]?.__GRID_ROW_ID;
+        const pendingKey = rowId ? pendingRuleKeys.current.get(rowId) : undefined;
+        return pendingKey === undefined ? row : { ...row, RULE_KEY: pendingKey };
+      }),
+    };
     const changed = [...changes.INSERTED, ...changes.UPDATED];
     for (const row of changed) {
       const errors = validateDocumentNumberRule(toSave(row));
@@ -191,17 +213,18 @@ export default function DocumentNumberManagePage() {
         catch (error) { failedInserts.push(row); errors.push(error instanceof Error ? error.message : '등록 실패'); }
       }
       for (const row of changes.UPDATED) {
-        const current = rows.find(item => ruleKey(item) === ruleKey(row));
+        const current = snapshot.rows.find(item => ruleKey(item) === ruleKey(row));
         if (!current) continue;
         try { await documentNumberApi.update(toSave(row), current.RULE_VERSION); }
         catch (error) { failedUpdates.push(row); errors.push(error instanceof Error ? error.message : '수정 실패'); }
       }
       const result = await documentNumberApi.list(keyword);
+      pendingRuleKeys.current.clear();
       replace(result.map(toRuleRow));
       // Keep rows whose API call failed editable so the user can correct and retry them.
       for (const row of failedInserts) add(row);
       for (const row of failedUpdates) {
-        const tracked = rows.find(item => ruleKey(item) === ruleKey(row));
+        const tracked = snapshot.rows.find(item => ruleKey(item) === ruleKey(row));
         if (tracked) update(tracked.__GRID_ROW_ID, current => ({ ...current, ...row }));
       }
       setSelectedId(current => result.some(row => ruleKey(row) === current) ? current : '');
